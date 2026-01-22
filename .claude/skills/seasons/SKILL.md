@@ -10,12 +10,15 @@ Display the current Japanese micro-season (kō 候) to foster seasonal awareness
 ## Instructions
 
 1. **Determine today's date** and find the matching kō from the reference below
-2. **Display the current micro-season** with:
-   - Japanese name (romaji)
-   - English translation
-   - Date range
-   - Brief nature observation or reflection prompt
-3. **Optionally suggest** a seasonal element to incorporate into today's work
+2. **Display the current micro-season** in a clean, compact format
+3. **Include a brief ELI5 insight** (2-3 sentences max) explaining the natural phenomenon
+4. **Add a positive contemplation** that:
+   - Connects nature's wisdom to human growth and work
+   - Frames challenges as opportunities
+   - Suggests an actionable mindset or practice
+5. **Include relevant resources** (1-2 links) for deeper exploration
+
+See `sekki-explanations.md` for detailed ELI5 explanations of each solar term.
 
 ## Output Format
 
@@ -24,9 +27,20 @@ Display the current Japanese micro-season (kō 候) to foster seasonal awareness
 │  第{number}候 · {romaji}                         │
 │  "{english translation}"                        │
 │                                                 │
-│  {date range}                                   │
-│  {seasonal observation/prompt}                  │
+│  {date range} · {sekki name} ({sekki english})  │
 └─────────────────────────────────────────────────┘
+
+**Why now?** {1-2 sentence ELI5 of the natural phenomenon}
+
+**Insight:** {Positive philosophical musing connecting nature to
+work/life—focus on growth, opportunity, patience, timing, etc.}
+
+**Today's practice:** {One small actionable suggestion to embody
+this seasonal wisdom in your work}
+
+**Learn more:**
+- {Relevant article, video, or resource URL}
+- {Optional second resource}
 ```
 
 ## The 72 Kō Reference
@@ -223,13 +237,58 @@ Display the current Japanese micro-season (kō 候) to foster seasonal awareness
 | 71  | Jan 25-29    | 水沢腹堅 | Sawamizu kōri tsumeru           | Ice thickens on streams |
 | 72  | Jan 30-Feb 3 | 鶏始乳   | Niwatori hajimete toya ni tsuku | Hens start laying       |
 
-## Integration Ideas
+## Resource Library
 
-When displaying the current kō, consider suggesting:
+Use these for the "Learn more" section. Select 1-2 relevant to the current season:
 
-- **Morning ritual**: A brief observation or intention aligned with the season
-- **Work theme**: A metaphor from the season that applies to current tasks
-- **Evening reflection**: What did you notice today that echoes this season?
+**General 72 Seasons:**
+
+- [72 Seasons Japan (Nippon.com)](https://www.nippon.com/en/features/h00124/)
+- [Japanese Microseasons (Wikipedia)](https://en.wikipedia.org/wiki/Japanese_calendar#Seasons)
+- [Kurashi no Goyomi App](https://www.kurashikata.com/en/)
+
+**Seasonal Philosophy:**
+
+- [In Praise of Shadows - Tanizaki](https://www.penguin.co.uk/books/57555/in-praise-of-shadows-by-tanizaki-junichiro/9780099283577)
+- [Wabi-Sabi for Artists (Leonard Koren)](https://www.leonardkoren.com/wabi-sabi.html)
+- [The Book of Tea - Okakura](https://www.gutenberg.org/ebooks/769)
+
+**Nature & Attention:**
+
+- [How to Do Nothing - Jenny Odell](https://www.penguinrandomhouse.com/books/600671/how-to-do-nothing-by-jenny-odell/)
+- [Braiding Sweetgrass - Robin Wall Kimmerer](https://milkweed.org/book/braiding-sweetgrass)
+- [The Overstory - Richard Powers](https://www.richardpowers.net/the-overstory/)
+
+**Productivity & Natural Rhythms:**
+
+- [Deep Work - Cal Newport](https://www.calnewport.com/books/deep-work/)
+- [Rest - Alex Soojung-Kim Pang](https://www.strategy.rest/)
+- [Four Thousand Weeks - Oliver Burkeman](https://www.oliverburkeman.com/fourthousandweeks)
+
+**Contemplative Practice:**
+
+- [On the Shortness of Life - Seneca](https://www.gutenberg.org/ebooks/67954)
+- [Meditations - Marcus Aurelius](https://www.gutenberg.org/ebooks/2680)
+- [Zen Mind, Beginner's Mind - Shunryu Suzuki](https://www.shambhala.com/zen-mind-beginner-s-mind-712.html)
+
+## Contemplation Themes
+
+Match insights to these positive themes based on the season:
+
+| Season Phase | Themes                                              |
+| ------------ | --------------------------------------------------- |
+| Early Spring | Hidden beginnings, patience, trust in process       |
+| Mid Spring   | Emergence, receptivity, opening to growth           |
+| Late Spring  | Crossing thresholds, balance points, clarity        |
+| Early Summer | Energy arriving, production mode, abundance         |
+| Mid Summer   | Full engagement, strategic timing, momentum         |
+| Late Summer  | Peak effort, endurance, knowing extremes pass       |
+| Early Autumn | Sensing shifts, harvesting, completing              |
+| Mid Autumn   | Releasing, revealing, elegant endings               |
+| Late Autumn  | Preparing, simplifying, countercyclical opportunity |
+| Early Winter | Withdrawal with purpose, essential focus            |
+| Mid Winter   | Deep rest, hibernation as strategy, conservation    |
+| Late Winter  | Hidden spring, reversal underway, quiet preparation |
 
 ## Example Output
 
@@ -241,9 +300,22 @@ For January 22:
 │  "Butterburs bud"                               │
 │                                                 │
 │  January 20-24 · 大寒 Daikan (Major Cold)       │
-│                                                 │
-│  In the coldest days, life persists beneath    │
-│  the snow. What is quietly growing in your     │
-│  work today?                                    │
 └─────────────────────────────────────────────────┘
+
+**Why now?** While air is coldest, soil stays warmer underground.
+The butterbur taps this hidden warmth, blooming before competitors
+wake—first-mover advantage in nature's economy.
+
+**Insight:** The coldest days come *after* the solstice turn, not
+before. Light has been returning for a month—the reversal is
+already underway, even when conditions feel hardest. This is the
+"hidden spring": change begins before evidence appears.
+
+**Today's practice:** Identify one project that's quietly building
+momentum beneath the surface. Give it 15 minutes of attention—
+water roots that others can't see yet.
+
+**Learn more:**
+- [72 Seasons Japan](https://www.nippon.com/en/features/h00124/)
+- [The Hidden Spring (Aeon)](https://aeon.co/essays/japans-72-microseasons-offer-a-meditative-way-to-mark-time)
 ```
