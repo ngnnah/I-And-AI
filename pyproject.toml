@@ -1,0 +1,7 @@
+[project]
+name = "ready-nhat-ai"
+version = "0.1.0"
+description = "Personal AI-assisted development and data engineering workspace"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []

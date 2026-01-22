@@ -10,6 +10,18 @@ This is a personal learning repository for a data engineer working in B2G teleco
 
 - **Linear**: Enabled for issue tracking and project management. Use Linear MCP tools to create, update, and query issues.
 
+## Python Environment
+
+This project uses **uv** for package and environment management.
+
+- Run Python scripts: `uv run script.py`
+- Run tools (pytest, ruff, etc.): `uv run pytest`, `uv run ruff check`
+- Add dependencies: `uv add <package>`
+- Add dev dependencies: `uv add --dev <package>`
+- Sync environment: `uv sync`
+
+Always use `uv run` instead of activating the venv manually or calling `python` directly.
+
 ## Code Style
 
 - Python: Follow PEP 8, use type hints for function signatures
