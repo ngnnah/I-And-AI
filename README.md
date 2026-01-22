@@ -1,10 +1,10 @@
-# ready-nhat-ai
+# Better work-life with AIs
 
-Personal workspace for learning and applying AI tools in data engineering workflows.
+Personal workspace for learning and applying AI tools in data engineering workflows. Also a safe space to try fun experiments.
 
 ## About
 
-I'm a data engineer at a B2G software platform company in telecom. This repo documents my journey integrating AI-assisted development into daily work:
+This repo documents my journey integrating AI-assisted development into daily life and work:
 
 - **AI-powered coding**: Using Claude Code, Cursor, and other AI dev tools
 - **Data engineering workflows**: ETL pipelines, SQL optimization, data modeling
@@ -18,7 +18,6 @@ I'm a data engineer at a B2G software platform company in telecom. This repo doc
 ├── .claude/
 │   ├── agents/        # Specialized subagents for complex workflows
 │   └── skills/        # Custom slash commands
-├── AGENTS.md          # Instructions for AI agents working in this repo
 ├── CLAUDE.md          # Claude Code workspace config
 └── README.md
 ```
