@@ -1,74 +1,106 @@
 ---
 name: skill-creator
-description: Create new skills and agents that extend Claude Code capabilities
+description: This skill should be used when the user asks to "create a skill", "add a new command", "make a custom agent", "extend Claude capabilities", or wants to add automation to their workflow.
 ---
 
 # /skill-creator
 
-Create effective skills that extend Claude's capabilities.
+Create effective skills and agents that extend Claude Code capabilities.
 
-## Instructions
+## Reference
 
-Skills are modular packages that transform Claude from general-purpose to specialized agent by bundling procedural knowledge, domain expertise, and reusable resources.
+See `.claude/AGENT_CLAUDE.md` for comprehensive guidelines on skill and agent development.
 
-### Skill Structure
+## Quick Start
 
-Each skill requires:
+### Create a Skill
 
-- **SKILL.md** (mandatory) - YAML frontmatter with name/description, plus markdown instructions
-- **Bundled Resources** (optional):
-  - `scripts/` - Executable code for deterministic tasks
-  - `references/` - Documentation loaded as-needed
-  - `assets/` - Templates, icons, fonts for output
+1. **Create directory**: `.claude/skills/<skill-name>/`
+2. **Add SKILL.md** with YAML frontmatter and instructions
+3. **Test**: Invoke with `/skill-name` or describe the trigger scenario
 
-### Creation Process
+### Create an Agent
 
-1. **Gather examples**: Identify concrete usage scenarios through user feedback
-2. **Analyze patterns**: Identify reusable scripts, references, and assets needed
-3. **Initialize structure**: Create skill directory with required files
-4. **Write instructions**: Use imperative form in SKILL.md; populate resources
-5. **Package and validate**: Ensure skill is properly structured for distribution
-6. **Iterate**: Refine based on real-world usage
+1. **Create file**: `.claude/agents/<agent-name>.md`
+2. **Add YAML frontmatter** with name, description (with examples), and tools
+3. **Write system prompt** defining persona, responsibilities, and output format
 
-### Writing Effective Skills
-
-- Keep metadata concise (~100 words)
-- SKILL.md body should be <5k words
-- Use progressive disclosure: load resources only when needed
-- Instructions should be clear, actionable, and step-by-step
-- Include examples of expected inputs and outputs
-- Define success criteria when applicable
-
-### Skill File Format
+## Skill Template
 
 ```markdown
 ---
 name: skill-name
-description: Brief one-line description of what the skill does
+description: This skill should be used when the user asks to "trigger phrase 1", "trigger phrase 2", or "trigger phrase 3". Be specific about when to activate.
+disable-model-invocation: true # Set true for side effects (deploy, commit)
+allowed-tools: Read, Grep, Glob # Restrict tools if needed
 ---
 
 # /skill-name
 
-Brief one-line description.
+Brief description of what this skill does.
 
 ## Instructions
 
-Step-by-step instructions for Claude to follow when this skill is invoked.
+1. First step - what to do
+2. Second step - what to do
+3. Third step - what to do
+
+## Examples
+
+Input: `$ARGUMENTS`
+Expected output: ...
 ```
 
-### Agent File Format
-
-Agents are similar but require additional fields:
+## Agent Template
 
 ```markdown
 ---
 name: agent-name
-description: Brief description of the agent's expertise
-tools: Read, Grep, Glob
+description: Use this agent when [specific conditions]. Examples:
+
+<example>
+Context: [Situation]
+user: "[Request]"
+assistant: "[Response pattern]"
+<commentary>
+[Why this agent fits]
+</commentary>
+</example>
+
+tools: ["Read", "Grep", "Glob"]
 model: sonnet
 ---
 
-# Agent Name
+You are [expert persona with domain knowledge].
 
-Domain expertise and specialized instructions.
+**Core Responsibilities:**
+
+1. [Primary task]
+2. [Secondary task]
+
+**Process:**
+
+1. [Step one]
+2. [Step two]
+
+**Output Format:**
+[What to return]
 ```
+
+## Best Practices Checklist
+
+**Skills:**
+
+- [ ] Description uses third-person ("This skill should be used when...")
+- [ ] Includes exact trigger phrases in quotes
+- [ ] Has `disable-model-invocation: true` if it has side effects
+- [ ] Instructions are step-by-step and actionable
+- [ ] Under 500 lines (use supporting files for details)
+
+**Agents:**
+
+- [ ] Description includes `<example>` blocks with `<commentary>`
+- [ ] Tools array contains only what's needed
+- [ ] System prompt uses second person ("You are...")
+- [ ] Defines clear output format
+- [ ] Has quality criteria or success conditions

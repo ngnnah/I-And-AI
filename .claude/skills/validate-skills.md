@@ -1,64 +1,81 @@
 ---
 name: validate-skills
-description: Validate all skills and agents have correct format and structure
+description: This skill should be used when the user asks to "validate skills", "check skill format", "verify agents", or "audit .claude directory".
 ---
 
 # /validate-skills
 
-Validate that all skills and agents in `.claude/` are properly formatted and functional.
+Validate that all skills and agents in `.claude/` follow best practices from `.claude/AGENT_CLAUDE.md`.
 
 ## Instructions
 
 1. **Scan for skill and agent files**:
-   - List all `.md` files in `.claude/skills/`
+   - List all `.md` files in `.claude/skills/` (flat files or `SKILL.md` in subdirectories)
    - List all `.md` files in `.claude/agents/`
 
-2. **Validate each file** has required YAML frontmatter:
+2. **Validate Skills** against these criteria:
 
-   **For Skills** (`.claude/skills/*.md`):
-
-   ```yaml
-   ---
-   name: skill-name # Required: lowercase, hyphenated
-   description: ... # Required: brief description (<100 chars)
-   ---
-   ```
-
-   **For Agents** (`.claude/agents/*.md`):
+   **Required:**
 
    ```yaml
    ---
-   name: agent-name # Required: lowercase, hyphenated
-   description: ... # Required: brief description (<100 chars)
-   tools: Tool1, Tool2 # Required: comma-separated tool list
-   model: sonnet # Optional: sonnet, opus, or haiku
+   name: skill-name # Lowercase, hyphens only, max 64 chars
+   description: ... # Should use third-person and include trigger phrases
    ---
    ```
 
-3. **Check content quality**:
-   - Has clear instructions section
-   - Instructions are actionable and step-by-step
-   - Total content is under 5000 words
-   - No placeholder text or TODOs
+   **Best Practices:**
+   - Description uses "This skill should be used when..." format
+   - Description includes specific trigger phrases in quotes
+   - Has `disable-model-invocation: true` if skill has side effects
+   - Instructions are step-by-step and actionable
+   - Content under 500 lines
+
+3. **Validate Agents** against these criteria:
+
+   **Required:**
+
+   ```yaml
+   ---
+   name: agent-name # Lowercase, hyphens only
+   description: ... # Should include <example> blocks
+   tools: ["Read", "Grep"] # Array of allowed tools
+   ---
+   ```
+
+   **Best Practices:**
+   - Description includes `<example>` blocks with `<commentary>`
+   - System prompt uses second person ("You are...")
+   - Defines clear responsibilities and process
+   - Specifies output format
+   - Has quality criteria or success conditions
 
 4. **Report findings**:
 
-   **Valid**:
-   - List each valid skill/agent with its name and description
+   **Valid:**
+   - List each valid skill/agent with name and brief assessment
 
-   **Invalid**:
-   - List each invalid file with specific issues:
-     - Missing frontmatter
-     - Missing required fields (name, description, tools for agents)
-     - Empty or placeholder content
-     - Excessive length
+   **Issues Found:**
+   - List specific problems for each file:
+     - Missing or malformed frontmatter
+     - Missing required fields
+     - Description doesn't follow third-person format (skills)
+     - Missing `<example>` blocks (agents)
+     - Missing tools array (agents)
+     - Placeholder text or TODOs
+     - Excessive length (>500 lines)
 
-   **Suggestions**:
-   - Recommend improvements for borderline cases
-   - Flag skills that could benefit from examples
-   - Identify potential duplicates or overlapping functionality
+   **Recommendations:**
+   - Suggest improvements based on `.claude/AGENT_CLAUDE.md` guidelines
+   - Flag side-effect skills missing `disable-model-invocation: true`
+   - Identify agents that could benefit from more examples
 
 5. **Summary**:
-   - Total skills: X valid, Y invalid
-   - Total agents: X valid, Y invalid
-   - Action items if any fixes needed
+
+   ```
+   Skills: X valid, Y need attention
+   Agents: X valid, Y need attention
+
+   Action items:
+   - [specific fixes needed]
+   ```
