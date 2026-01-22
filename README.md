@@ -53,3 +53,13 @@ Custom skills available in this workspace:
 - **Languages**: Python, SQL
 - **Data**: PostgreSQL, dbt
 - **Tools**: Claude Code, GitHub CLI, Linear
+
+## Changelog
+
+| Date       | Change                                                              |
+| ---------- | ------------------------------------------------------------------- |
+| 2026-01-22 | Added `test-generator` agent for pytest generation                  |
+| 2026-01-22 | Added `/skill-creator` and `/validate-skills` skills                |
+| 2026-01-22 | Added Documentation Maintenance guidelines to CLAUDE.md             |
+| 2026-01-22 | Added secrets protection hook and skills validation hook            |
+| 2026-01-22 | Initial setup: 4 data engineering agents, 4 core skills, Linear MCP |
