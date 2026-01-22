@@ -9,16 +9,19 @@ Display the current Japanese micro-season (kō 候) to foster seasonal awareness
 
 ## Instructions
 
-1. **Determine today's date** and find the matching kō from the reference below
-2. **Display the current micro-season** in a clean, compact format
-3. **Include a brief ELI5 insight** (2-3 sentences max) explaining the natural phenomenon
-4. **Add a positive contemplation** that:
+1. **Check if today's log exists**: Look for `./logs/YYYY-MM-DD.md`
+   - **If exists**: Read and display the log file contents, then stop (no regeneration)
+   - **If not**: Continue with steps below
+2. **Determine today's date** and find the matching kō from the reference below
+3. **Display the current micro-season** in a clean, compact format
+4. **Include a brief ELI5 insight** (2-3 sentences max) explaining the natural phenomenon
+5. **Add a positive contemplation** that:
    - Connects nature's wisdom to human growth and work
    - Frames challenges as opportunities
    - Suggests an actionable mindset or practice
-5. **Select a quote** from the Quotes Library that matches the season/theme
-6. **Include relevant resources** (1-2 links) for deeper exploration
-7. **Save output to log file**: `./logs/YYYY-MM-DD.md`
+6. **Select a quote** from the Quotes Library that matches the season/theme
+7. **Include relevant resources** (1-2 links) for deeper exploration
+8. **Save output to log file**: `./logs/YYYY-MM-DD.md`
 
 See `sekki-explanations.md` for detailed ELI5 explanations of each solar term.
 
@@ -55,34 +58,27 @@ This skill is self-contained with local images and curated URLs.
 
 ### Image Strategy
 
-1. **Local images only**: Check for `./images/{number}-{romaji-slug}.jpg`
-2. **If exists**: Include in output with HTML for size control:
+All 72 images are available locally. Always include the image in output.
+
+1. **In log files**: Use `../images/` path (logs are in `./logs/` subdirectory)
+   ```html
+   <img src="../images/{number}-{slug}.jpg" alt="{description}" width="480" />
+   ```
+2. **In terminal output**: Use `./images/` path
    ```html
    <img src="./images/{number}-{slug}.jpg" alt="{description}" width="480" />
    ```
-3. **If missing**: Omit image from output (no external URLs)
-4. **In log files**: Use `../images/...` (logs are in `./logs/` subdirectory)
 
 ### Local Images
 
-- Stored in: `./images/{number}-{romaji-slug}.jpg`
+- All 72 images stored in: `./images/{number}-{romaji-slug}.jpg`
 - Example: `./images/70-fuki-no-hana-saku.jpg`
 - Git-tracked for portability
-- See `./images/.gitkeep` for manual download instructions
 
 ### Curated URLs
 
 - See `./resources.md` for specific "Learn more" URLs for each kō
 - Each micro-season has a validated Wikipedia/Japan Guide link
-- Image source URLs listed for manual download
-
-### Adding New Images
-
-1. Find image on Wikimedia Commons for the plant/phenomenon
-2. Right-click image > "Save Image As..."
-3. Rename to: `{number}-{romaji-slug}.jpg`
-4. Save to `./images/` folder
-5. Recommended: 640px width for fast loading
 
 ## Logging
 
