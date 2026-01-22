@@ -1,1 +1,0 @@
-select id,name,email from users where status='active' and created_at>='2024-01-01' order by name

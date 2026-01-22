@@ -10,19 +10,19 @@ fi
 
 # Format SQL files with sqlfluff
 if [[ "$file_path" == *.sql ]]; then
-  sqlfluff fix --dialect ansi "$file_path" 2>/dev/null || true
+  sqlfluff fix --dialect postgres "$file_path" >/dev/null 2>&1 || true
   exit 0
 fi
 
 # Format Python files with black
 if [[ "$file_path" == *.py ]]; then
-  black --quiet "$file_path" 2>/dev/null || true
+  black --quiet "$file_path" >/dev/null 2>&1 || true
   exit 0
 fi
 
 # Format Markdown files with prettier
 if [[ "$file_path" == *.md ]]; then
-  prettier --write "$file_path" 2>/dev/null || true
+  prettier --write "$file_path" >/dev/null 2>&1 || true
   exit 0
 fi
 

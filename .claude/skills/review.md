@@ -1,3 +1,8 @@
+---
+name: review
+description: Review code for bugs, security issues, and best practices
+---
+
 # /review
 
 Review code for issues, improvements, and best practices.

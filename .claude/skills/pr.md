@@ -1,3 +1,8 @@
+---
+name: pr
+description: Create a GitHub pull request for the current feature branch
+---
+
 # /pr
 
 Create a GitHub pull request for the current branch.

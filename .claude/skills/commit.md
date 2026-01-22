@@ -1,3 +1,8 @@
+---
+name: commit
+description: Create a git commit with a well-crafted conventional commit message
+---
+
 # /commit
 
 Create a git commit with a well-crafted message.

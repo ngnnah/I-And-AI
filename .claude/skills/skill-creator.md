@@ -1,3 +1,8 @@
+---
+name: skill-creator
+description: Create new skills and agents that extend Claude Code capabilities
+---
+
 # /skill-creator
 
 Create effective skills that extend Claude's capabilities.
@@ -9,6 +14,7 @@ Skills are modular packages that transform Claude from general-purpose to specia
 ### Skill Structure
 
 Each skill requires:
+
 - **SKILL.md** (mandatory) - YAML frontmatter with name/description, plus markdown instructions
 - **Bundled Resources** (optional):
   - `scripts/` - Executable code for deterministic tasks
@@ -36,6 +42,11 @@ Each skill requires:
 ### Skill File Format
 
 ```markdown
+---
+name: skill-name
+description: Brief one-line description of what the skill does
+---
+
 # /skill-name
 
 Brief one-line description.
@@ -43,4 +54,21 @@ Brief one-line description.
 ## Instructions
 
 Step-by-step instructions for Claude to follow when this skill is invoked.
+```
+
+### Agent File Format
+
+Agents are similar but require additional fields:
+
+```markdown
+---
+name: agent-name
+description: Brief description of the agent's expertise
+tools: Read, Grep, Glob
+model: sonnet
+---
+
+# Agent Name
+
+Domain expertise and specialized instructions.
 ```

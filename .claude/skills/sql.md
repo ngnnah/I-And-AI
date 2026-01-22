@@ -1,3 +1,8 @@
+---
+name: sql
+description: Write, optimize, or explain SQL queries with best practices
+---
+
 # /sql
 
 Help write, optimize, or explain SQL queries.
@@ -14,7 +19,7 @@ When the user provides a SQL query or describes what they need:
 2. **Optimizing SQL**: Look for:
    - Missing indexes (suggest based on WHERE/JOIN columns)
    - N+1 patterns
-   - Unnecessary SELECT *
+   - Unnecessary SELECT \*
    - Subqueries that could be JOINs
    - Opportunities for window functions
 
