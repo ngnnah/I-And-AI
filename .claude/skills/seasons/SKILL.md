@@ -31,6 +31,7 @@ See `sekki-explanations.md` for detailed ELI5 explanations of each solar term.
 > {date range} · {sekki name} ({sekki english})
 
 <!-- If local image exists: ![{alt}](./images/{number}-{slug}.jpg) -->
+<!-- NOTE: In log files (./logs/), use ../images/ path instead -->
 
 **Why now?** {1-2 sentence ELI5 of the natural phenomenon}
 
@@ -57,6 +58,7 @@ This skill is self-contained with local images and curated URLs.
 1. **Local images only**: Check for `./images/{number}-{romaji-slug}.jpg`
 2. **If exists**: Include in output with `![alt](./images/...)`
 3. **If missing**: Omit image from output (no external URLs)
+4. **In log files**: Use `../images/...` (logs are in `./logs/` subdirectory)
 
 ### Local Images
 
@@ -91,7 +93,9 @@ Example: `./logs/2026-01-22.md`
 
 ### Log Format
 
-Save the complete output (box + all sections) to the log file. One file per day.
+Save the complete output to the log file. One file per day.
+
+**Important:** Use `../images/` for image paths in logs (not `./images/`).
 
 ### Purpose
 

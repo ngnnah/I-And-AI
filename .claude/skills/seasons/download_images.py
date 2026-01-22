@@ -78,7 +78,7 @@ SEASONS = {
     39: ("39-fukaki-kiri-mato.jpg", "dense fog morning"),
     # 処暑 Shosho (Limit of Heat) - Aug 23-Sep 7
     40: ("40-wata-no-hana-shibe-hiraku.jpg", "cotton flower bloom white"),
-    41: ("41-tenchi-hajimete-samushi.jpg", "late summer cool morning"),
+    41: ("41-tenchi-hajimete-samushi.jpg", "late summer sunset field"),
     42: ("42-kokumono-sunawachi-minoru.jpg", "rice field golden ripe"),
     # 白露 Hakuro (White Dew) - Sep 8-22
     43: ("43-kusa-no-tsuyu-shiroshi.jpg", "morning dew grass droplets"),
