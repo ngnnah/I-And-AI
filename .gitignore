@@ -98,6 +98,7 @@ mlruns/
 wandb/
 runs/
 logs/
+!.claude/skills/seasons/logs/
 tensorboard/
 
 # ===========================
