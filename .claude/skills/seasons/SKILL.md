@@ -308,7 +308,7 @@ Use these for the "Learn more" section. Select 1-2 relevant to the current seaso
 **Seasonal Philosophy:**
 
 - [In Praise of Shadows - Tanizaki](https://www.penguin.co.uk/books/57555/in-praise-of-shadows-by-tanizaki-junichiro/9780099283577)
-- [Wabi-Sabi for Artists (Leonard Koren)](https://www.leonardkoren.com/wabi-sabi.html)
+- [Wabi-Sabi for Artists (Leonard Koren)](https://www.amazon.com/Wabi-Sabi-Artists-Designers-Poets-Philosophers/dp/0981484603)
 - [The Book of Tea - Okakura](https://www.gutenberg.org/ebooks/769)
 
 **Nature & Attention:**
@@ -320,14 +320,14 @@ Use these for the "Learn more" section. Select 1-2 relevant to the current seaso
 **Productivity & Natural Rhythms:**
 
 - [Deep Work - Cal Newport](https://www.calnewport.com/books/deep-work/)
-- [Rest - Alex Soojung-Kim Pang](https://www.strategy.rest/)
+- [Rest - Alex Soojung-Kim Pang](https://www.hachettebookgroup.com/titles/alex-soojung-kim-pang/rest/9781541604834/)
 - [Four Thousand Weeks - Oliver Burkeman](https://www.oliverburkeman.com/fourthousandweeks)
 
 **Contemplative Practice:**
 
 - [On the Shortness of Life - Seneca](https://en.wikisource.org/wiki/On_the_shortness_of_life)
 - [Meditations - Marcus Aurelius](https://www.gutenberg.org/ebooks/2680)
-- [Zen Mind, Beginner's Mind - Shunryu Suzuki](https://www.shambhala.com/zen-mind-beginner-s-mind-712.html)
+- [Zen Mind, Beginner's Mind - Shunryu Suzuki](https://www.penguinrandomhouse.com/books/175559/zen-mind-beginners-mind-by-shunryu-suzuki/)
 
 ## Contemplation Themes
 

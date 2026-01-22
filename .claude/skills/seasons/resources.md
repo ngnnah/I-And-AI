@@ -33,7 +33,7 @@ See `download_images.py` for search terms and configuration.
 | --- | --------------------- | --------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------- |
 | 1   | Harukaze kōri wo toku | East wind melts the ice     | <img src="./images/01-harukaze-kori-wo-toku.jpg" width="80"> | [East Wind](https://en.wikipedia.org/wiki/East_wind)                         |
 | 2   | Kōō kenkan su         | Bush warblers start singing | <img src="./images/02-koo-kenkan-su.jpg" width="80">         | [Japanese Bush Warbler](https://en.wikipedia.org/wiki/Japanese_bush_warbler) |
-| 3   | Uo kōri wo izuru      | Fish emerge from the ice    | <img src="./images/03-uo-kori-wo-izuru.jpg" width="80">      | [Ice Fishing Japan](https://www.japan.travel/en/spot/1168/)                  |
+| 3   | Uo kōri wo izuru      | Fish emerge from the ice    | <img src="./images/03-uo-kori-wo-izuru.jpg" width="80">      | [Ice Fishing Japan](https://livejapan.com/en/article-a0000766/)              |
 
 **Sekki Resources:**
 
@@ -87,11 +87,11 @@ See `download_images.py` for search terms and configuration.
 
 ### 清明 Seimei (Clear and Bright) — Apr 5-19
 
-| #   | Romaji                | English              | Image                                                        | Learn More                                                                     |
-| --- | --------------------- | -------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| 13  | Tsubame kitaru        | Swallows return      | <img src="./images/13-tsubame-kitaru.jpg" width="80">        | [Barn Swallow Migration](https://en.wikipedia.org/wiki/Barn_swallow#Migration) |
-| 14  | Kōgan kaeru           | Wild geese fly north | <img src="./images/14-kogan-kaeru.jpg" width="80">           | [Wild Goose Migration](https://en.wikipedia.org/wiki/Goose#Migration)          |
-| 15  | Niji hajimete arawaru | First rainbows       | <img src="./images/15-niji-hajimete-arawaru.jpg" width="80"> | [How Rainbows Form](https://scijinks.gov/rainbow/)                             |
+| #   | Romaji                | English              | Image                                                        | Learn More                                                                      |
+| --- | --------------------- | -------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| 13  | Tsubame kitaru        | Swallows return      | <img src="./images/13-tsubame-kitaru.jpg" width="80">        | [Barn Swallow Migration](https://en.wikipedia.org/wiki/Barn_swallow#Migration)  |
+| 14  | Kōgan kaeru           | Wild geese fly north | <img src="./images/14-kogan-kaeru.jpg" width="80">           | [Wild Goose Migration](https://en.wikipedia.org/wiki/Goose#Migration)           |
+| 15  | Niji hajimete arawaru | First rainbows       | <img src="./images/15-niji-hajimete-arawaru.jpg" width="80"> | [How Rainbows Form](https://education.nationalgeographic.org/resource/rainbow/) |
 
 **Sekki Resources:**
 
@@ -121,7 +121,7 @@ See `download_images.py` for search terms and configuration.
 | --- | -------------------- | -------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | 19  | Kawazu hajimete naku | Frogs start singing  | <img src="./images/19-kawazu-hajimete-naku.jpg" width="80"> | [Japanese Tree Frog](https://en.wikipedia.org/wiki/Japanese_tree_frog)              |
 | 20  | Mimizu izuru         | Worms surface        | <img src="./images/20-mimizu-izuru.jpg" width="80">         | [Earthworm Ecology](https://en.wikipedia.org/wiki/Earthworm)                        |
-| 21  | Takenoko shōzu       | Bamboo shoots sprout | <img src="./images/21-takenoko-shozu.jpg" width="80">       | [Bamboo Shoots in Japanese Cuisine](https://www.justonecookbook.com/bamboo-shoots/) |
+| 21  | Takenoko shōzu       | Bamboo shoots sprout | <img src="./images/21-takenoko-shozu.jpg" width="80">       | [Bamboo Shoots in Japanese Cuisine](https://www.nippon.com/en/japan-topics/c15302/) |
 
 **Sekki Resources:**
 
@@ -400,4 +400,4 @@ See `download_images.py` for search terms and configuration.
 ### Rest & Conservation (Winter)
 
 - [Rest - Alex Soojung-Kim Pang](https://www.hachettebookgroup.com/titles/alex-soojung-kim-pang/rest/9781541604834/)
-- [Zen Mind, Beginner's Mind - Shunryu Suzuki](https://www.shambhala.com/zen-mind-beginner-s-mind-712.html)
+- [Zen Mind, Beginner's Mind - Shunryu Suzuki](https://www.penguinrandomhouse.com/books/175559/zen-mind-beginners-mind-by-shunryu-suzuki/)
