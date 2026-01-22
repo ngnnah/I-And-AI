@@ -1,0 +1,19 @@
+# Screenshots Index
+
+Git-managed collection of web screenshots and images.
+
+## Naming Convention
+
+```
+YYYYMMDD-HHMMSS_topic_slug.ext
+```
+
+- **Timestamp**: When the screenshot was captured
+- **Topic**: Category/source (google-doodle, github, docs, etc.)
+- **Slug**: Brief kebab-case description
+
+## Screenshots
+
+| Date       | File                                             | Description                                       | Source         |
+| ---------- | ------------------------------------------------ | ------------------------------------------------- | -------------- |
+| 2026-01-22 | `20260122-200358_google-doodle_mlk-day-2026.png` | Dr. Martin Luther King Jr. Day 2026 Google Doodle | doodles.google |

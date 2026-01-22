@@ -30,7 +30,7 @@ See `sekki-explanations.md` for detailed ELI5 explanations of each solar term.
 │  {date range} · {sekki name} ({sekki english})  │
 └─────────────────────────────────────────────────┘
 
-![{alt text}]({image_url})
+<!-- If local image exists: ![{alt}](./images/{number}-{slug}.jpg) -->
 
 **Why now?** {1-2 sentence ELI5 of the natural phenomenon}
 
@@ -45,23 +45,36 @@ this seasonal wisdom in your work}
 - {Optional second resource}
 ```
 
-## Image Sources
+## Images & Resources
 
-Include a relevant image URL for each season. Preferred sources:
+This skill is self-contained with local images and curated URLs.
 
-1. **Wikimedia Commons** (free, reliable)
-   - Search: `https://commons.wikimedia.org/w/index.php?search={plant/phenomenon}`
-   - Use direct file URL ending in `.jpg` or `.png`
+### Image Strategy
 
-2. **Unsplash** (free, high quality)
-   - Search: `https://unsplash.com/s/photos/{search-term}`
-   - Use the image page URL
+1. **Local images only**: Check for `./images/{number}-{romaji-slug}.jpg`
+2. **If exists**: Include in output with `![alt](./images/...)`
+3. **If missing**: Omit image from output (no external URLs)
 
-Choose images that show:
+### Local Images
 
-- The specific plant, animal, or phenomenon mentioned in the kō
-- The seasonal atmosphere (frost, blossoms, mist, etc.)
-- Japanese aesthetic when possible (but not required)
+- Stored in: `./images/{number}-{romaji-slug}.jpg`
+- Example: `./images/70-fuki-no-hana-saku.jpg`
+- Git-tracked for portability
+- See `./images/.gitkeep` for manual download instructions
+
+### Curated URLs
+
+- See `./resources.md` for specific "Learn more" URLs for each kō
+- Each micro-season has a validated Wikipedia/Japan Guide link
+- Image source URLs listed for manual download
+
+### Adding New Images
+
+1. Find image on Wikimedia Commons for the plant/phenomenon
+2. Right-click image > "Save Image As..."
+3. Rename to: `{number}-{romaji-slug}.jpg`
+4. Save to `./images/` folder
+5. Recommended: 640px width for fast loading
 
 ## The 72 Kō Reference
 
@@ -322,8 +335,6 @@ For January 22:
 │  January 20-24 · 大寒 Daikan (Major Cold)       │
 └─────────────────────────────────────────────────┘
 
-![Butterbur flowers emerging in early spring](https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Petasites_japonicus_in_Kogashi_2008-3-24.jpg/640px-Petasites_japonicus_in_Kogashi_2008-3-24.jpg)
-
 **Why now?** While air is coldest, soil stays warmer underground.
 The butterbur taps this hidden warmth, blooming before competitors
 wake—first-mover advantage in nature's economy.
@@ -338,6 +349,6 @@ momentum beneath the surface. Give it 15 minutes of attention—
 water roots that others can't see yet.
 
 **Learn more:**
-- [72 Seasons Japan](https://www.nippon.com/en/features/h00124/)
-- [The Hidden Spring (Aeon)](https://aeon.co/essays/japans-72-microseasons-offer-a-meditative-way-to-mark-time)
+- [Butterbur (Petasites japonicus)](https://en.wikipedia.org/wiki/Petasites_japonicus)
+- [Daikan - Coldest Period](https://www.nippon.com/en/features/h00124/)
 ```
