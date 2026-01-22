@@ -1,6 +1,6 @@
 ---
 name: validate-urls
-description: This skill should be used when the user asks to "validate URLs", "check external links", "audit links", "screenshot URLs", or wants to verify and document external resources referenced in the codebase.
+description: This skill should be used when the user asks to "validate external URLs", "check for link rot", "screenshot URLs", "archive external links", or wants to verify and document external web resources (http/https) referenced in the codebase. This is for external URLs only, not internal file paths.
 disable-model-invocation: true
 ---
 

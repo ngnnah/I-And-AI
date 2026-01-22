@@ -1,6 +1,6 @@
 ---
 name: check-links
-description: This skill should be used when the user asks to "check links", "validate urls", "find broken links", "audit internal links", or wants to ensure all relative paths in documentation are valid.
+description: This skill should be used when the user asks to "check internal links", "validate relative paths", "find broken file references", "audit documentation links", or wants to ensure all relative paths and anchors in documentation are valid. This is for internal links only, not external URLs.
 ---
 
 # /check-links
