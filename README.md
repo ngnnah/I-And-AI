@@ -1,6 +1,6 @@
-# Better work-life with AIs
+# I-And-AI
 
-Personal workspace for learning and applying AI tools in data engineering workflows. Also a safe space to try fun experiments.
+Personal workspace for learning and applying AI tools in data engineering workflows. A space for collaboration between human and AI—experiments, workflows, and growth.
 
 ## About
 
