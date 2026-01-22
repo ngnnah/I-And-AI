@@ -47,6 +47,50 @@ Always use `uv run` instead of activating the venv manually or calling `python` 
 - Use environment variables for configuration
 - Sanitize inputs in any data pipelines
 
+## Skills and Agents
+
+### Skills (`.claude/skills/<skill-name>/SKILL.md`)
+
+```yaml
+---
+name: skill-name
+description: This skill should be used when the user asks to "phrase 1", "phrase 2".
+disable-model-invocation: true # Set for side effects (deploy, commit)
+---
+## Instructions
+1. Step one
+2. Step two
+```
+
+Best practices:
+
+- Use third-person descriptions with trigger phrases in quotes
+- Set `disable-model-invocation: true` for side effects
+- Keep SKILL.md under 500 lines; use supporting files for details
+
+### Agents (`.claude/agents/<agent-name>.md`)
+
+```yaml
+---
+name: agent-name
+description: Use this agent when [condition]. Examples:
+  <example>
+  user: "[request]"
+  <commentary>Why this agent fits</commentary>
+  </example>
+tools: ["Read", "Grep", "Glob"]
+model: sonnet
+---
+
+You are [expert persona]...
+```
+
+Best practices:
+
+- Include `<example>` blocks with `<commentary>` in descriptions
+- Use second person in system prompts ("You are...")
+- Only include tools the agent needs
+
 ## Documentation Maintenance
 
 When making code changes:
