@@ -17,6 +17,7 @@ Display the current Japanese micro-season (kō 候) to foster seasonal awareness
    - Frames challenges as opportunities
    - Suggests an actionable mindset or practice
 5. **Include relevant resources** (1-2 links) for deeper exploration
+6. **Save output to log file**: `./logs/YYYY-MM-DD.md`
 
 See `sekki-explanations.md` for detailed ELI5 explanations of each solar term.
 
@@ -75,6 +76,27 @@ This skill is self-contained with local images and curated URLs.
 3. Rename to: `{number}-{romaji-slug}.jpg`
 4. Save to `./images/` folder
 5. Recommended: 640px width for fast loading
+
+## Logging
+
+Each /seasons output is saved as a markdown log file for tracking over time.
+
+### Log Location
+
+`./logs/YYYY-MM-DD.md`
+
+Example: `./logs/2026-01-22.md`
+
+### Log Format
+
+Save the complete output (box + all sections) to the log file. One file per day.
+
+### Purpose
+
+- Build a personal seasonal journal
+- Track contemplations and practices over time
+- Review patterns across seasons
+- Git-tracked for history
 
 ## The 72 Kō Reference
 
