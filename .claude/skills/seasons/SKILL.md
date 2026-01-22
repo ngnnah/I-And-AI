@@ -25,12 +25,10 @@ See `sekki-explanations.md` for detailed ELI5 explanations of each solar term.
 ## Output Format
 
 ```
-┌─────────────────────────────────────────────────┐
-│  第{number}候 · {romaji}                         │
-│  "{english translation}"                        │
-│                                                 │
-│  {date range} · {sekki name} ({sekki english})  │
-└─────────────────────────────────────────────────┘
+## 第{number}候 · {romaji}
+### "{english translation}"
+
+> {date range} · {sekki name} ({sekki english})
 
 <!-- If local image exists: ![{alt}](./images/{number}-{slug}.jpg) -->
 
@@ -42,8 +40,8 @@ work/life—focus on growth, opportunity, patience, timing, etc.}
 **Today's practice:** {One small actionable suggestion to embody
 this seasonal wisdom in your work}
 
-**💬 Quote:** "{Relevant quote from the library below}"
-— {Author}
+> **💬** "{Relevant quote from the library below}"
+> — {Author}
 
 **Learn more:**
 - {Relevant article, video, or resource URL}
@@ -424,31 +422,22 @@ Select one quote that resonates with the current season's theme:
 
 For January 22:
 
-```
-┌─────────────────────────────────────────────────┐
-│  第70候 · Fuki no hana saku                     │
-│  "Butterburs bud"                               │
-│                                                 │
-│  January 20-24 · 大寒 Daikan (Major Cold)       │
-└─────────────────────────────────────────────────┘
+## 第70候 · Fuki no hana saku
 
-**Why now?** While air is coldest, soil stays warmer underground.
-The butterbur taps this hidden warmth, blooming before competitors
-wake—first-mover advantage in nature's economy.
+### "Butterburs bud"
 
-**Insight:** The coldest days come *after* the solstice turn, not
-before. Light has been returning for a month—the reversal is
-already underway, even when conditions feel hardest. This is the
-"hidden spring": change begins before evidence appears.
+> January 20-24 · 大寒 Daikan (Major Cold)
 
-**Today's practice:** Identify one project that's quietly building
-momentum beneath the surface. Give it 15 minutes of attention—
-water roots that others can't see yet.
+**Why now?** While air is coldest, soil stays warmer underground. The butterbur taps this hidden warmth, blooming before competitors wake—first-mover advantage in nature's economy.
 
-**💬 Quote:** "In the depth of winter, I finally learned that within me there lay an invincible summer."
-— Albert Camus
+**Insight:** The coldest days come _after_ the solstice turn, not before. Light has been returning for a month—the reversal is already underway, even when conditions feel hardest. This is the "hidden spring": change begins before evidence appears.
+
+**Today's practice:** Identify one project that's quietly building momentum beneath the surface. Give it 15 minutes of attention—water roots that others can't see yet.
+
+> **💬** "In the depth of winter, I finally learned that within me there lay an invincible summer."
+> — Albert Camus
 
 **Learn more:**
+
 - [Butterbur (Petasites japonicus)](https://en.wikipedia.org/wiki/Petasites_japonicus)
 - [Daikan - Coldest Period](https://www.nippon.com/en/features/h00124/)
-```
