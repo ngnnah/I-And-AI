@@ -30,6 +30,8 @@ See `sekki-explanations.md` for detailed ELI5 explanations of each solar term.
 │  {date range} · {sekki name} ({sekki english})  │
 └─────────────────────────────────────────────────┘
 
+![{alt text}]({image_url})
+
 **Why now?** {1-2 sentence ELI5 of the natural phenomenon}
 
 **Insight:** {Positive philosophical musing connecting nature to
@@ -42,6 +44,24 @@ this seasonal wisdom in your work}
 - {Relevant article, video, or resource URL}
 - {Optional second resource}
 ```
+
+## Image Sources
+
+Include a relevant image URL for each season. Preferred sources:
+
+1. **Wikimedia Commons** (free, reliable)
+   - Search: `https://commons.wikimedia.org/w/index.php?search={plant/phenomenon}`
+   - Use direct file URL ending in `.jpg` or `.png`
+
+2. **Unsplash** (free, high quality)
+   - Search: `https://unsplash.com/s/photos/{search-term}`
+   - Use the image page URL
+
+Choose images that show:
+
+- The specific plant, animal, or phenomenon mentioned in the kō
+- The seasonal atmosphere (frost, blossoms, mist, etc.)
+- Japanese aesthetic when possible (but not required)
 
 ## The 72 Kō Reference
 
@@ -301,6 +321,8 @@ For January 22:
 │                                                 │
 │  January 20-24 · 大寒 Daikan (Major Cold)       │
 └─────────────────────────────────────────────────┘
+
+![Butterbur flowers emerging in early spring](https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Petasites_japonicus_in_Kogashi_2008-3-24.jpg/640px-Petasites_japonicus_in_Kogashi_2008-3-24.jpg)
 
 **Why now?** While air is coldest, soil stays warmer underground.
 The butterbur taps this hidden warmth, blooming before competitors

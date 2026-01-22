@@ -29,10 +29,11 @@ Specialized agents for data engineering workflows:
 
 | Agent              | Purpose                                                     |
 | ------------------ | ----------------------------------------------------------- |
-| `dag-validator`    | Validate DAG structures in Airflow/dbt/Prefect pipelines    |
 | `code-architect`   | Design and plan code structure before implementation        |
 | `code-simplifier`  | Reduce complexity and improve readability                   |
+| `dag-validator`    | Validate DAG structures in Airflow/dbt/Prefect pipelines    |
 | `data-io-verifier` | Verify data integrity at input/output boundaries            |
+| `data-profiler`    | Profile and analyze data from CSV, Excel, DOCX, PDF files   |
 | `test-generator`   | Generate pytest test cases for data engineering Python code |
 
 ## Claude Skills
@@ -41,11 +42,17 @@ Custom skills available in this workspace:
 
 | Skill              | Description                                      |
 | ------------------ | ------------------------------------------------ |
+| `/calc`            | Perform calculations and unit conversions        |
 | `/commit`          | Create well-crafted git commits                  |
+| `/data-pipeline`   | Generate ETL/ELT pipeline code                   |
+| `/datetime`        | Date, time, and timezone conversions             |
+| `/ics`             | Extract events and generate .ics calendar files  |
+| `/pdf`             | Read, extract, and analyze PDF documents         |
 | `/pr`              | Create GitHub pull requests                      |
-| `/sql`             | Write, optimize, or explain SQL queries          |
 | `/review`          | Code review for bugs, security, and style        |
+| `/seasons`         | Display current Japanese micro-season (kō)       |
 | `/skill-creator`   | Create new skills and agents for Claude Code     |
+| `/sql`             | Write, optimize, or explain SQL queries          |
 | `/validate-skills` | Validate skills and agents follow best practices |
 
 ## Tech Stack
@@ -58,6 +65,9 @@ Custom skills available in this workspace:
 
 | Date       | Change                                                              |
 | ---------- | ------------------------------------------------------------------- |
+| 2026-01-22 | Added `/seasons` skill for Japanese micro-season awareness          |
+| 2026-01-22 | Added utility skills: `/calc`, `/datetime`, `/pdf`, `/ics`          |
+| 2026-01-22 | Added `data-profiler` agent and `/data-pipeline` skill              |
 | 2026-01-22 | Added `test-generator` agent for pytest generation                  |
 | 2026-01-22 | Added `/skill-creator` and `/validate-skills` skills                |
 | 2026-01-22 | Added Documentation Maintenance guidelines to CLAUDE.md             |
