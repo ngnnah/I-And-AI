@@ -360,70 +360,142 @@ Select one quote that resonates with the current season's theme:
 
 ### Spring (Beginnings, Growth, Emergence)
 
-| Quote                                                                                      | Author              |
-| ------------------------------------------------------------------------------------------ | ------------------- |
-| "In the depth of winter, I finally learned that within me there lay an invincible summer." | Albert Camus        |
-| "No winter lasts forever; no spring skips its turn."                                       | Hal Borland         |
-| "Spring passes and one remembers one's innocence."                                         | Yoko Ono            |
-| "The earth laughs in flowers."                                                             | Ralph Waldo Emerson |
-| "If we had no winter, the spring would not be so pleasant."                                | Anne Bradstreet     |
-| "Adopt the pace of nature: her secret is patience."                                        | Ralph Waldo Emerson |
+| Quote                                                                                      | Author               |
+| ------------------------------------------------------------------------------------------ | -------------------- |
+| "In the depth of winter, I finally learned that within me there lay an invincible summer." | Albert Camus         |
+| "No winter lasts forever; no spring skips its turn."                                       | Hal Borland          |
+| "Spring passes and one remembers one's innocence."                                         | Yoko Ono             |
+| "The earth laughs in flowers."                                                             | Ralph Waldo Emerson  |
+| "If we had no winter, the spring would not be so pleasant."                                | Anne Bradstreet      |
+| "Adopt the pace of nature: her secret is patience."                                        | Ralph Waldo Emerson  |
+| "And the day came when the risk to remain tight in a bud was more painful than the risk it took to blossom." | Anaïs Nin |
+| "Everything is blooming most recklessly; if it were voices instead of colors, there would be an unbelievable shrieking into the ears of the most delicate person." | Rainer Maria Rilke |
+| "Spring is the time of plans and projects."                                                | Leo Tolstoy          |
+| "You can cut all the flowers but you cannot keep spring from coming."                      | Pablo Neruda         |
+| "In the spring, at the end of the day, you should smell like dirt."                        | Margaret Atwood      |
 
 ### Summer (Energy, Abundance, Full Engagement)
 
-| Quote                                                                                                                   | Author              |
-| ----------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| "Live in the sunshine, swim the sea, drink the wild air."                                                               | Ralph Waldo Emerson |
-| "Rest is not idleness, and to lie sometimes on the grass under trees on a summer's day is by no means a waste of time." | John Lubbock        |
-| "Summer afternoon—summer afternoon; to me those have always been the two most beautiful words in the English language." | Henry James         |
-| "One must maintain a little bit of summer, even in the middle of winter."                                               | Henry David Thoreau |
-| "Deep summer is when laziness finds respectability."                                                                    | Sam Keen            |
+| Quote                                                                                                                   | Author                |
+| ----------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| "Live in the sunshine, swim the sea, drink the wild air."                                                               | Ralph Waldo Emerson   |
+| "Rest is not idleness, and to lie sometimes on the grass under trees on a summer's day is by no means a waste of time." | John Lubbock          |
+| "Summer afternoon—summer afternoon; to me those have always been the two most beautiful words in the English language." | Henry James           |
+| "One must maintain a little bit of summer, even in the middle of winter."                                               | Henry David Thoreau   |
+| "Deep summer is when laziness finds respectability."                                                                    | Sam Keen              |
+| "In summer, the song sings itself."                                                                                     | William Carlos Williams |
+| "The summer night is like a perfection of thought."                                                                     | Wallace Stevens       |
+| "Ah, summer, what power you have to make us suffer and like it."                                                        | Russell Baker         |
+| "A life without love is like a year without summer."                                                                    | Swedish Proverb       |
 
 ### Autumn (Harvest, Release, Transition)
 
-| Quote                                                                                                | Author              |
-| ---------------------------------------------------------------------------------------------------- | ------------------- |
-| "Autumn is a second spring when every leaf is a flower."                                             | Albert Camus        |
-| "Life starts all over again when it gets crisp in the fall."                                         | F. Scott Fitzgerald |
-| "Notice that autumn is more the season of the soul than of nature."                                  | Friedrich Nietzsche |
-| "Every leaf speaks bliss to me, fluttering from the autumn tree."                                    | Emily Brontë        |
-| "There is something incredibly nostalgic and significant about the annual cascade of autumn leaves." | Joe L. Wheeler      |
-| "Simplicity is the ultimate sophistication."                                                         | Leonardo da Vinci   |
+| Quote                                                                                                | Author                |
+| ---------------------------------------------------------------------------------------------------- | --------------------- |
+| "Autumn is a second spring when every leaf is a flower."                                             | Albert Camus          |
+| "Life starts all over again when it gets crisp in the fall."                                         | F. Scott Fitzgerald   |
+| "Notice that autumn is more the season of the soul than of nature."                                  | Friedrich Nietzsche   |
+| "Every leaf speaks bliss to me, fluttering from the autumn tree."                                    | Emily Brontë          |
+| "There is something incredibly nostalgic and significant about the annual cascade of autumn leaves." | Joe L. Wheeler        |
+| "Simplicity is the ultimate sophistication."                                                         | Leonardo da Vinci     |
+| "Autumn carries more gold in its pocket than all the other seasons."                                 | Jim Bishop            |
+| "The tints of autumn...a mighty flower garden blossoming under the spell of the enchanter, frost."   | John Greenleaf Whittier |
+| "Autumn...the year's last, loveliest smile."                                                         | William Cullen Bryant |
+| "How beautifully leaves grow old. How full of light and color are their last days."                  | John Burroughs        |
+| "Fall has always been my favorite season. The time when everything bursts with its last beauty, as if nature had been saving up all year for the grand finale." | Lauren DeStefano |
 
 ### Winter (Rest, Depth, Hidden Preparation)
 
-| Quote                                                                                                                                                       | Author             |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| "The snow itself is lonely or, if you prefer, self-sufficient. There is no other time when the whole world seems composed of one thing and one thing only." | Joseph Wood Krutch |
-| "What good is the warmth of summer, without the cold of winter to give it sweetness."                                                                       | John Steinbeck     |
-| "In seed time learn, in harvest teach, in winter enjoy."                                                                                                    | William Blake      |
-| "Winter is the time for comfort, for good food and warmth, for the touch of a friendly hand and for a talk beside the fire."                                | Edith Sitwell      |
-| "To appreciate the beauty of a snowflake it is necessary to stand out in the cold."                                                                         | Aristotle          |
-| "The pine stays green in winter... wisdom in hardship."                                                                                                     | Norman Douglas     |
+| Quote                                                                                                                                                       | Author              |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| "The snow itself is lonely or, if you prefer, self-sufficient. There is no other time when the whole world seems composed of one thing and one thing only." | Joseph Wood Krutch  |
+| "What good is the warmth of summer, without the cold of winter to give it sweetness."                                                                       | John Steinbeck      |
+| "In seed time learn, in harvest teach, in winter enjoy."                                                                                                    | William Blake       |
+| "Winter is the time for comfort, for good food and warmth, for the touch of a friendly hand and for a talk beside the fire."                                | Edith Sitwell       |
+| "To appreciate the beauty of a snowflake it is necessary to stand out in the cold."                                                                         | Aristotle           |
+| "The pine stays green in winter... wisdom in hardship."                                                                                                     | Norman Douglas      |
+| "Winter is not a season, it's a celebration."                                                                                                               | Anamika Mishra      |
+| "There is a privacy about winter which no other season gives you."                                                                                          | Ruth Stout          |
+| "In the midst of winter, I found there was, within me, an invincible summer."                                                                               | Albert Camus        |
+| "The color of springtime is in the flowers; the color of winter is in the imagination."                                                                     | Terri Guillemets    |
+| "I prefer winter and fall, when you feel the bone structure of the landscape. Something waits beneath it; the whole story doesn't show."                    | Andrew Wyeth        |
 
-### Universal (Any Season)
+### Work, Craft & Creation
 
-| Quote                                                                                   | Author             |
-| --------------------------------------------------------------------------------------- | ------------------ |
-| "Nature does not hurry, yet everything is accomplished."                                | Lao Tzu            |
-| "Look deep into nature, and then you will understand everything better."                | Albert Einstein    |
-| "In every walk with nature one receives far more than he seeks."                        | John Muir          |
-| "The clearest way into the Universe is through a forest wilderness."                    | John Muir          |
-| "Study nature, love nature, stay close to nature. It will never fail you."              | Frank Lloyd Wright |
-| "Attention is the rarest and purest form of generosity."                                | Simone Weil        |
-| "The world is full of magic things, patiently waiting for our senses to grow sharper."  | W.B. Yeats         |
-| "Between stimulus and response there is a space. In that space is our power to choose." | Viktor Frankl      |
+| Quote                                                                                                            | Author              |
+| ---------------------------------------------------------------------------------------------------------------- | ------------------- |
+| "The craftsman is proud of what he has made, and cherishes it, while the consumer discards things that are perfectly serviceable in his restless pursuit of the new." | Christopher Lasch |
+| "Simplicity is prerequisite for reliability."                                                                    | Edsger W. Dijkstra  |
+| "First, solve the problem. Then, write the code."                                                                | John Johnson        |
+| "The best way to predict the future is to implement it."                                                         | David Heinemeier Hansson |
+| "Make it work, make it right, make it fast."                                                                     | Kent Beck           |
+| "Programs must be written for people to read, and only incidentally for machines to execute."                    | Harold Abelson      |
+| "The most damaging phrase in the language is: 'It's always been done this way.'"                                 | Grace Hopper        |
+| "Done is better than perfect."                                                                                   | Sheryl Sandberg     |
+| "Amateurs sit and wait for inspiration, the rest of us just get up and go to work."                              | Stephen King        |
+| "The expert in anything was once a beginner."                                                                    | Helen Hayes         |
+| "Move fast and break things' is a developer motto. 'Move carefully and fix things' is a surgeon's motto. Know which you are building." | Unknown |
 
-### Playful & Fun
+### Attention, Presence & Time
 
-| Quote                                                                                             | Author              |
-| ------------------------------------------------------------------------------------------------- | ------------------- |
-| "I like trees because they seem more resigned to the way they have to live than other things do." | Willa Cather        |
-| "Do not go where the path may lead, go instead where there is no path and leave a trail."         | Ralph Waldo Emerson |
-| "Instructions for living a life: Pay attention. Be astonished. Tell about it."                    | Mary Oliver         |
-| "The creation of a thousand forests is in one acorn."                                             | Ralph Waldo Emerson |
-| "Not all those who wander are lost."                                                              | J.R.R. Tolkien      |
-| "I took a walk in the woods and came out taller than the trees."                                  | Henry David Thoreau |
+| Quote                                                                                   | Author                    |
+| --------------------------------------------------------------------------------------- | ------------------------- |
+| "Attention is the rarest and purest form of generosity."                                | Simone Weil               |
+| "Between stimulus and response there is a space. In that space is our power to choose." | Viktor Frankl             |
+| "The world is full of magic things, patiently waiting for our senses to grow sharper."  | W.B. Yeats                |
+| "Instructions for living a life: Pay attention. Be astonished. Tell about it."          | Mary Oliver               |
+| "Wherever you are, be all there."                                                       | Jim Elliot                |
+| "The present moment is the only time over which we have dominion."                      | Thích Nhất Hạnh           |
+| "Time isn't precious at all, because it is an illusion. What you perceive as precious is not time but the one point that is out of time: the Now." | Eckhart Tolle |
+| "How we spend our days is, of course, how we spend our lives."                          | Annie Dillard             |
+| "You can't stop the waves, but you can learn to surf."                                  | Jon Kabat-Zinn            |
+| "Drink your tea slowly and reverently, as if it is the axis on which the world earth revolves." | Thích Nhất Hạnh    |
+
+### Eastern Wisdom & Japanese Philosophy
+
+| Quote                                                                                        | Author              |
+| -------------------------------------------------------------------------------------------- | ------------------- |
+| "Nature does not hurry, yet everything is accomplished."                                     | Lao Tzu             |
+| "The old pond—a frog jumps in, sound of water."                                              | Matsuo Bashō        |
+| "In all things success depends on previous preparation, and without such preparation there is sure to be failure." | Confucius |
+| "When you do something, you should burn yourself up completely, like a good bonfire, leaving no trace of yourself." | Shunryu Suzuki |
+| "The bamboo that bends is stronger than the oak that resists."                               | Japanese Proverb    |
+| "Fall seven times, stand up eight."                                                          | Japanese Proverb    |
+| "Vision without action is a daydream. Action without vision is a nightmare."                 | Japanese Proverb    |
+| "Even a small star shines in the darkness."                                                  | Finnish Proverb     |
+| "The quieter you become, the more you are able to hear."                                     | Rumi                |
+| "Sitting quietly, doing nothing, spring comes, and the grass grows by itself."               | Zen saying          |
+| "Before enlightenment; chop wood, carry water. After enlightenment; chop wood, carry water." | Zen Proverb         |
+
+### Nature & Interconnection
+
+| Quote                                                                                   | Author                    |
+| --------------------------------------------------------------------------------------- | ------------------------- |
+| "In every walk with nature one receives far more than he seeks."                        | John Muir                 |
+| "The clearest way into the Universe is through a forest wilderness."                    | John Muir                 |
+| "Study nature, love nature, stay close to nature. It will never fail you."              | Frank Lloyd Wright        |
+| "Look deep into nature, and then you will understand everything better."                | Albert Einstein           |
+| "I like trees because they seem more resigned to the way they have to live than other things do." | Willa Cather       |
+| "The creation of a thousand forests is in one acorn."                                   | Ralph Waldo Emerson       |
+| "We are not apart from nature, we are a part of nature."                                | Unknown                   |
+| "The frog does not drink up the pond in which it lives."                                | Buddhist Proverb          |
+| "Those who contemplate the beauty of the earth find reserves of strength that will endure as long as life lasts." | Rachel Carson |
+| "The cure for anything is salt water: sweat, tears, or the sea."                        | Isak Dinesen              |
+
+### Growth, Patience & Change
+
+| Quote                                                                                             | Author                |
+| ------------------------------------------------------------------------------------------------- | --------------------- |
+| "A society grows great when old people plant trees whose shade they know they shall never sit in." | Greek Proverb       |
+| "Do not go where the path may lead, go instead where there is no path and leave a trail."         | Ralph Waldo Emerson   |
+| "Not all those who wander are lost."                                                              | J.R.R. Tolkien        |
+| "I took a walk in the woods and came out taller than the trees."                                  | Henry David Thoreau   |
+| "The day you plant the seed is not the day you eat the fruit."                                    | Fabienne Fredrickson  |
+| "If you want to go fast, go alone. If you want to go far, go together."                           | African Proverb       |
+| "The best time to plant a tree was 20 years ago. The second best time is now."                    | Chinese Proverb       |
+| "Be like a tree and let the dead leaves drop."                                                    | Rumi                  |
+| "The flower that blooms in adversity is the most rare and beautiful of all."                      | Mulan (Disney)        |
+| "Rivers know this: there is no hurry. We shall get there some day."                               | A.A. Milne            |
 
 ## Example Output
 
