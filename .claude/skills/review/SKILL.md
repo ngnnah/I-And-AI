@@ -1,6 +1,6 @@
 ---
 name: review
-description: Review code for bugs, security issues, and best practices
+description: This skill should be used when the user asks to "review code", "check for bugs", "audit this file", or wants feedback on code quality, security, and best practices.
 ---
 
 # /review

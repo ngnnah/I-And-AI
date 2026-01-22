@@ -1,6 +1,6 @@
 ---
 name: sql
-description: Write, optimize, or explain SQL queries with best practices
+description: This skill should be used when the user asks to "write SQL", "optimize a query", "explain this SQL", or needs help with database queries and SQL best practices.
 ---
 
 # /sql

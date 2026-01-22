@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Create a git commit with a well-crafted conventional commit message
+description: This skill should be used when the user asks to "commit changes", "create a commit", "git commit", or wants to save their staged changes with a meaningful message.
 ---
 
 # /commit

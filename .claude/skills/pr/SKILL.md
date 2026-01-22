@@ -1,6 +1,6 @@
 ---
 name: pr
-description: Create a GitHub pull request for the current feature branch
+description: This skill should be used when the user asks to "create a PR", "open a pull request", "submit for review", or wants to push their branch and create a GitHub pull request.
 ---
 
 # /pr
