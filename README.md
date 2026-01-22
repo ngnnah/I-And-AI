@@ -15,12 +15,24 @@ I'm a data engineer at a B2G software platform company in telecom. This repo doc
 
 ```
 .
-├── .claude/           # Claude Code configuration & skills
-│   └── skills/        # Custom slash commands (/commit, /pr, /sql, /review)
+├── .claude/
+│   ├── agents/        # Specialized subagents for complex workflows
+│   └── skills/        # Custom slash commands
 ├── AGENTS.md          # Instructions for AI agents working in this repo
 ├── CLAUDE.md          # Claude Code workspace config
 └── README.md
 ```
+
+## Subagents
+
+Specialized agents for data engineering workflows:
+
+| Agent | Purpose |
+|-------|---------|
+| `dag-validator` | Validate DAG structures in Airflow/dbt/Prefect pipelines |
+| `code-architect` | Design and plan code structure before implementation |
+| `code-simplifier` | Reduce complexity and improve readability |
+| `data-io-verifier` | Verify data integrity at input/output boundaries |
 
 ## Claude Skills
 
