@@ -33,8 +33,7 @@ See `sekki-explanations.md` for detailed ELI5 explanations of each solar term.
 
 > {date range} · {sekki name} ({sekki english})
 
-<img src="./images/{number}-{slug}.jpg" alt="{description}" width="480">
-<!-- NOTE: In log files (./logs/), use ../images/ path instead -->
+<img src="../images/{number}-{slug}.jpg" alt="{description}" width="480">
 
 **Why now?** {1-2 sentence ELI5 of the natural phenomenon}
 
@@ -375,7 +374,7 @@ For January 22 (kō #70):
 
 > January 20-24 · 大寒 Daikan (Major Cold)
 
-<img src="./images/70-fuki-no-hana-saku.jpg" alt="Butterbur buds emerging through cold earth" width="480">
+<img src="../images/70-fuki-no-hana-saku.jpg" alt="Butterbur buds emerging through cold earth" width="480">
 
 **Why now?** While air is coldest, soil stays warmer underground. The butterbur taps this hidden warmth, blooming before competitors wake—first-mover advantage in nature's economy.
 
