@@ -57,17 +57,19 @@ All screenshots in `resources/screenshots/` are git-tracked. After saving:
 - Files are ready for commit
 - Use descriptive commit messages: `docs: add screenshot of [topic]`
 
-### 5. Index File (Optional)
+### 5. Index File
 
-For sessions with multiple screenshots, consider updating `resources/screenshots/INDEX.md`:
+Update `resources/screenshots/INDEX.md` with a clickable link to the file:
 
 ```markdown
 ## Screenshots
 
-| Date       | File                                             | Description           | Source         |
-| ---------- | ------------------------------------------------ | --------------------- | -------------- |
-| 2026-01-22 | `20260122-143052_google-doodle_mlk-day-2026.png` | MLK Day Google Doodle | doodles.google |
+| Date       | File                                                                                               | Description           | Source         |
+| ---------- | -------------------------------------------------------------------------------------------------- | --------------------- | -------------- |
+| 2026-01-22 | [`20260122-143052_google-doodle_mlk-day-2026.png`](20260122-143052_google-doodle_mlk-day-2026.png) | MLK Day Google Doodle | doodles.google |
 ```
+
+**Format:** `[filename](filename)` - links to the file in the same directory for one-click viewing.
 
 ## Examples
 
