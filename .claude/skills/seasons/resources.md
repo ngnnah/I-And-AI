@@ -10,6 +10,24 @@ Images stored in `./images/` with format: `{number}-{romaji-slug}.jpg`
 
 Example: `70-fuki-no-hana-saku.jpg`
 
+### Rendering Images in Markdown
+
+Use HTML for size control (GitHub/most markdown renderers support this):
+
+```html
+<img src="./images/70-fuki-no-hana-saku.jpg" alt="Butterbur buds" width="400" />
+```
+
+For log files (in `./logs/` subdirectory), use relative path:
+
+```html
+<img
+  src="../images/70-fuki-no-hana-saku.jpg"
+  alt="Butterbur buds"
+  width="400"
+/>
+```
+
 ### Download Script
 
 ```bash
