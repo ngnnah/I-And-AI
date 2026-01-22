@@ -52,7 +52,7 @@ See `download_images.py` for search terms and configuration.
 
 **Sekki Resources:**
 
-- [Rain in Japanese Culture](https://www.tofugu.com/japan/rain-in-japan/)
+- [Japanese Words for Rain](https://blog.gaijinpot.com/potsu-potsu-rain-summertime/)
 
 ---
 
@@ -66,7 +66,7 @@ See `download_images.py` for search terms and configuration.
 
 **Sekki Resources:**
 
-- [Keichitsu Traditions](https://japanobjects.com/features/keichitsu)
+- [Keichitsu - Insects Awaken](https://www.nippon.com/en/japan-topics/b09704/)
 
 ---
 
@@ -379,8 +379,8 @@ See `download_images.py` for search terms and configuration.
 
 ### Patience & Hidden Growth (Winter/Early Spring)
 
-- [Wabi-Sabi - Leonard Koren](https://www.leonardkoren.com/wabi-sabi.html)
-- [In Praise of Shadows - Tanizaki](https://www.penguinrandomhouse.com/books/37425/in-praise-of-shadows-by-junichiro-tanizaki/)
+- [Wabi-Sabi - Leonard Koren](https://www.amazon.com/Wabi-Sabi-Artists-Designers-Poets-Philosophers/dp/0981484603)
+- [In Praise of Shadows - Tanizaki](https://tuttlepublishing.com/japan/in-praise-of-shadows-and-other-essays-9784805319352)
 
 ### Emergence & Receptivity (Spring)
 
@@ -399,5 +399,5 @@ See `download_images.py` for search terms and configuration.
 
 ### Rest & Conservation (Winter)
 
-- [Rest - Alex Soojung-Kim Pang](https://www.strategy.rest/)
+- [Rest - Alex Soojung-Kim Pang](https://www.hachettebookgroup.com/titles/alex-soojung-kim-pang/rest/9781541604834/)
 - [Zen Mind, Beginner's Mind - Shunryu Suzuki](https://www.shambhala.com/zen-mind-beginner-s-mind-712.html)

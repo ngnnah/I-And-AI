@@ -325,7 +325,7 @@ Use these for the "Learn more" section. Select 1-2 relevant to the current seaso
 
 **Contemplative Practice:**
 
-- [On the Shortness of Life - Seneca](https://www.gutenberg.org/ebooks/67954)
+- [On the Shortness of Life - Seneca](https://en.wikisource.org/wiki/On_the_shortness_of_life)
 - [Meditations - Marcus Aurelius](https://www.gutenberg.org/ebooks/2680)
 - [Zen Mind, Beginner's Mind - Shunryu Suzuki](https://www.shambhala.com/zen-mind-beginner-s-mind-712.html)
 
