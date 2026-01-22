@@ -58,16 +58,13 @@ This skill is self-contained with local images and curated URLs.
 
 ### Image Strategy
 
-All 72 images are available locally. Always include the image in output.
+All 72 images are available locally. Always include the image in log files.
 
-1. **In log files**: Use `../images/` path (logs are in `./logs/` subdirectory)
-   ```html
-   <img src="../images/{number}-{slug}.jpg" alt="{description}" width="480" />
-   ```
-2. **In terminal output**: Use `./images/` path
-   ```html
-   <img src="./images/{number}-{slug}.jpg" alt="{description}" width="480" />
-   ```
+**Log file path**: Use `../images/` (logs are in `./logs/` subdirectory)
+
+```html
+<img src="../images/{number}-{slug}.jpg" alt="{description}" width="480" />
+```
 
 ### Local Images
 
