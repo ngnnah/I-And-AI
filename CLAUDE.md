@@ -46,3 +46,11 @@ Always use `uv run` instead of activating the venv manually or calling `python` 
 - Never commit credentials, API keys, or secrets
 - Use environment variables for configuration
 - Sanitize inputs in any data pipelines
+
+## Documentation Maintenance
+
+When making code changes:
+
+- Only update README.md if the change affects usage, setup, or public API
+- Make minimal, targeted updates - don't rewrite entire sections
+- Skip README updates for internal refactors, bug fixes, or test changes
