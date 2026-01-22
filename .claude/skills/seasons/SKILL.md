@@ -16,8 +16,9 @@ Display the current Japanese micro-season (kō 候) to foster seasonal awareness
    - Connects nature's wisdom to human growth and work
    - Frames challenges as opportunities
    - Suggests an actionable mindset or practice
-5. **Include relevant resources** (1-2 links) for deeper exploration
-6. **Save output to log file**: `./logs/YYYY-MM-DD.md`
+5. **Select a quote** from the Quotes Library that matches the season/theme
+6. **Include relevant resources** (1-2 links) for deeper exploration
+7. **Save output to log file**: `./logs/YYYY-MM-DD.md`
 
 See `sekki-explanations.md` for detailed ELI5 explanations of each solar term.
 
@@ -443,6 +444,9 @@ already underway, even when conditions feel hardest. This is the
 **Today's practice:** Identify one project that's quietly building
 momentum beneath the surface. Give it 15 minutes of attention—
 water roots that others can't see yet.
+
+**💬 Quote:** "In the depth of winter, I finally learned that within me there lay an invincible summer."
+— Albert Camus
 
 **Learn more:**
 - [Butterbur (Petasites japonicus)](https://en.wikipedia.org/wiki/Petasites_japonicus)
