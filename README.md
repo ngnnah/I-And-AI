@@ -27,26 +27,29 @@ I'm a data engineer at a B2G software platform company in telecom. This repo doc
 
 Specialized agents for data engineering workflows:
 
-| Agent | Purpose |
-|-------|---------|
-| `dag-validator` | Validate DAG structures in Airflow/dbt/Prefect pipelines |
-| `code-architect` | Design and plan code structure before implementation |
-| `code-simplifier` | Reduce complexity and improve readability |
-| `data-io-verifier` | Verify data integrity at input/output boundaries |
+| Agent              | Purpose                                                     |
+| ------------------ | ----------------------------------------------------------- |
+| `dag-validator`    | Validate DAG structures in Airflow/dbt/Prefect pipelines    |
+| `code-architect`   | Design and plan code structure before implementation        |
+| `code-simplifier`  | Reduce complexity and improve readability                   |
+| `data-io-verifier` | Verify data integrity at input/output boundaries            |
+| `test-generator`   | Generate pytest test cases for data engineering Python code |
 
 ## Claude Skills
 
 Custom skills available in this workspace:
 
-| Skill | Description |
-|-------|-------------|
-| `/commit` | Create well-crafted git commits |
-| `/pr` | Create GitHub pull requests |
-| `/sql` | Write, optimize, or explain SQL queries |
-| `/review` | Code review for bugs, security, and style |
+| Skill              | Description                                      |
+| ------------------ | ------------------------------------------------ |
+| `/commit`          | Create well-crafted git commits                  |
+| `/pr`              | Create GitHub pull requests                      |
+| `/sql`             | Write, optimize, or explain SQL queries          |
+| `/review`          | Code review for bugs, security, and style        |
+| `/skill-creator`   | Create new skills and agents for Claude Code     |
+| `/validate-skills` | Validate skills and agents follow best practices |
 
 ## Tech Stack
 
 - **Languages**: Python, SQL
-- **Data**: PostgreSQL, BigQuery, dbt
+- **Data**: PostgreSQL, dbt
 - **Tools**: Claude Code, GitHub CLI, Linear
