@@ -1,5 +1,31 @@
 #!/usr/bin/env python3
-"""Generate daily log files for the seasons skill from JSON data."""
+"""Generate daily log files for the seasons skill from JSON data.
+
+Overview
+--------
+Generates 365 daily markdown files, one for each day of the year.
+Each file contains seasonal wisdom based on Japan's 72 micro-seasons (kō).
+
+Data Flow
+---------
+    seasons_data.json  →  generate_logs.py  →  logs/2026-01-01.md
+       (72 seasons)         (this script)       logs/2026-01-02.md
+                                                ...
+                                                (365 files)
+
+Processing Pipeline
+-------------------
+    Date (e.g., Jan 24)
+           ↓
+    get_ko_for_date()  →  find matching kō (#70: Jan 20-24)
+           ↓
+    get_day_index()    →  day position within kō (day 4 of 5)
+           ↓
+    generate_log_content()  →  select practice[4], build markdown
+           ↓
+    Write to logs/2026-01-24.md
+
+"""
 
 import json
 from calendar import month_name
