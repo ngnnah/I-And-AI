@@ -1,0 +1,2280 @@
+#!/usr/bin/env python3
+"""Generate all 365 daily log files for the seasons skill."""
+
+from datetime import date, timedelta
+from pathlib import Path
+
+# Each kō: (number, romaji, english, start_month, start_day, end_month, end_day, sekki_jp, sekki_en, quote, author, image_slug)
+KO_DATA = [
+    # Risshun (Beginning of Spring)
+    (
+        1,
+        "Harukaze kōri wo toku",
+        "East wind melts the ice",
+        2,
+        4,
+        2,
+        8,
+        "立春 Risshun",
+        "Beginning of Spring",
+        "In the depth of winter, I finally learned that within me there lay an invincible summer.",
+        "Albert Camus",
+        "harukaze-kori-wo-toku",
+    ),
+    (
+        2,
+        "Kōō kenkan su",
+        "Bush warblers start singing",
+        2,
+        9,
+        2,
+        13,
+        "立春 Risshun",
+        "Beginning of Spring",
+        "Instructions for living a life: Pay attention. Be astonished. Tell about it.",
+        "Mary Oliver",
+        "koo-kenkan-su",
+    ),
+    (
+        3,
+        "Uo kōri wo izuru",
+        "Fish emerge from the ice",
+        2,
+        14,
+        2,
+        18,
+        "立春 Risshun",
+        "Beginning of Spring",
+        "No winter lasts forever; no spring skips its turn.",
+        "Hal Borland",
+        "uo-kori-wo-izuru",
+    ),
+    # Usui (Rainwater)
+    (
+        4,
+        "Tsuchi no shō uruoi okoru",
+        "Rain moistens the soil",
+        2,
+        19,
+        2,
+        23,
+        "雨水 Usui",
+        "Rainwater",
+        "Adopt the pace of nature: her secret is patience.",
+        "Ralph Waldo Emerson",
+        "tsuchi-no-sho-uruoi-okoru",
+    ),
+    (
+        5,
+        "Kasumi hajimete tanabiku",
+        "Mist starts to linger",
+        2,
+        24,
+        2,
+        28,
+        "雨水 Usui",
+        "Rainwater",
+        "The world is full of magic things, patiently waiting for our senses to grow sharper.",
+        "W.B. Yeats",
+        "kasumi-hajimete-tanabiku",
+    ),
+    (
+        6,
+        "Sōmoku mebae izuru",
+        "Grass sprouts, trees bud",
+        3,
+        1,
+        3,
+        5,
+        "雨水 Usui",
+        "Rainwater",
+        "And the day came when the risk to remain tight in a bud was more painful than the risk it took to blossom.",
+        "Anaïs Nin",
+        "somoku-mebae-izuru",
+    ),
+    # Keichitsu (Awakening of Insects)
+    (
+        7,
+        "Sugomori mushito wo hiraku",
+        "Hibernating insects surface",
+        3,
+        6,
+        3,
+        10,
+        "啓蟄 Keichitsu",
+        "Awakening of Insects",
+        "Between stimulus and response there is a space. In that space is our power to choose.",
+        "Viktor Frankl",
+        "sugomori-mushito-wo-hiraku",
+    ),
+    (
+        8,
+        "Momo hajimete saku",
+        "First peach blossoms",
+        3,
+        11,
+        3,
+        15,
+        "啓蟄 Keichitsu",
+        "Awakening of Insects",
+        "The earth laughs in flowers.",
+        "Ralph Waldo Emerson",
+        "momo-hajimete-saku",
+    ),
+    (
+        9,
+        "Namushi chō to naru",
+        "Caterpillars become butterflies",
+        3,
+        16,
+        3,
+        20,
+        "啓蟄 Keichitsu",
+        "Awakening of Insects",
+        "The expert in anything was once a beginner.",
+        "Helen Hayes",
+        "namushi-cho-to-naru",
+    ),
+    # Shunbun (Spring Equinox)
+    (
+        10,
+        "Suzume hajimete sukū",
+        "Sparrows start to nest",
+        3,
+        21,
+        3,
+        25,
+        "春分 Shunbun",
+        "Spring Equinox",
+        "The present moment is the only time over which we have dominion.",
+        "Thích Nhất Hạnh",
+        "suzume-hajimete-suku",
+    ),
+    (
+        11,
+        "Sakura hajimete saku",
+        "First cherry blossoms",
+        3,
+        26,
+        3,
+        30,
+        "春分 Shunbun",
+        "Spring Equinox",
+        "Spring passes and one remembers one's innocence.",
+        "Yoko Ono",
+        "sakura-hajimete-saku",
+    ),
+    (
+        12,
+        "Kaminari sunawachi koe wo hassu",
+        "Distant thunder",
+        3,
+        31,
+        4,
+        4,
+        "春分 Shunbun",
+        "Spring Equinox",
+        "You can cut all the flowers but you cannot keep spring from coming.",
+        "Pablo Neruda",
+        "kaminari-sunawachi-koe-wo-hassu",
+    ),
+    # Seimei (Clear and Bright)
+    (
+        13,
+        "Tsubame kitaru",
+        "Swallows return",
+        4,
+        5,
+        4,
+        9,
+        "清明 Seimei",
+        "Clear and Bright",
+        "Do not go where the path may lead, go instead where there is no path and leave a trail.",
+        "Ralph Waldo Emerson",
+        "tsubame-kitaru",
+    ),
+    (
+        14,
+        "Kōgan kaeru",
+        "Wild geese fly north",
+        4,
+        10,
+        4,
+        14,
+        "清明 Seimei",
+        "Clear and Bright",
+        "Not all those who wander are lost.",
+        "J.R.R. Tolkien",
+        "kogan-kaeru",
+    ),
+    (
+        15,
+        "Niji hajimete arawaru",
+        "First rainbows",
+        4,
+        15,
+        4,
+        19,
+        "清明 Seimei",
+        "Clear and Bright",
+        "After the rain, comes the rainbow.",
+        "Traditional saying",
+        "niji-hajimete-arawaru",
+    ),
+    # Kokuu (Grain Rain)
+    (
+        16,
+        "Ashi hajimete shōzu",
+        "First reeds sprout",
+        4,
+        20,
+        4,
+        24,
+        "穀雨 Kokuu",
+        "Grain Rain",
+        "The bamboo that bends is stronger than the oak that resists.",
+        "Japanese Proverb",
+        "ashi-hajimete-shozu",
+    ),
+    (
+        17,
+        "Shimo yamite nae izuru",
+        "Last frost, rice seedlings grow",
+        4,
+        25,
+        4,
+        29,
+        "穀雨 Kokuu",
+        "Grain Rain",
+        "The day you plant the seed is not the day you eat the fruit.",
+        "Fabienne Fredrickson",
+        "shimo-yamite-nae-izuru",
+    ),
+    (
+        18,
+        "Botan hana saku",
+        "Peonies bloom",
+        4,
+        30,
+        5,
+        4,
+        "穀雨 Kokuu",
+        "Grain Rain",
+        "Spring is the time of plans and projects.",
+        "Leo Tolstoy",
+        "botan-hana-saku",
+    ),
+    # Rikka (Beginning of Summer)
+    (
+        19,
+        "Kawazu hajimete naku",
+        "Frogs start singing",
+        5,
+        5,
+        5,
+        9,
+        "立夏 Rikka",
+        "Beginning of Summer",
+        "In summer, the song sings itself.",
+        "William Carlos Williams",
+        "kawazu-hajimete-naku",
+    ),
+    (
+        20,
+        "Mimizu izuru",
+        "Worms surface",
+        5,
+        10,
+        5,
+        14,
+        "立夏 Rikka",
+        "Beginning of Summer",
+        "We are not apart from nature, we are a part of nature.",
+        "Unknown",
+        "mimizu-izuru",
+    ),
+    (
+        21,
+        "Takenoko shōzu",
+        "Bamboo shoots sprout",
+        5,
+        15,
+        5,
+        20,
+        "立夏 Rikka",
+        "Beginning of Summer",
+        "A society grows great when old people plant trees whose shade they know they shall never sit in.",
+        "Greek Proverb",
+        "takenoko-shozu",
+    ),
+    # Shōman (Grain Buds)
+    (
+        22,
+        "Kaiko okite kuwa wo hamu",
+        "Silkworms start feasting on mulberry",
+        5,
+        21,
+        5,
+        25,
+        "小満 Shōman",
+        "Grain Buds",
+        "Amateurs sit and wait for inspiration, the rest of us just get up and go to work.",
+        "Stephen King",
+        "kaiko-okite-kuwa-wo-hamu",
+    ),
+    (
+        23,
+        "Benibana sakau",
+        "Safflowers bloom",
+        5,
+        26,
+        5,
+        30,
+        "小満 Shōman",
+        "Grain Buds",
+        "In every walk with nature one receives far more than he seeks.",
+        "John Muir",
+        "benibana-sakau",
+    ),
+    (
+        24,
+        "Mugi no toki itaru",
+        "Wheat ripens and is harvested",
+        5,
+        31,
+        6,
+        5,
+        "小満 Shōman",
+        "Grain Buds",
+        "How we spend our days is, of course, how we spend our lives.",
+        "Annie Dillard",
+        "mugi-no-toki-itaru",
+    ),
+    # Bōshu (Grain in Ear)
+    (
+        25,
+        "Kamakiri shōzu",
+        "Praying mantises hatch",
+        6,
+        6,
+        6,
+        10,
+        "芒種 Bōshu",
+        "Grain in Ear",
+        "When you do something, you should burn yourself up completely, like a good bonfire, leaving no trace of yourself.",
+        "Shunryu Suzuki",
+        "kamakiri-shozu",
+    ),
+    (
+        26,
+        "Kusaretaru kusa hotaru to naru",
+        "Rotten grass becomes fireflies",
+        6,
+        11,
+        6,
+        15,
+        "芒種 Bōshu",
+        "Grain in Ear",
+        "Even a small star shines in the darkness.",
+        "Finnish Proverb",
+        "kusaretaru-kusa-hotaru-to-naru",
+    ),
+    (
+        27,
+        "Ume no mi kibamu",
+        "Plums turn yellow",
+        6,
+        16,
+        6,
+        20,
+        "芒種 Bōshu",
+        "Grain in Ear",
+        "First, solve the problem. Then, write the code.",
+        "John Johnson",
+        "ume-no-mi-kibamu",
+    ),
+    # Geshi (Summer Solstice)
+    (
+        28,
+        "Natsukarekusa karuru",
+        "Self-heal withers",
+        6,
+        21,
+        6,
+        26,
+        "夏至 Geshi",
+        "Summer Solstice",
+        "One must maintain a little bit of summer, even in the middle of winter.",
+        "Henry David Thoreau",
+        "natsukarekusa-karuru",
+    ),
+    (
+        29,
+        "Ayame hana saku",
+        "Irises bloom",
+        6,
+        27,
+        7,
+        1,
+        "夏至 Geshi",
+        "Summer Solstice",
+        "Summer afternoon—summer afternoon; to me those have always been the two most beautiful words in the English language.",
+        "Henry James",
+        "ayame-hana-saku",
+    ),
+    (
+        30,
+        "Hange shōzu",
+        "Crow-dipper sprouts",
+        7,
+        2,
+        7,
+        6,
+        "夏至 Geshi",
+        "Summer Solstice",
+        "Live in the sunshine, swim the sea, drink the wild air.",
+        "Ralph Waldo Emerson",
+        "hange-shozu",
+    ),
+    # Shōsho (Minor Heat)
+    (
+        31,
+        "Atsukaze itaru",
+        "Warm winds blow",
+        7,
+        7,
+        7,
+        11,
+        "小暑 Shōsho",
+        "Minor Heat",
+        "You can't stop the waves, but you can learn to surf.",
+        "Jon Kabat-Zinn",
+        "atsukaze-itaru",
+    ),
+    (
+        32,
+        "Hasu hajimete hiraku",
+        "First lotus blossoms",
+        7,
+        12,
+        7,
+        16,
+        "小暑 Shōsho",
+        "Minor Heat",
+        "Sitting quietly, doing nothing, spring comes, and the grass grows by itself.",
+        "Zen saying",
+        "hasu-hajimete-hiraku",
+    ),
+    (
+        33,
+        "Taka sunawachi waza wo narau",
+        "Hawks learn to fly",
+        7,
+        17,
+        7,
+        22,
+        "小暑 Shōsho",
+        "Minor Heat",
+        "The best way to predict the future is to implement it.",
+        "David Heinemeier Hansson",
+        "taka-sunawachi-waza-wo-narau",
+    ),
+    # Taisho (Major Heat)
+    (
+        34,
+        "Kiri hajimete hana wo musubu",
+        "Paulownia produces seeds",
+        7,
+        23,
+        7,
+        28,
+        "大暑 Taisho",
+        "Major Heat",
+        "The creation of a thousand forests is in one acorn.",
+        "Ralph Waldo Emerson",
+        "kiri-hajimete-hana-wo-musubu",
+    ),
+    (
+        35,
+        "Tsuchi uruōte mushi atsushi",
+        "Earth is damp, air is humid",
+        7,
+        29,
+        8,
+        2,
+        "大暑 Taisho",
+        "Major Heat",
+        "Rest is not idleness, and to lie sometimes on the grass under trees on a summer's day is by no means a waste of time.",
+        "John Lubbock",
+        "tsuchi-uruote-mushi-atsushi",
+    ),
+    (
+        36,
+        "Taiu tokidoki furu",
+        "Great rains sometimes fall",
+        8,
+        3,
+        8,
+        7,
+        "大暑 Taisho",
+        "Major Heat",
+        "The cure for anything is salt water: sweat, tears, or the sea.",
+        "Isak Dinesen",
+        "taiu-tokidoki-furu",
+    ),
+    # Risshū (Beginning of Autumn)
+    (
+        37,
+        "Suzukaze itaru",
+        "Cool winds blow",
+        8,
+        8,
+        8,
+        12,
+        "立秋 Risshū",
+        "Beginning of Autumn",
+        "Autumn is a second spring when every leaf is a flower.",
+        "Albert Camus",
+        "suzukaze-itaru",
+    ),
+    (
+        38,
+        "Higurashi naku",
+        "Evening cicadas sing",
+        8,
+        13,
+        8,
+        17,
+        "立秋 Risshū",
+        "Beginning of Autumn",
+        "The quieter you become, the more you are able to hear.",
+        "Rumi",
+        "higurashi-naku",
+    ),
+    (
+        39,
+        "Fukaki kiri matō",
+        "Dense fog descends",
+        8,
+        18,
+        8,
+        22,
+        "立秋 Risshū",
+        "Beginning of Autumn",
+        "Attention is the rarest and purest form of generosity.",
+        "Simone Weil",
+        "fukaki-kiri-mato",
+    ),
+    # Shosho (Limit of Heat)
+    (
+        40,
+        "Wata no hana shibe hiraku",
+        "Cotton flowers bloom",
+        8,
+        23,
+        8,
+        27,
+        "処暑 Shosho",
+        "Limit of Heat",
+        "Notice that autumn is more the season of the soul than of nature.",
+        "Friedrich Nietzsche",
+        "wata-no-hana-shibe-hiraku",
+    ),
+    (
+        41,
+        "Tenchi hajimete samushi",
+        "Heat starts to die down",
+        8,
+        28,
+        9,
+        1,
+        "処暑 Shosho",
+        "Limit of Heat",
+        "Life starts all over again when it gets crisp in the fall.",
+        "F. Scott Fitzgerald",
+        "tenchi-hajimete-samushi",
+    ),
+    (
+        42,
+        "Kokumono sunawachi minoru",
+        "Rice ripens",
+        9,
+        2,
+        9,
+        7,
+        "処暑 Shosho",
+        "Limit of Heat",
+        "Make it work, make it right, make it fast.",
+        "Kent Beck",
+        "kokumono-sunawachi-minoru",
+    ),
+    # Hakuro (White Dew)
+    (
+        43,
+        "Kusa no tsuyu shiroshi",
+        "Dew glistens white on grass",
+        9,
+        8,
+        9,
+        12,
+        "白露 Hakuro",
+        "White Dew",
+        "Those who contemplate the beauty of the earth find reserves of strength that will endure as long as life lasts.",
+        "Rachel Carson",
+        "kusa-no-tsuyu-shiroshi",
+    ),
+    (
+        44,
+        "Sekirei naku",
+        "Wagtails sing",
+        9,
+        13,
+        9,
+        17,
+        "白露 Hakuro",
+        "White Dew",
+        "Every leaf speaks bliss to me, fluttering from the autumn tree.",
+        "Emily Brontë",
+        "sekirei-naku",
+    ),
+    (
+        45,
+        "Tsubame saru",
+        "Swallows leave",
+        9,
+        18,
+        9,
+        22,
+        "白露 Hakuro",
+        "White Dew",
+        "Rivers know this: there is no hurry. We shall get there some day.",
+        "A.A. Milne",
+        "tsubame-saru",
+    ),
+    # Shūbun (Autumn Equinox)
+    (
+        46,
+        "Kaminari sunawachi koe wo osamu",
+        "Thunder ceases",
+        9,
+        23,
+        9,
+        27,
+        "秋分 Shūbun",
+        "Autumn Equinox",
+        "Wherever you are, be all there.",
+        "Jim Elliot",
+        "kaminari-sunawachi-koe-wo-osamu",
+    ),
+    (
+        47,
+        "Mushi kakurete to wo fusagu",
+        "Insects hide in the ground",
+        9,
+        28,
+        10,
+        2,
+        "秋分 Shūbun",
+        "Autumn Equinox",
+        "In all things success depends on previous preparation, and without such preparation there is sure to be failure.",
+        "Confucius",
+        "mushi-kakurete-to-wo-fusagu",
+    ),
+    (
+        48,
+        "Mizu hajimete karuru",
+        "Farmers drain fields",
+        10,
+        3,
+        10,
+        7,
+        "秋分 Shūbun",
+        "Autumn Equinox",
+        "Simplicity is prerequisite for reliability.",
+        "Edsger W. Dijkstra",
+        "mizu-hajimete-karuru",
+    ),
+    # Kanro (Cold Dew)
+    (
+        49,
+        "Kōgan kitaru",
+        "Wild geese return",
+        10,
+        8,
+        10,
+        12,
+        "寒露 Kanro",
+        "Cold Dew",
+        "If you want to go fast, go alone. If you want to go far, go together.",
+        "African Proverb",
+        "kogan-kitaru",
+    ),
+    (
+        50,
+        "Kiku no hana hiraku",
+        "Chrysanthemums bloom",
+        10,
+        13,
+        10,
+        17,
+        "寒露 Kanro",
+        "Cold Dew",
+        "How beautifully leaves grow old. How full of light and color are their last days.",
+        "John Burroughs",
+        "kiku-no-hana-hiraku",
+    ),
+    (
+        51,
+        "Kirigirisu to ni ari",
+        "Crickets chirp in doorways",
+        10,
+        18,
+        10,
+        22,
+        "寒露 Kanro",
+        "Cold Dew",
+        "The old pond—a frog jumps in, sound of water.",
+        "Matsuo Bashō",
+        "kirigirisu-to-ni-ari",
+    ),
+    # Sōkō (Frost Falls)
+    (
+        52,
+        "Shimo hajimete furu",
+        "First frost",
+        10,
+        23,
+        10,
+        27,
+        "霜降 Sōkō",
+        "Frost Falls",
+        "The flower that blooms in adversity is the most rare and beautiful of all.",
+        "Mulan (Disney)",
+        "shimo-hajimete-furu",
+    ),
+    (
+        53,
+        "Kosame tokidoki furu",
+        "Light rains sometimes fall",
+        10,
+        28,
+        11,
+        1,
+        "霜降 Sōkō",
+        "Frost Falls",
+        "There is something incredibly nostalgic and significant about the annual cascade of autumn leaves.",
+        "Joe L. Wheeler",
+        "kosame-tokidoki-furu",
+    ),
+    (
+        54,
+        "Momiji tsuta kibamu",
+        "Maples and ivy turn yellow",
+        11,
+        2,
+        11,
+        6,
+        "霜降 Sōkō",
+        "Frost Falls",
+        "Simplicity is the ultimate sophistication.",
+        "Leonardo da Vinci",
+        "momiji-tsuta-kibamu",
+    ),
+    # Rittō (Beginning of Winter)
+    (
+        55,
+        "Tsubaki hajimete hiraku",
+        "Camellias bloom",
+        11,
+        7,
+        11,
+        11,
+        "立冬 Rittō",
+        "Beginning of Winter",
+        "I prefer winter and fall, when you feel the bone structure of the landscape. Something waits beneath it; the whole story doesn't show.",
+        "Andrew Wyeth",
+        "tsubaki-hajimete-hiraku",
+    ),
+    (
+        56,
+        "Chi hajimete kōru",
+        "Land starts to freeze",
+        11,
+        12,
+        11,
+        16,
+        "立冬 Rittō",
+        "Beginning of Winter",
+        "Look deep into nature, and then you will understand everything better.",
+        "Albert Einstein",
+        "chi-hajimete-koru",
+    ),
+    (
+        57,
+        "Kinsenka saku",
+        "Daffodils bloom",
+        11,
+        17,
+        11,
+        21,
+        "立冬 Rittō",
+        "Beginning of Winter",
+        "The best time to plant a tree was 20 years ago. The second best time is now.",
+        "Chinese Proverb",
+        "kinsenka-saku",
+    ),
+    # Shōsetsu (Minor Snow)
+    (
+        58,
+        "Niji kakurete miezu",
+        "Rainbows hide",
+        11,
+        22,
+        11,
+        26,
+        "小雪 Shōsetsu",
+        "Minor Snow",
+        "What good is the warmth of summer, without the cold of winter to give it sweetness.",
+        "John Steinbeck",
+        "niji-kakurete-miezu",
+    ),
+    (
+        59,
+        "Kitakaze konoha wo harau",
+        "North wind blows leaves",
+        11,
+        27,
+        12,
+        1,
+        "小雪 Shōsetsu",
+        "Minor Snow",
+        "Be like a tree and let the dead leaves drop.",
+        "Rumi",
+        "kitakaze-konoha-wo-harau",
+    ),
+    (
+        60,
+        "Tachibana hajimete kibamu",
+        "Tangerines turn yellow",
+        12,
+        2,
+        12,
+        6,
+        "小雪 Shōsetsu",
+        "Minor Snow",
+        "I took a walk in the woods and came out taller than the trees.",
+        "Henry David Thoreau",
+        "tachibana-hajimete-kibamu",
+    ),
+    # Taisetsu (Major Snow)
+    (
+        61,
+        "Sora samuku fuyu to naru",
+        "Cold sets in, winter begins",
+        12,
+        7,
+        12,
+        11,
+        "大雪 Taisetsu",
+        "Major Snow",
+        "Nature does not hurry, yet everything is accomplished.",
+        "Lao Tzu",
+        "sora-samuku-fuyu-to-naru",
+    ),
+    (
+        62,
+        "Kuma ana ni komoru",
+        "Bears hibernate",
+        12,
+        12,
+        12,
+        16,
+        "大雪 Taisetsu",
+        "Major Snow",
+        "In seed time learn, in harvest teach, in winter enjoy.",
+        "William Blake",
+        "kuma-ana-ni-komoru",
+    ),
+    (
+        63,
+        "Sake no uo muragaru",
+        "Salmon gather and swim upstream",
+        12,
+        17,
+        12,
+        21,
+        "大雪 Taisetsu",
+        "Major Snow",
+        "Fall seven times, stand up eight.",
+        "Japanese Proverb",
+        "sake-no-uo-muragaru",
+    ),
+    # Tōji (Winter Solstice)
+    (
+        64,
+        "Natsukarekusa shōzu",
+        "Self-heal sprouts",
+        12,
+        22,
+        12,
+        26,
+        "冬至 Tōji",
+        "Winter Solstice",
+        "The snow itself is lonely or, if you prefer, self-sufficient. There is no other time when the whole world seems composed of one thing and one thing only.",
+        "Joseph Wood Krutch",
+        "natsukarekusa-shozu",
+    ),
+    (
+        65,
+        "Sawashika no tsuno otsuru",
+        "Deer shed antlers",
+        12,
+        27,
+        12,
+        31,
+        "冬至 Tōji",
+        "Winter Solstice",
+        "There is a privacy about winter which no other season gives you.",
+        "Ruth Stout",
+        "sawashika-no-tsuno-otsuru",
+    ),
+    (
+        66,
+        "Yuki watarite mugi nobiru",
+        "Wheat sprouts under snow",
+        1,
+        1,
+        1,
+        4,
+        "冬至 Tōji",
+        "Winter Solstice",
+        "Vision without action is a daydream. Action without vision is a nightmare.",
+        "Japanese Proverb",
+        "yuki-watarite-mugi-nobiru",
+    ),
+    # Shōkan (Minor Cold)
+    (
+        67,
+        "Seri sunawachi sakau",
+        "Parsley flourishes",
+        1,
+        5,
+        1,
+        9,
+        "小寒 Shōkan",
+        "Minor Cold",
+        "The frog does not drink up the pond in which it lives.",
+        "Buddhist Proverb",
+        "seri-sunawachi-sakau",
+    ),
+    (
+        68,
+        "Shimizu atataka wo fukumu",
+        "Springs thaw",
+        1,
+        10,
+        1,
+        14,
+        "小寒 Shōkan",
+        "Minor Cold",
+        "Before enlightenment; chop wood, carry water. After enlightenment; chop wood, carry water.",
+        "Zen Proverb",
+        "shimizu-atataka-wo-fukumu",
+    ),
+    (
+        69,
+        "Kiji hajimete naku",
+        "Pheasants start to call",
+        1,
+        15,
+        1,
+        19,
+        "小寒 Shōkan",
+        "Minor Cold",
+        "Winter is the time for comfort, for good food and warmth, for the touch of a friendly hand and for a talk beside the fire.",
+        "Edith Sitwell",
+        "kiji-hajimete-naku",
+    ),
+    # Daikan (Major Cold)
+    (
+        70,
+        "Fuki no hana saku",
+        "Butterburs bud",
+        1,
+        20,
+        1,
+        24,
+        "大寒 Daikan",
+        "Major Cold",
+        "In the midst of winter, I found there was, within me, an invincible summer.",
+        "Albert Camus",
+        "fuki-no-hana-saku",
+    ),
+    (
+        71,
+        "Sawamizu kōri tsumeru",
+        "Ice thickens on streams",
+        1,
+        25,
+        1,
+        29,
+        "大寒 Daikan",
+        "Major Cold",
+        "To appreciate the beauty of a snowflake it is necessary to stand out in the cold.",
+        "Aristotle",
+        "sawamizu-kori-tsumeru",
+    ),
+    (
+        72,
+        "Niwatori hajimete toya ni tsuku",
+        "Hens start laying",
+        1,
+        30,
+        2,
+        3,
+        "大寒 Daikan",
+        "Major Cold",
+        "The pine stays green in winter... wisdom in hardship.",
+        "Norman Douglas",
+        "niwatori-hajimete-toya-ni-tsuku",
+    ),
+]
+
+# Content for each kō: (why_now, insight, resources, practices_list)
+# practices_list has 5-6 unique daily practices per kō
+KO_CONTENT = {
+    1: (
+        "Around February 4th, the east wind—warmer air from the Pacific—begins to blow across Japan. This wind carries enough warmth to start melting ice at the edges. It's not spring yet, but the first messenger has arrived.",
+        "The calendar marks spring's beginning while winter still holds firm. This teaches us that beginnings are declarations of intent, not descriptions of current reality. The east wind is a promise, not a proof. Sometimes we must announce our direction before circumstances align.",
+        [
+            "[East Wind](https://en.wikipedia.org/wiki/East_wind)",
+            "[72 Seasons of Japan](https://www.nippon.com/en/features/h00124/)",
+        ],
+        [
+            "Notice one small sign of change in your environment today—a shift in light, temperature, or sound. Acknowledge the messenger.",
+            "Declare an intention for something you want to begin, even if conditions aren't perfect yet. Write it down.",
+            "Identify where you're waiting for proof before starting. Take one small action as a declaration of direction.",
+            "Step outside and feel the air. Notice any warmth hidden within the cold—the promise within current conditions.",
+            "Begin something today that you've been postponing until 'the right time.' The east wind doesn't wait.",
+        ],
+    ),
+    2: (
+        "The uguisu (bush warbler) begins its distinctive call—'ho-hokekyo'—as days lengthen. These birds have been silent all winter, but now they announce themselves. Their song is considered one of the first heralds of spring in Japan.",
+        "The warbler's song emerges not from nowhere, but from winter's silence. It practiced in the dark. When conditions shift, readiness meets opportunity. What appears as sudden expression is actually long preparation finally voiced.",
+        [
+            "[Japanese Bush Warbler](https://en.wikipedia.org/wiki/Japanese_bush_warbler)",
+            "[Uguisu Song](https://www.japan-guide.com/e/e2012.html)",
+        ],
+        [
+            "Listen for birdsong today. When you hear it, pause and give it your full attention for ten seconds.",
+            "Share something you've been working on quietly. Let your 'song' be heard, even briefly.",
+            "Practice something in private today that you'll eventually share. Honor the preparation phase.",
+            "Notice what wants to be expressed but hasn't found its voice yet. Give it five minutes of attention.",
+            "Pay attention to how others announce themselves today. What can you learn from their timing?",
+        ],
+    ),
+    3: (
+        "As ice thins, fish that sheltered in deeper, warmer water begin rising toward the surface. They emerge through gaps in the ice, drawn by increasing light and oxygen. Life moves upward, toward the sun.",
+        "The fish don't break through the ice—they find where it has already thinned. Emergence requires both readiness and finding the right opening. Sometimes patience means waiting for the gap, not forcing the breakthrough.",
+        [
+            "[Ice Fishing Japan](https://livejapan.com/en/article-a0000766/)",
+            "[Fish Behavior Under Ice](https://en.wikipedia.org/wiki/Ice_fishing)",
+        ],
+        [
+            "Identify one area where you've been 'under the ice'—waiting, conserving energy. Check if conditions have shifted.",
+            "Look for natural openings in a stuck situation rather than trying to force a breakthrough.",
+            "Rise toward something that energizes you today, even if just for fifteen minutes.",
+            "Notice where light is increasing in your life. Move toward it.",
+            "Surface something you've kept submerged—a thought, a project, a conversation that's ready to emerge.",
+        ],
+    ),
+    4: (
+        "Rain begins to fall on soil that can finally receive it. After months of frozen ground, the earth softens and becomes absorbent again. The same rain that would have run off now soaks in, feeding roots waiting below.",
+        "Reception requires preparation. The rain hasn't changed—the earth has. Sometimes what we need has been falling all along; we simply weren't ready to absorb it. Thawing precedes receiving.",
+        [
+            "[Spring Rain Japan](https://www.japan-guide.com/e/e2011.html)",
+            "[Soil Thawing](https://en.wikipedia.org/wiki/Frost_heaving)",
+        ],
+        [
+            "Notice what you're now ready to receive that you couldn't absorb before. Open to it.",
+            "Soften one rigid stance or habit today. Create space for something to soak in.",
+            "Water something—a plant, a relationship, a project—that's ready to receive nourishment.",
+            "Ask for feedback or input on something you've been developing alone. Let it in.",
+            "Spend time in a receptive mode: listening, reading, observing without agenda.",
+        ],
+    ),
+    5: (
+        "Mist lingers in valleys and low places, neither fully rain nor clear air. This transitional weather creates soft, diffuse light and blurred boundaries. The world becomes impressionistic, edges softened.",
+        "Mist is transition made visible—water caught between states. When we're between phases, clarity naturally decreases. This isn't failure of vision; it's the nature of crossing. Some passages require navigating without sharp edges.",
+        [
+            "[Kasumi - Japanese Mist](https://en.wikipedia.org/wiki/Haze)",
+            "[Spring Weather Patterns](https://www.jma.go.jp/jma/indexe.html)",
+        ],
+        [
+            "Accept one area of uncertainty today without forcing clarity. Let the mist be.",
+            "Notice something beautiful in ambiguity—a half-formed idea, an unresolved question.",
+            "Move through a transition without rushing to the other side. Honor the between.",
+            "Soften your focus. What do you notice when edges blur?",
+            "Write about something you're in the middle of, without trying to resolve it.",
+        ],
+    ),
+    6: (
+        "Dormant buds on trees and grasses begin to swell and open. Energy stored through winter now expresses as visible growth. What looked dead reveals it was only sleeping, gathering strength for this moment.",
+        "The bud was there all along, wrapped tight, waiting. Growth isn't created in spring—it's released. What emerges was already forming in the dark. Trust that your quiet seasons have been building something.",
+        [
+            "[Tree Buds](https://en.wikipedia.org/wiki/Bud#Vegetative_budding)",
+            "[Spring Growth](https://www.britannica.com/science/vernalization)",
+        ],
+        [
+            "Identify something in your life that's budding—not yet bloomed, but swelling with potential. Protect it.",
+            "Take one small visible action on something you've been developing internally.",
+            "Notice signs of growth that aren't yet obvious to others. Acknowledge your hidden progress.",
+            "Risk opening slightly—share an early idea, start before you're fully ready.",
+            "Walk outside and look for buds. Let their patient timing inform yours.",
+        ],
+    ),
+    7: (
+        "Insects that entered diapause (a hibernation-like state) begin to stir as soil temperatures rise. They 'open their doors' and emerge into a changed world. The ground itself becomes active again.",
+        "The insects didn't die—they paused. Their emergence teaches that stillness isn't absence of life, but life in waiting mode. What surfaces in spring was alive all winter, just operating differently. Your dormant periods contain vitality.",
+        [
+            "[Insect Dormancy](https://en.wikipedia.org/wiki/Diapause)",
+            "[Keichitsu Explanation](https://www.nippon.com/en/japan-topics/b09704/)",
+        ],
+        [
+            "Resume something you paused over winter—a project, habit, or connection that's ready to reactivate.",
+            "Check in on something that's been in 'maintenance mode.' Is it time to engage more fully?",
+            "Surface from a period of withdrawal. Take one action that announces you're active again.",
+            "Open a door you closed for protection. See what's changed while you were sheltered.",
+            "Notice what's emerging in your energy levels or interests. Follow that signal.",
+        ],
+    ),
+    8: (
+        "Peach trees bloom with pink flowers before their leaves appear—flowers first, foliage second. This burst of color against bare branches is striking, a celebration before the practical work of leaves.",
+        "The peach tree leads with beauty, not utility. It flowers before it can photosynthesize efficiently. Sometimes expression must precede function. Not everything useful looks practical at first.",
+        [
+            "[Peach Blossom Japan](https://www.japan-guide.com/e/e2012.html)",
+            "[Flowering Before Leaves](https://en.wikipedia.org/wiki/Peach#Description)",
+        ],
+        [
+            "Create something beautiful today without worrying about its usefulness.",
+            "Lead with expression before explanation. Let beauty precede justification.",
+            "Notice where you're delaying joy until everything is 'practical.' Bloom first.",
+            "Share something delightful without apologizing for its lack of utility.",
+            "Find a flowering tree and sit with it. Let its timing inform yours.",
+        ],
+    ),
+    9: (
+        "Caterpillars that pupated in autumn now emerge as butterflies. The transformation happened in darkness, unseen. What crawled now flies—same creature, completely changed form.",
+        "Metamorphosis isn't improvement; it's total reorganization. The caterpillar didn't become a better caterpillar—it became something else entirely. Some growth requires dissolution before reconstitution.",
+        [
+            "[Butterfly Metamorphosis](https://en.wikipedia.org/wiki/Butterfly#Life_cycle)",
+            "[Spring Butterflies Japan](https://www.japan-guide.com/e/e2012.html)",
+        ],
+        [
+            "Identify one way you've transformed, not just improved. Honor the magnitude of change.",
+            "Release attachment to a former version of yourself that no longer fits.",
+            "Trust a process of change you can't see or control. Transformation works in the dark.",
+            "Notice where you're trying to become a 'better caterpillar' when butterfly is possible.",
+            "Spend time with something transformed—a butterfly, a flower, a changed relationship. Learn from its journey.",
+        ],
+    ),
+    10: (
+        "Sparrows begin building nests, gathering materials and selecting sites. This industrious work happens while spring is still young—preparation for what's coming, not reaction to what's here.",
+        "The sparrow doesn't wait until eggs are ready to build the nest. It prepares for what it knows will come. Wisdom is action taken in anticipation, not just in response.",
+        [
+            "[Eurasian Tree Sparrow](https://en.wikipedia.org/wiki/Eurasian_tree_sparrow)",
+            "[Shunbun no Hi](https://www.japan-guide.com/e/e2079.html)",
+        ],
+        [
+            "Prepare for something you know is coming, even if not imminent. Build your nest early.",
+            "Gather resources for a project that hasn't started yet. Stockpile materials.",
+            "Choose a site—make a decision about where something will live before you build it.",
+            "Notice the sparrows' focus. What deserves that level of concentrated preparation in your life?",
+            "Start infrastructure work on something. Foundation before flourish.",
+        ],
+    ),
+    11: (
+        "Cherry blossoms begin opening across Japan, triggering hanami (flower viewing) celebrations. The blooms last only a week or two, making their beauty precious through impermanence.",
+        "Cherry blossoms are celebrated not despite their brevity, but because of it. Their transience is their teaching. We pay attention because we know they'll pass. What if we treated all beautiful moments this way?",
+        [
+            "[Cherry Blossom Forecast](https://www.japan-guide.com/e/e2011_when.html)",
+            "[Hanami Tradition](https://en.wikipedia.org/wiki/Hanami)",
+        ],
+        [
+            "Give full attention to something beautiful that won't last. Don't photograph it—just witness.",
+            "Celebrate an ending as you would a beginning. Honor the full arc.",
+            "Notice what you're taking for granted that could change. Appreciate it now.",
+            "Share a fleeting moment with someone. Make transience relational.",
+            "Let something beautiful pass without trying to preserve it. Experience the ache and the teaching.",
+        ],
+    ),
+    12: (
+        "Thunder begins to be heard in the distance—spring storms building as temperature differentials increase. The sound announces energy arriving, weather systems in motion.",
+        "Thunder is announcement before arrival. It tells you something is coming, gives you time to prepare. Nature provides warnings to those who listen. The rumble is information.",
+        [
+            "[Spring Thunder](https://en.wikipedia.org/wiki/Thunderstorm#Spring)",
+            "[Higan Observance](https://en.wikipedia.org/wiki/Higan)",
+        ],
+        [
+            "Listen for 'distant thunder' in your life—early signs of change approaching. What do you hear?",
+            "Prepare for something you sense is coming, even if you can't see it yet.",
+            "Announce something before executing it. Let the rumble precede the rain.",
+            "Notice where energy is building. What storm might be gathering?",
+            "Pay attention to warnings or signals you've been dismissing. What are they telling you?",
+        ],
+    ),
+    13: (
+        "Barn swallows return from their southern wintering grounds, arriving in Japan to nest. These long-distance migrants navigate thousands of miles to return to familiar places.",
+        "Swallows return to where they know they can thrive. Migration isn't just leaving—it's knowing where to come back to. Home can be seasonal, returned to when conditions are right.",
+        [
+            "[Barn Swallow Migration](https://en.wikipedia.org/wiki/Barn_swallow#Migration)",
+            "[Qingming Festival](https://en.wikipedia.org/wiki/Qingming_Festival)",
+        ],
+        [
+            "Return to something you left when conditions weren't right. Check if it's time.",
+            "Identify your 'wintering grounds'—where do you go when you need to restore?",
+            "Navigate toward a familiar place or practice that always helps. Trust your homing instinct.",
+            "Welcome something or someone returning to your life. Make space for the arrival.",
+            "Consider what you'd return to if you could. What stops you?",
+        ],
+    ),
+    14: (
+        "Wild geese that wintered in Japan now fly north to their breeding grounds. Their V-formations cross the sky, each bird taking turns at the front to share the work of leading.",
+        "Geese rotate leadership because no single bird can lead indefinitely. Sustainable progress requires sharing the effort. The one who leads now will follow later—and both roles serve the whole.",
+        [
+            "[Wild Goose Migration](https://en.wikipedia.org/wiki/Goose#Migration)",
+            "[V-Formation Flight](https://en.wikipedia.org/wiki/V_formation)",
+        ],
+        [
+            "Let someone else lead today. Support from behind rather than directing from front.",
+            "Take a turn at leading something you usually follow. Share the rotation.",
+            "Notice who's doing the heavy lifting in a group. Offer to spell them.",
+            "Accept help with something you've been handling alone. Let others take a turn.",
+            "Study how leadership works in a system you're part of. Is the rotation fair?",
+        ],
+    ),
+    15: (
+        "Spring conditions—sun and rain together—create the geometry for rainbows. These first rainbows of the year mark the return of a phenomenon impossible in winter's dry or frozen air.",
+        "Rainbows require specific conditions: light, moisture, and the right angle of observation. When these align, something invisible becomes visible. The spectrum was always there; circumstances revealed it.",
+        [
+            "[How Rainbows Form](https://education.nationalgeographic.org/resource/rainbow/)",
+            "[Atmospheric Optics](https://en.wikipedia.org/wiki/Rainbow)",
+        ],
+        [
+            "Look for something beautiful that only appears under specific conditions. Create those conditions.",
+            "Notice what becomes visible when circumstances change. What's revealing itself now?",
+            "Position yourself differently to see something you've been missing. Change your angle.",
+            "Create conditions for a breakthrough—the combination of elements that makes magic possible.",
+            "Witness something that won't last: a rainbow, a moment, a particular light. Just see it.",
+        ],
+    ),
+    16: (
+        "Reeds begin pushing up from wetlands and riverbanks. These tall grasses will eventually form dense stands, but now they're just green spears emerging from mud.",
+        "Reeds are one of the fastest-growing plants—gaining visible height daily. But they start in mud, not despite it. Their growth medium looks unpromising, yet it provides exactly what they need.",
+        [
+            "[Common Reed](https://en.wikipedia.org/wiki/Phragmites)",
+            "[Grain Rain Solar Term](https://en.wikipedia.org/wiki/Grain_Rain)",
+        ],
+        [
+            "Start something from 'muddy' conditions—imperfect circumstances that actually contain what you need.",
+            "Measure growth that others might not see yet. Track your own daily progress.",
+            "Stand firm in territory others avoid. Find nutrients in difficult ground.",
+            "Grow upward from wherever you are. Don't wait for better soil.",
+            "Notice where you're fastest growing. Put more energy there.",
+        ],
+    ),
+    17: (
+        "The last frost passes and rice seedlings can safely be transplanted into paddies. Farmers watch temperature carefully—too early and seedlings freeze, too late and the growing season shortens.",
+        "Timing matters immensely for rice farmers. They don't rush, but they don't delay either. The window exists; the task is recognizing it and acting within it. Patience and decisiveness aren't opposites.",
+        [
+            "[Rice Cultivation Japan](https://www.japan-guide.com/e/e2059.html)",
+            "[Frost-Free Date](https://en.wikipedia.org/wiki/Frost#Frost-free_dates)",
+        ],
+        [
+            "Identify a 'last frost' in your timeline—a constraint that defines when you must act. Plan around it.",
+            "Move something from protected conditions to its real environment. It's time.",
+            "Watch conditions carefully for the right window. Don't force, but don't miss it.",
+            "Transplant a project from planning to execution. The ground is warm enough.",
+            "Trust your timing. If you've been patient and prepared, act when the moment comes.",
+        ],
+    ),
+    18: (
+        "Peonies burst into bloom with their large, fragrant flowers. In China and Japan, they're called the 'king of flowers' for their dramatic beauty and association with prosperity.",
+        "The peony doesn't apologize for its extravagance. It blooms fully, without restraint. There's a season for subtlety and a season for splendor. Late spring is for bold expression.",
+        [
+            "[Peony in Japanese Culture](https://en.wikipedia.org/wiki/Paeonia_lactiflora#Cultural_significance)",
+            "[Botan (Peony) Symbolism](https://www.japan-guide.com/e/e2012.html)",
+        ],
+        [
+            "Express something fully today—without hedging, minimizing, or apologizing for its size.",
+            "Bloom boldly in one area. Let yourself be extravagant.",
+            "Share something you're proud of. Don't diminish it with false modesty.",
+            "Notice where you're holding back flourishing. What would 'full bloom' look like?",
+            "Appreciate something dramatic and beautiful. Let magnificence inspire you.",
+        ],
+    ),
+    19: (
+        "Frogs begin their chorus as temperatures warm. The songs of male frogs fill evening air near ponds and rice paddies, announcing the start of breeding season.",
+        "Frogs don't wait for permission to sing—they respond to conditions. When warmth arrives, they raise their voices. They're not performing; they're participating in the season.",
+        [
+            "[Japanese Tree Frog](https://en.wikipedia.org/wiki/Japanese_tree_frog)",
+            "[Kodomo no Hi](https://www.japan-guide.com/e/e2281.html)",
+        ],
+        [
+            "Raise your voice when conditions call for it. Don't wait for an invitation.",
+            "Join a chorus—add your contribution to something collective.",
+            "Announce yourself tonight. Let the day end with expression, not just completion.",
+            "Notice what wants to emerge as energy arrives. Give it voice.",
+            "Participate in the season. What's the 'song' of this time in your life?",
+        ],
+    ),
+    20: (
+        "Earthworms surface as soil warms, their tunneling visible in fresh castings. These essential creatures aerate soil and process organic matter, doing vital work mostly unseen.",
+        "Worms do critical work underground, out of sight. Their contribution is enormous but unglamorous. Not all important work is visible; some of the most essential processes happen below the surface.",
+        [
+            "[Earthworm Ecology](https://en.wikipedia.org/wiki/Earthworm)",
+            "[Soil Health](https://www.nature.com/articles/nature11069)",
+        ],
+        [
+            "Do important work today that no one will see or credit. Let the value be enough.",
+            "Appreciate infrastructure—the systems and people that make visible work possible.",
+            "Turn something over, like a worm aerates soil. Process something that needs breaking down.",
+            "Notice unglamorous work you've been avoiding. It might be the most important task.",
+            "Honor those who work 'underground' in your life. Acknowledge their contribution.",
+        ],
+    ),
+    21: (
+        "Bamboo shoots push through soil with tremendous force—some species can grow nearly a meter in a single day. This growth was prepared by the root system for years; expression is sudden but preparation was long.",
+        "The bamboo shoot's rapid growth is backed by years of root development. What looks like overnight success has deep preparation beneath it. Speed comes from foundation.",
+        [
+            "[Bamboo Shoots in Japanese Cuisine](https://www.nippon.com/en/japan-topics/c15302/)",
+            "[Bamboo Growth](https://en.wikipedia.org/wiki/Bamboo#Ecology)",
+        ],
+        [
+            "Act quickly on something you've been preparing for a long time. Trust your foundation.",
+            "Push through resistance today. Your roots are stronger than obstacles.",
+            "Invest in foundation work that won't show results for years. Future breakthroughs need current roots.",
+            "Notice rapid growth happening around you. What root system made it possible?",
+            "Eat bamboo shoots if possible—consume the lesson literally.",
+        ],
+    ),
+    22: (
+        "Silkworms begin their intensive feeding period, consuming mulberry leaves voraciously. This concentrated eating will fuel their transformation into pupae and eventually silk moths.",
+        "The silkworm's focused feeding isn't indulgence—it's preparation. They consume intensively because transformation requires resources. Sometimes you need to take in more before you can give out.",
+        [
+            "[Sericulture in Japan](https://en.wikipedia.org/wiki/Sericulture#Japan)",
+            "[Silkworm Lifecycle](https://en.wikipedia.org/wiki/Bombyx_mori)",
+        ],
+        [
+            "Feed yourself what you need for an upcoming transformation. Input precedes output.",
+            "Learn voraciously about something for a concentrated period. Consume knowledge.",
+            "Rest and nourish before a demanding phase. Store energy intentionally.",
+            "Notice what you're consuming. Is it building toward something?",
+            "Honor an input phase without guilt. Not every day is for producing.",
+        ],
+    ),
+    23: (
+        "Safflowers bloom with their brilliant orange-red flowers, traditionally used for dyeing fabric and making cosmetics. Their vivid color once made them more valuable than gold by weight.",
+        "The safflower holds its value in concentrated form—just a small amount produces vivid dye. Potency isn't about quantity; it's about concentration of what matters.",
+        [
+            "[Safflower](https://en.wikipedia.org/wiki/Safflower)",
+            "[Traditional Japanese Dyes](https://en.wikipedia.org/wiki/Japanese_dyeing)",
+        ],
+        [
+            "Concentrate your effort into something potent rather than spreading thin.",
+            "Create something small but vivid—a powerful message, a dense insight.",
+            "Notice where your unique 'dye' is—your concentrated value. Use it today.",
+            "Distill something complex into its essential color. What's the core?",
+            "Share something valuable in concentrated form. Potency over volume.",
+        ],
+    ),
+    24: (
+        "Wheat reaches maturity and farmers begin harvest. This 'wheat autumn' comes as other plants are still in spring—different crops have different timelines, and harvest happens when ready, not by calendar.",
+        "Wheat's harvest in late spring reminds us that seasons are species-specific. Your timeline isn't everyone's timeline. Maturity arrives when preparation meets conditions, regardless of what others are doing.",
+        [
+            "[Wheat Harvest](https://en.wikipedia.org/wiki/Wheat#Harvesting)",
+            "[Grain Buds Solar Term](https://en.wikipedia.org/wiki/Grain_Buds_(solar_term))",
+        ],
+        [
+            "Harvest something that's ready, even if it's 'off-season' for others.",
+            "Recognize your own timeline. Don't delay ripeness to match others' schedules.",
+            "Complete a project that's mature, regardless of what you're 'supposed' to be doing now.",
+            "Notice what's ready in your life. Don't let it over-ripen waiting for the 'right time.'",
+            "Trust your own seasons. Harvest when the grain is golden.",
+        ],
+    ),
+    25: (
+        "Praying mantis egg cases hatch, releasing hundreds of tiny mantises. These predators will grow to be important controllers of garden pests, but now they're minuscule and vulnerable.",
+        "The mantis starts small but is already a hunter. Form follows function from the beginning—it doesn't become a predator, it was always one. Your nature is present from the start, even in miniature.",
+        [
+            "[Praying Mantis Life Cycle](https://en.wikipedia.org/wiki/Mantis#Reproduction_and_life_cycle)",
+            "[Tsuyu - Rainy Season](https://www.japan-guide.com/e/e2277.html)",
+        ],
+        [
+            "Act according to your nature, even if your capacity is still small. Function before scale.",
+            "Start something in miniature that contains your full intent. Size grows, purpose doesn't change.",
+            "Protect something vulnerable that has potential. Guard the hatchling.",
+            "Be patient with your own smallness in a new endeavor. You're already what you'll become.",
+            "Observe something in early form. See its essence before its scale.",
+        ],
+    ),
+    26: (
+        "Fireflies begin to appear near water, their bioluminescence visible on warm early summer nights. Ancient Japanese believed they emerged from decaying grass, light from rot—transformation of the humble into the magical.",
+        "The firefly creates light from within—no external power source, just chemistry and intent. You carry your own illumination. Even in decay, there is potential for light.",
+        [
+            "[Fireflies in Japan](https://www.japan-guide.com/e/e2302.html)",
+            "[Bioluminescence](https://en.wikipedia.org/wiki/Bioluminescence)",
+        ],
+        [
+            "Generate your own light today. Don't wait for external illumination.",
+            "Find beauty in something decaying or ending. Light can come from unexpected places.",
+            "Share something luminous tonight. Let your work glow in the dark.",
+            "Notice where you're waiting for someone else to light your way. Generate your own.",
+            "Sit in darkness and appreciate points of light—literal or metaphorical.",
+        ],
+    ),
+    27: (
+        "Plums reach ripeness, turning from green to yellow. This is the season for making umeboshi (pickled plums) and umeshu (plum wine)—preserving summer's abundance for the year ahead.",
+        "Ripe plums must be processed quickly—their moment of perfection is brief. Preservation extends this moment's value into the future. Capture abundance when it arrives; store it skillfully.",
+        [
+            "[Umeshu - Plum Wine](https://en.wikipedia.org/wiki/Umeshu)",
+            "[Umeboshi](https://en.wikipedia.org/wiki/Umeboshi)",
+        ],
+        [
+            "Preserve something at its peak—a memory, a technique, a relationship's current state.",
+            "Process an abundance before it spoils. Don't let surplus become waste.",
+            "Create something that extends a moment's value into the future. Document, record, pickle.",
+            "Recognize ripeness. What in your life is at its peak right now?",
+            "Make something from something—transform raw material into lasting form.",
+        ],
+    ),
+    28: (
+        "The self-heal plant (natsukarekusa) withers in summer heat despite its name—'summer-withering grass.' It blooms in late spring, then dies back as solstice approaches, resting through heat.",
+        "Self-heal teaches strategic retreat. It doesn't fight summer—it withdraws, knowing its strength is in another season. Sometimes wisdom is knowing when to wither, conserving energy for better conditions.",
+        [
+            "[Self-Heal Plant](https://en.wikipedia.org/wiki/Prunella_vulgaris)",
+            "[Summer Solstice Traditions](https://en.wikipedia.org/wiki/Summer_solstice#Celebrations)",
+        ],
+        [
+            "Withdraw strategically from something that's costing too much energy. Conserve for better conditions.",
+            "Let something complete its cycle, even if it means visible 'withering.' Rest is part of growth.",
+            "Identify where you're fighting the season instead of adapting to it. Consider retreat.",
+            "Honor a natural ending. Not everything survives every season—and that's design, not failure.",
+            "Pull back from heat—literal or metaphorical. Find shade.",
+        ],
+    ),
+    29: (
+        "Japanese irises bloom in dramatic purple, blue, and white. These moisture-loving flowers thrive in rainy season conditions that challenge other plants. They're at their best when it's wet.",
+        "The iris doesn't just tolerate rain—it flourishes in it. Some conditions that seem adverse are actually ideal, depending on what you're growing. Find what thrives in your particular weather.",
+        [
+            "[Iris Gardens Japan](https://www.japan-guide.com/e/e2303.html)",
+            "[Iris Flower Symbolism](https://en.wikipedia.org/wiki/Iris_(plant))",
+        ],
+        [
+            "Thrive in conditions others find difficult. What grows best in your specific challenges?",
+            "Embrace moisture—tears, rain, emotional weather. Some things bloom wet.",
+            "Plant something suited to your actual conditions, not the conditions you wish you had.",
+            "Notice what's flourishing now, even as other things struggle. Learn from its adaptation.",
+            "Visit water today if possible. Let wetness be welcome.",
+        ],
+    ),
+    30: (
+        "The crow-dipper (hange) sprouts as the summer solstice passes. This medicinal plant marks the transition into true summer—five days before and after the solstice.",
+        "Hange emerges at the pivot point of the year's longest days. It marks transition precisely, growing in the exact moment of seasonal shift. Some things exist to mark thresholds.",
+        [
+            "[Pinellia ternata](https://en.wikipedia.org/wiki/Pinellia_ternata)",
+            "[Hange - Calendar Division](https://en.wikipedia.org/wiki/Japanese_calendar#Seasonal_divisions)",
+        ],
+        [
+            "Mark a threshold you're crossing. Acknowledge the transition explicitly.",
+            "Notice what emerges during pivotal moments. What grows at your turning points?",
+            "Honor the solstice—longest day, most light. What will you do with maximum illumination?",
+            "Document where you are at this halfway point of the year. What's changed? What's ahead?",
+            "Be present at a transition. Don't rush through the threshold.",
+        ],
+    ),
+    31: (
+        "Warm winds from the south blow across Japan, bringing humid heat. These aren't gentle breezes but substantial movements of hot air—summer declaring itself fully.",
+        "Warm wind is energy in motion, heat transferred from one place to another. Summer doesn't ask permission—it arrives with force. Sometimes arrival is assertive, not subtle.",
+        [
+            "[Summer Winds Japan](https://www.jma.go.jp/jma/indexe.html)",
+            "[Tanabata Festival](https://www.japan-guide.com/e/e2283.html)",
+        ],
+        [
+            "Arrive somewhere with energy today. Don't apologize for your presence.",
+            "Move something with force—an idea, a project, a stalled situation. Be the warm wind.",
+            "Accept heat without fighting it. Summer's intensity is its nature.",
+            "Transfer energy from where it's abundant to where it's needed.",
+            "Notice winds—literal or metaphorical—and what they're carrying your direction.",
+        ],
+    ),
+    32: (
+        "Lotus flowers open in ponds and temple gardens, blooming from murky water with pristine petals. This emergence of purity from mud is a central Buddhist symbol.",
+        "The lotus needs mud to bloom—it's not despite the murk, but because of it. Nutrients in dark water feed the pristine flower. Our difficult circumstances may be feeding something beautiful.",
+        [
+            "[Lotus in Buddhism](https://en.wikipedia.org/wiki/Nelumbo_nucifera#Cultural_and_religious_significance)",
+            "[Lotus Ponds Japan](https://www.japan-guide.com/e/e2303.html)",
+        ],
+        [
+            "Find nourishment in difficult circumstances. What's feeding you that looks like mud?",
+            "Bloom from where you are, not where you wish you were.",
+            "Create something pristine from messy conditions. Beauty from compost.",
+            "Visit water if possible. Watch something grow from it.",
+            "Accept that purity and mud coexist. One emerges from the other.",
+        ],
+    ),
+    33: (
+        "Young hawks leave their nests and begin learning to fly and hunt. This period of clumsy practice is essential—they must fail repeatedly before they become skilled predators.",
+        "Hawks aren't born able to hunt—they learn through awkward attempts and frequent failure. Mastery requires a period of incompetence. The expert was once the beginner falling from branches.",
+        [
+            "[Falconry in Japan](https://en.wikipedia.org/wiki/Falconry#Japan)",
+            "[Hawk Development](https://en.wikipedia.org/wiki/Hawk#Reproduction)",
+        ],
+        [
+            "Practice something clumsily today. Let yourself be a beginner.",
+            "Attempt something you might fail at. Learning requires misses.",
+            "Watch someone learning—notice their courage in being publicly imperfect.",
+            "Remember your own learning periods. Let that memory generate patience for current struggles.",
+            "Leave a nest—try something independent that you've only done with support.",
+        ],
+    ),
+    34: (
+        "Paulownia trees produce their seeds in summer heat, preparing for autumn dispersal. These fast-growing trees are traditionally planted when a daughter is born, harvested for her wedding furniture when she marries.",
+        "The paulownia grows fast but is planted with long-term intent. Speed and patience aren't opposites—they serve different time horizons. Some things grow quickly toward distant goals.",
+        [
+            "[Paulownia Tree](https://en.wikipedia.org/wiki/Paulownia)",
+            "[Doyo no Ushi](https://www.japan-guide.com/e/e2062.html)",
+        ],
+        [
+            "Plant something intended for someone else's future. Think beyond your own timeline.",
+            "Grow quickly toward a patient goal. Fast execution, long vision.",
+            "Notice what's being prepared now for later use. What seeds are forming?",
+            "Invest in something that compounds over time. Let growth be slow and fast simultaneously.",
+            "Consider what you're building for the next generation.",
+        ],
+    ),
+    35: (
+        "Earth is damp from rain while air grows humid and hot—the combination creates uncomfortable, sticky days. This 'steaming' period is when both moisture and heat are at their peak.",
+        "Discomfort peaks when multiple intensities combine. Humid heat is harder than dry heat; wet cold is harder than dry cold. Combinations create experiences beyond their components.",
+        [
+            "[Humidity and Health](https://en.wikipedia.org/wiki/Humid_subtropical_climate)",
+            "[Japanese Summer](https://www.japan-guide.com/e/e2277.html)",
+        ],
+        [
+            "Endure a combination of difficulties without expecting relief. Some periods just require persistence.",
+            "Find small comforts in an uncomfortable time. A cool drink, a moment of shade.",
+            "Accept that peak intensity passes. This is not forever.",
+            "Notice how you handle discomfort. What can you learn from it?",
+            "Rest more when conditions are demanding. Conservation is wisdom.",
+        ],
+    ),
+    36: (
+        "Sudden heavy rains fall—summer storms that arrive quickly, drop significant water, and often pass just as fast. These downpours provide relief but can also flood.",
+        "Great rains come suddenly and don't last. Intensity is often brief. When the deluge arrives, shelter and wait—it will pass, leaving nourishment and destruction in its wake.",
+        [
+            "[Monsoon in Japan](https://en.wikipedia.org/wiki/East_Asian_monsoon)",
+            "[Summer Storms](https://www.jma.go.jp/jma/indexe.html)",
+        ],
+        [
+            "Shelter during an intense period. Don't fight the storm—wait it out.",
+            "Use a sudden abundance wisely. Not everything needs to be consumed immediately.",
+            "Prepare for sudden intensity. Keep an umbrella metaphor for your life.",
+            "Let something cleansing wash over you, even if it's disruptive.",
+            "Notice what grows after heavy rains. Nourishment follows disruption.",
+        ],
+    ),
+    37: (
+        "The first cool winds of autumn arrive, subtle hints of change even while summer heat persists. These breezes are advance notice—autumn is coming, though summer isn't finished.",
+        "Cool wind in hot weather is a message from the future. Change announces itself with hints before it arrives in force. Sensitivity catches these signals; habit ignores them.",
+        [
+            "[Autumn Breeze Poetry](https://en.wikipedia.org/wiki/Autumn#Cultural_associations)",
+            "[Obon Festival](https://www.japan-guide.com/e/e2286.html)",
+        ],
+        [
+            "Notice early signals of coming change. Don't dismiss the cool breeze in hot weather.",
+            "Prepare for a transition that hasn't fully arrived. The hint is enough to begin.",
+            "Welcome relief, even if temporary and small. The cool wind is real even if summer persists.",
+            "Sense shifts in your environment. What's changing before it's obvious?",
+            "Trust your perception of subtle change. The first signals are often quiet.",
+        ],
+    ),
+    38: (
+        "Higurashi (evening cicadas) begin their distinctive singing at dusk, a melancholic sound associated with late summer and the approaching end of the season.",
+        "The higurashi sings at day's end, marking transition from light to dark. Its song is beautiful and sad—the beauty of endings, the recognition that this won't last.",
+        [
+            "[Evening Cicada](https://en.wikipedia.org/wiki/Tanna_japonensis)",
+            "[Cicada Songs Japan](https://www.japan-guide.com/e/e2312.html)",
+        ],
+        [
+            "Notice beauty in an ending. Let melancholy coexist with appreciation.",
+            "Mark transitions with awareness. Don't let day become night unwitnessed.",
+            "Create something appropriate for dusk—a closing activity, a winding down.",
+            "Listen to what's singing as things end. There's information in the evening song.",
+            "Accept that some beauty only exists in ending. The cicada's song requires approaching night.",
+        ],
+    ),
+    39: (
+        "Dense fog descends in late summer mornings as cool night air meets warm ground. This fog burns off by midday but creates mysterious, enclosed hours in the early day.",
+        "Morning fog creates temporary intimacy—a smaller world, closer horizons. Sometimes reduced visibility is an invitation to focus on what's immediately near.",
+        [
+            "[Morning Fog Formation](https://en.wikipedia.org/wiki/Fog)",
+            "[Late Summer Japan](https://www.japan-guide.com/e/e2012.html)",
+        ],
+        [
+            "Work in a smaller world today. Reduce your visible horizon intentionally.",
+            "Focus on what's immediately close rather than distant possibilities.",
+            "Trust that the fog will lift. Limited visibility is temporary.",
+            "Find intimacy in enclosure. Who is with you in the fog?",
+            "Accept mystery. Not everything needs to be visible to be navigated.",
+        ],
+    ),
+    40: (
+        "Cotton plants produce their flowers, soon to be followed by the cotton bolls that will be harvested for fiber. This flowering marks the beginning of the end of agricultural summer.",
+        "Cotton flowers are the first step toward a practical harvest—not food but fiber, not immediate but processed. Some growth is for utility discovered through transformation.",
+        [
+            "[Cotton Plant](https://en.wikipedia.org/wiki/Gossypium)",
+            "[End of Summer Japan](https://www.japan-guide.com/e/e2012.html)",
+        ],
+        [
+            "Produce something that requires processing before it's useful. Trust the transformation.",
+            "Notice the practical emerging from the beautiful. Flower becomes fiber.",
+            "Work on something with delayed utility. Not everything is for immediate consumption.",
+            "Appreciate raw materials before they're finished. See potential in early form.",
+            "Create something that others will complete. Your flowering enables their harvest.",
+        ],
+    ),
+    41: (
+        "Summer's heat begins to die down as the sun's angle lowers. Days are still warm but lack the intensity of peak summer. The limit has been reached; decline begins.",
+        "Peaks pass by definition—they're the point beyond which decline begins. Recognizing the limit of heat is recognizing that intensity cannot be sustained indefinitely. Relief is approaching.",
+        [
+            "[End of Summer Japan](https://www.japan-guide.com/e/e2012.html)",
+            "[Jizo Festival](https://en.wikipedia.org/wiki/Jiz%C5%8D)",
+        ],
+        [
+            "Notice where intensity has peaked in your life. Relief is approaching.",
+            "Accept the limit. Not everything can keep increasing—and that's release, not failure.",
+            "Prepare for a calmer phase. What will you do with reduced intensity?",
+            "Exhale. Let held effort release now that the peak has passed.",
+            "Mark the limit of heat. Acknowledge the turning point.",
+        ],
+    ),
+    42: (
+        "Rice in the paddies ripens and begins to turn golden. Months of growth reach their culmination—the grain is ready or nearly ready for harvest.",
+        "Ripening is the conversion of growth into yield. All the water, sun, and care now becomes something harvestable. The work shifts from cultivation to collection.",
+        [
+            "[Rice Harvest](https://www.japan-guide.com/e/e2059.html)",
+            "[Rice Cultivation](https://en.wikipedia.org/wiki/Rice#Harvesting)",
+        ],
+        [
+            "Notice what's ripening in your work. What's converting from growth to yield?",
+            "Shift from cultivation to harvest mode. The crop doesn't need more water—it needs gathering.",
+            "Prepare for collection. The yield is coming; be ready to receive it.",
+            "Appreciate the golden moment before harvest—the fullness before the change.",
+            "Trust that your work is reaching fruition. The grain remembers every day of growth.",
+        ],
+    ),
+    43: (
+        "Morning dew forms thicker now, glistening white on grass as nights cool. This 'white dew' is visible evidence of autumn's approach—water condensing on surfaces that couldn't cool enough in summer.",
+        "Dew reveals what was always there—moisture in the air, made visible by cooling. The water didn't arrive; conditions changed to reveal it. Sometimes our circumstances must shift before we see what's present.",
+        [
+            "[Dew Formation](https://en.wikipedia.org/wiki/Dew)",
+            "[Tsukimi - Moon Viewing](https://www.japan-guide.com/e/e2062.html)",
+        ],
+        [
+            "Look for what's revealed by changing conditions. What can you see now that you couldn't before?",
+            "Walk in the morning, when dew is visible. Witness what cooling reveals.",
+            "Notice something that was always present but has become visible.",
+            "Cool down emotionally. What appears when intensity drops?",
+            "Appreciate transient beauty—dew evaporates by midday.",
+        ],
+    ),
+    44: (
+        "Wagtails begin their clear, distinctive singing as autumn progresses. These small birds have adapted to human environments and are often seen near houses and streams.",
+        "The wagtail adapts to human spaces, thriving where others can't. Its song in autumn is a reminder that adaptation brings presence—being able to sing in places others avoid.",
+        [
+            "[Japanese Wagtail](https://en.wikipedia.org/wiki/Japanese_wagtail)",
+            "[Autumn Birds Japan](https://www.japan-guide.com/e/e2012.html)",
+        ],
+        [
+            "Adapt to circumstances others find inhospitable. Find your song in difficult places.",
+            "Thrive in human-modified environments. Not all natural flourishing requires wilderness.",
+            "Sing clearly despite surrounding noise. Let your voice be distinct.",
+            "Notice what thrives in your immediate environment. Learn from its adaptation.",
+            "Be present where you actually are, not where you wish you were.",
+        ],
+    ),
+    45: (
+        "Swallows that arrived in spring now depart for their southern wintering grounds. The birds that announced spring's arrival now announce autumn's deepening.",
+        "Departure completes the cycle begun by arrival. The swallows go; they'll return next spring. Not everything stays—some visitors are seasonal by nature, and their leaving is as much part of the rhythm as their coming.",
+        [
+            "[Swallow Migration South](https://en.wikipedia.org/wiki/Barn_swallow#Migration)",
+            "[Autumn in Japan](https://www.japan-guide.com/e/e2012.html)",
+        ],
+        [
+            "Let something leave that came for a season. Don't hold what needs to go.",
+            "Say goodbye well. Acknowledge the departure that completes the arrival.",
+            "Trust that what leaves may return. Seasonal absence isn't permanent loss.",
+            "Notice what's leaving. What signals are the departures sending?",
+            "Release with grace. Some things are meant to migrate.",
+        ],
+    ),
+    46: (
+        "Thunder ceases as autumn deepens—the atmospheric conditions that created summer storms no longer align. The quiet absence of thunder marks a seasonal shift.",
+        "The end of thunder is noticed by its absence. We often mark arrivals more than departures, beginnings more than endings. But what stops is as significant as what starts.",
+        [
+            "[Autumn Weather Patterns](https://en.wikipedia.org/wiki/Equinox)",
+            "[Shūbun no Hi](https://www.japan-guide.com/e/e2079.html)",
+        ],
+        [
+            "Notice what's stopped. The absence of noise is its own signal.",
+            "Appreciate the quiet that follows intensity. Silence has texture.",
+            "Mark an ending by what's no longer there. Honor the departure.",
+            "Listen for what's missing. What thunder has ceased in your life?",
+            "Rest in the quieter season. Not everything needs to be loud.",
+        ],
+    ),
+    47: (
+        "Insects sense the cooling and begin to hide in the ground, sealing entrances to their burrows. Life prepares for winter by going underground, invisible but present.",
+        "The insects don't die—they hide. They'll be there all winter, in reduced form, waiting. What disappears from view isn't necessarily gone; it may be preserving itself in places we can't see.",
+        [
+            "[Insect Hibernation](https://en.wikipedia.org/wiki/Hibernation#Invertebrates)",
+            "[Autumn Equinox](https://en.wikipedia.org/wiki/Higan)",
+        ],
+        [
+            "Prepare for a period of invisibility. Some preservation requires hiding.",
+            "Seal the entrance on something you're protecting through a hard season.",
+            "Go underground on one thing—reduce its visibility to protect it.",
+            "Trust that what's hidden is still alive. Not everything needs to be seen to survive.",
+            "Prepare your shelter. Winter is coming; is your burrow ready?",
+        ],
+    ),
+    48: (
+        "Farmers drain rice paddies to dry the fields for harvest. Water that sustained growth all summer now must leave so the crop can be collected.",
+        "Draining the fields is essential for harvest—what nurtured growth now impedes collection. Conditions for cultivation differ from conditions for harvest. The transition requires different care.",
+        [
+            "[Rice Paddy Drainage](https://en.wikipedia.org/wiki/Paddy_field#Draining)",
+            "[Rice Harvest Japan](https://www.japan-guide.com/e/e2059.html)",
+        ],
+        [
+            "Drain what sustained an earlier phase to enable the next one. Remove what's no longer needed.",
+            "Change conditions for harvest. What needs to dry out before you can collect?",
+            "Let go of nurturing mode to enter gathering mode. Different phases need different environments.",
+            "Prepare for collection by changing the field. Make space for the harvest.",
+            "Accept that what helped growth may hinder harvest. Transition requirements shift.",
+        ],
+    ),
+    49: (
+        "Wild geese return from their northern breeding grounds to winter in Japan. Their V-formations overhead announce autumn's deepening—the same birds that left in spring now return.",
+        "The geese return to where they know they can survive winter. Migration is about matching location to season—being where conditions support you, moving when they change.",
+        [
+            "[Goose Migration to Japan](https://en.wikipedia.org/wiki/Greater_white-fronted_goose)",
+            "[Autumn Leaves Japan](https://www.japan-guide.com/e/e2014.html)",
+        ],
+        [
+            "Return to something you left when conditions weren't right. Check if the season has changed.",
+            "Go where conditions support you. Don't stay where you can't thrive.",
+            "Welcome returning energy—people, projects, or patterns that cycle back.",
+            "Notice what returns in autumn. What comes back when things cool?",
+            "Trust your migration instincts. Move toward sustainable conditions.",
+        ],
+    ),
+    50: (
+        "Chrysanthemums bloom with their intricate flowers in autumn when most plants are finished blooming. They flourish in cooling weather, a symbol of longevity and the beauty of late seasons.",
+        "The chrysanthemum blooms when others fade—a countercyclical flower. Late seasons have their own beauty, distinct from the abundance of summer. Some things only flourish in the cooling.",
+        [
+            "[Chrysanthemum Festival](https://www.japan-guide.com/e/e2063.html)",
+            "[Kiku - Imperial Flower](https://en.wikipedia.org/wiki/Chrysanthemum)",
+        ],
+        [
+            "Bloom in your own season, even if others are finished. Late flourishing is still flourishing.",
+            "Notice beauty in decline. What's blooming as other things fade?",
+            "Cultivate something countercyclical. There's opportunity when others rest.",
+            "Appreciate complexity—chrysanthemum petals are intricate, like late-season wisdom.",
+            "Celebrate longevity. Some beauty develops only with time.",
+        ],
+    ),
+    51: (
+        "Crickets chirp in doorways as nights cool, seeking residual warmth from human dwellings. Their song is a familiar autumn sound, associated with nostalgia and seasonal change.",
+        "Crickets at the threshold—not quite inside, not outside—sing at the edge. Boundaries are where life often gathers, seeking the best of both conditions.",
+        [
+            "[Cricket Singing](https://en.wikipedia.org/wiki/Cricket_(insect)#Chirping)",
+            "[Autumn Insects Japan](https://www.japan-guide.com/e/e2312.html)",
+        ],
+        [
+            "Position yourself at a threshold—between states, roles, or environments. Find the warmth.",
+            "Sing at the edge. Boundaries are where interesting things happen.",
+            "Notice what gathers at your doorway. What's seeking warmth from your environment?",
+            "Appreciate liminal spaces—neither fully in nor fully out.",
+            "Listen to evening songs. What's singing as the day ends?",
+        ],
+    ),
+    52: (
+        "First frost appears on exposed surfaces—grass, car windows, fallen leaves. This thin white coating marks winter's first physical touch, killing tender plants and signaling coming cold.",
+        "Frost is winter's first mark on the landscape. It transforms what it touches, ending some lives while beginning a new phase. The first touch of change is often the hardest.",
+        [
+            "[Frost Formation](https://en.wikipedia.org/wiki/Frost)",
+            "[Autumn Colors Peak](https://www.japan-guide.com/e/e2014_when.html)",
+        ],
+        [
+            "Notice the first touch of a coming change. The advance signal is already here.",
+            "Protect what's tender from the first frost. Some things need shelter.",
+            "Accept that frost kills some things. Not everything survives every transition.",
+            "See beauty in frost—the crystalline transformation of what it touches.",
+            "Prepare for harder cold. First frost is just the beginning.",
+        ],
+    ),
+    53: (
+        "Light rains fall intermittently—not the heavy rains of summer but gentler, cooler showers that come and go without drama.",
+        "Light rain is persistent rather than intense. It doesn't make dramatic announcements but accomplishes its work through steady presence. Some things are better done gently over time.",
+        [
+            "[Autumn Drizzle](https://en.wikipedia.org/wiki/Drizzle)",
+            "[Autumn Weather Japan](https://www.japan-guide.com/e/e2012.html)",
+        ],
+        [
+            "Work gently and persistently. Light rain still waters.",
+            "Show up steadily rather than dramatically. Consistency beats intensity.",
+            "Accept intermittent progress. Some things come and go before completing.",
+            "Notice gentle effects. Not all impact is visible immediately.",
+            "Be patient with drizzle. It's still rain.",
+        ],
+    ),
+    54: (
+        "Maples and ivy turn yellow and red as chlorophyll breaks down, revealing hidden pigments that were there all along. The fall colors are an unmasking, not a creation.",
+        "Autumn colors reveal what was always present, hidden by green. The tree doesn't create these pigments in fall—it stops hiding them. Sometimes beauty requires letting go of what obscures.",
+        [
+            "[Momijigari - Leaf Viewing](https://www.japan-guide.com/e/e2014.html)",
+            "[Autumn Color Science](https://en.wikipedia.org/wiki/Autumn_leaf_color)",
+        ],
+        [
+            "Let something fall away to reveal what was always underneath.",
+            "Notice hidden colors emerging. What's being unmasked in your life?",
+            "Appreciate what letting go reveals. Some beauty only appears in release.",
+            "Walk among turning leaves. Let their teaching enter through your eyes.",
+            "Stop hiding something that's actually beautiful. Let the green go.",
+        ],
+    ),
+    55: (
+        "Camellias bloom as most flowers have finished—these winter-hardy plants flower in the cold, bringing color to an increasingly stark landscape.",
+        "The camellia blooms when others can't—its strategy is countercyclical flowering. While competition rests, it has the stage to itself. There's opportunity in seasons others avoid.",
+        [
+            "[Camellia japonica](https://en.wikipedia.org/wiki/Camellia_japonica)",
+            "[Shichi-Go-San Festival](https://www.japan-guide.com/e/e2282.html)",
+        ],
+        [
+            "Find opportunity in a quiet season. Less competition means more attention.",
+            "Bloom when others won't. There's beauty in countercyclical effort.",
+            "Bring color to a stark environment. Be the brightness in a quiet time.",
+            "Notice what thrives in conditions others find harsh. Learn from it.",
+            "Appreciate winter flowers—proof that beauty persists through difficulty.",
+        ],
+    ),
+    56: (
+        "The ground begins to freeze at the surface, first in thin layers overnight that thaw by midday, then increasingly firm as cold deepens.",
+        "Freezing happens in layers—surface first, then gradually deeper. Slow change is still change. The imperceptible progress of cold eventually becomes hardness.",
+        [
+            "[Ground Frost](https://en.wikipedia.org/wiki/Ground_frost)",
+            "[Early Winter Japan](https://www.japan-guide.com/e/e2012.html)",
+        ],
+        [
+            "Notice gradual change. Slow doesn't mean nothing—it means building.",
+            "Accept that some changes are imperceptible daily but significant over time.",
+            "Prepare for deeper freezing. Surface changes predict what's coming.",
+            "Observe what hardens as conditions intensify. What's becoming firm?",
+            "Track slow change. Journal something that's shifting gradually.",
+        ],
+    ),
+    57: (
+        "Winter daffodils (kinsenka) bloom in cold weather, their yellow flowers appearing as most other plants dormant. Like camellias, they bloom countercyclically.",
+        "Yellow flowers in winter are unexpected brightness—they don't match what we think winter should look like. Sometimes the most valuable contributions come from defying expectations.",
+        [
+            "[Winter Daffodil](https://en.wikipedia.org/wiki/Narcissus_(plant))",
+            "[Winter Flowers Japan](https://www.japan-guide.com/e/e2012.html)",
+        ],
+        [
+            "Bring unexpected brightness to a dark time. Defy seasonal expectations.",
+            "Bloom in a surprising place or time. Let your timing be unexpected.",
+            "Notice winter yellows. Where is warmth appearing against expectation?",
+            "Be bright when the world is gray. Your color matters more in contrast.",
+            "Plant something that blooms in hard seasons. Prepare future surprise.",
+        ],
+    ),
+    58: (
+        "Rainbows become rare as the low winter sun and infrequent rain reduce the geometry needed for their formation. The light phenomena 'hides' until conditions return.",
+        "Rainbows hide because conditions don't support them—light too low, rain too rare. Some beautiful things are seasonal not because they're fragile but because they require specific circumstances.",
+        [
+            "[Winter Light Angle](https://en.wikipedia.org/wiki/Solar_zenith_angle)",
+            "[Winter in Japan](https://www.japan-guide.com/e/e2012.html)",
+        ],
+        [
+            "Accept that some beauty is seasonal. Don't expect rainbows in winter.",
+            "Create conditions for what you want to see. Some things need specific circumstances.",
+            "Notice what's hidden, not lost. What will return when conditions change?",
+            "Appreciate available beauty rather than mourning unavailable beauty.",
+            "Trust that hidden things still exist. Invisible isn't absent.",
+        ],
+    ),
+    59: (
+        "North winds blow the last leaves from branches, completing the trees' transition to bare winter form. The wind does what gravity alone couldn't—finishes the release.",
+        "The north wind completes what autumn started. Sometimes completion needs outside force; internal readiness meets external push. The tree let go; the wind carried away.",
+        [
+            "[North Wind](https://en.wikipedia.org/wiki/North_wind)",
+            "[Late Autumn Japan](https://www.japan-guide.com/e/e2012.html)",
+        ],
+        [
+            "Let outside force complete what you've started releasing. Accept help with letting go.",
+            "Finish something that's mostly done. Be the wind for your own completion.",
+            "Clear the last attachments. What's holding on that's ready to go?",
+            "Accept brisk treatment. Sometimes kindness is quick completion.",
+            "Stand bare. See what remains when everything extra is gone.",
+        ],
+    ),
+    60: (
+        "Tachibana (wild tangerines) turn yellow on the branch, their citrus brightness appearing as other colors fade. These small, bitter fruits are prized for their fragrance and longevity.",
+        "The tachibana offers something different from sweetness—fragrance, resilience, traditional significance. Not all value is immediate or obvious. Some gifts require appreciation of a different kind.",
+        [
+            "[Tachibana Orange](https://en.wikipedia.org/wiki/Citrus_tachibana)",
+            "[Winter Citrus Japan](https://www.japan-guide.com/e/e2012.html)",
+        ],
+        [
+            "Offer something valuable that isn't immediately sweet. Subtle gifts matter.",
+            "Appreciate what's bitter or difficult. Some value isn't obvious.",
+            "Find the fragrance in a hard season. Beauty takes different forms.",
+            "Cultivate something resilient. Hardiness has its own worth.",
+            "Notice what turns golden when everything else has dropped. What brightens as things simplify?",
+        ],
+    ),
+    61: (
+        "Cold sets in firmly now—no longer tentative frost but established winter. The sky feels closer, the air denser with cold. Winter declares itself.",
+        "Established cold is different from approaching cold. Once set in, winter isn't coming—it's here. Acceptance shifts from anticipating to inhabiting.",
+        [
+            "[Winter Sky Japan](https://en.wikipedia.org/wiki/Winter#Weather)",
+            "[Year-End Traditions](https://www.japan-guide.com/e/e2062.html)",
+        ],
+        [
+            "Accept what's arrived. Stop preparing for what's already here.",
+            "Inhabit winter rather than waiting for spring. This is real time too.",
+            "Notice how established cold differs from approaching cold. What changes when arrival is complete?",
+            "Settle into the season. Some things are best accepted, not resisted.",
+            "Find winter's particular beauty. It's not inferior to other seasons.",
+        ],
+    ),
+    62: (
+        "Bears enter their dens for winter hibernation, slowing metabolism dramatically to survive months without eating. This withdrawal is survival strategy, not defeat.",
+        "The bear doesn't fight winter—it yields, slows, waits. Hibernation is active conservation, not passive giving up. Sometimes the wise response to harsh conditions is dramatic reduction.",
+        [
+            "[Bear Hibernation](https://en.wikipedia.org/wiki/Hibernation#Bears)",
+            "[Winter Survival](https://en.wikipedia.org/wiki/Hibernation)",
+        ],
+        [
+            "Reduce dramatically in one area. Yield to conditions rather than fighting them.",
+            "Conserve for a hard season. Strategic withdrawal is strength.",
+            "Enter a metaphorical den. What do you need to close out for a while?",
+            "Slow your metabolism on something. Not everything needs full speed.",
+            "Trust that you can survive reduced. The bear wakes in spring.",
+        ],
+    ),
+    63: (
+        "Salmon gather to swim upstream to their spawning grounds—a final journey to the place they were born, where they will reproduce and die.",
+        "The salmon's final journey is about completion and continuation. They don't fight death; they swim toward their purpose, carrying the future in their bodies. Some endings are the most generative act possible.",
+        [
+            "[Salmon Run Japan](https://en.wikipedia.org/wiki/Salmon_run)",
+            "[Salmon Lifecycle](https://en.wikipedia.org/wiki/Salmon#Life_cycle)",
+        ],
+        [
+            "Swim toward your origin when the time is right. Return can be purpose.",
+            "Complete something that enables what comes next. Some endings are beginnings.",
+            "Give fully, even if it depletes you. Some contributions require everything.",
+            "Honor an ending that carries the future. Death and birth interweave.",
+            "Follow deep instinct. Some purposes can't be reasoned, only obeyed.",
+        ],
+    ),
+    64: (
+        "Impossibly, the self-heal plant sprouts new growth at the winter solstice—the darkest time. What withered in summer now emerges in winter, alive again beneath the snow.",
+        "Self-heal sprouts at maximum darkness—reversal begins at the extremity. The darkest moment contains the seed of light. What seems like end often contains beginning.",
+        [
+            "[Self-Heal Winter Growth](https://en.wikipedia.org/wiki/Prunella_vulgaris)",
+            "[Tōji - Winter Solstice](https://www.japan-guide.com/e/e2062.html)",
+        ],
+        [
+            "Look for growth in your darkest time. Something may be sprouting unseen.",
+            "Trust the turn. Maximum darkness is when light begins returning.",
+            "Find the reversal point in a difficult situation. Extremity often contains its opposite.",
+            "Celebrate the solstice—honor the darkness that holds the seed of light.",
+            "Begin something at the bottom. Some starts happen at endings.",
+        ],
+    ),
+    65: (
+        "Male deer shed their antlers in winter, a dramatic loss that seems like diminishment but is actually normal cycling. New antlers will grow in spring, larger than before.",
+        "Shedding antlers isn't loss—it's the precondition for better growth. What you let go of creates space for what comes next, often larger than what you released.",
+        [
+            "[Deer Antler Shedding](https://en.wikipedia.org/wiki/Antler#Growth_and_shedding)",
+            "[Winter Wildlife Japan](https://www.japan-guide.com/e/e2012.html)",
+        ],
+        [
+            "Release something impressive that's served its purpose. Space for growth requires emptying.",
+            "Trust that what you shed will regrow. This loss is part of a cycle.",
+            "Notice where you're carrying old growth that needs releasing.",
+            "Don't cling to current antlers. They're not your identity—they're your current equipment.",
+            "Accept diminishment that enables enlargement. Sometimes you have to be less to become more.",
+        ],
+    ),
+    66: (
+        "Wheat planted in autumn sprouts beneath the snow, growing slowly in cold that would kill other crops. This winter wheat uses the dormant season productively.",
+        "Wheat under snow is working—slowly, invisibly, but actively growing toward future harvest. Some progress happens out of sight, in conditions that look inhospitable.",
+        [
+            "[Winter Wheat](https://en.wikipedia.org/wiki/Winter_wheat)",
+            "[New Year Japan](https://www.japan-guide.com/e/e2062.html)",
+        ],
+        [
+            "Grow beneath the surface when external conditions don't support visible progress.",
+            "Use a quiet time productively. Dormancy isn't always dormant.",
+            "Trust invisible growth. Things are happening under the snow.",
+            "Plant something that develops in difficult seasons. Future harvest starts now.",
+            "Work slowly when conditions require it. Speed isn't the only measure.",
+        ],
+    ),
+    67: (
+        "Japanese parsley (seri) flourishes in cold water—it thrives in conditions that most plants avoid. This winter vegetable is prized for its fresh flavor in the cold months.",
+        "Seri thrives in cold water, finding advantage where others struggle. Specific adaptation creates niche opportunity. Your unusual preference might be your competitive advantage.",
+        [
+            "[Japanese Parsley (Seri)](https://en.wikipedia.org/wiki/Oenanthe_javanica)",
+            "[Nanakusa-gayu](https://en.wikipedia.org/wiki/Nanakusa-no-sekku)",
+        ],
+        [
+            "Find your cold water—the conditions where you thrive that others avoid.",
+            "Offer something fresh in a sparse time. Scarcity increases value.",
+            "Flourish where others withdraw. There's opportunity in adverse conditions.",
+            "Know your specific adaptation. What makes you resilient?",
+            "Provide nourishment in a hard season. Your gifts matter more now.",
+        ],
+    ),
+    68: (
+        "Deep underground springs begin to warm slightly as geothermal heat persists even as surface freezes. Water emerges warmer than the air, steaming in cold mornings.",
+        "Springs flow from depths that surface cold can't reach. Deep sources continue when surfaces freeze. Your deepest resources may be more stable than your circumstances suggest.",
+        [
+            "[Natural Springs](https://en.wikipedia.org/wiki/Spring_(hydrology))",
+            "[Onsen - Hot Springs](https://www.japan-guide.com/e/e2292.html)",
+        ],
+        [
+            "Draw from deep sources when surface conditions are harsh. Your depths are warmer.",
+            "Trust what flows from below. Deep resources survive surface fluctuations.",
+            "Find warmth at the source. Go deeper when the surface freezes.",
+            "Let your depths surface. What emerges from your core?",
+            "Offer from your spring. Warm others from your reserves.",
+        ],
+    ),
+    69: (
+        "Pheasants begin to call as days lengthen—their mating calls are among the first bird sounds to break winter's quiet. They sense the turn before it's visible.",
+        "The pheasant calls in response to lengthening light, not warming temperature. It reads the true signal, not the obvious one. Some changes are better detected through subtle indicators.",
+        [
+            "[Green Pheasant](https://en.wikipedia.org/wiki/Green_pheasant)",
+            "[Early Spring Sounds](https://www.japan-guide.com/e/e2012.html)",
+        ],
+        [
+            "Respond to the true signal, not the obvious one. Light is changing before warmth.",
+            "Call out when you sense the turn, even if it's still cold. Be an early voice.",
+            "Notice lengthening days. What small change carries the important message?",
+            "Break silence with announcement. Something is coming that deserves voice.",
+            "Trust subtle signals. The important changes often come through small channels.",
+        ],
+    ),
+    70: (
+        "While the air reaches its coldest, the earth below stays warmer. Butterbur taps this hidden warmth to bloom before other plants awaken—a first-mover advantage written into nature's playbook.",
+        "We're deep in Major Cold, yet the winter solstice passed a month ago. Light has been quietly returning. The reversal is already underway, invisible beneath harsh conditions. This is the 'hidden spring'—change begins before evidence appears. Your hardest moments may already contain the seeds of what comes next.",
+        [
+            "[Butterbur (Petasites japonicus)](https://en.wikipedia.org/wiki/Petasites_japonicus)",
+            "[72 Seasons of Japan](https://www.nippon.com/en/features/h00124/)",
+        ],
+        [
+            "Identify one effort that's building momentum beneath the surface—a skill developing, a relationship deepening, a project taking shape. Give it 15 minutes of focused attention today. Water roots that others can't see yet.",
+            "Look for warmth in unexpected places today. The surface isn't the whole story.",
+            "Trust that conditions are changing beneath appearances. The hidden spring is real.",
+            "Be a first mover on something. Don't wait for others to signal it's safe.",
+            "Notice where you're blooming before the season permits. Lean into that advantage.",
+        ],
+    ),
+    71: (
+        "Ice reaches its maximum thickness on streams and ponds—the accumulation of cold nights over weeks. This is the depth of winter's grip.",
+        "Ice thickens through patient accumulation—each cold night adds a layer. Depth comes from persistence, not single events. The most solid structures build slowly.",
+        [
+            "[Ice Formation on Streams](https://en.wikipedia.org/wiki/Ice)",
+            "[Daikan - Coldest Period](https://www.nippon.com/en/features/h00124/)",
+        ],
+        [
+            "Appreciate what's built through accumulation. Thick ice came from many cold nights.",
+            "Add a layer today to something you're building slowly. Depth takes time.",
+            "Notice the thickness of your foundations. What has accumulated over time?",
+            "Stand on something solid you've built. Trust the ice that formed through persistence.",
+            "Embrace the depth of a difficult season. This too is part of the structure.",
+        ],
+    ),
+    72: (
+        "As days lengthen, hens respond to increasing light by beginning to lay eggs again. After a winter pause, production resumes—not because of warmth but because of light.",
+        "Hens respond to light, not temperature. They read the signal that matters for their biology. Sometimes we're tracking the wrong indicator for readiness—what truly signals your next phase?",
+        [
+            "[Chicken Egg Laying Cycles](https://en.wikipedia.org/wiki/Egg_laying#Chickens)",
+            "[Setsubun](https://www.japan-guide.com/e/e2062.html)",
+        ],
+        [
+            "Identify the true signal for your productivity. It might not be what you expect.",
+            "Resume something that paused for winter. The light is returning.",
+            "Produce again after rest. The pause was necessary; the resumption is natural.",
+            "Notice what's starting again in your life. Something is responding to increasing light.",
+            "Trust biological rhythms. Your body knows things your mind might miss.",
+        ],
+    ),
+}
+
+
+def get_month_name(month: int) -> str:
+    """Return month name for date range display."""
+    months = [
+        "",
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ]
+    return months[month]
+
+
+def format_date_range(
+    start_month: int, start_day: int, end_month: int, end_day: int
+) -> str:
+    """Format date range for display."""
+    if start_month == end_month:
+        return f"{get_month_name(start_month)} {start_day}-{end_day}"
+    else:
+        return f"{get_month_name(start_month)} {start_day}-{get_month_name(end_month)} {end_day}"
+
+
+def get_ko_for_date(target_date: date) -> tuple | None:
+    """Find which kō a given date falls into."""
+    month = target_date.month
+    day = target_date.day
+
+    for ko in KO_DATA:
+        (
+            num,
+            romaji,
+            english,
+            sm,
+            sd,
+            em,
+            ed,
+            sekki_jp,
+            sekki_en,
+            quote,
+            author,
+            slug,
+        ) = ko
+
+        # Handle date ranges that cross year boundary (e.g., Jan 30 - Feb 3)
+        if sm > em:  # Crosses year boundary
+            if (
+                (month == sm and day >= sd)
+                or (month == em and day <= ed)
+                or (month > sm)
+                or (month < em)
+            ):
+                return ko
+        else:
+            if sm == em:
+                if month == sm and sd <= day <= ed:
+                    return ko
+            else:
+                if (month == sm and day >= sd) or (month == em and day <= ed):
+                    return ko
+
+    return None
+
+
+def get_day_index_in_ko(target_date: date, ko: tuple) -> int:
+    """Get the 0-indexed day position within a kō period."""
+    _, _, _, sm, sd, em, ed, _, _, _, _, _ = ko
+
+    # Calculate days from start
+    year = target_date.year
+    start_date = date(year if sm <= target_date.month else year - 1, sm, sd)
+
+    delta = (target_date - start_date).days
+    return delta
+
+
+def generate_log_content(target_date: date, ko: tuple, day_index: int) -> str:
+    """Generate the markdown content for a log file."""
+    num, romaji, english, sm, sd, em, ed, sekki_jp, sekki_en, quote, author, slug = ko
+
+    why_now, insight, resources, practices = KO_CONTENT[num]
+
+    # Get the practice for this day (cycle if more days than practices)
+    practice = practices[day_index % len(practices)]
+
+    date_range = format_date_range(sm, sd, em, ed)
+
+    content = f"""## 第{num}候 · {romaji}
+
+### "{english}"
+
+> {date_range} · {sekki_jp} ({sekki_en})
+
+<img src="../images/{num:02d}-{slug}.jpg" alt="{english}" width="480">
+
+**Why now?** {why_now}
+
+**Insight:** {insight}
+
+**Today's practice:** {practice}
+
+> **💬** "{quote}"
+> — {author}
+
+**Learn more:**
+
+"""
+    for resource in resources:
+        content += f"- {resource}\n"
+
+    return content
+
+
+def generate_all_logs(year: int = 2026):
+    """Generate log files for every day of the year."""
+    logs_dir = Path(__file__).parent / "logs"
+    logs_dir.mkdir(exist_ok=True)
+
+    start_date = date(year, 1, 1)
+    end_date = date(year, 12, 31)
+
+    current = start_date
+    generated = 0
+    skipped = 0
+
+    while current <= end_date:
+        ko = get_ko_for_date(current)
+        if ko:
+            day_index = get_day_index_in_ko(current, ko)
+            content = generate_log_content(current, ko, day_index)
+
+            filename = logs_dir / f"{current.isoformat()}.md"
+            filename.write_text(content)
+            generated += 1
+        else:
+            print(f"Warning: No kō found for {current}")
+            skipped += 1
+
+        current += timedelta(days=1)
+
+    print(f"Generated {generated} log files, skipped {skipped}")
+
+
+if __name__ == "__main__":
+    generate_all_logs()
