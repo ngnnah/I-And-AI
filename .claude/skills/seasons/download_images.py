@@ -19,6 +19,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+from seasons_utils import IMAGES_DIR, Ko, get_image_filename, load_ko_dict
+
 UNSPLASH_ACCESS_KEY = os.environ.get("UNSPLASH_ACCESS_KEY", "")
 
 # Unsplash search queries for each kō (filenames derived from seasons_data.json)
@@ -98,18 +100,6 @@ SEARCH_QUERIES = {
 }
 
 
-def load_ko_data() -> dict[int, dict]:
-    """Load kō data from JSON, indexed by number."""
-    data_file = Path(__file__).parent / "seasons_data.json"
-    ko_list = json.loads(data_file.read_text())["ko"]
-    return {ko["num"]: ko for ko in ko_list}
-
-
-def get_filename(ko: dict) -> str:
-    """Derive image filename from kō data."""
-    return f"{ko['num']:02d}-{ko['slug']}.jpg"
-
-
 def search_unsplash(query: str) -> str | None:
     """Search Unsplash and return the first image URL."""
     if not UNSPLASH_ACCESS_KEY:
@@ -158,7 +148,7 @@ def download_image(url: str, filepath: Path) -> bool:
         return False
 
 
-def process_ko(ko_num: int, ko_data: dict[int, dict], images_dir: Path) -> bool:
+def process_ko(ko_num: int, ko_data: dict[int, Ko]) -> bool:
     """Download image for a specific kō number."""
     if ko_num not in ko_data:
         print(f"  No data for kō {ko_num}")
@@ -168,8 +158,8 @@ def process_ko(ko_num: int, ko_data: dict[int, dict], images_dir: Path) -> bool:
         return False
 
     ko = ko_data[ko_num]
-    filename = get_filename(ko)
-    filepath = images_dir / filename
+    filename = get_image_filename(ko)
+    filepath = IMAGES_DIR / filename
 
     if filepath.exists():
         print(f"  {filename} already exists, skipping")
@@ -186,10 +176,9 @@ def process_ko(ko_num: int, ko_data: dict[int, dict], images_dir: Path) -> bool:
         return False
 
 
-def main():
-    script_dir = Path(__file__).parent
-    images_dir = script_dir / "images"
-    images_dir.mkdir(exist_ok=True)
+def main() -> None:
+    """Download images for specified kō numbers (or all if none specified)."""
+    IMAGES_DIR.mkdir(exist_ok=True)
 
     if not UNSPLASH_ACCESS_KEY:
         print("ERROR: UNSPLASH_ACCESS_KEY environment variable not set")
@@ -201,7 +190,7 @@ def main():
         print()
         sys.exit(1)
 
-    ko_data = load_ko_data()
+    ko_data = load_ko_dict()
 
     # Determine which kō to download
     if len(sys.argv) > 1:
@@ -209,14 +198,14 @@ def main():
     else:
         ko_numbers = list(range(1, 73))
 
-    print(f"Downloading images to {images_dir}")
+    print(f"Downloading images to {IMAGES_DIR}")
     print(f"Kō numbers: {ko_numbers}")
     print()
 
     success = 0
     for ko_num in ko_numbers:
         print(f"Kō {ko_num}:")
-        if process_ko(ko_num, ko_data, images_dir):
+        if process_ko(ko_num, ko_data):
             success += 1
         print()
 
