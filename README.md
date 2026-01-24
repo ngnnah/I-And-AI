@@ -22,6 +22,15 @@ This repo documents my journey integrating AI-assisted development into daily li
 └── README.md
 ```
 
+## Hooks
+
+Automated checks that run on file operations:
+
+| Hook              | Trigger           | Purpose                                     |
+| ----------------- | ----------------- | ------------------------------------------- |
+| `protect-secrets` | Before Edit/Write | Prevents committing secrets and credentials |
+| `format`          | After Edit/Write  | Auto-formats files after editing            |
+
 ## Subagents
 
 Specialized agents for data engineering workflows:

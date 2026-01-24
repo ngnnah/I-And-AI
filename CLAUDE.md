@@ -91,6 +91,37 @@ Best practices:
 - Use second person in system prompts ("You are...")
 - Only include tools the agent needs
 
+### Available Skills
+
+| Skill              | Trigger                                 |
+| ------------------ | --------------------------------------- |
+| `/calc`            | calculations, unit conversions, math    |
+| `/check-links`     | validate internal links, relative paths |
+| `/commit`          | create git commits                      |
+| `/data-pipeline`   | generate ETL/ELT pipelines              |
+| `/datetime`        | time, timezone, date calculations       |
+| `/ics`             | create calendar events from bookings    |
+| `/pdf`             | read and analyze PDFs                   |
+| `/pr`              | create GitHub pull requests             |
+| `/review`          | code review for bugs, security          |
+| `/seasons`         | Japanese micro-season awareness         |
+| `/skill-creator`   | create new skills/agents                |
+| `/sql`             | write, optimize, explain SQL            |
+| `/validate-skills` | audit .claude/ directory                |
+| `/validate-urls`   | check external URLs for link rot        |
+| `/web-screenshot`  | save images from web content            |
+
+### Available Agents
+
+| Agent              | Use When                                      |
+| ------------------ | --------------------------------------------- |
+| `data-profiler`    | analyzing CSV, Excel, PDF, DOCX data files    |
+| `code-architect`   | planning code structure before implementation |
+| `code-simplifier`  | reducing complexity, improving readability    |
+| `dag-validator`    | validating DAG structures in pipelines        |
+| `data-io-verifier` | verifying data integrity at boundaries        |
+| `test-generator`   | generating pytest test cases                  |
+
 ## Documentation Maintenance
 
 When making code changes:
