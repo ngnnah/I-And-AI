@@ -86,7 +86,7 @@ Go to https://github.com/new and create a private repo (e.g., `my-todos`)
 
 1. Open https://ngnnah.github.io/I-And-AI/projects/github-todo-app/
 2. Enter your username (e.g., `ngnnah`)
-3. Enter your repo name (e.g., `my-todos` or `test-private-file-based-todo-app`)
+3. Enter your repo name (e.g., `my-todos` or `git-based-todo-app`)
 4. Paste your token
 5. (Optional) Check "Remember token" if on a personal device
 
@@ -109,10 +109,10 @@ Go to https://github.com/new and create a private repo (e.g., `my-todos`)
 
 ## Example
 
-Using `ngnnah` as username and `test-private-file-based-todo-app` as repo:
+Using `ngnnah` as username and `git-based-todo-app` as repo:
 
-- **Repo**: https://github.com/ngnnah/test-private-file-based-todo-app
-- **Todos stored at**: https://github.com/ngnnah/test-private-file-based-todo-app/blob/main/todos.json (private)
+- **Repo**: https://github.com/ngnnah/git-based-todo-app
+- **Todos stored at**: https://github.com/ngnnah/git-based-todo-app/blob/main/todos.json (private)
 - **Fine-grained PAT**: scoped to only that repo, Contents read/write only
 
 ### How Sync Works
