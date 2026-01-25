@@ -1,41 +1,106 @@
 # GitHub TODO App
 
-A static TODO app that uses GitHub as a filesystem database. Each user's TODOs are stored in their own private GitHub repository.
+A static TODO app that uses GitHub as a file-based database. Your todos are stored in your own private GitHub repository.
+
+**Live Demo**: https://ngnnah.github.io/I-And-AI/projects/github-todo-app/
+
+## ⚠️ SECURITY: READ THIS FIRST
+
+This app requires a GitHub Personal Access Token (PAT). **Misconfiguring your token can expose your repositories.**
+
+### DO use Fine-Grained PAT with:
+
+- ✅ **Repository access**: "Only select repositories" → select ONLY your todo repo
+- ✅ **Permission**: Contents → Read and write
+- ✅ **Expiration**: 90 days or less
+
+### DON'T use:
+
+- ❌ Classic PAT with `repo` scope (grants access to ALL your repos)
+- ❌ Fine-grained PAT with "All repositories" access
+- ❌ Any permissions beyond "Contents: Read and write"
+
+### Why This Matters
+
+| Token Type             | If Leaked, Attacker Can...             |
+| ---------------------- | -------------------------------------- |
+| Fine-grained (correct) | Only read/write your todo list         |
+| Classic with `repo`    | Access ALL your public & private repos |
 
 ## How It Works
 
 ```
 ┌─────────────────────────────────────────┐
 │  Static App (GitHub Pages)              │
-│  - No user data stored here             │
-│  - Just UI + logic                      │
+│  - No backend, no server                │
+│  - Your token stays in YOUR browser     │
 └─────────────────────────────────────────┘
                     │ GitHub API
                     ▼
 ┌─────────────────────────────────────────┐
-│  Your GitHub Account                    │
-│  └── my-todos (private repo)            │
-│      └── todos.json                     │
+│  Your GitHub Repository (private)       │
+│  └── todos.json                         │
+│      Every save = a git commit          │
 └─────────────────────────────────────────┘
 ```
 
-## Setup
+## Quick Start
 
 ### 1. Create a Private Repository
 
-Create a new private repository on GitHub (e.g., `my-todos`). It can be empty.
+Go to https://github.com/new and create a private repo (e.g., `my-todos`)
 
-### 2. Generate a Personal Access Token
+### 2. Create a Fine-Grained PAT
 
-1. Go to [GitHub Settings > Tokens](https://github.com/settings/tokens/new?scopes=repo&description=GitHub%20TODO%20App)
-2. Select scope: `repo` (for private repos) or `public_repo` (for public)
-3. Generate and copy the token
+1. Go to https://github.com/settings/personal-access-tokens/new
+2. Configure:
+   - **Token name**: `todo-app`
+   - **Expiration**: 90 days
+   - **Repository access**: "Only select repositories" → select your todo repo
+   - **Permissions** → Repository permissions → **Contents: Read and write**
 
-### 3. Use the App
+> ⚠️ **CRITICAL**: Select "Contents", NOT "Actions". They look similar but "Actions" won't work!
 
-1. Open the app in your browser
-2. Enter your GitHub username, repository name, and PAT
-3. Start managing your TODOs
+3. Generate and copy the token (starts with `github_pat_`)
+
+### 3. Connect
+
+1. Open https://ngnnah.github.io/I-And-AI/projects/github-todo-app/
+2. Enter your username (e.g., `ngnnah`)
+3. Enter your repo name (e.g., `my-todos` or `test-private-file-based-todo-app`)
+4. Paste your token
+5. (Optional) Check "Remember token" if on a personal device
+
+## Features
+
+- **Zero backend** - Purely static, hosted on GitHub Pages
+- **You own your data** - Stored in your own GitHub repo
+- **Version history** - Every change is a git commit
+- **Privacy** - Use a private repo; only you can access it
+- **Optional persistence** - Choose whether to remember your token
+
+## Token Storage Security
+
+| "Remember token" | Behavior                                                                               |
+| ---------------- | -------------------------------------------------------------------------------------- |
+| **Unchecked**    | Token is NOT saved. You must re-enter it each session.                                 |
+| **Checked**      | Token is saved in browser localStorage. Convenient but: don't use on shared computers. |
+
+### localStorage Risks
+
+- Vulnerable to XSS attacks (if this site were compromised)
+- Accessible to browser extensions
+- Visible in browser DevTools
+
+**Mitigation**: Fine-grained PAT limits damage. Even if stolen, attacker can only access your todo list.
+
+## Example Setup
+
+Using `ngnnah` as username and `test-private-file-based-todo-app` as repo:
+
+1. Repo: https://github.com/ngnnah/test-private-file-based-todo-app
+2. Fine-grained PAT scoped to only that repo
+3. Permission: Contents read/write only
 
 ## Development
 
@@ -49,36 +114,31 @@ npm start
 # Run unit tests
 npm test
 
-# Run E2E tests (requires Playwright browsers)
+# Run E2E tests
 npx playwright install
 npm run test:e2e
-
-# Run all tests
-npm run test:all
 ```
 
-## Deploy to GitHub Pages
-
-1. Fork or copy this repository
-2. Enable GitHub Pages in repository settings
-3. Set source to `main` branch, root folder
-4. Access at `https://yourusername.github.io/repo-name`
-
-## Security
-
-- **Your PAT is stored only in your browser's localStorage**
-- **The app has no backend** - all API calls go directly from your browser to GitHub
-- **Each user's data is isolated** in their own GitHub repository
-- **You control access** - make your TODO repo private
-
-## File Structure
+## Files
 
 ```
-├── index.html          # Main app (UI)
-├── app.js              # Application logic
+├── index.html          # UI with security warnings
+├── app.js              # Core logic, GitHub API
 ├── app.test.js         # Unit tests
-├── e2e.test.js         # E2E tests (Playwright)
-├── playwright.config.js
-├── package.json
-└── README.md
+├── e2e.test.js         # Playwright E2E tests
+├── LEARNINGS.md        # Learning in public documentation
+└── README.md           # This file
 ```
+
+## Learning in Public
+
+See [LEARNINGS.md](./LEARNINGS.md) for the full story of building this app, including:
+
+- What worked and what didn't
+- Security analysis
+- Common errors and how to fix them
+- Alternative approaches considered
+
+## License
+
+MIT

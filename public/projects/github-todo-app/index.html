@@ -67,6 +67,32 @@
     .loading { text-align: center; color: #666; padding: 20px; }
     .empty { text-align: center; color: #999; padding: 40px; }
 
+    /* Security warning */
+    .security-warning {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-left: 4px solid #ff9800;
+      padding: 12px 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-size: 13px;
+    }
+    .security-warning strong { color: #856404; }
+    .security-warning ul { margin: 8px 0 0 20px; color: #856404; }
+    .security-warning li { margin-bottom: 4px; }
+
+    /* Remember me */
+    .remember-me {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 15px;
+      font-size: 13px;
+    }
+    .remember-me input[type="checkbox"] { margin-top: 2px; }
+    .remember-me label { font-weight: normal; color: #555; cursor: pointer; }
+    .remember-me .warning { color: #856404; font-size: 12px; margin-top: 4px; }
+
     /* Setup guide */
     .setup-guide { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; }
     .setup-guide h3 { font-size: 14px; color: #333; margin-bottom: 12px; }
@@ -75,10 +101,10 @@
     .setup-steps li { margin-bottom: 8px; line-height: 1.5; }
     .setup-steps a { color: #0366d6; }
     .setup-steps code { background: #f1f1f1; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
-    .setup-steps .note { background: #fff8e6; padding: 8px 10px; border-radius: 4px; margin-top: 10px; border-left: 3px solid #f0ad4e; }
+    .setup-steps .critical { background: #f8d7da; border-left: 3px solid #dc3545; padding: 10px; margin: 10px 0; border-radius: 4px; }
+    .setup-steps .critical strong { color: #721c24; }
 
-    /* Saving indicator */
-    .saving { opacity: 0.6; pointer-events: none; }
+    /* Status bar */
     .status-bar { font-size: 12px; color: #666; text-align: right; padding: 5px 0; }
     .status-bar.error { color: #dc3545; }
     .status-bar.success { color: #2ea44f; }
@@ -89,22 +115,40 @@
   <p class="subtitle">Your todos, stored in your own GitHub repo. <a href="https://github.com/ngnnah/I-And-AI/blob/main/projects/github-todo-app/LEARNINGS.md" target="_blank">Learn more</a></p>
 
   <div id="auth-form" class="auth-form">
+    <div class="security-warning">
+      <strong>&#9888; Security Notice</strong>
+      <ul>
+        <li>Use a <strong>fine-grained PAT</strong> (not classic token)</li>
+        <li>Scope it to <strong>only your todo repository</strong></li>
+        <li>Grant only <strong>Contents: Read and write</strong> permission</li>
+        <li>If token leaks, attacker can only access your todos - not other repos</li>
+      </ul>
+    </div>
+
     <div id="auth-error" class="error" style="display: none;"></div>
 
     <label for="username">GitHub Username</label>
-    <input type="text" id="username" placeholder="your-username" autocomplete="username">
+    <input type="text" id="username" placeholder="e.g. ngnnah" autocomplete="username">
 
     <label for="repo">
       Repository Name
       <span class="label-hint">(private repo recommended)</span>
     </label>
-    <input type="text" id="repo" placeholder="my-todos" autocomplete="off">
+    <input type="text" id="repo" placeholder="e.g. my-todos" autocomplete="off">
 
     <label for="token">
       Personal Access Token
-      <span class="label-hint">(fine-grained, with Contents read/write)</span>
+      <span class="label-hint">(fine-grained, Contents read/write only)</span>
     </label>
     <input type="password" id="token" placeholder="github_pat_xxxxxxxxxxxx" autocomplete="off">
+
+    <div class="remember-me">
+      <input type="checkbox" id="remember-token">
+      <div>
+        <label for="remember-token">Remember token on this device</label>
+        <div class="warning">&#9888; Don't check this on shared or public computers</div>
+      </div>
+    </div>
 
     <button id="login-btn" onclick="login()">Connect to GitHub</button>
 
@@ -112,19 +156,24 @@
       <h3>First time? Follow these steps:</h3>
       <div class="setup-steps">
         <ol>
-          <li><a href="https://github.com/new" target="_blank">Create a private repository</a> (e.g., <code>my-todos</code>)</li>
-          <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank">Create a fine-grained PAT</a>:
+          <li>
+            <a href="https://github.com/new" target="_blank">Create a private repository</a><br>
+            Example: <code>my-todos</code> or <code>test-private-file-based-todo-app</code>
+          </li>
+          <li>
+            <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">Create a fine-grained Personal Access Token</a>:
             <ul style="margin-top: 5px;">
               <li>Token name: <code>todo-app</code></li>
-              <li>Repository access: <strong>Only select repositories</strong> → select your todo repo</li>
+              <li>Expiration: 90 days (or custom)</li>
+              <li>Repository access: <strong>"Only select repositories"</strong> → select your todo repo only</li>
               <li>Permissions → Repository permissions → <strong>Contents: Read and write</strong></li>
             </ul>
+            <div class="critical">
+              <strong>&#9888; CRITICAL:</strong> Select <strong>Contents</strong>, NOT "Actions". These look similar but "Actions" won't work!
+            </div>
           </li>
-          <li>Copy the token and paste it above</li>
+          <li>Copy the token (starts with <code>github_pat_</code>) and paste above</li>
         </ol>
-        <div class="note">
-          <strong>Why fine-grained PAT?</strong> It's scoped to only your todo repo. Even if leaked, it can't access your other repositories.
-        </div>
       </div>
     </div>
   </div>
@@ -148,6 +197,6 @@
     <div id="status-bar" class="status-bar"></div>
   </div>
 
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

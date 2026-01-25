@@ -56,11 +56,22 @@ function assertTrue(value, message = '') {
 
 console.log('\n--- Config Storage Tests ---\n');
 
-test('saveConfig stores config in localStorage', () => {
+test('saveConfig stores config in localStorage when rememberToken is true', () => {
   const config = { username: 'testuser', repo: 'my-todos', token: 'ghp_test' };
-  app.saveConfig(config);
+  app.saveConfig(config, true);
   const stored = JSON.parse(localStorageMock.getItem('github-todo-config'));
   assertEqual(stored, config);
+});
+
+test('saveConfig does not store token when rememberToken is false', () => {
+  const config = { username: 'testuser', repo: 'my-todos', token: 'ghp_test' };
+  app.saveConfig(config, false);
+  const stored = localStorageMock.getItem('github-todo-config');
+  assertEqual(stored, null);
+  // But should still remember username/repo
+  const remembered = JSON.parse(localStorageMock.getItem('github-todo-remember'));
+  assertEqual(remembered.username, 'testuser');
+  assertEqual(remembered.repo, 'my-todos');
 });
 
 test('loadConfig returns null when no config exists', () => {

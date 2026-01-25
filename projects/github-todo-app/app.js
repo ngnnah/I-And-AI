@@ -10,13 +10,21 @@ let fileSha = null;
 
 // --- Storage ---
 
-function saveConfig(cfg) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
-  // Also save username/repo for remembering after disconnect
+function saveConfig(cfg, rememberToken = false) {
+  // Always save username/repo for convenience
   localStorage.setItem(REMEMBER_KEY, JSON.stringify({
     username: cfg.username,
-    repo: cfg.repo
+    repo: cfg.repo,
+    rememberToken: rememberToken
   }));
+
+  // Only save full config (with token) if user opted in
+  if (rememberToken) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+  } else {
+    // Clear any previously saved token
+    localStorage.removeItem(STORAGE_KEY);
+  }
 }
 
 function loadConfig() {
@@ -31,7 +39,12 @@ function loadRemembered() {
 
 function clearConfig() {
   localStorage.removeItem(STORAGE_KEY);
-  // Keep remembered username/repo
+  // Keep remembered username/repo but clear rememberToken preference
+  const remembered = loadRemembered();
+  if (remembered) {
+    remembered.rememberToken = false;
+    localStorage.setItem(REMEMBER_KEY, JSON.stringify(remembered));
+  }
 }
 
 // --- GitHub API ---
@@ -137,6 +150,7 @@ async function login() {
   const username = document.getElementById('username').value.trim();
   const repo = document.getElementById('repo').value.trim();
   const token = document.getElementById('token').value.trim();
+  const rememberToken = document.getElementById('remember-token').checked;
 
   if (!username || !repo || !token) {
     showError('auth-error', 'Please fill in all fields');
@@ -152,7 +166,7 @@ async function login() {
   try {
     // Verify credentials by fetching repo
     await githubRequest('GET', '');
-    saveConfig(config);
+    saveConfig(config, rememberToken);
     showApp();
   } catch (error) {
     let message = error.message;
@@ -160,9 +174,9 @@ async function login() {
     if (message.includes('Bad credentials')) {
       message = 'Invalid token. Please check your Personal Access Token.';
     } else if (message.includes('Not Found')) {
-      message = `Repository "${repo}" not found. Check the repo name and ensure your token has access to it.`;
+      message = `Repository "${repo}" not found. Check the repo name and ensure your fine-grained PAT has access to this specific repository.`;
     } else if (message.includes('not accessible')) {
-      message = 'Token doesn\'t have access. Ensure your fine-grained PAT has "Contents: Read and write" permission.';
+      message = 'Token doesn\'t have access. Ensure your fine-grained PAT has "Contents: Read and write" permission (not "Actions").';
     }
     showError('auth-error', message);
     config = null;
@@ -179,8 +193,9 @@ function logout() {
   fileSha = null;
   document.getElementById('auth-form').classList.remove('hidden');
   document.getElementById('todo-app').classList.add('hidden');
-  // Keep username/repo pre-filled, clear only token
+  // Clear token field and uncheck remember
   document.getElementById('token').value = '';
+  document.getElementById('remember-token').checked = false;
 }
 
 async function showApp() {
@@ -274,14 +289,19 @@ function init() {
   if (remembered) {
     document.getElementById('username').value = remembered.username || '';
     document.getElementById('repo').value = remembered.repo || '';
+    // Restore remember checkbox state
+    if (remembered.rememberToken) {
+      document.getElementById('remember-token').checked = true;
+    }
   }
 
-  // Auto-login if full config exists
+  // Auto-login only if user opted to remember token
   config = loadConfig();
   if (config) {
-    // Also pre-fill form in case user disconnects
+    // Pre-fill form in case user disconnects
     document.getElementById('username').value = config.username;
     document.getElementById('repo').value = config.repo;
+    document.getElementById('remember-token').checked = true;
     showApp();
   }
 }
