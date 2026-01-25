@@ -135,11 +135,12 @@ test('githubRequest makes correct API call', async () => {
     });
   });
 
-  await app.githubRequest('GET', '/contents/todos.json');
+  const result = await app.githubRequest('GET', '/contents/todos.json');
 
   assertEqual(capturedUrl, 'https://api.github.com/repos/testuser/my-todos/contents/todos.json');
   assertEqual(capturedOptions.method, 'GET');
   assertTrue(capturedOptions.headers['Authorization'].includes('ghp_test'));
+  assertTrue(result.ok, 'Should return ok: true for successful requests');
 });
 
 test('fetchTodos returns empty array for 404', async () => {
@@ -205,13 +206,32 @@ test('saveTodos omits sha for new file', async () => {
     capturedBody = JSON.parse(options.body);
     return Promise.resolve({
       ok: true,
-      status: 200,
+      status: 201,
       json: () => Promise.resolve({ content: { sha: 'newsha' } }),
     });
   });
 
   await app.saveTodos([{ id: 1, text: 'Test', done: false }], null);
   assertTrue(!('sha' in capturedBody), 'Should not include sha for new file');
+});
+
+test('saveTodos throws error on failure', async () => {
+  app.setState({ config: { username: 'testuser', repo: 'my-todos', token: 'ghp_test' }, todos: [], fileSha: null });
+
+  mockFetch(() => Promise.resolve({
+    ok: false,
+    status: 422,
+    json: () => Promise.resolve({ message: 'Validation failed' }),
+  }));
+
+  let errorThrown = false;
+  try {
+    await app.saveTodos([{ id: 1, text: 'Test', done: false }], null);
+  } catch (e) {
+    errorThrown = true;
+    assertTrue(e.message.includes('Validation failed'), 'Should include error message');
+  }
+  assertTrue(errorThrown, 'Should throw error on failure');
 });
 
 console.log('\n--- Summary ---\n');

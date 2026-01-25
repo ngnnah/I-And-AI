@@ -38,11 +38,11 @@ async function githubRequest(method, path, body = null) {
     headers,
     body: body ? JSON.stringify(body) : null,
   });
+  const data = await response.json().catch(() => null);
   if (!response.ok && response.status !== 404) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || `GitHub API error: ${response.status}`);
+    throw new Error(data?.message || `GitHub API error: ${response.status}`);
   }
-  return { status: response.status, data: await response.json().catch(() => null) };
+  return { status: response.status, data, ok: response.ok };
 }
 
 async function fetchTodos() {
@@ -63,7 +63,10 @@ async function saveTodos(todos, sha) {
   if (sha) {
     body.sha = sha;
   }
-  const { data } = await githubRequest('PUT', `/contents/${TODOS_FILE}`, body);
+  const { data, ok } = await githubRequest('PUT', `/contents/${TODOS_FILE}`, body);
+  if (!ok || !data?.content?.sha) {
+    throw new Error(data?.message || 'Failed to save file');
+  }
   return data.content.sha;
 }
 
