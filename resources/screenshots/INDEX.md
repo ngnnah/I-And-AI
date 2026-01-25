@@ -23,3 +23,4 @@ YYYYMMDD-HHMMSS_topic_slug.ext
 | 2026-01-25 | [`20260125-235255_iron-academy_start-screen.png`](20260125-235255_iron-academy_start-screen.png)                             | Iron Academy Chapter 1 start screen               | GitHub Pages             |
 | 2026-01-26 | [`20260126-002051_pokemon-math-world_level-select.png`](20260126-002051_pokemon-math-world_level-select.png)                 | Pokemon Math World level selection                | Local file               |
 | 2026-01-26 | [`20260126-012336_pokemon-math-world_modular-world-select.png`](20260126-012336_pokemon-math-world_modular-world-select.png) | Pokemon Math World modular version                | GitHub Pages             |
+| 2026-01-26 | [`20260126-012641_pokemon-math-world_deployed.png`](20260126-012641_pokemon-math-world_deployed.png)                         | Pokemon Math World deployed (final)               | GitHub Pages             |

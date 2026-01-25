@@ -15,12 +15,13 @@ This repo documents my journey integrating AI-assisted development into daily li
 
 Interactive web apps deployed at **https://ngnnah.github.io/I-And-AI/**
 
-| Project                                                                                     | Description                                                                                                                           | Tech         |
-| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| [Pokemon Math](https://ngnnah.github.io/I-And-AI/projects/pokemon-math/)                    | Beginner: Simple addition (0-10), 2 choices, big buttons. Perfect for 1st graders.                                                    | HTML/JS, PWA |
-| [Pokemon Math Adventure](https://ngnnah.github.io/I-And-AI/projects/pokemon-math-advanced/) | Advanced: 9 chapters, gym battles, 25+ Pokemon. Addition, subtraction, missing numbers (0-25). Team building, badges, full storyline. | HTML/JS, PWA |
-| [Iron Academy](https://ngnnah.github.io/I-And-AI/projects/iron-academy/)                    | Math learning game (Grade 5-6) with Tony Stark theme. Feynman explanations, SAT vocabulary builder, 3 attempts per question.          | HTML/JS, PWA |
-| [GitHub TODO](https://ngnnah.github.io/I-And-AI/projects/github-todo-app/)                  | Client-side TODO app using GitHub API as backend                                                                                      | HTML/JS      |
+| Project                                                                                     | Description                                                                                                                                | Tech         |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------ |
+| [Pokemon Math World](https://ngnnah.github.io/I-And-AI/projects/pokemon-math-world/)        | 3 difficulty levels: Trainer School, Pokemon League, Champion's Road. Add/sub to 100, multiplication, division, word problems, 40+ Pokemon | HTML/JS, PWA |
+| [Pokemon Math](https://ngnnah.github.io/I-And-AI/projects/pokemon-math/)                    | Beginner: Simple addition (0-10), 2 choices, big buttons. Perfect for 1st graders.                                                         | HTML/JS, PWA |
+| [Pokemon Math Adventure](https://ngnnah.github.io/I-And-AI/projects/pokemon-math-advanced/) | Advanced: 9 chapters, gym battles, 25+ Pokemon. Addition, subtraction, missing numbers (0-25). Team building, badges, full storyline.      | HTML/JS, PWA |
+| [Iron Academy](https://ngnnah.github.io/I-And-AI/projects/iron-academy/)                    | Math learning game (Grade 5-6) with Tony Stark theme. Feynman explanations, SAT vocabulary builder, 3 attempts per question.               | HTML/JS, PWA |
+| [GitHub TODO](https://ngnnah.github.io/I-And-AI/projects/github-todo-app/)                  | Client-side TODO app using GitHub API as backend                                                                                           | HTML/JS      |
 
 ## Structure
 
@@ -95,6 +96,7 @@ Custom skills available in this workspace:
 
 | Date       | Change                                                              |
 | ---------- | ------------------------------------------------------------------- |
+| 2026-01-26 | Added Pokemon Math World (combined 3-level version with modular JS) |
 | 2026-01-25 | Added Pokemon Math Adventure (9 chapters, gym battles, 25+ Pokemon) |
 | 2026-01-25 | Added Pokemon Math Beginner for 1st graders (addition 0-10)         |
 | 2026-01-25 | Added Iron Academy math game with mobile/iOS support                |

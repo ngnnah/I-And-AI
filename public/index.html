@@ -72,6 +72,18 @@
       font-size: 0.75rem;
       margin-top: 12px;
     }
+    .project-card.featured {
+      border-color: rgba(255, 203, 5, 0.4);
+      background: rgba(255, 203, 5, 0.08);
+    }
+    .project-card.featured:hover {
+      box-shadow: 0 10px 40px rgba(255, 203, 5, 0.2);
+      border-color: rgba(255, 203, 5, 0.5);
+    }
+    .project-card.featured .tag {
+      background: rgba(255, 203, 5, 0.2);
+      color: #FFCB05;
+    }
     footer {
       text-align: center;
       margin-top: 60px;
@@ -95,6 +107,12 @@
     </header>
 
     <div class="projects-grid">
+      <a href="projects/pokemon-math-world/" class="project-card featured">
+        <h2>Pokemon Math World ⭐</h2>
+        <p>3 difficulty levels in one! Trainer School, Pokemon League, Champion's Road. Add/sub to 100, multiplication, division, word problems. 40+ Pokemon, chapter navigation, progress saving.</p>
+        <span class="tag">Grade 1-2 Complete</span>
+      </a>
+
       <a href="projects/pokemon-math/" class="project-card">
         <h2>Pokemon Math (Beginner)</h2>
         <p>Catch Pokemon by solving simple addition (0-10)! Perfect for 1st graders. Big buttons, 2 answer choices, lots of encouragement.</p>
@@ -130,7 +148,7 @@
     </div>
 
     <footer>
-      <p>View source on <a href="https://github.com/nhat/I-And-AI">GitHub</a></p>
+      <p>View source on <a href="https://github.com/ngnnah/I-And-AI">GitHub</a></p>
     </footer>
   </div>
 </body>
