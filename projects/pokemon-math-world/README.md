@@ -136,13 +136,6 @@ python3 -m http.server 8080
 
 _Level selection screen with three difficulty tiers_
 
-## Related Projects
-
-This project combines and extends:
-
-- [Pokemon Math (Beginner)](../pokemon-math/) - Original simple version
-- [Pokemon Math Adventure](../pokemon-math-advanced/) - Original adventure version
-
 ## Credits
 
 - Pokemon is a trademark of Nintendo/Game Freak
