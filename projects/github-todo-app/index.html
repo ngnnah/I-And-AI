@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub TODO App</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 { text-align: center; margin-bottom: 20px; color: #333; }
+    .auth-form, .todo-app { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .auth-form { margin-bottom: 20px; }
+    .auth-form.hidden, .todo-app.hidden { display: none; }
+    label { display: block; margin-bottom: 5px; font-weight: 500; }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #2ea44f;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover { background: #22863a; }
+    button:disabled { background: #94d3a2; cursor: not-allowed; }
+    button.secondary { background: #6c757d; }
+    button.secondary:hover { background: #5a6268; }
+    button.danger { background: #dc3545; }
+    button.danger:hover { background: #c82333; }
+    .user-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+    .user-info span { color: #666; }
+    .add-todo { display: flex; gap: 10px; margin-bottom: 20px; }
+    .add-todo input { flex: 1; margin-bottom: 0; }
+    .todo-list { list-style: none; }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      gap: 10px;
+    }
+    .todo-item:last-child { border-bottom: none; }
+    .todo-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+    .todo-item .text { flex: 1; }
+    .todo-item.done .text { text-decoration: line-through; color: #999; }
+    .todo-item button { padding: 5px 10px; font-size: 12px; }
+    .error { color: #dc3545; margin-bottom: 15px; padding: 10px; background: #f8d7da; border-radius: 4px; }
+    .loading { text-align: center; color: #666; padding: 20px; }
+    .empty { text-align: center; color: #999; padding: 40px; }
+    .help { font-size: 12px; color: #666; margin-top: 10px; }
+    .help a { color: #0366d6; }
+  </style>
+</head>
+<body>
+  <h1>GitHub TODO App</h1>
+
+  <div id="auth-form" class="auth-form">
+    <div id="auth-error" class="error" style="display: none;"></div>
+    <label for="username">GitHub Username</label>
+    <input type="text" id="username" placeholder="your-username">
+    <label for="repo">Repository Name</label>
+    <input type="text" id="repo" placeholder="my-todos" value="my-todos">
+    <label for="token">Personal Access Token</label>
+    <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx">
+    <button id="login-btn" onclick="login()">Connect</button>
+    <p class="help">
+      Create a <a href="https://github.com/new" target="_blank">private repo</a> and
+      <a href="https://github.com/settings/tokens/new?scopes=repo&description=GitHub%20TODO%20App" target="_blank">generate a PAT</a> with repo scope.
+    </p>
+  </div>
+
+  <div id="todo-app" class="todo-app hidden">
+    <div class="user-info">
+      <span id="user-display"></span>
+      <button class="secondary" onclick="logout()">Disconnect</button>
+    </div>
+    <div id="app-error" class="error" style="display: none;"></div>
+    <div class="add-todo">
+      <input type="text" id="new-todo" placeholder="What needs to be done?" onkeypress="if(event.key==='Enter')addTodo()">
+      <button onclick="addTodo()">Add</button>
+    </div>
+    <div id="todo-container">
+      <div class="loading">Loading...</div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

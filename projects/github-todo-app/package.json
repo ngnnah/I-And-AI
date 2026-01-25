@@ -1,0 +1,19 @@
+{
+  "name": "github-todo-app",
+  "version": "1.0.0",
+  "description": "A static TODO app using GitHub as filesystem database",
+  "main": "app.js",
+  "scripts": {
+    "start": "npx serve",
+    "test": "node app.test.js",
+    "test:e2e": "npx playwright test",
+    "test:e2e:ui": "npx playwright test --ui",
+    "test:all": "npm test && npm run test:e2e"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "serve": "^14.2.0"
+  },
+  "keywords": ["todo", "github", "static", "pwa"],
+  "license": "MIT"
+}
