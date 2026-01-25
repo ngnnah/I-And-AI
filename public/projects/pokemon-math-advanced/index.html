@@ -45,7 +45,6 @@
       margin: 0 auto;
     }
 
-    /* === SCREENS === */
     .screen {
       display: none;
       animation: fadeIn 0.3s ease;
@@ -60,7 +59,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* === COMMON STYLES === */
     .card {
       background: white;
       border-radius: 20px;
@@ -88,18 +86,10 @@
       box-shadow: 0 5px 0 #3730A3;
     }
 
-    .btn-primary:active {
-      box-shadow: 0 2px 0 #3730A3;
-    }
-
     .btn-success {
       background: linear-gradient(180deg, var(--success) 0%, var(--success-dark) 100%);
       color: white;
       box-shadow: 0 5px 0 #047857;
-    }
-
-    .btn-success:active {
-      box-shadow: 0 2px 0 #047857;
     }
 
     .btn-warning {
@@ -108,75 +98,98 @@
       box-shadow: 0 5px 0 #B8860B;
     }
 
-    .btn-warning:active {
-      box-shadow: 0 2px 0 #B8860B;
-    }
-
     /* === START SCREEN === */
     .start-screen {
       text-align: center;
-      padding: 20px;
+      padding: 15px;
     }
 
     .logo {
       font-family: 'Fredoka One', cursive;
-      font-size: clamp(1.8rem, 7vw, 2.5rem);
+      font-size: clamp(1.6rem, 6vw, 2.2rem);
       color: var(--pokemon-yellow);
-      text-shadow:
-        3px 3px 0 var(--pokemon-blue),
-        -1px -1px 0 var(--pokemon-blue),
-        1px -1px 0 var(--pokemon-blue),
-        -1px 1px 0 var(--pokemon-blue);
+      text-shadow: 3px 3px 0 var(--pokemon-blue), -1px -1px 0 var(--pokemon-blue), 1px -1px 0 var(--pokemon-blue), -1px 1px 0 var(--pokemon-blue);
       margin-bottom: 5px;
     }
 
     .subtitle {
       color: white;
-      font-size: 1rem;
+      font-size: 0.95rem;
       opacity: 0.9;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
-    .trainer-select {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin: 20px 0;
+    /* Name Input */
+    .name-input-section {
+      margin-bottom: 15px;
+    }
+
+    .name-input-section label {
+      display: block;
+      color: #374151;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .name-input {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 1.1rem;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      border: 3px solid #E5E7EB;
+      border-radius: 12px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+
+    .name-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* Trainer Selection */
+    .trainer-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 15px 0;
     }
 
     .trainer-card {
       background: white;
-      padding: 15px 25px;
-      border-radius: 15px;
+      padding: 10px 5px;
+      border-radius: 12px;
       cursor: pointer;
       transition: all 0.2s;
       border: 4px solid transparent;
+      text-align: center;
     }
 
     .trainer-card.selected {
       border-color: var(--pokemon-yellow);
-      box-shadow: 0 0 20px rgba(255, 203, 5, 0.5);
+      background: #FFFBEB;
+      box-shadow: 0 0 15px rgba(255, 203, 5, 0.4);
     }
 
     .trainer-card:active {
       transform: scale(0.95);
     }
 
-    .trainer-emoji {
-      font-size: 3rem;
+    .trainer-card img {
+      width: 64px;
+      height: 64px;
+      image-rendering: pixelated;
     }
 
-    .trainer-name {
+    .trainer-card .name {
       font-weight: 700;
+      font-size: 0.75rem;
       color: #374151;
       margin-top: 5px;
     }
 
-    .starter-section h3 {
-      color: white;
-      margin-bottom: 15px;
-    }
-
+    /* Starter Selection */
     .starter-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -185,7 +198,7 @@
 
     .starter-card {
       background: white;
-      padding: 15px 10px;
+      padding: 12px 8px;
       border-radius: 15px;
       cursor: pointer;
       transition: all 0.2s;
@@ -203,15 +216,15 @@
     }
 
     .starter-card img {
-      width: 80px;
-      height: 80px;
+      width: 70px;
+      height: 70px;
       image-rendering: pixelated;
     }
 
     .starter-card .name {
       font-weight: 700;
       color: #374151;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
 
     .type-badge {
@@ -225,16 +238,16 @@
     }
 
     .start-btn {
-      font-size: 1.5rem;
-      padding: 18px 50px;
-      margin-top: 20px;
+      font-size: 1.4rem;
+      padding: 15px 40px;
+      margin-top: 15px;
     }
 
     .stats-preview {
       display: flex;
       justify-content: center;
-      gap: 30px;
-      margin-top: 20px;
+      gap: 25px;
+      margin-top: 15px;
       color: white;
     }
 
@@ -244,11 +257,11 @@
 
     .stat-preview .value {
       font-family: 'Fredoka One', cursive;
-      font-size: 1.5rem;
+      font-size: 1.3rem;
     }
 
     .stat-preview .label {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       opacity: 0.8;
     }
 
@@ -259,9 +272,9 @@
 
     .chapter-banner {
       text-align: center;
-      padding: 30px 20px;
+      padding: 25px 20px;
       border-radius: 20px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       color: white;
       position: relative;
       overflow: hidden;
@@ -270,10 +283,7 @@
     .chapter-banner::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 100%);
     }
 
@@ -290,19 +300,18 @@
 
     .chapter-number {
       font-family: 'Fredoka One', cursive;
-      font-size: 1rem;
+      font-size: 0.9rem;
       opacity: 0.9;
-      margin-bottom: 5px;
     }
 
     .chapter-title {
       font-family: 'Fredoka One', cursive;
-      font-size: 1.8rem;
-      margin-bottom: 10px;
+      font-size: 1.6rem;
+      margin: 5px 0;
     }
 
     .chapter-desc {
-      font-size: 1rem;
+      font-size: 0.95rem;
       opacity: 0.95;
       line-height: 1.4;
     }
@@ -312,21 +321,20 @@
       justify-content: center;
       align-items: center;
       flex-wrap: wrap;
-      gap: 8px;
-      margin: 20px 0;
+      gap: 6px;
+      margin: 15px 0;
     }
 
     .map-node {
-      width: 50px;
-      height: 50px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.3rem;
+      font-size: 1.1rem;
       background: white;
       border: 3px solid #E5E7EB;
-      transition: all 0.2s;
     }
 
     .map-node.completed {
@@ -347,8 +355,8 @@
     }
 
     .map-connector {
-      width: 20px;
-      height: 4px;
+      width: 15px;
+      height: 3px;
       background: #E5E7EB;
       border-radius: 2px;
     }
@@ -359,45 +367,39 @@
 
     @keyframes pulse {
       0%, 100% { box-shadow: 0 0 0 0 rgba(255, 203, 5, 0.5); }
-      50% { box-shadow: 0 0 0 10px rgba(255, 203, 5, 0); }
+      50% { box-shadow: 0 0 0 8px rgba(255, 203, 5, 0); }
     }
 
     .badges-display {
       display: flex;
       justify-content: center;
       gap: 10px;
-      margin: 15px 0;
+      margin: 12px 0;
     }
 
     .badge-slot {
-      width: 45px;
-      height: 45px;
+      width: 40px;
+      height: 40px;
       background: #F3F4F6;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       border: 3px dashed #D1D5DB;
     }
 
     .badge-slot.earned {
       background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
       border: 3px solid #F59E0B;
-      animation: badgeShine 2s infinite;
-    }
-
-    @keyframes badgeShine {
-      0%, 100% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
-      50% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.6); }
     }
 
     .chapter-btn {
-      font-size: 1.3rem;
-      padding: 15px 40px;
+      font-size: 1.2rem;
+      padding: 12px 35px;
       display: block;
       width: 100%;
-      max-width: 300px;
+      max-width: 280px;
       margin: 10px auto 0;
     }
 
@@ -408,25 +410,26 @@
 
     .team-header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
     .team-header h2 {
       font-family: 'Fredoka One', cursive;
       color: white;
-      font-size: 1.5rem;
+      font-size: 1.4rem;
     }
 
     .team-header p {
       color: white;
       opacity: 0.9;
+      font-size: 0.9rem;
     }
 
     .pokemon-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
     .pokemon-select-card {
@@ -437,40 +440,88 @@
       cursor: pointer;
       border: 4px solid transparent;
       transition: all 0.2s;
+      position: relative;
     }
 
     .pokemon-select-card.selected {
-      border-color: var(--primary);
-      background: #EEF2FF;
+      border-color: var(--pokemon-yellow);
+      background: linear-gradient(180deg, #FFFBEB 0%, #FEF3C7 100%);
+      box-shadow: 0 0 20px rgba(255, 203, 5, 0.4);
     }
 
     .pokemon-select-card:active {
       transform: scale(0.95);
     }
 
-    .pokemon-select-card img {
-      width: 70px;
-      height: 70px;
+    .pokemon-select-card img.pokemon-sprite {
+      width: 65px;
+      height: 65px;
       image-rendering: pixelated;
     }
 
     .pokemon-select-card .name {
       font-weight: 700;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: #374151;
     }
 
     .pokemon-select-card .level {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: #6B7280;
     }
 
+    /* Trainer badge on selected card */
+    .pokemon-select-card .trainer-badge {
+      display: none;
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: white;
+      border: 3px solid var(--pokemon-yellow);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+
+    .pokemon-select-card.selected .trainer-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pokemon-select-card .trainer-badge img {
+      width: 40px;
+      height: 40px;
+      image-rendering: pixelated;
+    }
+
+    .player-name-tag {
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--pokemon-yellow);
+      color: #1F2937;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+      display: none;
+    }
+
+    .pokemon-select-card.selected .player-name-tag {
+      display: block;
+    }
+
     .team-btn {
-      font-size: 1.3rem;
-      padding: 15px 40px;
+      font-size: 1.2rem;
+      padding: 12px 35px;
       display: block;
       width: 100%;
-      max-width: 300px;
+      max-width: 280px;
       margin: 0 auto;
     }
 
@@ -483,10 +534,10 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 15px;
+      padding: 8px 12px;
       background: white;
-      border-radius: 15px;
-      margin-bottom: 10px;
+      border-radius: 12px;
+      margin-bottom: 8px;
     }
 
     .battle-stat {
@@ -494,17 +545,17 @@
     }
 
     .battle-stat .icon {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
     }
 
     .battle-stat .value {
       font-family: 'Fredoka One', cursive;
-      font-size: 1.1rem;
+      font-size: 1rem;
       color: var(--primary);
     }
 
     .battle-stat .label {
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       color: #6B7280;
       text-transform: uppercase;
     }
@@ -512,18 +563,31 @@
     .battle-field {
       background: linear-gradient(180deg, #87CEEB 0%, #90EE90 60%, #228B22 100%);
       border-radius: 20px;
-      padding: 15px;
+      padding: 12px;
       margin-bottom: 10px;
       position: relative;
-      min-height: 280px;
+      min-height: 260px;
+    }
+
+    .encounter-type {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .encounter-type span {
+      background: rgba(255,255,255,0.95);
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #374151;
     }
 
     .battle-scene {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      height: 200px;
-      padding: 0 10px;
+      padding: 0 5px;
     }
 
     .battle-pokemon {
@@ -531,63 +595,99 @@
       flex: 1;
     }
 
-    .battle-pokemon img {
-      width: 120px;
-      height: 120px;
-      image-rendering: pixelated;
-      filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+    /* Trainer + Pokemon combo in battle */
+    .battle-trainer-pokemon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    .battle-pokemon.player img {
+    .battle-trainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: -10px;
+      z-index: 2;
+    }
+
+    .battle-trainer img {
+      width: 50px;
+      height: 50px;
+      image-rendering: pixelated;
+    }
+
+    .battle-trainer .trainer-name {
+      background: rgba(255,255,255,0.95);
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: #374151;
+      margin-top: -5px;
+    }
+
+    .battle-pokemon-sprite {
+      position: relative;
+      z-index: 1;
+    }
+
+    .battle-pokemon-sprite img {
+      width: 100px;
+      height: 100px;
+      image-rendering: pixelated;
+      filter: drop-shadow(0 8px 12px rgba(0,0,0,0.3));
+    }
+
+    .battle-pokemon.player .battle-pokemon-sprite img {
       animation: playerIdle 2s ease-in-out infinite;
     }
 
-    .battle-pokemon.enemy img {
+    .battle-pokemon.enemy .battle-pokemon-sprite img {
       animation: enemyIdle 2s ease-in-out infinite 0.5s;
     }
 
     @keyframes playerIdle {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
+      50% { transform: translateY(-6px); }
     }
 
     @keyframes enemyIdle {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
+      50% { transform: translateY(-6px); }
     }
 
     .pokemon-info-card {
       background: white;
-      border-radius: 12px;
-      padding: 10px;
-      margin-top: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      padding: 8px;
+      margin-top: 5px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
     }
 
     .pokemon-info-card .name {
       font-weight: 800;
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       color: #1F2937;
     }
 
     .pokemon-info-card .level {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: #6B7280;
     }
 
     .hp-bar-container {
       background: #E5E7EB;
-      height: 12px;
-      border-radius: 6px;
+      height: 10px;
+      border-radius: 5px;
       overflow: hidden;
-      margin-top: 5px;
+      margin-top: 4px;
     }
 
     .hp-bar {
       height: 100%;
       background: linear-gradient(90deg, var(--success) 0%, #34D399 100%);
       transition: width 0.5s ease;
-      border-radius: 6px;
+      border-radius: 5px;
     }
 
     .hp-bar.low {
@@ -610,64 +710,51 @@
       left: 50%;
       transform: translate(-50%, -50%);
       font-family: 'Fredoka One', cursive;
-      font-size: 1.5rem;
+      font-size: 1.2rem;
       color: white;
       background: linear-gradient(135deg, var(--danger) 0%, #DC2626 100%);
-      padding: 8px 20px;
-      border-radius: 20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    }
-
-    .encounter-type {
-      text-align: center;
-      margin-bottom: 10px;
-    }
-
-    .encounter-type span {
-      background: rgba(255,255,255,0.9);
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: #374151;
+      padding: 6px 15px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 10;
     }
 
     /* Question Area */
     .question-card {
       background: white;
       border-radius: 20px;
-      padding: 20px;
+      padding: 15px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
 
     .question-prompt {
       text-align: center;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: #6B7280;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .question {
       font-family: 'Fredoka One', cursive;
-      font-size: clamp(2rem, 8vw, 3rem);
+      font-size: clamp(1.8rem, 7vw, 2.5rem);
       text-align: center;
       color: #1F2937;
-      padding: 15px;
+      padding: 12px;
       background: linear-gradient(180deg, #F9FAFB 0%, #F3F4F6 100%);
-      border-radius: 15px;
-      margin-bottom: 15px;
+      border-radius: 12px;
+      margin-bottom: 12px;
     }
 
     .answers-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
     }
 
     .answer-btn {
-      font-size: 1.8rem;
-      padding: 18px 15px;
-      min-height: 70px;
+      font-size: 1.6rem;
+      padding: 15px 12px;
+      min-height: 60px;
     }
 
     .answer-btn.correct {
@@ -689,17 +776,18 @@
 
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-8px); }
-      75% { transform: translateX(8px); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
     }
 
     .message-box {
-      margin-top: 15px;
-      padding: 12px;
-      border-radius: 12px;
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 10px;
       text-align: center;
       font-weight: 700;
-      min-height: 50px;
+      font-size: 0.9rem;
+      min-height: 45px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -715,18 +803,10 @@
       color: #92400E;
     }
 
-    .message-box.info {
-      background: linear-gradient(180deg, #DBEAFE 0%, #BFDBFE 100%);
-      color: #1E40AF;
-    }
-
     /* === VICTORY SCREEN === */
     .victory-screen {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.9);
       display: none;
       justify-content: center;
@@ -742,67 +822,62 @@
     .victory-content {
       background: white;
       border-radius: 25px;
-      padding: 30px 25px;
+      padding: 25px 20px;
       text-align: center;
-      max-width: 400px;
+      max-width: 380px;
       width: 100%;
       animation: victoryPop 0.5s ease;
     }
 
     @keyframes victoryPop {
-      from {
-        opacity: 0;
-        transform: scale(0.8);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
     }
 
     .victory-title {
       font-family: 'Fredoka One', cursive;
-      font-size: 2rem;
+      font-size: 1.8rem;
       color: var(--pokemon-yellow);
       text-shadow: 2px 2px 0 var(--pokemon-blue);
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
 
     .victory-pokemon {
-      margin: 15px 0;
+      margin: 10px 0;
     }
 
     .victory-pokemon img {
-      width: 150px;
-      height: 150px;
+      width: 130px;
+      height: 130px;
       animation: victoryBounce 0.5s ease-in-out infinite;
       filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
     }
 
     @keyframes victoryBounce {
       0%, 100% { transform: translateY(0) rotate(-3deg); }
-      50% { transform: translateY(-15px) rotate(3deg); }
+      50% { transform: translateY(-12px) rotate(3deg); }
     }
 
     .victory-name {
       font-family: 'Fredoka One', cursive;
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       color: #1F2937;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
 
     .victory-stats {
       background: #F9FAFB;
-      border-radius: 15px;
-      padding: 15px;
-      margin: 15px 0;
+      border-radius: 12px;
+      padding: 12px;
+      margin: 12px 0;
     }
 
     .victory-stat-row {
       display: flex;
       justify-content: space-between;
-      padding: 8px 0;
+      padding: 6px 0;
       border-bottom: 1px solid #E5E7EB;
+      font-size: 0.9rem;
     }
 
     .victory-stat-row:last-child {
@@ -810,9 +885,9 @@
     }
 
     .victory-btn {
-      font-size: 1.3rem;
-      padding: 15px 35px;
-      margin-top: 10px;
+      font-size: 1.2rem;
+      padding: 12px 30px;
+      margin-top: 8px;
     }
 
     /* === COLLECTION SCREEN === */
@@ -822,12 +897,12 @@
 
     .collection-header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
     .collection-header h2 {
       font-family: 'Fredoka One', cursive;
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       color: white;
     }
 
@@ -839,20 +914,20 @@
     .collection-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 20px;
+      gap: 8px;
+      margin-bottom: 15px;
     }
 
     .collection-item {
       background: white;
-      border-radius: 12px;
-      padding: 10px 5px;
+      border-radius: 10px;
+      padding: 8px 4px;
       text-align: center;
     }
 
     .collection-item img {
-      width: 60px;
-      height: 60px;
+      width: 55px;
+      height: 55px;
       image-rendering: pixelated;
     }
 
@@ -861,10 +936,10 @@
     }
 
     .collection-item .name {
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       font-weight: 700;
       color: #374151;
-      margin-top: 3px;
+      margin-top: 2px;
     }
 
     .collection-item.locked .name {
@@ -872,8 +947,8 @@
     }
 
     .back-btn {
-      font-size: 1.1rem;
-      padding: 12px 30px;
+      font-size: 1rem;
+      padding: 10px 25px;
       display: block;
       margin: 0 auto;
       background: rgba(255,255,255,0.2);
@@ -881,7 +956,7 @@
       box-shadow: none;
     }
 
-    /* === TYPE COLORS === */
+    /* Type colors */
     .type-fire { background: linear-gradient(135deg, #F08030 0%, #DD6610 100%); }
     .type-water { background: linear-gradient(135deg, #6890F0 0%, #4A70D0 100%); }
     .type-grass { background: linear-gradient(135deg, #78C850 0%, #5CA030 100%); }
@@ -896,16 +971,13 @@
     .type-ground { background: linear-gradient(135deg, #E0C068 0%, #C0A048 100%); }
     .type-fighting { background: linear-gradient(135deg, #C03028 0%, #A02820 100%); }
     .type-ghost { background: linear-gradient(135deg, #705898 0%, #554374 100%); }
-    .type-ice { background: linear-gradient(135deg, #98D8D8 0%, #78B8B8 100%); }
     .type-dragon { background: linear-gradient(135deg, #7038F8 0%, #5028C8 100%); }
 
-    /* === CONFETTI === */
+    /* Confetti */
     .confetti-container {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       pointer-events: none;
       z-index: 1001;
       overflow: hidden;
@@ -913,50 +985,54 @@
 
     .confetti {
       position: absolute;
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       animation: confettiFall 3s ease-out forwards;
     }
 
     @keyframes confettiFall {
-      0% {
-        transform: translateY(-50px) rotate(0deg);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(100vh) rotate(720deg);
-        opacity: 0;
-      }
+      0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
     }
 
-    /* === SETTINGS === */
+    /* Settings */
     .settings-btn {
       position: fixed;
-      top: max(12px, env(safe-area-inset-top));
-      right: max(12px, env(safe-area-inset-right));
-      width: 45px;
-      height: 45px;
+      top: max(10px, env(safe-area-inset-top));
+      right: max(10px, env(safe-area-inset-right));
+      width: 40px;
+      height: 40px;
       background: white;
       border: none;
       border-radius: 50%;
-      font-size: 1.3rem;
+      font-size: 1.1rem;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
       z-index: 100;
       touch-action: manipulation;
     }
 
-    /* === RESPONSIVE === */
+    /* Responsive */
     @media (max-width: 380px) {
       .answer-btn {
-        font-size: 1.5rem;
-        padding: 15px 10px;
-        min-height: 60px;
+        font-size: 1.4rem;
+        padding: 12px 8px;
+        min-height: 50px;
       }
 
-      .battle-pokemon img {
-        width: 100px;
-        height: 100px;
+      .battle-pokemon-sprite img {
+        width: 80px;
+        height: 80px;
+      }
+
+      .trainer-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+      }
+
+      .trainer-card img {
+        width: 50px;
+        height: 50px;
       }
 
       .pokemon-grid {
@@ -969,15 +1045,8 @@
     }
 
     @media (hover: hover) {
-      .btn:hover {
-        transform: translateY(-2px);
-      }
-
-      .trainer-card:hover,
-      .starter-card:hover,
-      .pokemon-select-card:hover {
-        transform: scale(1.02);
-      }
+      .btn:hover { transform: translateY(-2px); }
+      .trainer-card:hover, .starter-card:hover, .pokemon-select-card:hover { transform: scale(1.02); }
     }
   </style>
 </head>
@@ -992,21 +1061,17 @@
         <p class="subtitle">Become a Pokemon Master with math!</p>
 
         <div class="card">
-          <h3 style="text-align: center; color: #374151; margin-bottom: 15px;">Choose Your Trainer</h3>
-          <div class="trainer-select">
-            <div class="trainer-card selected" data-trainer="boy" onclick="selectTrainer('boy')">
-              <div class="trainer-emoji">🧒</div>
-              <div class="trainer-name">Boy</div>
-            </div>
-            <div class="trainer-card" data-trainer="girl" onclick="selectTrainer('girl')">
-              <div class="trainer-emoji">👧</div>
-              <div class="trainer-name">Girl</div>
-            </div>
+          <div class="name-input-section">
+            <label for="playerName">Your Name</label>
+            <input type="text" id="playerName" class="name-input" placeholder="Enter your name" maxlength="12">
           </div>
+
+          <h3 style="text-align: center; color: #374151; margin: 15px 0 10px;">Choose Your Trainer</h3>
+          <div class="trainer-grid" id="trainerGrid"></div>
         </div>
 
-        <div class="card starter-section">
-          <h3 style="text-align: center; color: #374151; margin-bottom: 15px;">Choose Your Starter!</h3>
+        <div class="card">
+          <h3 style="text-align: center; color: #374151; margin-bottom: 12px;">Choose Your Starter!</h3>
           <div class="starter-grid" id="starterGrid"></div>
         </div>
 
@@ -1014,7 +1079,7 @@
           START ADVENTURE!
         </button>
 
-        <div class="stats-preview" id="statsPreview">
+        <div class="stats-preview">
           <div class="stat-preview">
             <div class="value" id="previewBadges">0</div>
             <div class="label">Badges</div>
@@ -1029,7 +1094,7 @@
           </div>
         </div>
 
-        <button class="btn back-btn" style="margin-top: 20px;" onclick="showCollection()">
+        <button class="btn back-btn" style="margin-top: 15px;" onclick="showCollection()">
           View Collection
         </button>
       </div>
@@ -1041,28 +1106,21 @@
         <div class="chapter-banner" id="chapterBanner">
           <div class="chapter-number" id="chapterNumber">CHAPTER 1</div>
           <div class="chapter-title" id="chapterTitle">🌳 Route 1</div>
-          <div class="chapter-desc" id="chapterDesc">
-            Your adventure begins! Wild Pokemon are waiting in the tall grass.
-          </div>
+          <div class="chapter-desc" id="chapterDesc">Your adventure begins!</div>
         </div>
 
         <div class="card">
-          <h4 style="text-align: center; color: #374151; margin-bottom: 10px;">Your Journey</h4>
+          <h4 style="text-align: center; color: #374151; margin-bottom: 8px;">Your Journey</h4>
           <div class="journey-map" id="journeyMap"></div>
         </div>
 
         <div class="card">
-          <h4 style="text-align: center; color: #374151; margin-bottom: 10px;">Gym Badges</h4>
+          <h4 style="text-align: center; color: #374151; margin-bottom: 8px;">Gym Badges</h4>
           <div class="badges-display" id="badgesDisplay"></div>
         </div>
 
-        <button class="btn btn-success chapter-btn" onclick="startChapter()">
-          GO!
-        </button>
-
-        <button class="btn back-btn" style="margin-top: 10px;" onclick="backToStart()">
-          Back to Menu
-        </button>
+        <button class="btn btn-success chapter-btn" onclick="startChapter()">GO!</button>
+        <button class="btn back-btn" style="margin-top: 8px;" onclick="backToStart()">Back to Menu</button>
       </div>
     </div>
 
@@ -1071,14 +1129,12 @@
       <div class="team-select">
         <div class="team-header">
           <h2>Choose Your Pokemon!</h2>
-          <p>Pick one to battle with</p>
+          <p>Tap a Pokemon to battle with it</p>
         </div>
 
         <div class="pokemon-grid" id="teamGrid"></div>
 
-        <button class="btn btn-primary team-btn" onclick="confirmTeamSelection()">
-          BATTLE!
-        </button>
+        <button class="btn btn-primary team-btn" onclick="confirmTeamSelection()">BATTLE!</button>
       </div>
     </div>
 
@@ -1103,14 +1159,22 @@
           </div>
         </div>
 
-        <div class="battle-field" id="battleField">
+        <div class="battle-field">
           <div class="encounter-type">
             <span id="encounterType">Wild Pokemon!</span>
           </div>
 
           <div class="battle-scene">
             <div class="battle-pokemon player">
-              <img id="playerPokemonImg" src="" alt="Your Pokemon">
+              <div class="battle-trainer-pokemon">
+                <div class="battle-trainer" id="playerTrainer">
+                  <img id="playerTrainerImg" src="" alt="Trainer">
+                  <div class="trainer-name" id="playerTrainerName">Ash</div>
+                </div>
+                <div class="battle-pokemon-sprite">
+                  <img id="playerPokemonImg" src="" alt="Your Pokemon">
+                </div>
+              </div>
               <div class="pokemon-info-card">
                 <div class="name" id="playerPokemonName">Pikachu</div>
                 <div class="level" id="playerPokemonLevel">Lv. 5</div>
@@ -1123,7 +1187,15 @@
             <div class="vs-badge">VS</div>
 
             <div class="battle-pokemon enemy">
-              <img id="enemyPokemonImg" src="" alt="Wild Pokemon">
+              <div class="battle-trainer-pokemon">
+                <div class="battle-trainer" id="enemyTrainer">
+                  <img id="enemyTrainerImg" src="" alt="Trainer">
+                  <div class="trainer-name" id="enemyTrainerName">Wild</div>
+                </div>
+                <div class="battle-pokemon-sprite">
+                  <img id="enemyPokemonImg" src="" alt="Enemy Pokemon">
+                </div>
+              </div>
               <div class="pokemon-info-card">
                 <div class="name" id="enemyPokemonName">Rattata</div>
                 <div class="level" id="enemyPokemonLevel">Lv. 3</div>
@@ -1166,9 +1238,7 @@
             <span id="victoryTeam">🎉 3</span>
           </div>
         </div>
-        <button class="btn btn-success victory-btn" onclick="continueAdventure()">
-          CONTINUE!
-        </button>
+        <button class="btn btn-success victory-btn" onclick="continueAdventure()">CONTINUE!</button>
       </div>
     </div>
 
@@ -1179,12 +1249,8 @@
           <h2>My Pokemon</h2>
           <p id="collectionCount">0 / 25 caught</p>
         </div>
-
         <div class="collection-grid" id="collectionGrid"></div>
-
-        <button class="btn back-btn" onclick="backToStart()">
-          Back
-        </button>
+        <button class="btn back-btn" onclick="backToStart()">Back</button>
       </div>
     </div>
   </div>
@@ -1192,186 +1258,82 @@
   <div class="confetti-container" id="confetti"></div>
 
   <script>
+    // === TRAINERS (Using PokeAPI trainer sprites) ===
+    const TRAINERS = {
+      ash: { name: 'Ash', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/red.png' },
+      red: { name: 'Red', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/red.png' },
+      blue: { name: 'Blue', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/blue.png' },
+      leaf: { name: 'Leaf', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/leaf.png' },
+      ethan: { name: 'Ethan', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/ethan.png' },
+      lyra: { name: 'Lyra', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/lyra.png' },
+      brendan: { name: 'Brendan', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/brendan.png' },
+      may: { name: 'May', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/may.png' }
+    };
+
+    // Gym leaders for enemy trainers
+    const GYM_LEADERS = {
+      brock: { name: 'Brock', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/brock.png' },
+      misty: { name: 'Misty', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/misty.png' },
+      surge: { name: 'Lt. Surge', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/lt-surge.png' }
+    };
+
     // === POKEMON DATABASE ===
     const POKEMON = {
-      // Starters
       bulbasaur: { id: 1, name: 'Bulbasaur', type: 'grass', hp: 45, atk: 8, level: 5 },
       charmander: { id: 4, name: 'Charmander', type: 'fire', hp: 39, atk: 9, level: 5 },
       squirtle: { id: 7, name: 'Squirtle', type: 'water', hp: 44, atk: 8, level: 5 },
-
-      // Route 1 Pokemon (Easy)
       rattata: { id: 19, name: 'Rattata', type: 'normal', hp: 30, atk: 6, level: 3 },
       pidgey: { id: 16, name: 'Pidgey', type: 'flying', hp: 35, atk: 6, level: 4 },
       caterpie: { id: 10, name: 'Caterpie', type: 'bug', hp: 30, atk: 5, level: 3 },
       weedle: { id: 13, name: 'Weedle', type: 'bug', hp: 30, atk: 5, level: 3 },
-
-      // Route 2 Pokemon (Medium)
       pikachu: { id: 25, name: 'Pikachu', type: 'electric', hp: 35, atk: 10, level: 6 },
       oddish: { id: 43, name: 'Oddish', type: 'grass', hp: 40, atk: 7, level: 5 },
       meowth: { id: 52, name: 'Meowth', type: 'normal', hp: 38, atk: 8, level: 6 },
       psyduck: { id: 54, name: 'Psyduck', type: 'water', hp: 45, atk: 8, level: 7 },
-
-      // Cave Pokemon
       geodude: { id: 74, name: 'Geodude', type: 'rock', hp: 40, atk: 10, level: 8 },
       zubat: { id: 41, name: 'Zubat', type: 'flying', hp: 35, atk: 7, level: 6 },
       machop: { id: 66, name: 'Machop', type: 'fighting', hp: 45, atk: 11, level: 8 },
-
-      // Route 3 Pokemon (Hard)
       eevee: { id: 133, name: 'Eevee', type: 'normal', hp: 50, atk: 9, level: 10 },
       jigglypuff: { id: 39, name: 'Jigglypuff', type: 'fairy', hp: 100, atk: 6, level: 8 },
       clefairy: { id: 35, name: 'Clefairy', type: 'fairy', hp: 65, atk: 7, level: 9 },
       abra: { id: 63, name: 'Abra', type: 'psychic', hp: 25, atk: 12, level: 10 },
       gastly: { id: 92, name: 'Gastly', type: 'ghost', hp: 30, atk: 11, level: 10 },
       dratini: { id: 147, name: 'Dratini', type: 'dragon', hp: 40, atk: 12, level: 12 },
-
-      // Gym Leaders
       onix: { id: 95, name: 'Onix', type: 'rock', hp: 70, atk: 12, level: 12, isGym: true },
       staryu: { id: 120, name: 'Staryu', type: 'water', hp: 65, atk: 13, level: 15, isGym: true },
       raichu: { id: 26, name: 'Raichu', type: 'electric', hp: 75, atk: 15, level: 18, isGym: true },
-
-      // Special
       magikarp: { id: 129, name: 'Magikarp', type: 'water', hp: 20, atk: 3, level: 5 },
       snorlax: { id: 143, name: 'Snorlax', type: 'normal', hp: 150, atk: 14, level: 15 },
     };
 
     // === CHAPTERS ===
     const CHAPTERS = [
-      {
-        id: 1,
-        name: 'Route 1',
-        title: '🌳 Route 1 - First Steps',
-        desc: 'Your Pokemon journey begins! Practice addition to catch wild Pokemon.',
-        env: 'env-route',
-        enemies: ['rattata', 'pidgey', 'caterpie'],
-        difficulty: 1,
-        questionsToWin: 4,
-        isGym: false
-      },
-      {
-        id: 2,
-        name: 'Route 1 (Deep)',
-        title: '🌲 Route 1 - Deeper Path',
-        desc: 'More Pokemon await! The numbers are getting bigger.',
-        env: 'env-route',
-        enemies: ['pidgey', 'weedle', 'rattata'],
-        difficulty: 1,
-        questionsToWin: 4,
-        isGym: false
-      },
-      {
-        id: 3,
-        name: 'Pewter Gym',
-        title: '🏛️ Pewter Gym - Brock',
-        desc: 'Your first gym battle! Brock uses Rock-type Pokemon. Solve harder problems!',
-        env: 'env-gym',
-        enemies: ['onix'],
-        difficulty: 2,
-        questionsToWin: 5,
-        isGym: true,
-        gymLeader: 'Brock',
-        badge: '🪨'
-      },
-      {
-        id: 4,
-        name: 'Route 2',
-        title: '🌊 Route 2 - Waterside',
-        desc: 'New Pokemon near the water! Addition and subtraction ahead.',
-        env: 'env-water',
-        enemies: ['psyduck', 'oddish', 'pikachu'],
-        difficulty: 2,
-        questionsToWin: 4,
-        isGym: false
-      },
-      {
-        id: 5,
-        name: 'Mt. Moon',
-        title: '🦇 Mt. Moon Cave',
-        desc: 'A dark cave with rare Pokemon! Watch out for harder math!',
-        env: 'env-cave',
-        enemies: ['zubat', 'geodude', 'machop'],
-        difficulty: 2,
-        questionsToWin: 5,
-        isGym: false
-      },
-      {
-        id: 6,
-        name: 'Cerulean Gym',
-        title: '💧 Cerulean Gym - Misty',
-        desc: 'Misty loves Water Pokemon! She\'ll test your subtraction skills!',
-        env: 'env-gym',
-        enemies: ['staryu'],
-        difficulty: 2,
-        questionsToWin: 5,
-        isGym: true,
-        gymLeader: 'Misty',
-        badge: '💧'
-      },
-      {
-        id: 7,
-        name: 'Route 3',
-        title: '✨ Route 3 - Rare Pokemon',
-        desc: 'Rare Pokemon live here! You\'ll need to find missing numbers!',
-        env: 'env-route',
-        enemies: ['eevee', 'jigglypuff', 'clefairy', 'abra'],
-        difficulty: 3,
-        questionsToWin: 5,
-        isGym: false
-      },
-      {
-        id: 8,
-        name: 'Pokemon Tower',
-        title: '👻 Pokemon Tower',
-        desc: 'Spooky! Ghost Pokemon are here. Master all the math types!',
-        env: 'env-cave',
-        enemies: ['gastly', 'dratini', 'magikarp'],
-        difficulty: 3,
-        questionsToWin: 5,
-        isGym: false
-      },
-      {
-        id: 9,
-        name: 'Vermilion Gym',
-        title: '⚡ Vermilion Gym - Lt. Surge',
-        desc: 'The final gym! Lt. Surge brings the thunder! Show your math mastery!',
-        env: 'env-electric',
-        enemies: ['raichu'],
-        difficulty: 3,
-        questionsToWin: 6,
-        isGym: true,
-        gymLeader: 'Lt. Surge',
-        badge: '⚡'
-      }
+      { id: 1, name: 'Route 1', title: '🌳 Route 1 - First Steps', desc: 'Your Pokemon journey begins! Practice addition to catch wild Pokemon.', env: 'env-route', enemies: ['rattata', 'pidgey', 'caterpie'], difficulty: 1, questionsToWin: 4, isGym: false },
+      { id: 2, name: 'Route 1 (Deep)', title: '🌲 Route 1 - Deeper Path', desc: 'More Pokemon await! The numbers are getting bigger.', env: 'env-route', enemies: ['pidgey', 'weedle', 'rattata'], difficulty: 1, questionsToWin: 4, isGym: false },
+      { id: 3, name: 'Pewter Gym', title: '🏛️ Pewter Gym - Brock', desc: 'Your first gym battle! Brock uses Rock-type Pokemon.', env: 'env-gym', enemies: ['onix'], difficulty: 2, questionsToWin: 5, isGym: true, gymLeader: 'brock', badge: '🪨' },
+      { id: 4, name: 'Route 2', title: '🌊 Route 2 - Waterside', desc: 'New Pokemon near the water! Addition and subtraction ahead.', env: 'env-water', enemies: ['psyduck', 'oddish', 'pikachu'], difficulty: 2, questionsToWin: 4, isGym: false },
+      { id: 5, name: 'Mt. Moon', title: '🦇 Mt. Moon Cave', desc: 'A dark cave with rare Pokemon! Watch out for harder math!', env: 'env-cave', enemies: ['zubat', 'geodude', 'machop'], difficulty: 2, questionsToWin: 5, isGym: false },
+      { id: 6, name: 'Cerulean Gym', title: '💧 Cerulean Gym - Misty', desc: 'Misty loves Water Pokemon! Subtraction challenge!', env: 'env-gym', enemies: ['staryu'], difficulty: 2, questionsToWin: 5, isGym: true, gymLeader: 'misty', badge: '💧' },
+      { id: 7, name: 'Route 3', title: '✨ Route 3 - Rare Pokemon', desc: 'Rare Pokemon live here! Find missing numbers!', env: 'env-route', enemies: ['eevee', 'jigglypuff', 'clefairy', 'abra'], difficulty: 3, questionsToWin: 5, isGym: false },
+      { id: 8, name: 'Pokemon Tower', title: '👻 Pokemon Tower', desc: 'Spooky! Ghost Pokemon are here. Master all math types!', env: 'env-cave', enemies: ['gastly', 'dratini', 'magikarp'], difficulty: 3, questionsToWin: 5, isGym: false },
+      { id: 9, name: 'Vermilion Gym', title: '⚡ Vermilion Gym - Lt. Surge', desc: 'The final gym! Show your math mastery!', env: 'env-electric', enemies: ['raichu'], difficulty: 3, questionsToWin: 6, isGym: true, gymLeader: 'surge', badge: '⚡' }
     ];
 
     const STARTERS = ['bulbasaur', 'charmander', 'squirtle'];
     const GYM_BADGES = ['🪨', '💧', '⚡'];
 
-    // === MESSAGES ===
-    const CORRECT_MESSAGES = [
-      "Super effective! 💥",
-      "Critical hit! ⚡",
-      "Amazing! 🌟",
-      "You're a math master! 🎓",
-      "Fantastic! ✨",
-      "Brilliant! 🧠",
-      "Perfect! 💯"
-    ];
-
-    const WRONG_MESSAGES = [
-      "Not quite! The answer is {answer}. {explanation}",
-      "Almost! {answer} is correct. {explanation}",
-      "Try to remember: {explanation}"
-    ];
-
+    const CORRECT_MESSAGES = ["Super effective! 💥", "Critical hit! ⚡", "Amazing! 🌟", "Math master! 🎓", "Fantastic! ✨", "Brilliant! 🧠"];
+    const WRONG_MESSAGES = ["Not quite! The answer is {answer}. {explanation}", "Almost! {answer} is correct. {explanation}"];
     const EXPLANATIONS = {
-      add: "{a} + {b} = {c} because if you have {a} and add {b} more, you get {c}!",
-      sub: "{a} - {b} = {c} because if you take {b} away from {a}, you have {c} left!",
-      missing: "The missing number is {answer} because {equation}!"
+      add: "{a} + {b} = {c} because {a} and {b} more makes {c}!",
+      sub: "{a} - {b} = {c} because taking {b} from {a} leaves {c}!",
+      missing: "The missing number is {answer}!"
     };
 
     // === GAME STATE ===
     let state = {
-      trainer: 'boy',
+      playerName: '',
+      trainer: 'red',
       starter: 'charmander',
       team: [],
       collection: [],
@@ -1396,22 +1358,16 @@
     let audioCtx = null;
 
     function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
     function playSound(type) {
       if (!state.soundEnabled || !audioCtx) return;
-
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.connect(gain);
       gain.connect(audioCtx.destination);
-
       const now = audioCtx.currentTime;
 
       if (type === 'correct') {
@@ -1420,35 +1376,21 @@
         osc.frequency.setValueAtTime(783.99, now + 0.2);
         gain.gain.setValueAtTime(0.25, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-        osc.start();
-        osc.stop(now + 0.4);
+        osc.start(); osc.stop(now + 0.4);
       } else if (type === 'wrong') {
         osc.frequency.setValueAtTime(200, now);
         gain.gain.setValueAtTime(0.15, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-        osc.start();
-        osc.stop(now + 0.25);
+        osc.start(); osc.stop(now + 0.25);
       } else if (type === 'catch') {
-        osc.frequency.setValueAtTime(392, now);
-        osc.frequency.setValueAtTime(523.25, now + 0.12);
-        osc.frequency.setValueAtTime(659.25, now + 0.24);
-        osc.frequency.setValueAtTime(783.99, now + 0.36);
-        gain.gain.setValueAtTime(0.25, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
-        osc.start();
-        osc.stop(now + 0.6);
-      } else if (type === 'badge') {
-        const notes = [523.25, 659.25, 783.99, 1046.50];
-        notes.forEach((freq, i) => {
+        [392, 523.25, 659.25, 783.99].forEach((freq, i) => {
           const o = audioCtx.createOscillator();
           const g = audioCtx.createGain();
-          o.connect(g);
-          g.connect(audioCtx.destination);
-          o.frequency.setValueAtTime(freq, now + i * 0.15);
-          g.gain.setValueAtTime(0.2, now + i * 0.15);
-          g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.15 + 0.3);
-          o.start(now + i * 0.15);
-          o.stop(now + i * 0.15 + 0.3);
+          o.connect(g); g.connect(audioCtx.destination);
+          o.frequency.setValueAtTime(freq, now + i * 0.12);
+          g.gain.setValueAtTime(0.2, now + i * 0.12);
+          g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.12 + 0.25);
+          o.start(now + i * 0.12); o.stop(now + i * 0.12 + 0.25);
         });
       }
     }
@@ -1463,6 +1405,7 @@
     // === STORAGE ===
     function saveGame() {
       localStorage.setItem('pokemon-adv-save', JSON.stringify({
+        playerName: state.playerName,
         trainer: state.trainer,
         starter: state.starter,
         team: state.team,
@@ -1476,11 +1419,7 @@
 
     function loadGame() {
       const saved = localStorage.getItem('pokemon-adv-save');
-      if (saved) {
-        const data = JSON.parse(saved);
-        Object.assign(state, data);
-      }
-
+      if (saved) Object.assign(state, JSON.parse(saved));
       const soundSaved = localStorage.getItem('pokemon-adv-sound');
       if (soundSaved !== null) {
         state.soundEnabled = soundSaved === 'true';
@@ -1506,8 +1445,7 @@
       const container = document.getElementById('confetti');
       container.innerHTML = '';
       const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
-
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < 35; i++) {
         const c = document.createElement('div');
         c.className = 'confetti';
         c.style.left = Math.random() * 100 + '%';
@@ -1516,16 +1454,28 @@
         c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
         container.appendChild(c);
       }
-
       setTimeout(() => container.innerHTML = '', 3500);
     }
 
     // === START SCREEN ===
     function initStartScreen() {
-      // Render starters
-      const grid = document.getElementById('starterGrid');
-      grid.innerHTML = '';
+      // Name input
+      document.getElementById('playerName').value = state.playerName;
 
+      // Render trainers
+      const trainerGrid = document.getElementById('trainerGrid');
+      trainerGrid.innerHTML = '';
+      Object.entries(TRAINERS).forEach(([key, t]) => {
+        const div = document.createElement('div');
+        div.className = `trainer-card ${state.trainer === key ? 'selected' : ''}`;
+        div.onclick = () => selectTrainer(key);
+        div.innerHTML = `<img src="${t.sprite}" alt="${t.name}"><div class="name">${t.name}</div>`;
+        trainerGrid.appendChild(div);
+      });
+
+      // Render starters
+      const starterGrid = document.getElementById('starterGrid');
+      starterGrid.innerHTML = '';
       STARTERS.forEach(key => {
         const p = POKEMON[key];
         const div = document.createElement('div');
@@ -1536,20 +1486,19 @@
           <div class="name">${p.name}</div>
           <span class="type-badge type-${p.type}">${p.type}</span>
         `;
-        grid.appendChild(div);
+        starterGrid.appendChild(div);
       });
 
-      // Update stats preview
+      // Stats preview
       document.getElementById('previewBadges').textContent = state.badges.length;
       document.getElementById('previewPokemon').textContent = state.collection.length;
       document.getElementById('previewStars').textContent = state.stars;
     }
 
-    function selectTrainer(t) {
-      state.trainer = t;
-      document.querySelectorAll('.trainer-card').forEach(c => {
-        c.classList.toggle('selected', c.dataset.trainer === t);
-      });
+    function selectTrainer(key) {
+      state.trainer = key;
+      document.querySelectorAll('.trainer-card').forEach(c => c.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
     }
 
     function selectStarter(key) {
@@ -1560,8 +1509,8 @@
 
     function startAdventure() {
       initAudio();
+      state.playerName = document.getElementById('playerName').value.trim() || 'Trainer';
 
-      // Initialize team if empty
       if (state.team.length === 0) {
         const starter = { ...POKEMON[state.starter], key: state.starter };
         state.team = [starter];
@@ -1575,42 +1524,35 @@
     // === CHAPTER SCREEN ===
     function showChapterScreen() {
       showScreen('chapterScreen');
-
       const chapter = CHAPTERS[state.currentChapter];
 
-      // Update banner
-      const banner = document.getElementById('chapterBanner');
-      banner.className = `chapter-banner ${chapter.env}`;
+      document.getElementById('chapterBanner').className = `chapter-banner ${chapter.env}`;
       document.getElementById('chapterNumber').textContent = `CHAPTER ${chapter.id}`;
       document.getElementById('chapterTitle').textContent = chapter.title;
       document.getElementById('chapterDesc').textContent = chapter.desc;
 
-      // Update journey map
+      // Journey map
       const map = document.getElementById('journeyMap');
       map.innerHTML = '';
-
       CHAPTERS.forEach((ch, i) => {
         if (i > 0) {
           const conn = document.createElement('div');
           conn.className = `map-connector ${i <= state.currentChapter ? 'completed' : ''}`;
           map.appendChild(conn);
         }
-
         const node = document.createElement('div');
         node.className = 'map-node';
         if (i < state.currentChapter) node.classList.add('completed');
         else if (i === state.currentChapter) node.classList.add('current');
         else node.classList.add('locked');
-
         node.innerHTML = ch.isGym ? '🏛️' : '🌳';
         map.appendChild(node);
       });
 
-      // Update badges
+      // Badges
       const badgesDiv = document.getElementById('badgesDisplay');
       badgesDiv.innerHTML = '';
-
-      GYM_BADGES.forEach((badge, i) => {
+      GYM_BADGES.forEach(badge => {
         const slot = document.createElement('div');
         slot.className = `badge-slot ${state.badges.includes(badge) ? 'earned' : ''}`;
         slot.textContent = state.badges.includes(badge) ? badge : '?';
@@ -1627,15 +1569,20 @@
     function renderTeamSelection() {
       const grid = document.getElementById('teamGrid');
       grid.innerHTML = '';
+      const trainer = TRAINERS[state.trainer];
 
       state.team.forEach((p, i) => {
         const div = document.createElement('div');
         div.className = `pokemon-select-card ${i === 0 ? 'selected' : ''}`;
         div.onclick = () => selectBattlePokemon(i);
         div.innerHTML = `
-          <img src="${getSprite(p.id)}" alt="${p.name}">
+          <div class="trainer-badge">
+            <img src="${trainer.sprite}" alt="${state.playerName}">
+          </div>
+          <img src="${getSprite(p.id)}" alt="${p.name}" class="pokemon-sprite">
           <div class="name">${p.name}</div>
           <div class="level">Lv. ${p.level}</div>
+          <div class="player-name-tag">${state.playerName}</div>
         `;
         grid.appendChild(div);
       });
@@ -1658,38 +1605,42 @@
     // === BATTLE ===
     function startBattle() {
       const chapter = CHAPTERS[state.currentChapter];
+      const trainer = TRAINERS[state.trainer];
 
-      // Set player Pokemon
       state.playerHp = state.currentPokemon.hp;
       state.playerMaxHp = state.currentPokemon.hp;
 
-      // Choose enemy
       const enemyKey = random(chapter.enemies);
       state.currentEnemy = { ...POKEMON[enemyKey], key: enemyKey };
       state.enemyHp = state.currentEnemy.hp;
       state.enemyMaxHp = state.currentEnemy.hp;
 
-      // Reset battle state
       state.streak = 0;
       state.questionsCorrect = 0;
 
-      // Update UI
+      // Player trainer & pokemon
+      document.getElementById('playerTrainerImg').src = trainer.sprite;
+      document.getElementById('playerTrainerName').textContent = state.playerName;
+
+      // Enemy trainer
+      if (chapter.isGym && GYM_LEADERS[chapter.gymLeader]) {
+        const gymLeader = GYM_LEADERS[chapter.gymLeader];
+        document.getElementById('enemyTrainerImg').src = gymLeader.sprite;
+        document.getElementById('enemyTrainerName').textContent = gymLeader.name;
+        document.getElementById('encounterType').textContent = `⚔️ Gym Leader ${gymLeader.name}!`;
+      } else {
+        document.getElementById('enemyTrainerImg').src = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png';
+        document.getElementById('enemyTrainerName').textContent = 'Wild';
+        document.getElementById('encounterType').textContent = `Wild ${state.currentEnemy.name}!`;
+      }
+
       updateBattleUI();
       generateQuestion();
-
-      // Set encounter type
-      const encounterType = document.getElementById('encounterType');
-      if (chapter.isGym) {
-        encounterType.textContent = `⚔️ Gym Leader ${chapter.gymLeader}!`;
-      } else {
-        encounterType.textContent = `Wild ${state.currentEnemy.name} appeared!`;
-      }
     }
 
     function updateBattleUI() {
       const chapter = CHAPTERS[state.currentChapter];
 
-      // Player
       document.getElementById('playerPokemonImg').src = getSprite(state.currentPokemon.id);
       document.getElementById('playerPokemonName').textContent = state.currentPokemon.name;
       document.getElementById('playerPokemonLevel').textContent = `Lv. ${state.currentPokemon.level}`;
@@ -1701,7 +1652,6 @@
       if (playerHpPct < 25) playerBar.classList.add('critical');
       else if (playerHpPct < 50) playerBar.classList.add('low');
 
-      // Enemy
       document.getElementById('enemyPokemonImg').src = getSprite(state.currentEnemy.id);
       document.getElementById('enemyPokemonName').textContent = state.currentEnemy.name;
       document.getElementById('enemyPokemonLevel').textContent = `Lv. ${state.currentEnemy.level}`;
@@ -1713,17 +1663,11 @@
       if (enemyHpPct < 25) enemyBar.classList.add('critical');
       else if (enemyHpPct < 50) enemyBar.classList.add('low');
 
-      // Stats
       document.getElementById('battleStars').textContent = state.stars;
       document.getElementById('battleStreak').textContent = state.streak;
       document.getElementById('battleProgress').textContent = `${state.questionsCorrect}/${chapter.questionsToWin}`;
 
-      const streakIcon = document.getElementById('streakIcon');
-      if (state.streak >= 3) {
-        streakIcon.style.animation = 'pulse 0.5s infinite';
-      } else {
-        streakIcon.style.animation = 'none';
-      }
+      document.getElementById('streakIcon').style.animation = state.streak >= 3 ? 'pulse 0.5s infinite' : 'none';
     }
 
     // === QUESTION GENERATION ===
@@ -1732,62 +1676,26 @@
       const difficulty = chapter.difficulty;
 
       let num1, num2, answer, questionText, explanation;
-      const questionType = getQuestionType(difficulty);
+      const qType = difficulty === 1 ? 'add' : (difficulty === 2 ? (Math.random() > 0.4 ? 'add' : 'sub') : (Math.random() < 0.35 ? 'add' : (Math.random() < 0.65 ? 'sub' : 'missing')));
 
-      if (questionType === 'add') {
-        // Addition
-        if (difficulty === 1) {
-          num1 = Math.floor(Math.random() * 10) + 1;
-          num2 = Math.floor(Math.random() * (10 - num1)) + 1;
-        } else if (difficulty === 2) {
-          num1 = Math.floor(Math.random() * 12) + 1;
-          num2 = Math.floor(Math.random() * (20 - num1)) + 1;
-        } else {
-          num1 = Math.floor(Math.random() * 15) + 5;
-          num2 = Math.floor(Math.random() * (25 - num1)) + 1;
-        }
+      if (qType === 'add') {
+        num1 = difficulty === 1 ? Math.floor(Math.random() * 10) + 1 : (difficulty === 2 ? Math.floor(Math.random() * 12) + 1 : Math.floor(Math.random() * 15) + 5);
+        num2 = difficulty === 1 ? Math.floor(Math.random() * (10 - num1)) + 1 : (difficulty === 2 ? Math.floor(Math.random() * (20 - num1)) + 1 : Math.floor(Math.random() * (25 - num1)) + 1);
         answer = num1 + num2;
         questionText = `${num1} + ${num2} = ?`;
         explanation = EXPLANATIONS.add.replace('{a}', num1).replace('{b}', num2).replace('{c}', answer);
-
-      } else if (questionType === 'sub') {
-        // Subtraction
-        if (difficulty === 2) {
-          answer = Math.floor(Math.random() * 10) + 1;
-          num2 = Math.floor(Math.random() * 8) + 1;
-          num1 = answer + num2;
-        } else {
-          answer = Math.floor(Math.random() * 12) + 1;
-          num2 = Math.floor(Math.random() * 10) + 1;
-          num1 = answer + num2;
-        }
+      } else if (qType === 'sub') {
+        answer = difficulty === 2 ? Math.floor(Math.random() * 10) + 1 : Math.floor(Math.random() * 12) + 1;
+        num2 = difficulty === 2 ? Math.floor(Math.random() * 8) + 1 : Math.floor(Math.random() * 10) + 1;
+        num1 = answer + num2;
         questionText = `${num1} - ${num2} = ?`;
         explanation = EXPLANATIONS.sub.replace('{a}', num1).replace('{b}', num2).replace('{c}', answer);
-
       } else {
-        // Missing number (? + 3 = 10)
-        const isPlus = Math.random() > 0.3;
-        if (isPlus) {
-          answer = Math.floor(Math.random() * 10) + 1;
-          num2 = Math.floor(Math.random() * 10) + 1;
-          const total = answer + num2;
-          const leftSide = Math.random() > 0.5;
-
-          if (leftSide) {
-            questionText = `? + ${num2} = ${total}`;
-            explanation = `${answer} + ${num2} = ${total}`;
-          } else {
-            questionText = `${num2} + ? = ${total}`;
-            explanation = `${num2} + ${answer} = ${total}`;
-          }
-        } else {
-          num1 = Math.floor(Math.random() * 15) + 5;
-          answer = Math.floor(Math.random() * (num1 - 1)) + 1;
-          const result = num1 - answer;
-          questionText = `${num1} - ? = ${result}`;
-          explanation = `${num1} - ${answer} = ${result}`;
-        }
-        explanation = EXPLANATIONS.missing.replace('{answer}', answer).replace('{equation}', explanation);
+        answer = Math.floor(Math.random() * 10) + 1;
+        num2 = Math.floor(Math.random() * 10) + 1;
+        const total = answer + num2;
+        questionText = Math.random() > 0.5 ? `? + ${num2} = ${total}` : `${num2} + ? = ${total}`;
+        explanation = EXPLANATIONS.missing.replace('{answer}', answer);
       }
 
       state.currentAnswer = answer;
@@ -1795,39 +1703,21 @@
 
       document.getElementById('question').textContent = questionText;
       generateAnswerOptions(answer, difficulty);
-      hideMessage();
-    }
-
-    function getQuestionType(difficulty) {
-      if (difficulty === 1) {
-        return 'add';
-      } else if (difficulty === 2) {
-        return Math.random() > 0.4 ? 'add' : 'sub';
-      } else {
-        const r = Math.random();
-        if (r < 0.35) return 'add';
-        if (r < 0.7) return 'sub';
-        return 'missing';
-      }
+      document.getElementById('messageBox').style.display = 'none';
     }
 
     function generateAnswerOptions(correct, difficulty) {
       const options = [correct];
       const range = difficulty === 1 ? 5 : 8;
-
       while (options.length < 4) {
         let wrong = correct + Math.floor(Math.random() * range * 2) - range;
         if (wrong < 0) wrong = Math.floor(Math.random() * range) + 1;
-        if (!options.includes(wrong) && wrong >= 0) {
-          options.push(wrong);
-        }
+        if (!options.includes(wrong) && wrong >= 0) options.push(wrong);
       }
-
       options.sort(() => Math.random() - 0.5);
 
       const answersDiv = document.getElementById('answers');
       answersDiv.innerHTML = '';
-
       options.forEach(opt => {
         const btn = document.createElement('button');
         btn.className = 'btn btn-primary answer-btn';
@@ -1844,19 +1734,14 @@
       const chapter = CHAPTERS[state.currentChapter];
 
       if (selected === state.currentAnswer) {
-        // Correct!
         playSound('correct');
         btn.classList.add('correct');
 
         state.streak++;
         state.questionsCorrect++;
         state.stars += 10 * Math.min(state.streak, 5);
+        if (state.streak > state.bestStreak) state.bestStreak = state.streak;
 
-        if (state.streak > state.bestStreak) {
-          state.bestStreak = state.streak;
-        }
-
-        // Deal damage to enemy
         const damage = state.currentPokemon.atk + Math.floor(state.streak * 2);
         state.enemyHp = Math.max(0, state.enemyHp - damage);
 
@@ -1870,30 +1755,23 @@
             generateQuestion();
             buttons.forEach(b => b.disabled = false);
           }
-        }, 1200);
-
+        }, 1000);
       } else {
-        // Wrong
         playSound('wrong');
         btn.classList.add('wrong');
 
         state.streak = 0;
-
-        // Take damage
         const damage = Math.floor(state.currentEnemy.atk * 0.4);
         state.playerHp = Math.max(0, state.playerHp - damage);
 
-        const msg = random(WRONG_MESSAGES)
-          .replace('{answer}', state.currentAnswer)
-          .replace('{explanation}', state.currentExplanation);
-
+        const msg = random(WRONG_MESSAGES).replace('{answer}', state.currentAnswer).replace('{explanation}', state.currentExplanation);
         showMessage('hint', msg);
         updateBattleUI();
 
         setTimeout(() => {
           btn.classList.remove('wrong');
           buttons.forEach(b => b.disabled = false);
-        }, 2500);
+        }, 2000);
       }
     }
 
@@ -1904,32 +1782,21 @@
       box.textContent = text;
     }
 
-    function hideMessage() {
-      document.getElementById('messageBox').style.display = 'none';
-    }
-
     // === VICTORY ===
     function victory() {
       const chapter = CHAPTERS[state.currentChapter];
 
       if (chapter.isGym) {
-        playSound('badge');
-
-        if (!state.badges.includes(chapter.badge)) {
-          state.badges.push(chapter.badge);
-        }
-
+        playSound('catch');
+        if (!state.badges.includes(chapter.badge)) state.badges.push(chapter.badge);
         document.getElementById('victoryTitle').textContent = '🏆 GYM VICTORY!';
       } else {
         playSound('catch');
         document.getElementById('victoryTitle').textContent = 'GOTCHA!';
       }
 
-      // Add to collection
       if (!state.collection.includes(state.currentEnemy.key)) {
         state.collection.push(state.currentEnemy.key);
-
-        // Add to team if not gym Pokemon
         if (!state.currentEnemy.isGym && state.team.length < 6) {
           const newMember = { ...state.currentEnemy };
           newMember.level = Math.max(5, newMember.level - 2);
@@ -1937,27 +1804,22 @@
         }
       }
 
-      // Update victory screen
       document.getElementById('victoryPokemonImg').src = getSprite(state.currentEnemy.id);
-      document.getElementById('victoryPokemonName').textContent =
-        chapter.isGym ? `You defeated ${chapter.gymLeader}!` : `${state.currentEnemy.name} was caught!`;
+      document.getElementById('victoryPokemonName').textContent = chapter.isGym ? `You defeated ${GYM_LEADERS[chapter.gymLeader]?.name || 'the Gym Leader'}!` : `${state.currentEnemy.name} was caught!`;
       document.getElementById('victoryStars').textContent = `⭐ ${state.stars}`;
       document.getElementById('victoryStreak').textContent = `🔥 ${state.bestStreak}`;
       document.getElementById('victoryTeam').textContent = `🎉 ${state.team.length}`;
 
       showConfetti();
-
       document.getElementById('victoryScreen').classList.add('active');
       saveGame();
     }
 
     function continueAdventure() {
       document.getElementById('victoryScreen').classList.remove('active');
-
       state.currentChapter++;
 
       if (state.currentChapter >= CHAPTERS.length) {
-        // Game complete!
         alert('🎊 CONGRATULATIONS! You\'ve become a Pokemon Math Master! 🎊');
         state.currentChapter = 0;
       }
@@ -1969,30 +1831,19 @@
     // === COLLECTION ===
     function showCollection() {
       showScreen('collectionScreen');
-      renderCollection();
-    }
-
-    function renderCollection() {
       const grid = document.getElementById('collectionGrid');
       grid.innerHTML = '';
 
-      const allPokemon = Object.keys(POKEMON);
-
-      allPokemon.forEach(key => {
+      Object.keys(POKEMON).forEach(key => {
         const p = POKEMON[key];
         const caught = state.collection.includes(key);
-
         const div = document.createElement('div');
         div.className = `collection-item ${caught ? '' : 'locked'}`;
-        div.innerHTML = `
-          <img src="${getSprite(p.id)}" alt="${p.name}">
-          <div class="name">${caught ? p.name : '???'}</div>
-        `;
+        div.innerHTML = `<img src="${getSprite(p.id)}" alt="${p.name}"><div class="name">${caught ? p.name : '???'}</div>`;
         grid.appendChild(div);
       });
 
-      document.getElementById('collectionCount').textContent =
-        `${state.collection.length} / ${allPokemon.length} caught`;
+      document.getElementById('collectionCount').textContent = `${state.collection.length} / ${Object.keys(POKEMON).length} caught`;
     }
 
     function backToStart() {
@@ -2002,10 +1853,8 @@
 
     // === iOS VIEWPORT FIX ===
     function setVH() {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
+      document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
     }
-
     window.addEventListener('resize', setVH);
     window.addEventListener('orientationchange', setVH);
     setVH();
