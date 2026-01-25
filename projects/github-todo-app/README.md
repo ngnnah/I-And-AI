@@ -35,7 +35,7 @@ This app requires a GitHub Personal Access Token (PAT). **Misconfiguring your to
 │  - No backend, no server                │
 │  - Your token stays in YOUR browser     │
 └─────────────────────────────────────────┘
-                    │ GitHub API
+                    │ GitHub Contents API
                     ▼
 ┌─────────────────────────────────────────┐
 │  Your GitHub Repository (private)       │
@@ -43,6 +43,25 @@ This app requires a GitHub Personal Access Token (PAT). **Misconfiguring your to
 │      Every save = a git commit          │
 └─────────────────────────────────────────┘
 ```
+
+### Why Saves Are Instant
+
+When you add/toggle/delete a todo:
+
+1. **UI updates immediately** (optimistic update)
+2. **HTTP PUT request sent to GitHub API** - happens right away, not batched
+3. **GitHub commits the change** - creates a new version in git history
+4. **If save fails** - UI rolls back to previous state
+
+This means even if you disconnect 1 second after adding a todo, the save request was already sent to GitHub.
+
+### Git Version History
+
+Every save creates a commit. You can:
+
+- View history: `github.com/<user>/<repo>/commits/main/todos.json`
+- Restore previous versions through GitHub UI
+- See exactly when each change happened
 
 ## Quick Start
 
@@ -76,68 +95,34 @@ Go to https://github.com/new and create a private repo (e.g., `my-todos`)
 - **Zero backend** - Purely static, hosted on GitHub Pages
 - **You own your data** - Stored in your own GitHub repo
 - **Version history** - Every change is a git commit
-- **Privacy** - Use a private repo; only you can access it
-- **Optional persistence** - Choose whether to remember your token
+- **Instant saves** - Changes sent to GitHub immediately
+- **Offline rollback** - Failed saves revert the UI
 
-## Token Storage Security
+## Token Storage
 
-| "Remember token" | Behavior                                                                               |
-| ---------------- | -------------------------------------------------------------------------------------- |
-| **Unchecked**    | Token is NOT saved. You must re-enter it each session.                                 |
-| **Checked**      | Token is saved in browser localStorage. Convenient but: don't use on shared computers. |
+| "Remember token" | Behavior                                                    |
+| ---------------- | ----------------------------------------------------------- |
+| **Unchecked**    | Token NOT saved. Re-enter each session. More secure.        |
+| **Checked**      | Token saved in localStorage. Don't use on shared computers. |
 
-### localStorage Risks
+**Risk**: localStorage is vulnerable to XSS. Mitigation: fine-grained PAT limits damage to just your todo repo.
 
-- Vulnerable to XSS attacks (if this site were compromised)
-- Accessible to browser extensions
-- Visible in browser DevTools
-
-**Mitigation**: Fine-grained PAT limits damage. Even if stolen, attacker can only access your todo list.
-
-## Example Setup
+## Example
 
 Using `ngnnah` as username and `test-private-file-based-todo-app` as repo:
 
-1. Repo: https://github.com/ngnnah/test-private-file-based-todo-app
-2. Fine-grained PAT scoped to only that repo
-3. Permission: Contents read/write only
+- Repo: https://github.com/ngnnah/test-private-file-based-todo-app
+- Fine-grained PAT scoped to only that repo
+- Permission: Contents read/write only
 
 ## Development
 
 ```bash
-# Install dependencies
-npm install
-
-# Start local server
-npm start
-
-# Run unit tests
-npm test
-
-# Run E2E tests
-npx playwright install
-npm run test:e2e
+npm install      # Install dependencies
+npm start        # Start local server
+npm test         # Run unit tests
+npm run test:e2e # Run E2E tests (requires: npx playwright install)
 ```
-
-## Files
-
-```
-├── index.html          # UI with security warnings
-├── app.js              # Core logic, GitHub API
-├── app.test.js         # Unit tests
-├── e2e.test.js         # Playwright E2E tests
-├── LEARNINGS.md        # Learning in public documentation
-└── README.md           # This file
-```
-
-## Learning in Public
-
-See [LEARNINGS.md](./LEARNINGS.md) for the full story of building this app, including:
-
-- What worked and what didn't
-- Security analysis
-- Common errors and how to fix them
-- Alternative approaches considered
 
 ## License
 
