@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#6366F1">
+  <title>Pokemon Math Adventure</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;700;800&display=swap');
+
+    :root {
+      --vh: 1vh;
+      --primary: #6366F1;
+      --primary-dark: #4F46E5;
+      --success: #10B981;
+      --success-dark: #059669;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --pokemon-yellow: #FFCB05;
+      --pokemon-blue: #3D7DCA;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      min-height: calc(var(--vh, 1vh) * 100);
+      padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* === SCREENS === */
+    .screen {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* === COMMON STYLES === */
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      margin-bottom: 15px;
+    }
+
+    .btn {
+      font-family: 'Fredoka One', cursive;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.1s;
+      touch-action: manipulation;
+    }
+
+    .btn:active {
+      transform: translateY(3px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      box-shadow: 0 5px 0 #3730A3;
+    }
+
+    .btn-primary:active {
+      box-shadow: 0 2px 0 #3730A3;
+    }
+
+    .btn-success {
+      background: linear-gradient(180deg, var(--success) 0%, var(--success-dark) 100%);
+      color: white;
+      box-shadow: 0 5px 0 #047857;
+    }
+
+    .btn-success:active {
+      box-shadow: 0 2px 0 #047857;
+    }
+
+    .btn-warning {
+      background: linear-gradient(180deg, var(--pokemon-yellow) 0%, #E5B800 100%);
+      color: #1F2937;
+      box-shadow: 0 5px 0 #B8860B;
+    }
+
+    .btn-warning:active {
+      box-shadow: 0 2px 0 #B8860B;
+    }
+
+    /* === START SCREEN === */
+    .start-screen {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .logo {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.8rem, 7vw, 2.5rem);
+      color: var(--pokemon-yellow);
+      text-shadow:
+        3px 3px 0 var(--pokemon-blue),
+        -1px -1px 0 var(--pokemon-blue),
+        1px -1px 0 var(--pokemon-blue),
+        -1px 1px 0 var(--pokemon-blue);
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: white;
+      font-size: 1rem;
+      opacity: 0.9;
+      margin-bottom: 20px;
+    }
+
+    .trainer-select {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .trainer-card {
+      background: white;
+      padding: 15px 25px;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 4px solid transparent;
+    }
+
+    .trainer-card.selected {
+      border-color: var(--pokemon-yellow);
+      box-shadow: 0 0 20px rgba(255, 203, 5, 0.5);
+    }
+
+    .trainer-card:active {
+      transform: scale(0.95);
+    }
+
+    .trainer-emoji {
+      font-size: 3rem;
+    }
+
+    .trainer-name {
+      font-weight: 700;
+      color: #374151;
+      margin-top: 5px;
+    }
+
+    .starter-section h3 {
+      color: white;
+      margin-bottom: 15px;
+    }
+
+    .starter-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .starter-card {
+      background: white;
+      padding: 15px 10px;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 4px solid transparent;
+      text-align: center;
+    }
+
+    .starter-card.selected {
+      border-color: var(--primary);
+      background: #EEF2FF;
+    }
+
+    .starter-card:active {
+      transform: scale(0.95);
+    }
+
+    .starter-card img {
+      width: 80px;
+      height: 80px;
+      image-rendering: pixelated;
+    }
+
+    .starter-card .name {
+      font-weight: 700;
+      color: #374151;
+      font-size: 0.9rem;
+    }
+
+    .type-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 10px;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      margin-top: 5px;
+    }
+
+    .start-btn {
+      font-size: 1.5rem;
+      padding: 18px 50px;
+      margin-top: 20px;
+    }
+
+    .stats-preview {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 20px;
+      color: white;
+    }
+
+    .stat-preview {
+      text-align: center;
+    }
+
+    .stat-preview .value {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.5rem;
+    }
+
+    .stat-preview .label {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    /* === CHAPTER SCREEN === */
+    .chapter-screen {
+      padding: 15px;
+    }
+
+    .chapter-banner {
+      text-align: center;
+      padding: 30px 20px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chapter-banner::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 100%);
+    }
+
+    .chapter-banner > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .env-route { background: linear-gradient(135deg, #22C55E 0%, #15803D 100%); }
+    .env-gym { background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); }
+    .env-cave { background: linear-gradient(135deg, #78716C 0%, #57534E 100%); }
+    .env-water { background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%); }
+    .env-electric { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); }
+
+    .chapter-number {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1rem;
+      opacity: 0.9;
+      margin-bottom: 5px;
+    }
+
+    .chapter-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    .chapter-desc {
+      font-size: 1rem;
+      opacity: 0.95;
+      line-height: 1.4;
+    }
+
+    .journey-map {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 20px 0;
+    }
+
+    .map-node {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      background: white;
+      border: 3px solid #E5E7EB;
+      transition: all 0.2s;
+    }
+
+    .map-node.completed {
+      background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+      border-color: var(--success-dark);
+      color: white;
+    }
+
+    .map-node.current {
+      background: linear-gradient(135deg, var(--pokemon-yellow) 0%, #E5B800 100%);
+      border-color: #B8860B;
+      animation: pulse 1s infinite;
+      transform: scale(1.1);
+    }
+
+    .map-node.locked {
+      opacity: 0.4;
+    }
+
+    .map-connector {
+      width: 20px;
+      height: 4px;
+      background: #E5E7EB;
+      border-radius: 2px;
+    }
+
+    .map-connector.completed {
+      background: var(--success);
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 203, 5, 0.5); }
+      50% { box-shadow: 0 0 0 10px rgba(255, 203, 5, 0); }
+    }
+
+    .badges-display {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .badge-slot {
+      width: 45px;
+      height: 45px;
+      background: #F3F4F6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      border: 3px dashed #D1D5DB;
+    }
+
+    .badge-slot.earned {
+      background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+      border: 3px solid #F59E0B;
+      animation: badgeShine 2s infinite;
+    }
+
+    @keyframes badgeShine {
+      0%, 100% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
+      50% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.6); }
+    }
+
+    .chapter-btn {
+      font-size: 1.3rem;
+      padding: 15px 40px;
+      display: block;
+      width: 100%;
+      max-width: 300px;
+      margin: 10px auto 0;
+    }
+
+    /* === TEAM SELECT SCREEN === */
+    .team-select {
+      padding: 15px;
+    }
+
+    .team-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .team-header h2 {
+      font-family: 'Fredoka One', cursive;
+      color: white;
+      font-size: 1.5rem;
+    }
+
+    .team-header p {
+      color: white;
+      opacity: 0.9;
+    }
+
+    .pokemon-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .pokemon-select-card {
+      background: white;
+      border-radius: 15px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      border: 4px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .pokemon-select-card.selected {
+      border-color: var(--primary);
+      background: #EEF2FF;
+    }
+
+    .pokemon-select-card:active {
+      transform: scale(0.95);
+    }
+
+    .pokemon-select-card img {
+      width: 70px;
+      height: 70px;
+      image-rendering: pixelated;
+    }
+
+    .pokemon-select-card .name {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #374151;
+    }
+
+    .pokemon-select-card .level {
+      font-size: 0.75rem;
+      color: #6B7280;
+    }
+
+    .team-btn {
+      font-size: 1.3rem;
+      padding: 15px 40px;
+      display: block;
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    /* === BATTLE SCREEN === */
+    .battle-screen {
+      padding: 10px;
+    }
+
+    .battle-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      background: white;
+      border-radius: 15px;
+      margin-bottom: 10px;
+    }
+
+    .battle-stat {
+      text-align: center;
+    }
+
+    .battle-stat .icon {
+      font-size: 1.2rem;
+    }
+
+    .battle-stat .value {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+
+    .battle-stat .label {
+      font-size: 0.65rem;
+      color: #6B7280;
+      text-transform: uppercase;
+    }
+
+    .battle-field {
+      background: linear-gradient(180deg, #87CEEB 0%, #90EE90 60%, #228B22 100%);
+      border-radius: 20px;
+      padding: 15px;
+      margin-bottom: 10px;
+      position: relative;
+      min-height: 280px;
+    }
+
+    .battle-scene {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      height: 200px;
+      padding: 0 10px;
+    }
+
+    .battle-pokemon {
+      text-align: center;
+      flex: 1;
+    }
+
+    .battle-pokemon img {
+      width: 120px;
+      height: 120px;
+      image-rendering: pixelated;
+      filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+    }
+
+    .battle-pokemon.player img {
+      animation: playerIdle 2s ease-in-out infinite;
+    }
+
+    .battle-pokemon.enemy img {
+      animation: enemyIdle 2s ease-in-out infinite 0.5s;
+    }
+
+    @keyframes playerIdle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @keyframes enemyIdle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .pokemon-info-card {
+      background: white;
+      border-radius: 12px;
+      padding: 10px;
+      margin-top: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .pokemon-info-card .name {
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: #1F2937;
+    }
+
+    .pokemon-info-card .level {
+      font-size: 0.75rem;
+      color: #6B7280;
+    }
+
+    .hp-bar-container {
+      background: #E5E7EB;
+      height: 12px;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+
+    .hp-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--success) 0%, #34D399 100%);
+      transition: width 0.5s ease;
+      border-radius: 6px;
+    }
+
+    .hp-bar.low {
+      background: linear-gradient(90deg, var(--warning) 0%, #FBBF24 100%);
+    }
+
+    .hp-bar.critical {
+      background: linear-gradient(90deg, var(--danger) 0%, #F87171 100%);
+      animation: hpPulse 0.5s infinite;
+    }
+
+    @keyframes hpPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .vs-badge {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.5rem;
+      color: white;
+      background: linear-gradient(135deg, var(--danger) 0%, #DC2626 100%);
+      padding: 8px 20px;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .encounter-type {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .encounter-type span {
+      background: rgba(255,255,255,0.9);
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #374151;
+    }
+
+    /* Question Area */
+    .question-card {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .question-prompt {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #6B7280;
+      margin-bottom: 10px;
+    }
+
+    .question {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2rem, 8vw, 3rem);
+      text-align: center;
+      color: #1F2937;
+      padding: 15px;
+      background: linear-gradient(180deg, #F9FAFB 0%, #F3F4F6 100%);
+      border-radius: 15px;
+      margin-bottom: 15px;
+    }
+
+    .answers-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .answer-btn {
+      font-size: 1.8rem;
+      padding: 18px 15px;
+      min-height: 70px;
+    }
+
+    .answer-btn.correct {
+      background: linear-gradient(180deg, var(--success) 0%, var(--success-dark) 100%) !important;
+      box-shadow: 0 5px 0 #047857 !important;
+      animation: correctBounce 0.5s ease;
+    }
+
+    .answer-btn.wrong {
+      background: linear-gradient(180deg, var(--danger) 0%, #DC2626 100%) !important;
+      box-shadow: 0 5px 0 #B91C1C !important;
+      animation: shake 0.5s ease;
+    }
+
+    @keyframes correctBounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+
+    .message-box {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 700;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .message-box.success {
+      background: linear-gradient(180deg, #DCFCE7 0%, #BBF7D0 100%);
+      color: #166534;
+    }
+
+    .message-box.hint {
+      background: linear-gradient(180deg, #FEF3C7 0%, #FDE68A 100%);
+      color: #92400E;
+    }
+
+    .message-box.info {
+      background: linear-gradient(180deg, #DBEAFE 0%, #BFDBFE 100%);
+      color: #1E40AF;
+    }
+
+    /* === VICTORY SCREEN === */
+    .victory-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .victory-screen.active {
+      display: flex;
+    }
+
+    .victory-content {
+      background: white;
+      border-radius: 25px;
+      padding: 30px 25px;
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+      animation: victoryPop 0.5s ease;
+    }
+
+    @keyframes victoryPop {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .victory-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2rem;
+      color: var(--pokemon-yellow);
+      text-shadow: 2px 2px 0 var(--pokemon-blue);
+      margin-bottom: 15px;
+    }
+
+    .victory-pokemon {
+      margin: 15px 0;
+    }
+
+    .victory-pokemon img {
+      width: 150px;
+      height: 150px;
+      animation: victoryBounce 0.5s ease-in-out infinite;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+    }
+
+    @keyframes victoryBounce {
+      0%, 100% { transform: translateY(0) rotate(-3deg); }
+      50% { transform: translateY(-15px) rotate(3deg); }
+    }
+
+    .victory-name {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.5rem;
+      color: #1F2937;
+      margin-bottom: 15px;
+    }
+
+    .victory-stats {
+      background: #F9FAFB;
+      border-radius: 15px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+
+    .victory-stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #E5E7EB;
+    }
+
+    .victory-stat-row:last-child {
+      border-bottom: none;
+    }
+
+    .victory-btn {
+      font-size: 1.3rem;
+      padding: 15px 35px;
+      margin-top: 10px;
+    }
+
+    /* === COLLECTION SCREEN === */
+    .collection-screen {
+      padding: 15px;
+    }
+
+    .collection-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .collection-header h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.8rem;
+      color: white;
+    }
+
+    .collection-header p {
+      color: white;
+      opacity: 0.9;
+    }
+
+    .collection-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .collection-item {
+      background: white;
+      border-radius: 12px;
+      padding: 10px 5px;
+      text-align: center;
+    }
+
+    .collection-item img {
+      width: 60px;
+      height: 60px;
+      image-rendering: pixelated;
+    }
+
+    .collection-item.locked img {
+      filter: grayscale(100%) brightness(0.2);
+    }
+
+    .collection-item .name {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #374151;
+      margin-top: 3px;
+    }
+
+    .collection-item.locked .name {
+      color: #9CA3AF;
+    }
+
+    .back-btn {
+      font-size: 1.1rem;
+      padding: 12px 30px;
+      display: block;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      box-shadow: none;
+    }
+
+    /* === TYPE COLORS === */
+    .type-fire { background: linear-gradient(135deg, #F08030 0%, #DD6610 100%); }
+    .type-water { background: linear-gradient(135deg, #6890F0 0%, #4A70D0 100%); }
+    .type-grass { background: linear-gradient(135deg, #78C850 0%, #5CA030 100%); }
+    .type-electric { background: linear-gradient(135deg, #F8D030 0%, #D8B010 100%); }
+    .type-normal { background: linear-gradient(135deg, #A8A878 0%, #8A8A58 100%); }
+    .type-flying { background: linear-gradient(135deg, #A890F0 0%, #8A70D0 100%); }
+    .type-bug { background: linear-gradient(135deg, #A8B820 0%, #8A9A10 100%); }
+    .type-poison { background: linear-gradient(135deg, #A040A0 0%, #802080 100%); }
+    .type-fairy { background: linear-gradient(135deg, #EE99AC 0%, #DD7798 100%); }
+    .type-psychic { background: linear-gradient(135deg, #F85888 0%, #D83868 100%); }
+    .type-rock { background: linear-gradient(135deg, #B8A038 0%, #9A8020 100%); }
+    .type-ground { background: linear-gradient(135deg, #E0C068 0%, #C0A048 100%); }
+    .type-fighting { background: linear-gradient(135deg, #C03028 0%, #A02820 100%); }
+    .type-ghost { background: linear-gradient(135deg, #705898 0%, #554374 100%); }
+    .type-ice { background: linear-gradient(135deg, #98D8D8 0%, #78B8B8 100%); }
+    .type-dragon { background: linear-gradient(135deg, #7038F8 0%, #5028C8 100%); }
+
+    /* === CONFETTI === */
+    .confetti-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1001;
+      overflow: hidden;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      animation: confettiFall 3s ease-out forwards;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(-50px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    /* === SETTINGS === */
+    .settings-btn {
+      position: fixed;
+      top: max(12px, env(safe-area-inset-top));
+      right: max(12px, env(safe-area-inset-right));
+      width: 45px;
+      height: 45px;
+      background: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.3rem;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      z-index: 100;
+      touch-action: manipulation;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 380px) {
+      .answer-btn {
+        font-size: 1.5rem;
+        padding: 15px 10px;
+        min-height: 60px;
+      }
+
+      .battle-pokemon img {
+        width: 100px;
+        height: 100px;
+      }
+
+      .pokemon-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .collection-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (hover: hover) {
+      .btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .trainer-card:hover,
+      .starter-card:hover,
+      .pokemon-select-card:hover {
+        transform: scale(1.02);
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="settings-btn" onclick="toggleSound()" id="soundBtn" title="Sound">🔊</button>
+
+  <div class="container">
+    <!-- START SCREEN -->
+    <div class="screen active" id="startScreen">
+      <div class="start-screen">
+        <h1 class="logo">Pokemon Math Adventure</h1>
+        <p class="subtitle">Become a Pokemon Master with math!</p>
+
+        <div class="card">
+          <h3 style="text-align: center; color: #374151; margin-bottom: 15px;">Choose Your Trainer</h3>
+          <div class="trainer-select">
+            <div class="trainer-card selected" data-trainer="boy" onclick="selectTrainer('boy')">
+              <div class="trainer-emoji">🧒</div>
+              <div class="trainer-name">Boy</div>
+            </div>
+            <div class="trainer-card" data-trainer="girl" onclick="selectTrainer('girl')">
+              <div class="trainer-emoji">👧</div>
+              <div class="trainer-name">Girl</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card starter-section">
+          <h3 style="text-align: center; color: #374151; margin-bottom: 15px;">Choose Your Starter!</h3>
+          <div class="starter-grid" id="starterGrid"></div>
+        </div>
+
+        <button class="btn btn-warning start-btn" onclick="startAdventure()">
+          START ADVENTURE!
+        </button>
+
+        <div class="stats-preview" id="statsPreview">
+          <div class="stat-preview">
+            <div class="value" id="previewBadges">0</div>
+            <div class="label">Badges</div>
+          </div>
+          <div class="stat-preview">
+            <div class="value" id="previewPokemon">0</div>
+            <div class="label">Pokemon</div>
+          </div>
+          <div class="stat-preview">
+            <div class="value" id="previewStars">0</div>
+            <div class="label">Stars</div>
+          </div>
+        </div>
+
+        <button class="btn back-btn" style="margin-top: 20px;" onclick="showCollection()">
+          View Collection
+        </button>
+      </div>
+    </div>
+
+    <!-- CHAPTER SCREEN -->
+    <div class="screen" id="chapterScreen">
+      <div class="chapter-screen">
+        <div class="chapter-banner" id="chapterBanner">
+          <div class="chapter-number" id="chapterNumber">CHAPTER 1</div>
+          <div class="chapter-title" id="chapterTitle">🌳 Route 1</div>
+          <div class="chapter-desc" id="chapterDesc">
+            Your adventure begins! Wild Pokemon are waiting in the tall grass.
+          </div>
+        </div>
+
+        <div class="card">
+          <h4 style="text-align: center; color: #374151; margin-bottom: 10px;">Your Journey</h4>
+          <div class="journey-map" id="journeyMap"></div>
+        </div>
+
+        <div class="card">
+          <h4 style="text-align: center; color: #374151; margin-bottom: 10px;">Gym Badges</h4>
+          <div class="badges-display" id="badgesDisplay"></div>
+        </div>
+
+        <button class="btn btn-success chapter-btn" onclick="startChapter()">
+          GO!
+        </button>
+
+        <button class="btn back-btn" style="margin-top: 10px;" onclick="backToStart()">
+          Back to Menu
+        </button>
+      </div>
+    </div>
+
+    <!-- TEAM SELECT SCREEN -->
+    <div class="screen" id="teamScreen">
+      <div class="team-select">
+        <div class="team-header">
+          <h2>Choose Your Pokemon!</h2>
+          <p>Pick one to battle with</p>
+        </div>
+
+        <div class="pokemon-grid" id="teamGrid"></div>
+
+        <button class="btn btn-primary team-btn" onclick="confirmTeamSelection()">
+          BATTLE!
+        </button>
+      </div>
+    </div>
+
+    <!-- BATTLE SCREEN -->
+    <div class="screen" id="battleScreen">
+      <div class="battle-screen">
+        <div class="battle-header">
+          <div class="battle-stat">
+            <div class="icon">⭐</div>
+            <div class="value" id="battleStars">0</div>
+            <div class="label">Stars</div>
+          </div>
+          <div class="battle-stat">
+            <div class="icon" id="streakIcon">🔥</div>
+            <div class="value" id="battleStreak">0</div>
+            <div class="label">Streak</div>
+          </div>
+          <div class="battle-stat">
+            <div class="icon">🎯</div>
+            <div class="value" id="battleProgress">0/4</div>
+            <div class="label">Progress</div>
+          </div>
+        </div>
+
+        <div class="battle-field" id="battleField">
+          <div class="encounter-type">
+            <span id="encounterType">Wild Pokemon!</span>
+          </div>
+
+          <div class="battle-scene">
+            <div class="battle-pokemon player">
+              <img id="playerPokemonImg" src="" alt="Your Pokemon">
+              <div class="pokemon-info-card">
+                <div class="name" id="playerPokemonName">Pikachu</div>
+                <div class="level" id="playerPokemonLevel">Lv. 5</div>
+                <div class="hp-bar-container">
+                  <div class="hp-bar" id="playerHpBar" style="width: 100%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="vs-badge">VS</div>
+
+            <div class="battle-pokemon enemy">
+              <img id="enemyPokemonImg" src="" alt="Wild Pokemon">
+              <div class="pokemon-info-card">
+                <div class="name" id="enemyPokemonName">Rattata</div>
+                <div class="level" id="enemyPokemonLevel">Lv. 3</div>
+                <div class="hp-bar-container">
+                  <div class="hp-bar" id="enemyHpBar" style="width: 100%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="question-prompt">Solve to attack!</div>
+          <div class="question" id="question">5 + 3 = ?</div>
+          <div class="answers-grid" id="answers"></div>
+          <div class="message-box" id="messageBox" style="display: none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VICTORY SCREEN -->
+    <div class="victory-screen" id="victoryScreen">
+      <div class="victory-content">
+        <div class="victory-title" id="victoryTitle">GOTCHA!</div>
+        <div class="victory-pokemon">
+          <img id="victoryPokemonImg" src="" alt="Caught Pokemon">
+        </div>
+        <div class="victory-name" id="victoryPokemonName">Rattata was caught!</div>
+        <div class="victory-stats">
+          <div class="victory-stat-row">
+            <span>Stars earned</span>
+            <span id="victoryStars">⭐ 40</span>
+          </div>
+          <div class="victory-stat-row">
+            <span>Best streak</span>
+            <span id="victoryStreak">🔥 4</span>
+          </div>
+          <div class="victory-stat-row">
+            <span>Team size</span>
+            <span id="victoryTeam">🎉 3</span>
+          </div>
+        </div>
+        <button class="btn btn-success victory-btn" onclick="continueAdventure()">
+          CONTINUE!
+        </button>
+      </div>
+    </div>
+
+    <!-- COLLECTION SCREEN -->
+    <div class="screen" id="collectionScreen">
+      <div class="collection-screen">
+        <div class="collection-header">
+          <h2>My Pokemon</h2>
+          <p id="collectionCount">0 / 25 caught</p>
+        </div>
+
+        <div class="collection-grid" id="collectionGrid"></div>
+
+        <button class="btn back-btn" onclick="backToStart()">
+          Back
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="confetti-container" id="confetti"></div>
+
+  <script>
+    // === POKEMON DATABASE ===
+    const POKEMON = {
+      // Starters
+      bulbasaur: { id: 1, name: 'Bulbasaur', type: 'grass', hp: 45, atk: 8, level: 5 },
+      charmander: { id: 4, name: 'Charmander', type: 'fire', hp: 39, atk: 9, level: 5 },
+      squirtle: { id: 7, name: 'Squirtle', type: 'water', hp: 44, atk: 8, level: 5 },
+
+      // Route 1 Pokemon (Easy)
+      rattata: { id: 19, name: 'Rattata', type: 'normal', hp: 30, atk: 6, level: 3 },
+      pidgey: { id: 16, name: 'Pidgey', type: 'flying', hp: 35, atk: 6, level: 4 },
+      caterpie: { id: 10, name: 'Caterpie', type: 'bug', hp: 30, atk: 5, level: 3 },
+      weedle: { id: 13, name: 'Weedle', type: 'bug', hp: 30, atk: 5, level: 3 },
+
+      // Route 2 Pokemon (Medium)
+      pikachu: { id: 25, name: 'Pikachu', type: 'electric', hp: 35, atk: 10, level: 6 },
+      oddish: { id: 43, name: 'Oddish', type: 'grass', hp: 40, atk: 7, level: 5 },
+      meowth: { id: 52, name: 'Meowth', type: 'normal', hp: 38, atk: 8, level: 6 },
+      psyduck: { id: 54, name: 'Psyduck', type: 'water', hp: 45, atk: 8, level: 7 },
+
+      // Cave Pokemon
+      geodude: { id: 74, name: 'Geodude', type: 'rock', hp: 40, atk: 10, level: 8 },
+      zubat: { id: 41, name: 'Zubat', type: 'flying', hp: 35, atk: 7, level: 6 },
+      machop: { id: 66, name: 'Machop', type: 'fighting', hp: 45, atk: 11, level: 8 },
+
+      // Route 3 Pokemon (Hard)
+      eevee: { id: 133, name: 'Eevee', type: 'normal', hp: 50, atk: 9, level: 10 },
+      jigglypuff: { id: 39, name: 'Jigglypuff', type: 'fairy', hp: 100, atk: 6, level: 8 },
+      clefairy: { id: 35, name: 'Clefairy', type: 'fairy', hp: 65, atk: 7, level: 9 },
+      abra: { id: 63, name: 'Abra', type: 'psychic', hp: 25, atk: 12, level: 10 },
+      gastly: { id: 92, name: 'Gastly', type: 'ghost', hp: 30, atk: 11, level: 10 },
+      dratini: { id: 147, name: 'Dratini', type: 'dragon', hp: 40, atk: 12, level: 12 },
+
+      // Gym Leaders
+      onix: { id: 95, name: 'Onix', type: 'rock', hp: 70, atk: 12, level: 12, isGym: true },
+      staryu: { id: 120, name: 'Staryu', type: 'water', hp: 65, atk: 13, level: 15, isGym: true },
+      raichu: { id: 26, name: 'Raichu', type: 'electric', hp: 75, atk: 15, level: 18, isGym: true },
+
+      // Special
+      magikarp: { id: 129, name: 'Magikarp', type: 'water', hp: 20, atk: 3, level: 5 },
+      snorlax: { id: 143, name: 'Snorlax', type: 'normal', hp: 150, atk: 14, level: 15 },
+    };
+
+    // === CHAPTERS ===
+    const CHAPTERS = [
+      {
+        id: 1,
+        name: 'Route 1',
+        title: '🌳 Route 1 - First Steps',
+        desc: 'Your Pokemon journey begins! Practice addition to catch wild Pokemon.',
+        env: 'env-route',
+        enemies: ['rattata', 'pidgey', 'caterpie'],
+        difficulty: 1,
+        questionsToWin: 4,
+        isGym: false
+      },
+      {
+        id: 2,
+        name: 'Route 1 (Deep)',
+        title: '🌲 Route 1 - Deeper Path',
+        desc: 'More Pokemon await! The numbers are getting bigger.',
+        env: 'env-route',
+        enemies: ['pidgey', 'weedle', 'rattata'],
+        difficulty: 1,
+        questionsToWin: 4,
+        isGym: false
+      },
+      {
+        id: 3,
+        name: 'Pewter Gym',
+        title: '🏛️ Pewter Gym - Brock',
+        desc: 'Your first gym battle! Brock uses Rock-type Pokemon. Solve harder problems!',
+        env: 'env-gym',
+        enemies: ['onix'],
+        difficulty: 2,
+        questionsToWin: 5,
+        isGym: true,
+        gymLeader: 'Brock',
+        badge: '🪨'
+      },
+      {
+        id: 4,
+        name: 'Route 2',
+        title: '🌊 Route 2 - Waterside',
+        desc: 'New Pokemon near the water! Addition and subtraction ahead.',
+        env: 'env-water',
+        enemies: ['psyduck', 'oddish', 'pikachu'],
+        difficulty: 2,
+        questionsToWin: 4,
+        isGym: false
+      },
+      {
+        id: 5,
+        name: 'Mt. Moon',
+        title: '🦇 Mt. Moon Cave',
+        desc: 'A dark cave with rare Pokemon! Watch out for harder math!',
+        env: 'env-cave',
+        enemies: ['zubat', 'geodude', 'machop'],
+        difficulty: 2,
+        questionsToWin: 5,
+        isGym: false
+      },
+      {
+        id: 6,
+        name: 'Cerulean Gym',
+        title: '💧 Cerulean Gym - Misty',
+        desc: 'Misty loves Water Pokemon! She\'ll test your subtraction skills!',
+        env: 'env-gym',
+        enemies: ['staryu'],
+        difficulty: 2,
+        questionsToWin: 5,
+        isGym: true,
+        gymLeader: 'Misty',
+        badge: '💧'
+      },
+      {
+        id: 7,
+        name: 'Route 3',
+        title: '✨ Route 3 - Rare Pokemon',
+        desc: 'Rare Pokemon live here! You\'ll need to find missing numbers!',
+        env: 'env-route',
+        enemies: ['eevee', 'jigglypuff', 'clefairy', 'abra'],
+        difficulty: 3,
+        questionsToWin: 5,
+        isGym: false
+      },
+      {
+        id: 8,
+        name: 'Pokemon Tower',
+        title: '👻 Pokemon Tower',
+        desc: 'Spooky! Ghost Pokemon are here. Master all the math types!',
+        env: 'env-cave',
+        enemies: ['gastly', 'dratini', 'magikarp'],
+        difficulty: 3,
+        questionsToWin: 5,
+        isGym: false
+      },
+      {
+        id: 9,
+        name: 'Vermilion Gym',
+        title: '⚡ Vermilion Gym - Lt. Surge',
+        desc: 'The final gym! Lt. Surge brings the thunder! Show your math mastery!',
+        env: 'env-electric',
+        enemies: ['raichu'],
+        difficulty: 3,
+        questionsToWin: 6,
+        isGym: true,
+        gymLeader: 'Lt. Surge',
+        badge: '⚡'
+      }
+    ];
+
+    const STARTERS = ['bulbasaur', 'charmander', 'squirtle'];
+    const GYM_BADGES = ['🪨', '💧', '⚡'];
+
+    // === MESSAGES ===
+    const CORRECT_MESSAGES = [
+      "Super effective! 💥",
+      "Critical hit! ⚡",
+      "Amazing! 🌟",
+      "You're a math master! 🎓",
+      "Fantastic! ✨",
+      "Brilliant! 🧠",
+      "Perfect! 💯"
+    ];
+
+    const WRONG_MESSAGES = [
+      "Not quite! The answer is {answer}. {explanation}",
+      "Almost! {answer} is correct. {explanation}",
+      "Try to remember: {explanation}"
+    ];
+
+    const EXPLANATIONS = {
+      add: "{a} + {b} = {c} because if you have {a} and add {b} more, you get {c}!",
+      sub: "{a} - {b} = {c} because if you take {b} away from {a}, you have {c} left!",
+      missing: "The missing number is {answer} because {equation}!"
+    };
+
+    // === GAME STATE ===
+    let state = {
+      trainer: 'boy',
+      starter: 'charmander',
+      team: [],
+      collection: [],
+      badges: [],
+      stars: 0,
+      currentChapter: 0,
+      currentPokemon: null,
+      currentEnemy: null,
+      playerHp: 0,
+      playerMaxHp: 0,
+      enemyHp: 0,
+      enemyMaxHp: 0,
+      streak: 0,
+      bestStreak: 0,
+      questionsCorrect: 0,
+      currentAnswer: 0,
+      currentExplanation: '',
+      soundEnabled: true
+    };
+
+    // === AUDIO ===
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playSound(type) {
+      if (!state.soundEnabled || !audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'correct') {
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.1);
+        osc.frequency.setValueAtTime(783.99, now + 0.2);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.start();
+        osc.stop(now + 0.4);
+      } else if (type === 'wrong') {
+        osc.frequency.setValueAtTime(200, now);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.start();
+        osc.stop(now + 0.25);
+      } else if (type === 'catch') {
+        osc.frequency.setValueAtTime(392, now);
+        osc.frequency.setValueAtTime(523.25, now + 0.12);
+        osc.frequency.setValueAtTime(659.25, now + 0.24);
+        osc.frequency.setValueAtTime(783.99, now + 0.36);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+        osc.start();
+        osc.stop(now + 0.6);
+      } else if (type === 'badge') {
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, i) => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.connect(g);
+          g.connect(audioCtx.destination);
+          o.frequency.setValueAtTime(freq, now + i * 0.15);
+          g.gain.setValueAtTime(0.2, now + i * 0.15);
+          g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.15 + 0.3);
+          o.start(now + i * 0.15);
+          o.stop(now + i * 0.15 + 0.3);
+        });
+      }
+    }
+
+    function toggleSound() {
+      state.soundEnabled = !state.soundEnabled;
+      document.getElementById('soundBtn').textContent = state.soundEnabled ? '🔊' : '🔇';
+      localStorage.setItem('pokemon-adv-sound', state.soundEnabled);
+      if (state.soundEnabled) initAudio();
+    }
+
+    // === STORAGE ===
+    function saveGame() {
+      localStorage.setItem('pokemon-adv-save', JSON.stringify({
+        trainer: state.trainer,
+        starter: state.starter,
+        team: state.team,
+        collection: state.collection,
+        badges: state.badges,
+        stars: state.stars,
+        currentChapter: state.currentChapter,
+        bestStreak: state.bestStreak
+      }));
+    }
+
+    function loadGame() {
+      const saved = localStorage.getItem('pokemon-adv-save');
+      if (saved) {
+        const data = JSON.parse(saved);
+        Object.assign(state, data);
+      }
+
+      const soundSaved = localStorage.getItem('pokemon-adv-sound');
+      if (soundSaved !== null) {
+        state.soundEnabled = soundSaved === 'true';
+        document.getElementById('soundBtn').textContent = state.soundEnabled ? '🔊' : '🔇';
+      }
+    }
+
+    // === UI HELPERS ===
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function getSprite(id) {
+      return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+    }
+
+    function random(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function showConfetti() {
+      const container = document.getElementById('confetti');
+      container.innerHTML = '';
+      const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
+
+      for (let i = 0; i < 40; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + '%';
+        c.style.backgroundColor = random(colors);
+        c.style.animationDelay = Math.random() * 0.5 + 's';
+        c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        container.appendChild(c);
+      }
+
+      setTimeout(() => container.innerHTML = '', 3500);
+    }
+
+    // === START SCREEN ===
+    function initStartScreen() {
+      // Render starters
+      const grid = document.getElementById('starterGrid');
+      grid.innerHTML = '';
+
+      STARTERS.forEach(key => {
+        const p = POKEMON[key];
+        const div = document.createElement('div');
+        div.className = `starter-card ${state.starter === key ? 'selected' : ''}`;
+        div.onclick = () => selectStarter(key);
+        div.innerHTML = `
+          <img src="${getSprite(p.id)}" alt="${p.name}">
+          <div class="name">${p.name}</div>
+          <span class="type-badge type-${p.type}">${p.type}</span>
+        `;
+        grid.appendChild(div);
+      });
+
+      // Update stats preview
+      document.getElementById('previewBadges').textContent = state.badges.length;
+      document.getElementById('previewPokemon').textContent = state.collection.length;
+      document.getElementById('previewStars').textContent = state.stars;
+    }
+
+    function selectTrainer(t) {
+      state.trainer = t;
+      document.querySelectorAll('.trainer-card').forEach(c => {
+        c.classList.toggle('selected', c.dataset.trainer === t);
+      });
+    }
+
+    function selectStarter(key) {
+      state.starter = key;
+      document.querySelectorAll('.starter-card').forEach(c => c.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+    }
+
+    function startAdventure() {
+      initAudio();
+
+      // Initialize team if empty
+      if (state.team.length === 0) {
+        const starter = { ...POKEMON[state.starter], key: state.starter };
+        state.team = [starter];
+        state.collection = [state.starter];
+      }
+
+      saveGame();
+      showChapterScreen();
+    }
+
+    // === CHAPTER SCREEN ===
+    function showChapterScreen() {
+      showScreen('chapterScreen');
+
+      const chapter = CHAPTERS[state.currentChapter];
+
+      // Update banner
+      const banner = document.getElementById('chapterBanner');
+      banner.className = `chapter-banner ${chapter.env}`;
+      document.getElementById('chapterNumber').textContent = `CHAPTER ${chapter.id}`;
+      document.getElementById('chapterTitle').textContent = chapter.title;
+      document.getElementById('chapterDesc').textContent = chapter.desc;
+
+      // Update journey map
+      const map = document.getElementById('journeyMap');
+      map.innerHTML = '';
+
+      CHAPTERS.forEach((ch, i) => {
+        if (i > 0) {
+          const conn = document.createElement('div');
+          conn.className = `map-connector ${i <= state.currentChapter ? 'completed' : ''}`;
+          map.appendChild(conn);
+        }
+
+        const node = document.createElement('div');
+        node.className = 'map-node';
+        if (i < state.currentChapter) node.classList.add('completed');
+        else if (i === state.currentChapter) node.classList.add('current');
+        else node.classList.add('locked');
+
+        node.innerHTML = ch.isGym ? '🏛️' : '🌳';
+        map.appendChild(node);
+      });
+
+      // Update badges
+      const badgesDiv = document.getElementById('badgesDisplay');
+      badgesDiv.innerHTML = '';
+
+      GYM_BADGES.forEach((badge, i) => {
+        const slot = document.createElement('div');
+        slot.className = `badge-slot ${state.badges.includes(badge) ? 'earned' : ''}`;
+        slot.textContent = state.badges.includes(badge) ? badge : '?';
+        badgesDiv.appendChild(slot);
+      });
+    }
+
+    function startChapter() {
+      showScreen('teamScreen');
+      renderTeamSelection();
+    }
+
+    // === TEAM SELECTION ===
+    function renderTeamSelection() {
+      const grid = document.getElementById('teamGrid');
+      grid.innerHTML = '';
+
+      state.team.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = `pokemon-select-card ${i === 0 ? 'selected' : ''}`;
+        div.onclick = () => selectBattlePokemon(i);
+        div.innerHTML = `
+          <img src="${getSprite(p.id)}" alt="${p.name}">
+          <div class="name">${p.name}</div>
+          <div class="level">Lv. ${p.level}</div>
+        `;
+        grid.appendChild(div);
+      });
+
+      state.currentPokemon = state.team[0];
+    }
+
+    function selectBattlePokemon(index) {
+      state.currentPokemon = state.team[index];
+      document.querySelectorAll('.pokemon-select-card').forEach((c, i) => {
+        c.classList.toggle('selected', i === index);
+      });
+    }
+
+    function confirmTeamSelection() {
+      showScreen('battleScreen');
+      startBattle();
+    }
+
+    // === BATTLE ===
+    function startBattle() {
+      const chapter = CHAPTERS[state.currentChapter];
+
+      // Set player Pokemon
+      state.playerHp = state.currentPokemon.hp;
+      state.playerMaxHp = state.currentPokemon.hp;
+
+      // Choose enemy
+      const enemyKey = random(chapter.enemies);
+      state.currentEnemy = { ...POKEMON[enemyKey], key: enemyKey };
+      state.enemyHp = state.currentEnemy.hp;
+      state.enemyMaxHp = state.currentEnemy.hp;
+
+      // Reset battle state
+      state.streak = 0;
+      state.questionsCorrect = 0;
+
+      // Update UI
+      updateBattleUI();
+      generateQuestion();
+
+      // Set encounter type
+      const encounterType = document.getElementById('encounterType');
+      if (chapter.isGym) {
+        encounterType.textContent = `⚔️ Gym Leader ${chapter.gymLeader}!`;
+      } else {
+        encounterType.textContent = `Wild ${state.currentEnemy.name} appeared!`;
+      }
+    }
+
+    function updateBattleUI() {
+      const chapter = CHAPTERS[state.currentChapter];
+
+      // Player
+      document.getElementById('playerPokemonImg').src = getSprite(state.currentPokemon.id);
+      document.getElementById('playerPokemonName').textContent = state.currentPokemon.name;
+      document.getElementById('playerPokemonLevel').textContent = `Lv. ${state.currentPokemon.level}`;
+
+      const playerHpPct = (state.playerHp / state.playerMaxHp) * 100;
+      const playerBar = document.getElementById('playerHpBar');
+      playerBar.style.width = playerHpPct + '%';
+      playerBar.className = 'hp-bar';
+      if (playerHpPct < 25) playerBar.classList.add('critical');
+      else if (playerHpPct < 50) playerBar.classList.add('low');
+
+      // Enemy
+      document.getElementById('enemyPokemonImg').src = getSprite(state.currentEnemy.id);
+      document.getElementById('enemyPokemonName').textContent = state.currentEnemy.name;
+      document.getElementById('enemyPokemonLevel').textContent = `Lv. ${state.currentEnemy.level}`;
+
+      const enemyHpPct = (state.enemyHp / state.enemyMaxHp) * 100;
+      const enemyBar = document.getElementById('enemyHpBar');
+      enemyBar.style.width = enemyHpPct + '%';
+      enemyBar.className = 'hp-bar';
+      if (enemyHpPct < 25) enemyBar.classList.add('critical');
+      else if (enemyHpPct < 50) enemyBar.classList.add('low');
+
+      // Stats
+      document.getElementById('battleStars').textContent = state.stars;
+      document.getElementById('battleStreak').textContent = state.streak;
+      document.getElementById('battleProgress').textContent = `${state.questionsCorrect}/${chapter.questionsToWin}`;
+
+      const streakIcon = document.getElementById('streakIcon');
+      if (state.streak >= 3) {
+        streakIcon.style.animation = 'pulse 0.5s infinite';
+      } else {
+        streakIcon.style.animation = 'none';
+      }
+    }
+
+    // === QUESTION GENERATION ===
+    function generateQuestion() {
+      const chapter = CHAPTERS[state.currentChapter];
+      const difficulty = chapter.difficulty;
+
+      let num1, num2, answer, questionText, explanation;
+      const questionType = getQuestionType(difficulty);
+
+      if (questionType === 'add') {
+        // Addition
+        if (difficulty === 1) {
+          num1 = Math.floor(Math.random() * 10) + 1;
+          num2 = Math.floor(Math.random() * (10 - num1)) + 1;
+        } else if (difficulty === 2) {
+          num1 = Math.floor(Math.random() * 12) + 1;
+          num2 = Math.floor(Math.random() * (20 - num1)) + 1;
+        } else {
+          num1 = Math.floor(Math.random() * 15) + 5;
+          num2 = Math.floor(Math.random() * (25 - num1)) + 1;
+        }
+        answer = num1 + num2;
+        questionText = `${num1} + ${num2} = ?`;
+        explanation = EXPLANATIONS.add.replace('{a}', num1).replace('{b}', num2).replace('{c}', answer);
+
+      } else if (questionType === 'sub') {
+        // Subtraction
+        if (difficulty === 2) {
+          answer = Math.floor(Math.random() * 10) + 1;
+          num2 = Math.floor(Math.random() * 8) + 1;
+          num1 = answer + num2;
+        } else {
+          answer = Math.floor(Math.random() * 12) + 1;
+          num2 = Math.floor(Math.random() * 10) + 1;
+          num1 = answer + num2;
+        }
+        questionText = `${num1} - ${num2} = ?`;
+        explanation = EXPLANATIONS.sub.replace('{a}', num1).replace('{b}', num2).replace('{c}', answer);
+
+      } else {
+        // Missing number (? + 3 = 10)
+        const isPlus = Math.random() > 0.3;
+        if (isPlus) {
+          answer = Math.floor(Math.random() * 10) + 1;
+          num2 = Math.floor(Math.random() * 10) + 1;
+          const total = answer + num2;
+          const leftSide = Math.random() > 0.5;
+
+          if (leftSide) {
+            questionText = `? + ${num2} = ${total}`;
+            explanation = `${answer} + ${num2} = ${total}`;
+          } else {
+            questionText = `${num2} + ? = ${total}`;
+            explanation = `${num2} + ${answer} = ${total}`;
+          }
+        } else {
+          num1 = Math.floor(Math.random() * 15) + 5;
+          answer = Math.floor(Math.random() * (num1 - 1)) + 1;
+          const result = num1 - answer;
+          questionText = `${num1} - ? = ${result}`;
+          explanation = `${num1} - ${answer} = ${result}`;
+        }
+        explanation = EXPLANATIONS.missing.replace('{answer}', answer).replace('{equation}', explanation);
+      }
+
+      state.currentAnswer = answer;
+      state.currentExplanation = explanation;
+
+      document.getElementById('question').textContent = questionText;
+      generateAnswerOptions(answer, difficulty);
+      hideMessage();
+    }
+
+    function getQuestionType(difficulty) {
+      if (difficulty === 1) {
+        return 'add';
+      } else if (difficulty === 2) {
+        return Math.random() > 0.4 ? 'add' : 'sub';
+      } else {
+        const r = Math.random();
+        if (r < 0.35) return 'add';
+        if (r < 0.7) return 'sub';
+        return 'missing';
+      }
+    }
+
+    function generateAnswerOptions(correct, difficulty) {
+      const options = [correct];
+      const range = difficulty === 1 ? 5 : 8;
+
+      while (options.length < 4) {
+        let wrong = correct + Math.floor(Math.random() * range * 2) - range;
+        if (wrong < 0) wrong = Math.floor(Math.random() * range) + 1;
+        if (!options.includes(wrong) && wrong >= 0) {
+          options.push(wrong);
+        }
+      }
+
+      options.sort(() => Math.random() - 0.5);
+
+      const answersDiv = document.getElementById('answers');
+      answersDiv.innerHTML = '';
+
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-primary answer-btn';
+        btn.textContent = opt;
+        btn.onclick = () => checkAnswer(opt, btn);
+        answersDiv.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected, btn) {
+      const buttons = document.querySelectorAll('.answer-btn');
+      buttons.forEach(b => b.disabled = true);
+
+      const chapter = CHAPTERS[state.currentChapter];
+
+      if (selected === state.currentAnswer) {
+        // Correct!
+        playSound('correct');
+        btn.classList.add('correct');
+
+        state.streak++;
+        state.questionsCorrect++;
+        state.stars += 10 * Math.min(state.streak, 5);
+
+        if (state.streak > state.bestStreak) {
+          state.bestStreak = state.streak;
+        }
+
+        // Deal damage to enemy
+        const damage = state.currentPokemon.atk + Math.floor(state.streak * 2);
+        state.enemyHp = Math.max(0, state.enemyHp - damage);
+
+        showMessage('success', random(CORRECT_MESSAGES) + ` -${damage} HP!`);
+        updateBattleUI();
+
+        setTimeout(() => {
+          if (state.enemyHp <= 0 || state.questionsCorrect >= chapter.questionsToWin) {
+            victory();
+          } else {
+            generateQuestion();
+            buttons.forEach(b => b.disabled = false);
+          }
+        }, 1200);
+
+      } else {
+        // Wrong
+        playSound('wrong');
+        btn.classList.add('wrong');
+
+        state.streak = 0;
+
+        // Take damage
+        const damage = Math.floor(state.currentEnemy.atk * 0.4);
+        state.playerHp = Math.max(0, state.playerHp - damage);
+
+        const msg = random(WRONG_MESSAGES)
+          .replace('{answer}', state.currentAnswer)
+          .replace('{explanation}', state.currentExplanation);
+
+        showMessage('hint', msg);
+        updateBattleUI();
+
+        setTimeout(() => {
+          btn.classList.remove('wrong');
+          buttons.forEach(b => b.disabled = false);
+        }, 2500);
+      }
+    }
+
+    function showMessage(type, text) {
+      const box = document.getElementById('messageBox');
+      box.style.display = 'flex';
+      box.className = `message-box ${type}`;
+      box.textContent = text;
+    }
+
+    function hideMessage() {
+      document.getElementById('messageBox').style.display = 'none';
+    }
+
+    // === VICTORY ===
+    function victory() {
+      const chapter = CHAPTERS[state.currentChapter];
+
+      if (chapter.isGym) {
+        playSound('badge');
+
+        if (!state.badges.includes(chapter.badge)) {
+          state.badges.push(chapter.badge);
+        }
+
+        document.getElementById('victoryTitle').textContent = '🏆 GYM VICTORY!';
+      } else {
+        playSound('catch');
+        document.getElementById('victoryTitle').textContent = 'GOTCHA!';
+      }
+
+      // Add to collection
+      if (!state.collection.includes(state.currentEnemy.key)) {
+        state.collection.push(state.currentEnemy.key);
+
+        // Add to team if not gym Pokemon
+        if (!state.currentEnemy.isGym && state.team.length < 6) {
+          const newMember = { ...state.currentEnemy };
+          newMember.level = Math.max(5, newMember.level - 2);
+          state.team.push(newMember);
+        }
+      }
+
+      // Update victory screen
+      document.getElementById('victoryPokemonImg').src = getSprite(state.currentEnemy.id);
+      document.getElementById('victoryPokemonName').textContent =
+        chapter.isGym ? `You defeated ${chapter.gymLeader}!` : `${state.currentEnemy.name} was caught!`;
+      document.getElementById('victoryStars').textContent = `⭐ ${state.stars}`;
+      document.getElementById('victoryStreak').textContent = `🔥 ${state.bestStreak}`;
+      document.getElementById('victoryTeam').textContent = `🎉 ${state.team.length}`;
+
+      showConfetti();
+
+      document.getElementById('victoryScreen').classList.add('active');
+      saveGame();
+    }
+
+    function continueAdventure() {
+      document.getElementById('victoryScreen').classList.remove('active');
+
+      state.currentChapter++;
+
+      if (state.currentChapter >= CHAPTERS.length) {
+        // Game complete!
+        alert('🎊 CONGRATULATIONS! You\'ve become a Pokemon Math Master! 🎊');
+        state.currentChapter = 0;
+      }
+
+      saveGame();
+      showChapterScreen();
+    }
+
+    // === COLLECTION ===
+    function showCollection() {
+      showScreen('collectionScreen');
+      renderCollection();
+    }
+
+    function renderCollection() {
+      const grid = document.getElementById('collectionGrid');
+      grid.innerHTML = '';
+
+      const allPokemon = Object.keys(POKEMON);
+
+      allPokemon.forEach(key => {
+        const p = POKEMON[key];
+        const caught = state.collection.includes(key);
+
+        const div = document.createElement('div');
+        div.className = `collection-item ${caught ? '' : 'locked'}`;
+        div.innerHTML = `
+          <img src="${getSprite(p.id)}" alt="${p.name}">
+          <div class="name">${caught ? p.name : '???'}</div>
+        `;
+        grid.appendChild(div);
+      });
+
+      document.getElementById('collectionCount').textContent =
+        `${state.collection.length} / ${allPokemon.length} caught`;
+    }
+
+    function backToStart() {
+      showScreen('startScreen');
+      initStartScreen();
+    }
+
+    // === iOS VIEWPORT FIX ===
+    function setVH() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', setVH);
+    setVH();
+
+    // === INIT ===
+    document.addEventListener('DOMContentLoaded', () => {
+      loadGame();
+      initStartScreen();
+    });
+
+    document.addEventListener('touchstart', initAudio, { once: true });
+    document.addEventListener('click', initAudio, { once: true });
+  </script>
+</body>
+</html>
