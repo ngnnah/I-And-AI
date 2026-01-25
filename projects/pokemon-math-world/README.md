@@ -132,7 +132,7 @@ python3 -m http.server 8080
 
 ## Screenshots
 
-![Level Select](../../resources/screenshots/20260126-002051_pokemon-math-world_level-select.png)
+![Level Select](../../resources/screenshots/20260126-012336_pokemon-math-world_modular-world-select.png)
 
 _Level selection screen with three difficulty tiers_
 
