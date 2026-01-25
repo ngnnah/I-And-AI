@@ -22,17 +22,17 @@ A math learning game for 1st-2nd graders who love Pokemon. Built for my 6-7 year
 All game progress is saved to **browser localStorage** automatically. No account or server needed.
 
 **What's saved:**
-| Data             | Description                   |
+| Data | Description |
 | ---------------- | ----------------------------- |
-| `playerName`     | Your custom name              |
-| `trainer`        | Selected trainer character    |
-| `starter`        | Your first Pokemon choice     |
-| `team`           | Current 3-Pokemon battle team |
-| `collection`     | All Pokemon you've caught     |
-| `badges`         | Gym badges earned             |
-| `stars`          | Progress currency             |
-| `currentChapter` | Story progress                |
-| `bestStreak`     | Longest correct answer streak |
+| `playerName` | Your custom name |
+| `trainer` | Selected trainer character |
+| `starter` | Your first Pokemon choice |
+| `team` | Current 3-Pokemon battle team |
+| `collection` | All Pokemon you've caught |
+| `badges` | Gym badges earned |
+| `stars` | Progress currency |
+| `currentChapter` | Story progress |
+| `bestStreak` | Longest correct answer streak |
 
 **Storage keys:**
 
@@ -57,6 +57,12 @@ All game progress is saved to **browser localStorage** automatically. No account
 - **GitHub Pages** - Free hosting with CI/CD
 - **Pokemon Showdown** - Trainer sprite CDN
 - **PokeAPI** - Pokemon sprite CDN
+
+## Screenshots
+
+![Start Screen](../../resources/screenshots/20260125-234411_pokemon-math-advanced_start-screen.png)
+
+_Start screen with trainer selection, name input, and starter Pokemon choice_
 
 ## Related
 
