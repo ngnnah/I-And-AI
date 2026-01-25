@@ -1173,8 +1173,63 @@
             totalTime: 0,
             problemAttempts: 0,
             maxAttemptsPerProblem: 3,
-            hintShown: false
+            hintShown: false,
+            completedChapters: []
         };
+
+        // LocalStorage keys
+        const STORAGE_KEY = 'iron-academy-save';
+
+        // Save game progress
+        function saveGame() {
+            const saveData = {
+                currentChapter: gameState.currentChapter,
+                score: gameState.score,
+                totalAttempts: gameState.totalAttempts,
+                correctAnswers: gameState.correctAnswers,
+                hintsUsed: gameState.hintsUsed,
+                maxStreak: gameState.maxStreak,
+                fastSolves: gameState.fastSolves,
+                totalTime: gameState.totalTime,
+                completedChapters: gameState.completedChapters
+            };
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
+            } catch (e) {
+                console.log('Could not save game progress');
+            }
+        }
+
+        // Load game progress
+        function loadGame() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    gameState.currentChapter = data.currentChapter || 0;
+                    gameState.score = data.score || 0;
+                    gameState.totalAttempts = data.totalAttempts || 0;
+                    gameState.correctAnswers = data.correctAnswers || 0;
+                    gameState.hintsUsed = data.hintsUsed || 0;
+                    gameState.maxStreak = data.maxStreak || 0;
+                    gameState.fastSolves = data.fastSolves || 0;
+                    gameState.totalTime = data.totalTime || 0;
+                    gameState.completedChapters = data.completedChapters || [];
+                    return true;
+                }
+            } catch (e) {
+                console.log('Could not load saved game');
+            }
+            return false;
+        }
+
+        // Reset game progress
+        function resetGame() {
+            if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
+        }
 
         // Sound effects (simple beep sounds using Web Audio API)
         // iOS requires AudioContext to be created after user gesture
@@ -1709,8 +1764,41 @@
 
         // Initialize game
         function startGame() {
+            const hasSavedGame = loadGame();
             gameState.problemStartTime = Date.now();
-            loadChapter();
+
+            if (hasSavedGame && gameState.currentChapter > 0) {
+                showContinueScreen();
+            } else {
+                loadChapter();
+            }
+        }
+
+        // Show continue or new game option
+        function showContinueScreen() {
+            const chapter = chapters[gameState.currentChapter];
+            const progress = Math.round((gameState.currentChapter / chapters.length) * 100);
+
+            const html = `
+                <div class="start-screen">
+                    <h2 style="color: #00d9ff; margin-bottom: 25px;">⚡ WELCOME BACK, ENGINEER! ⚡</h2>
+                    <div class="story-box">
+                        <p>You have saved progress! You're on <strong>${chapter.title}</strong>.</p>
+                        <p style="margin-top: 15px;">
+                            📊 Progress: <strong>${progress}%</strong> |
+                            🎯 Score: <strong>${gameState.score}</strong> |
+                            🔥 Best Streak: <strong>${gameState.maxStreak}</strong>
+                        </p>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 30px;">
+                        <button class="btn btn-primary" onclick="loadChapter()">CONTINUE MISSION →</button>
+                        <button class="btn btn-secondary" onclick="resetGame()">🔄 START NEW GAME</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('gameArea').innerHTML = html;
+            updateStats();
         }
 
         function loadChapter() {
@@ -1970,6 +2058,12 @@
 
         function showChapterComplete() {
             const prevChapter = chapters[gameState.currentChapter - 1];
+            // Mark chapter as completed and save progress
+            if (!gameState.completedChapters.includes(gameState.currentChapter - 1)) {
+                gameState.completedChapters.push(gameState.currentChapter - 1);
+            }
+            saveGame();
+
             playLevelUpSound();
             createConfetti();
             
@@ -2002,11 +2096,18 @@
         }
 
         function showVictory() {
+            // Mark final chapter as completed
+            if (!gameState.completedChapters.includes(gameState.currentChapter - 1)) {
+                gameState.completedChapters.push(gameState.currentChapter - 1);
+            }
+            // Clear save on completion (so next play starts fresh)
+            localStorage.removeItem(STORAGE_KEY);
+
             playLevelUpSound();
             createConfetti();
             setTimeout(createConfetti, 1000);
             setTimeout(createConfetti, 2000);
-            
+
             const accuracy = Math.round((gameState.correctAnswers / gameState.totalAttempts) * 100);
             const avgTime = (gameState.totalTime / gameState.correctAnswers).toFixed(1);
             const totalMinutes = Math.floor(gameState.totalTime / 60);
@@ -2119,8 +2220,14 @@ Ready to unlock YOUR potential? #IronAcademy #STEMEducation`;
 
         function updateStats() {
             const totalProblems = chapters.reduce((sum, ch) => sum + ch.problems.length, 0);
-            const solvedProblems = (gameState.currentChapter * 6) + Math.min(gameState.currentProblem, 6);
-            const accuracy = gameState.totalAttempts > 0 
+            // Calculate solved problems dynamically based on completed chapters
+            let solvedProblems = 0;
+            for (let i = 0; i < gameState.currentChapter; i++) {
+                solvedProblems += chapters[i].problems.length;
+            }
+            solvedProblems += gameState.currentProblem;
+
+            const accuracy = gameState.totalAttempts > 0
                 ? Math.round((gameState.correctAnswers / gameState.totalAttempts) * 100)
                 : 100;
             const level = Math.floor(solvedProblems / 5) + 1;

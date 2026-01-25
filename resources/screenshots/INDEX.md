@@ -20,3 +20,4 @@ YYYYMMDD-HHMMSS_topic_slug.ext
 | 2026-01-22 | [`20260122-201431_youtube-livecam_osaka-castle.jpg`](20260122-201431_youtube-livecam_osaka-castle.jpg)             | Osaka Castle area night view live cam             | youtube.com/@tvosakanews |
 | 2026-01-25 | [`20260125-234411_pokemon-math-advanced_start-screen.png`](20260125-234411_pokemon-math-advanced_start-screen.png) | Pokemon Math Adventure start screen               | GitHub Pages             |
 | 2026-01-25 | [`20260125-234432_pokemon-math_start-screen.png`](20260125-234432_pokemon-math_start-screen.png)                   | Pokemon Math (Beginner) start screen              | GitHub Pages             |
+| 2026-01-25 | [`20260125-235255_iron-academy_start-screen.png`](20260125-235255_iron-academy_start-screen.png)                   | Iron Academy Chapter 1 start screen               | GitHub Pages             |
