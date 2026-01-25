@@ -26,3 +26,6 @@ YYYYMMDD-HHMMSS_topic_slug.ext
 | 2026-01-26 | [`20260126-012641_pokemon-math-world_deployed.png`](20260126-012641_pokemon-math-world_deployed.png)                         | Pokemon Math World deployed (final)               | GitHub Pages             |
 | 2026-01-26 | [`20260126-014147_iron-academy_deployed.png`](20260126-014147_iron-academy_deployed.png)                                     | Iron Academy deployed                             | GitHub Pages             |
 | 2026-01-26 | [`20260126-014147_github-todo-app_deployed.png`](20260126-014147_github-todo-app_deployed.png)                               | GitHub TODO App deployed                          | GitHub Pages             |
+| 2026-01-26 | [`20260126-015909_pokemon-math-world_world-select.png`](20260126-015909_pokemon-math-world_world-select.png)                 | Pokemon Math World world select                   | GitHub Pages             |
+| 2026-01-26 | [`20260126-015909_iron-academy_start.png`](20260126-015909_iron-academy_start.png)                                           | Iron Academy start screen                         | GitHub Pages             |
+| 2026-01-26 | [`20260126-015909_github-todo-app_login.png`](20260126-015909_github-todo-app_login.png)                                     | GitHub TODO App login screen                      | GitHub Pages             |
