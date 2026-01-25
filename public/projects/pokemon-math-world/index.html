@@ -517,56 +517,204 @@
       opacity: 0.9;
     }
 
-    .battle-area {
-      background: linear-gradient(180deg, #B8E0FF 0%, #90EE90 70%, #228B22 100%);
-      border-radius: 25px;
-      padding: 20px;
-      margin-bottom: 15px;
-      box-shadow: inset 0 0 30px rgba(0,0,0,0.1), 0 8px 20px rgba(0,0,0,0.15);
+    /* Enhanced Battle Field */
+    .battle-field {
+      background: linear-gradient(180deg, #87CEEB 0%, #90EE90 60%, #228B22 100%);
+      border-radius: 20px;
+      padding: 12px;
+      margin-bottom: 10px;
       position: relative;
-      overflow: hidden;
+      min-height: 220px;
     }
 
-    .battle-area::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 40px;
-      background: repeating-linear-gradient(90deg, #228B22 0px, #228B22 20px, #32CD32 20px, #32CD32 40px);
-      border-radius: 0 0 25px 25px;
+    .encounter-type {
+      text-align: center;
+      margin-bottom: 8px;
     }
 
-    .pokemon-display {
+    .encounter-type span {
+      background: rgba(255,255,255,0.95);
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #374151;
+    }
+
+    .battle-scene {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 5px;
+    }
+
+    .battle-pokemon {
+      text-align: center;
+      flex: 1;
+    }
+
+    .battle-trainer-pokemon {
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      margin: 20px 0;
+    }
+
+    .battle-trainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: -10px;
+      z-index: 2;
+    }
+
+    .battle-trainer img {
+      width: 50px;
+      height: 50px;
+      image-rendering: pixelated;
+    }
+
+    .battle-trainer .trainer-name {
+      background: rgba(255,255,255,0.95);
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: #374151;
+      margin-top: -5px;
+    }
+
+    .battle-pokemon-sprite {
       position: relative;
       z-index: 1;
     }
 
-    .wild-pokemon {
-      text-align: center;
-    }
-
-    .wild-pokemon img {
-      width: 150px;
-      height: 150px;
-      animation: wildAppear 0.5s ease-out, float 2s ease-in-out infinite;
-      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+    .battle-pokemon-sprite img {
+      width: 90px;
+      height: 90px;
       image-rendering: pixelated;
+      filter: drop-shadow(0 8px 12px rgba(0,0,0,0.3));
     }
 
-    @keyframes wildAppear {
-      from { opacity: 0; transform: scale(0.5) translateY(50px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
+    .battle-pokemon.player .battle-pokemon-sprite img {
+      animation: playerIdle 2s ease-in-out infinite;
     }
 
-    @keyframes float {
+    .battle-pokemon.enemy .battle-pokemon-sprite img {
+      animation: enemyIdle 2s ease-in-out infinite 0.5s;
+    }
+
+    @keyframes playerIdle {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+      50% { transform: translateY(-6px); }
+    }
+
+    @keyframes enemyIdle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .pokemon-info-card {
+      background: white;
+      border-radius: 10px;
+      padding: 6px 10px;
+      margin-top: 5px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+      min-width: 100px;
+    }
+
+    .pokemon-info-card .poke-name {
+      font-weight: 800;
+      font-size: 0.8rem;
+      color: #1F2937;
+    }
+
+    .hp-bar-container {
+      background: #E5E7EB;
+      height: 8px;
+      border-radius: 4px;
+      margin-top: 4px;
+      overflow: hidden;
+    }
+
+    .hp-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--success) 0%, #34D399 100%);
+      transition: width 0.3s ease;
+      border-radius: 4px;
+    }
+
+    .hp-bar-fill.low { background: linear-gradient(90deg, var(--danger) 0%, #F87171 100%); }
+    .hp-bar-fill.medium { background: linear-gradient(90deg, var(--warning) 0%, #FBBF24 100%); }
+
+    .vs-badge {
+      background: linear-gradient(180deg, var(--danger) 0%, #DC2626 100%);
+      color: white;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1rem;
+      padding: 8px 12px;
+      border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 10;
+      margin: 0 5px;
+    }
+
+    /* Chapter Select Grid */
+    .chapter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .chapter-select-card {
+      background: white;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 3px solid transparent;
+    }
+
+    .chapter-select-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .chapter-select-card.current {
+      border-color: var(--primary);
+      background: #EEF2FF;
+    }
+
+    .chapter-select-card.completed {
+      border-color: var(--success);
+      background: #DCFCE7;
+    }
+
+    .chapter-select-card.locked {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .chapter-select-card .chapter-num {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+
+    .chapter-select-card.completed .chapter-num {
+      color: var(--success);
+    }
+
+    .chapter-select-card .chapter-name {
+      font-size: 0.75rem;
+      color: #6B7280;
+      margin-top: 5px;
+    }
+
+    .chapter-select-card .chapter-badge {
+      font-size: 1.2rem;
+      margin-top: 5px;
     }
 
     .pokemon-name {
@@ -1200,7 +1348,8 @@
       maxStreak: 0,
       collection: [],
       badges: [],
-      stars: 0
+      stars: 0,
+      completedChapters: []
     };
 
     // ============================================
@@ -1307,7 +1456,8 @@
           maxStreak: 0,
           collection: [],
           badges: [],
-          stars: 0
+          stars: 0,
+          completedChapters: []
         };
         showScreen('setupScreen');
         renderSetupScreen();
@@ -1368,7 +1518,8 @@
         maxStreak: 0,
         collection: [],
         badges: [],
-        stars: 0
+        stars: 0,
+        completedChapters: []
       };
 
       if (loadGame(level)) {
@@ -1472,6 +1623,20 @@
       const chapter = level.chapters[gameState.currentChapter];
       const trainer = TRAINERS[gameState.trainer];
 
+      // Build chapter selection grid - all chapters selectable
+      const chapterGridHTML = level.chapters.map((ch, idx) => {
+        const isCompleted = gameState.completedChapters && gameState.completedChapters.includes(idx);
+        const isCurrent = idx === gameState.currentChapter;
+        const statusClass = isCompleted ? 'completed' : isCurrent ? 'current' : '';
+        return `
+          <div class="chapter-select-card ${statusClass}" onclick="selectChapter(${idx})">
+            <div class="chapter-num">${idx + 1}</div>
+            <div class="chapter-name">${ch.name}</div>
+            ${ch.badge ? `<div class="chapter-badge">${isCompleted ? ch.badge : '🔲'}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+
       document.getElementById('chapterScreen').innerHTML = `
         <div class="chapter-screen">
           <div class="game-header">
@@ -1496,14 +1661,19 @@
             </div>
           </div>
 
+          <div class="card">
+            <label style="display:block;color:#374151;font-weight:700;margin-bottom:10px;">📍 Select Chapter</label>
+            <div class="chapter-grid">${chapterGridHTML}</div>
+          </div>
+
           <div class="chapter-banner ${chapter.env}">
             <div class="chapter-title">${chapter.title}</div>
             <div class="chapter-desc">${chapter.desc}</div>
           </div>
 
           <div class="card" style="text-align:center;">
-            <p style="margin-bottom:15px;color:#6B7280;">Answer ${chapter.questionsToWin} questions to complete this chapter!</p>
-            <button class="btn btn-success continue-btn" onclick="startBattle()">BEGIN!</button>
+            <p style="margin-bottom:15px;color:#6B7280;">Answer ${chapter.questionsToWin} questions to complete!</p>
+            <button class="btn btn-success continue-btn" onclick="startBattle()">BEGIN BATTLE!</button>
           </div>
 
           <div style="display:flex;gap:10px;margin-top:10px;">
@@ -1512,6 +1682,12 @@
           </div>
         </div>
       `;
+    }
+
+    function selectChapter(idx) {
+      gameState.currentChapter = idx;
+      saveGame();
+      renderChapterScreen();
     }
 
     // ============================================
@@ -1539,6 +1715,10 @@
       const chapter = level.chapters[gameState.currentChapter];
       const trainer = TRAINERS[gameState.trainer];
 
+      // Get player's active Pokemon (starter or first in collection)
+      const playerPokemonKey = gameState.starter || gameState.collection[0] || 'pikachu';
+      const playerPokemon = POKEMON[playerPokemonKey];
+
       // Generate question
       currentQuestionData = level.generateQuestion(chapter.difficulty, chapter.wordProblems);
 
@@ -1550,8 +1730,13 @@
         ? `<div class="word-problem">${currentQuestionData.question}</div>`
         : `<div class="question">${currentQuestionData.question}</div>`;
 
-      const hpPercent = enemyHP;
-      const hpClass = hpPercent > 50 ? '' : hpPercent > 20 ? 'medium' : 'low';
+      const enemyHpPercent = enemyHP;
+      const enemyHpClass = enemyHpPercent > 50 ? '' : enemyHpPercent > 20 ? 'medium' : 'low';
+
+      // Determine enemy trainer (gym leader or wild)
+      const isGymBattle = chapter.isGym && chapter.gymLeader;
+      const enemyTrainer = isGymBattle ? GYM_LEADERS[chapter.gymLeader] : null;
+      const encounterText = isGymBattle ? `⚔️ VS ${enemyTrainer.name}!` : '🌿 Wild Pokemon!';
 
       document.getElementById('gameScreen').innerHTML = `
         <div class="chapter-screen">
@@ -1577,18 +1762,58 @@
             </div>
           </div>
 
-          <div class="battle-area">
-            <div class="pokemon-display">
-              <div class="wild-pokemon">
-                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${currentEnemy.id}.png" alt="${currentEnemy.name}">
-                <div class="pokemon-name">${currentEnemy.name}</div>
-                <div class="hp-bar"><div class="hp-fill ${hpClass}" style="width:${hpPercent}%"></div></div>
+          <div class="battle-field">
+            <div class="encounter-type">
+              <span>${encounterText}</span>
+            </div>
+
+            <div class="battle-scene">
+              <!-- Player Side -->
+              <div class="battle-pokemon player">
+                <div class="battle-trainer-pokemon">
+                  <div class="battle-trainer">
+                    <img src="${trainer.sprite}" alt="${trainer.name}">
+                    <div class="trainer-name">${gameState.playerName}</div>
+                  </div>
+                  <div class="battle-pokemon-sprite">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${playerPokemon.id}.png" alt="${playerPokemon.name}">
+                  </div>
+                </div>
+                <div class="pokemon-info-card">
+                  <div class="poke-name">${playerPokemon.name}</div>
+                  <div class="hp-bar-container">
+                    <div class="hp-bar-fill" style="width:100%"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="vs-badge">VS</div>
+
+              <!-- Enemy Side -->
+              <div class="battle-pokemon enemy">
+                <div class="battle-trainer-pokemon">
+                  ${isGymBattle ? `
+                    <div class="battle-trainer">
+                      <img src="${enemyTrainer.sprite}" alt="${enemyTrainer.name}">
+                      <div class="trainer-name">${enemyTrainer.name}</div>
+                    </div>
+                  ` : ''}
+                  <div class="battle-pokemon-sprite">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${currentEnemy.id}.png" alt="${currentEnemy.name}">
+                  </div>
+                </div>
+                <div class="pokemon-info-card">
+                  <div class="poke-name">${currentEnemy.name}</div>
+                  <div class="hp-bar-container">
+                    <div class="hp-bar-fill ${enemyHpClass}" style="width:${enemyHpPercent}%"></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           <div class="question-area">
-            <div class="question-prompt">${chapter.isGym ? '⚔️ Gym Battle!' : '🎯 Answer to attack!'} (${questionsAnswered + 1}/${chapter.questionsToWin})</div>
+            <div class="question-prompt">🎯 Solve to attack! (${questionsAnswered + 1}/${chapter.questionsToWin})</div>
             ${questionHTML}
             ${currentQuestionData.hint ? `<div style="text-align:center;color:#F59E0B;font-size:0.9rem;margin-bottom:10px;">💡 ${currentQuestionData.hint}</div>` : ''}
             <div class="answers ${currentQuestionData.choices.length === 3 ? 'three-cols' : ''}">${choicesHTML}</div>
@@ -1694,16 +1919,28 @@
       const level = LEVELS[currentLevel];
       const chapter = level.chapters[gameState.currentChapter];
 
-      if (chapter.isGym && chapter.badge && !gameState.badges.includes(chapter.badge)) {
-        gameState.badges.push(chapter.badge);
-        saveGame();
+      // Track completed chapter
+      if (!gameState.completedChapters) {
+        gameState.completedChapters = [];
+      }
+      if (!gameState.completedChapters.includes(gameState.currentChapter)) {
+        gameState.completedChapters.push(gameState.currentChapter);
       }
 
-      gameState.currentChapter++;
+      // Award badge for gym battles
+      if (chapter.isGym && chapter.badge && !gameState.badges.includes(chapter.badge)) {
+        gameState.badges.push(chapter.badge);
+      }
 
-      if (gameState.currentChapter >= level.chapters.length) {
+      saveGame();
+
+      // Move to next chapter or show victory
+      const nextChapter = gameState.currentChapter + 1;
+      if (nextChapter >= level.chapters.length) {
         showVictoryScreen();
       } else {
+        gameState.currentChapter = nextChapter;
+        saveGame();
         showScreen('chapterScreen');
         renderChapterScreen();
       }
