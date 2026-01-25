@@ -56,6 +56,7 @@ _Start screen with Charmander and collection progress_
 
 ## Related
 
+- [Pokemon Math World](../pokemon-math-world/) - **NEW!** Combined version with 3 difficulty levels including Champion's Road
 - [Pokemon Math Adventure](../pokemon-math-advanced/) - Advanced version with 9 chapters, gym battles, and 25+ Pokemon
 
 ## Credits

@@ -66,6 +66,7 @@ _Start screen with trainer selection, name input, and starter Pokemon choice_
 
 ## Related
 
+- [Pokemon Math World](../pokemon-math-world/) - **NEW!** Combined version with 3 difficulty levels including Champion's Road
 - [Pokemon Math (Beginner)](../pokemon-math/) - Simpler version for 1st graders (addition 0-10, 2 choices)
 
 ## Credits
