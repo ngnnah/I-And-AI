@@ -1,0 +1,2125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Iron Academy: The Workshop Awakening ⚡</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: #0a0e27;
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 10px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 196, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 0, 0, 0.05) 0%, transparent 50%);
+            animation: bgPulse 10s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes bgPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: #00d9ff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: float 15s infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% {
+                transform: translateY(-100vh) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header with Iron Man arc reactor style */
+        header {
+            background: linear-gradient(135deg, #1a1f3a 0%, #0a0e27 100%);
+            padding: 25px;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 
+                0 0 50px rgba(0, 217, 255, 0.4),
+                inset 0 0 30px rgba(0, 217, 255, 0.1);
+            border: 2px solid rgba(0, 217, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(0, 217, 255, 0.1) 50%, transparent 70%);
+            animation: headerShine 8s linear infinite;
+        }
+
+        @keyframes headerShine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8em;
+            text-align: center;
+            text-shadow: 
+                0 0 10px #00d9ff,
+                0 0 20px #00d9ff,
+                0 0 30px #00d9ff,
+                2px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 3px;
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 10px #00d9ff, 0 0 20px #00d9ff, 0 0 30px #00d9ff; }
+            50% { text-shadow: 0 0 20px #00d9ff, 0 0 40px #00d9ff, 0 0 60px #00d9ff; }
+        }
+
+        .subtitle {
+            text-align: center;
+            opacity: 0.9;
+            font-size: 1.3em;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+            color: #ffc400;
+            text-shadow: 0 0 10px rgba(255, 196, 0, 0.5);
+        }
+
+        /* Arc Reactor Logo */
+        .arc-reactor {
+            width: 80px;
+            height: 80px;
+            margin: 15px auto;
+            position: relative;
+            animation: reactorPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes reactorPulse {
+            0%, 100% { 
+                transform: scale(1);
+                filter: drop-shadow(0 0 10px #00d9ff);
+            }
+            50% { 
+                transform: scale(1.1);
+                filter: drop-shadow(0 0 30px #00d9ff);
+            }
+        }
+
+        .arc-reactor::before {
+            content: '⚡';
+            font-size: 50px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: spin 4s linear infinite;
+        }
+
+        .arc-reactor::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 3px solid #00d9ff;
+            border-radius: 50%;
+            box-shadow: 
+                0 0 20px #00d9ff,
+                inset 0 0 20px #00d9ff;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Progress bar with energy effect */
+        .progress-container {
+            background: rgba(0,0,0,0.4);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+        }
+
+        .progress-label {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            color: #00d9ff;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            background: rgba(0,0,0,0.6);
+            height: 35px;
+            border-radius: 17px;
+            overflow: hidden;
+            border: 2px solid rgba(0, 217, 255, 0.4);
+            position: relative;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #00d9ff 0%, #0099cc 50%, #00d9ff 100%);
+            height: 100%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1em;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.6);
+        }
+
+        .progress-fill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: progressShine 2s infinite;
+        }
+
+        @keyframes progressShine {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        /* Stats with holographic effect */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.1) 0%, rgba(0, 153, 204, 0.1) 100%);
+            padding: 20px 15px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid rgba(0, 217, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-5px);
+            border-color: #00d9ff;
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
+        }
+
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(0, 217, 255, 0.1), transparent);
+            animation: statShine 3s infinite;
+        }
+
+        @keyframes statShine {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stat-icon {
+            font-size: 2em;
+            margin-bottom: 5px;
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2em;
+            font-weight: 900;
+            color: #00d9ff;
+            text-shadow: 0 0 10px rgba(0, 217, 255, 0.8);
+        }
+
+        /* Game area */
+        .game-area {
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.6) 0%, rgba(10, 14, 39, 0.6) 100%);
+            padding: 30px;
+            border-radius: 0 0 20px 20px;
+            min-height: 500px;
+            border: 2px solid rgba(0, 217, 255, 0.2);
+            border-top: none;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Story box with typewriter effect */
+        .story-box {
+            background: linear-gradient(135deg, rgba(255, 196, 0, 0.15) 0%, rgba(255, 149, 0, 0.1) 100%);
+            border-left: 5px solid #ffc400;
+            padding: 25px;
+            padding-top: 20px;
+            margin-bottom: 30px;
+            margin-top: 15px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            line-height: 1.8;
+            position: relative;
+            box-shadow: 0 5px 20px rgba(255, 196, 0, 0.2);
+        }
+
+        .story-box::before {
+            display: none;
+        }
+
+        /* SAT Word - Clickable vocabulary */
+        .sat-word {
+            color: #ffc400;
+            border-bottom: 2px dotted #ffc400;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .sat-word:hover {
+            background: rgba(255, 196, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        .sat-word::after {
+            content: ' 📖';
+            font-size: 0.7em;
+            opacity: 0.7;
+        }
+
+        /* Vocabulary Panel */
+        .vocab-panel {
+            background: linear-gradient(135deg, rgba(255, 196, 0, 0.15) 0%, rgba(255, 149, 0, 0.1) 100%);
+            border: 2px solid #ffc400;
+            border-radius: 12px;
+            margin-top: 15px;
+            overflow: hidden;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; max-height: 0; }
+            to { opacity: 1; max-height: 500px; }
+        }
+
+        .vocab-header {
+            background: rgba(255, 196, 0, 0.2);
+            padding: 12px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 700;
+            color: #ffc400;
+        }
+
+        .vocab-header:hover {
+            background: rgba(255, 196, 0, 0.3);
+        }
+
+        .vocab-content {
+            padding: 18px;
+        }
+
+        .vocab-word-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3em;
+            color: #ffc400;
+            margin-bottom: 12px;
+        }
+
+        .vocab-section {
+            margin: 12px 0;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border-left: 3px solid #00d9ff;
+        }
+
+        .vocab-section-label {
+            color: #00d9ff;
+            font-weight: 700;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .vocab-section p {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .vocab-close {
+            background: none;
+            border: 2px solid #ffc400;
+            color: #ffc400;
+            padding: 5px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+
+        .vocab-close:hover {
+            background: #ffc400;
+            color: #000;
+        }
+
+        /* Attempt counter */
+        .attempt-counter {
+            display: inline-block;
+            background: rgba(255, 196, 0, 0.2);
+            border: 2px solid #ffc400;
+            color: #ffc400;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-left: 15px;
+            font-weight: 600;
+        }
+
+        .attempt-counter.warning {
+            background: rgba(255, 100, 100, 0.2);
+            border-color: #ff6464;
+            color: #ff6464;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .chapter-title {
+            color: #ffc400;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-shadow: 0 0 10px rgba(255, 196, 0, 0.6);
+            font-weight: 700;
+        }
+
+        /* Problem card with holographic border */
+        .problem-card {
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(0, 153, 204, 0.05) 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 3px solid;
+            border-image: linear-gradient(45deg, #00d9ff, #ffc400, #00d9ff) 1;
+            position: relative;
+            animation: borderGlow 3s linear infinite;
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
+            }
+            50% { 
+                box-shadow: 0 0 40px rgba(255, 196, 0, 0.4);
+            }
+        }
+
+        .problem-number {
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            background: linear-gradient(135deg, #00d9ff, #0099cc);
+            color: #000;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9em;
+            box-shadow: 0 5px 15px rgba(0, 217, 255, 0.4);
+        }
+
+        .question {
+            font-size: 1.4em;
+            margin: 25px 0;
+            line-height: 1.7;
+            font-weight: 500;
+            color: #fff;
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #00d9ff;
+        }
+
+        /* Enhanced input */
+        .answer-input {
+            width: 100%;
+            padding: 18px 25px;
+            font-size: 1.4em;
+            border: 3px solid #00d9ff;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.95);
+            color: #000;
+            margin: 20px 0;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.6);
+            transform: scale(1.02);
+        }
+
+        /* Buttons with hover effects */
+        .btn {
+            padding: 18px 45px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+            color: #000;
+            box-shadow: 0 5px 25px rgba(0,217,255,0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 35px rgba(0,217,255,0.7);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #ffc400 0%, #ff9500 100%);
+            color: #000;
+            margin-left: 15px;
+            box-shadow: 0 5px 25px rgba(255,196,0,0.5);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 35px rgba(255,196,0,0.7);
+        }
+
+        /* Feedback animations */
+        .feedback {
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 25px;
+            animation: feedbackSlide 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border: 3px solid;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes feedbackSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .feedback::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: feedbackShine 2s infinite;
+        }
+
+        @keyframes feedbackShine {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .feedback.correct {
+            background: linear-gradient(135deg, rgba(0,255,0,0.2) 0%, rgba(0,200,0,0.15) 100%);
+            border-color: #00ff00;
+            box-shadow: 0 0 40px rgba(0,255,0,0.4);
+        }
+
+        .feedback.incorrect {
+            background: linear-gradient(135deg, rgba(255,0,0,0.2) 0%, rgba(200,0,0,0.15) 100%);
+            border-color: #ff4444;
+            box-shadow: 0 0 40px rgba(255,0,0,0.4);
+        }
+
+        .feedback h3 {
+            font-size: 2em;
+            margin-bottom: 15px;
+            font-family: 'Orbitron', sans-serif;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feedback p {
+            font-size: 1.3em;
+            position: relative;
+            z-index: 1;
+            font-weight: 500;
+        }
+
+        /* Explanation box */
+        .explanation {
+            background: linear-gradient(135deg, rgba(255, 196, 0, 0.1) 0%, rgba(255, 149, 0, 0.05) 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border-left: 5px solid #ffc400;
+            box-shadow: 0 5px 25px rgba(255, 196, 0, 0.2);
+        }
+
+        .explanation-title {
+            color: #ffc400;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 10px rgba(255, 196, 0, 0.5);
+        }
+
+        .explanation-section {
+            margin: 18px 0;
+            line-height: 1.8;
+            font-size: 1.15em;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            border-left: 3px solid #00d9ff;
+        }
+
+        .explanation-label {
+            color: #00d9ff;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Victory screen */
+        .victory-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .victory-screen h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3em;
+            color: #ffc400;
+            margin-bottom: 25px;
+            animation: victoryGlow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes victoryGlow {
+            0%, 100% { 
+                text-shadow: 0 0 20px #ffc400, 0 0 40px #ffc400;
+                transform: scale(1);
+            }
+            50% { 
+                text-shadow: 0 0 30px #ffc400, 0 0 60px #ffc400, 0 0 90px #ffc400;
+                transform: scale(1.05);
+            }
+        }
+
+        .achievement {
+            background: linear-gradient(135deg, rgba(255,196,0,0.25) 0%, rgba(255,149,0,0.2) 100%);
+            border: 4px solid #ffc400;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px auto;
+            font-size: 1.3em;
+            max-width: 600px;
+            box-shadow: 0 10px 40px rgba(255, 196, 0, 0.4);
+            animation: achievementPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes achievementPop {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .start-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .start-screen h2 {
+            color: #00d9ff;
+            margin-bottom: 25px;
+            font-size: 2.5em;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 20px rgba(0, 217, 255, 0.6);
+        }
+
+        .start-screen p {
+            font-size: 1.3em;
+            line-height: 1.9;
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+
+        /* Easter egg hint button */
+        .hint-btn {
+            background: linear-gradient(135deg, rgba(255, 196, 0, 0.2), rgba(255, 149, 0, 0.2));
+            border: 2px solid #ffc400;
+            color: #ffc400;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .hint-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 196, 0, 0.4), rgba(255, 149, 0, 0.3));
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255, 196, 0, 0.4);
+        }
+
+        .hint-box {
+            background: rgba(255, 196, 0, 0.1);
+            border: 2px dashed #ffc400;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            animation: hintAppear 0.5s ease;
+        }
+
+        @keyframes hintAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Streak counter */
+        .streak-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ff0000, #ff6600);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 1.2em;
+            box-shadow: 0 5px 25px rgba(255, 0, 0, 0.5);
+            z-index: 1000;
+            animation: streakPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes streakPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 217, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #00d9ff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        /* Confetti effect */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #ffc400;
+            top: -10px;
+            animation: confettiFall 3s linear;
+            z-index: 1000;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .question {
+                font-size: 1.2em;
+            }
+            .btn {
+                padding: 15px 30px;
+                font-size: 1em;
+            }
+            .streak-badge {
+                top: 10px;
+                right: 10px;
+                padding: 10px 15px;
+                font-size: 1em;
+            }
+        }
+
+        /* Sound wave animation */
+        .sound-wave {
+            display: inline-flex;
+            gap: 3px;
+            align-items: center;
+            margin-left: 10px;
+        }
+
+        .sound-wave span {
+            display: inline-block;
+            width: 3px;
+            height: 10px;
+            background: #00d9ff;
+            animation: soundWave 0.8s ease-in-out infinite;
+        }
+
+        .sound-wave span:nth-child(1) { animation-delay: 0s; }
+        .sound-wave span:nth-child(2) { animation-delay: 0.1s; }
+        .sound-wave span:nth-child(3) { animation-delay: 0.2s; }
+        .sound-wave span:nth-child(4) { animation-delay: 0.3s; }
+
+        @keyframes soundWave {
+            0%, 100% { height: 10px; }
+            50% { height: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating particles -->
+    <script>
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            document.body.appendChild(particle);
+        }
+    </script>
+
+    <div class="container">
+        <header>
+            <div class="arc-reactor"></div>
+            <h1>⚡ IRON ACADEMY ⚡</h1>
+            <div class="subtitle">The Workshop Awakening</div>
+        </header>
+
+        <div class="progress-container">
+            <div class="progress-label">MISSION PROGRESS</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar">0%</div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box" title="Current chapter in your journey">
+                <div class="stat-icon">📖</div>
+                <div class="stat-label">Chapter</div>
+                <div class="stat-value" id="chapterNum">1</div>
+            </div>
+            <div class="stat-box" title="Problems you've conquered">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-label">Solved</div>
+                <div class="stat-value" id="problemsSolved">0/30</div>
+            </div>
+            <div class="stat-box" title="Your precision percentage">
+                <div class="stat-icon">📊</div>
+                <div class="stat-label">Accuracy</div>
+                <div class="stat-value" id="accuracy">100%</div>
+            </div>
+            <div class="stat-box" title="Your engineer level">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-label">Level</div>
+                <div class="stat-value" id="level">1</div>
+            </div>
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <!-- Game content will be inserted here -->
+        </div>
+    </div>
+
+    <!-- Streak badge (hidden initially) -->
+    <div class="streak-badge hidden" id="streakBadge">
+        🔥 <span id="streakCount">0</span> Streak!
+    </div>
+
+    <script>
+        // Game State
+        const gameState = {
+            currentChapter: 0,
+            currentProblem: 0,
+            score: 0,
+            totalAttempts: 0,
+            correctAnswers: 0,
+            hintsUsed: 0,
+            streak: 0,
+            maxStreak: 0,
+            startTime: Date.now(),
+            problemStartTime: Date.now(),
+            fastSolves: 0,
+            totalTime: 0,
+            problemAttempts: 0,
+            maxAttemptsPerProblem: 3,
+            hintShown: false
+        };
+
+        // Sound effects (simple beep sounds using Web Audio API)
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(frequency, duration, type = 'sine') {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function playCorrectSound() {
+            playSound(523.25, 0.1); // C5
+            setTimeout(() => playSound(659.25, 0.1), 100); // E5
+            setTimeout(() => playSound(783.99, 0.2), 200); // G5
+        }
+
+        function playIncorrectSound() {
+            playSound(200, 0.3, 'sawtooth');
+        }
+
+        function playLevelUpSound() {
+            playSound(440, 0.1);
+            setTimeout(() => playSound(554.37, 0.1), 100);
+            setTimeout(() => playSound(659.25, 0.1), 200);
+            setTimeout(() => playSound(880, 0.3), 300);
+        }
+
+        // Confetti effect
+        function createConfetti() {
+            const colors = ['#00d9ff', '#ffc400', '#ff0000', '#00ff00', '#ff00ff'];
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 30);
+            }
+        }
+
+        // Update streak display
+        function updateStreak(correct) {
+            if (correct) {
+                gameState.streak++;
+                if (gameState.streak > gameState.maxStreak) {
+                    gameState.maxStreak = gameState.streak;
+                }
+                if (gameState.streak >= 3) {
+                    const badge = document.getElementById('streakBadge');
+                    const count = document.getElementById('streakCount');
+                    count.textContent = gameState.streak;
+                    badge.classList.remove('hidden');
+                }
+            } else {
+                gameState.streak = 0;
+                document.getElementById('streakBadge').classList.add('hidden');
+            }
+        }
+
+        // Game Data
+        const chapters = [
+            {
+                title: "Chapter 1: The Locked Workshop",
+                story: "You found your father's secret workshop in the basement. The door has a digital lock with fraction puzzles. Each correct answer brings you closer to unlocking the mysteries inside...",
+                icon: "🔐",
+                easterEgg: "Fun fact: The first combination lock was invented in 1857, but Tony's father made this one much smarter!",
+                problems: [
+                    {
+                        question: "The lock displays: <strong>1/4 + 1/4 = ?</strong>",
+                        answer: "1/2",
+                        altAnswers: ["0.5", "2/4", ".5", "0.50"],
+                        hint: "When adding fractions with the same bottom number, just add the tops! 1 + 1 = ?",
+                        explanation: {
+                            what: "You added two fractions with the same denominator.",
+                            why: "When fractions have the same bottom number (denominator), you just add the top numbers (numerators). So 1 + 1 = 2, keeping the 4 on bottom: 2/4. Then we simplify to 1/2 by dividing both top and bottom by 2.",
+                            real: "Tony needs to add fractions when mixing metal alloys. If one alloy is 1/4 iron and another is 1/4 carbon, together they make 1/2 of the total mixture.",
+                            concept: "Adding fractions with same denominators",
+                            funFact: "🎯 In engineering, precise fractions are crucial! SpaceX rockets use fraction calculations for fuel mixtures."
+                        }
+                    },
+                    {
+                        question: "Next puzzle: <strong>3/4 - 1/4 = ?</strong>",
+                        answer: "1/2",
+                        altAnswers: ["2/4", "0.5", ".5", "0.50"],
+                        hint: "Same bottom numbers again! Just subtract the tops: 3 - 1 = ?",
+                        explanation: {
+                            what: "You subtracted fractions with the same denominator.",
+                            why: "Just like addition, when the bottom numbers match, subtract the top numbers: 3 - 1 = 2, keep the 4 below: 2/4 = 1/2.",
+                            real: "If Tony's battery is 3/4 charged and he uses 1/4 power, he has 1/2 battery left. Simple subtraction saves his life in battle!",
+                            concept: "Subtracting fractions",
+                            funFact: "⚡ The arc reactor in Tony's chest generates 3 gigajoules per second - that's enough to power his house for a day!"
+                        }
+                    },
+                    {
+                        question: "The final lock code: <strong>2/3 + 1/3 = ?</strong>",
+                        answer: "1",
+                        altAnswers: ["3/3", "1.0", "1.00"],
+                        hint: "Add the tops: 2 + 1 = 3. You'll get 3/3. What does 3/3 equal?",
+                        explanation: {
+                            what: "You added fractions that equal a whole number!",
+                            why: "2 + 1 = 3, so we get 3/3. When the top and bottom numbers are the same, it equals 1 whole. Think of it like pizza: 2 slices + 1 slice = 3 slices, and if there were 3 slices total, you have the whole pizza!",
+                            real: "If Tony combines 2/3 of a circuit board with the missing 1/3 piece, he has 1 complete circuit board.",
+                            concept: "Fractions that equal whole numbers",
+                            funFact: "🔧 Tony Stark has built 52 different Iron Man suits (and counting)!"
+                        }
+                    },
+                    {
+                        question: "Door unlocked! Inside, you find a note: 'To understand my work, solve this: <strong>1/2 + 1/3 = ?</strong>'<br><br><em>(Hint: You'll need to find a common denominator)</em>",
+                        answer: "5/6",
+                        altAnswers: ["0.833", "0.83", ".833"],
+                        hint: "The bottoms are different (2 and 3). Find a number both divide into - try 6! Convert both fractions to sixths first.",
+                        explanation: {
+                            what: "You added fractions with DIFFERENT denominators!",
+                            why: "First, find a common denominator (a number both 2 and 3 divide into). That's 6! Convert: 1/2 = 3/6 (multiply top and bottom by 3) and 1/3 = 2/6 (multiply top and bottom by 2). Now add: 3/6 + 2/6 = 5/6.",
+                            real: "Tony must do this when combining parts from different measurement systems - imperial and metric. His suits use parts from around the world!",
+                            concept: "Common denominators",
+                            funFact: "🌍 NASA uses both metric and imperial measurements, so astronauts need to be fraction experts!"
+                        }
+                    },
+                    {
+                        question: "A blueprint shows: 'Widget needs <strong>2/5 steel</strong> and <strong>1/5 titanium</strong>. Total metal needed = ?'",
+                        answer: "3/5",
+                        altAnswers: ["0.6", ".6", "0.60"],
+                        hint: "Both fractions have 5 on the bottom. Just add 2 + 1 on top!",
+                        explanation: {
+                            what: "You added fractions to find a total.",
+                            why: "Same denominator (5), so just add tops: 2 + 1 = 3. Keep the 5 below: 3/5. This means 3 out of 5 parts are metal.",
+                            real: "Engineers constantly add fractions to calculate total materials needed for projects. Tony's Mark 50 suit uses a gold-titanium alloy mixture!",
+                            concept: "Real-world fraction application",
+                            funFact: "🦾 The Iron Man suit weighs about 240 pounds, but Tony's repulsors make him feel weightless!"
+                        }
+                    },
+                    {
+                        question: "You find 3/4 of a chocolate bar. You eat 1/4 of it. <strong>How much is left?</strong>",
+                        answer: "1/2",
+                        altAnswers: ["2/4", "0.5", ".5", "0.50"],
+                        hint: "Start with 3/4, take away 1/4. What's 3 - 1?",
+                        explanation: {
+                            what: "You subtracted a fraction from another fraction.",
+                            why: "Start with 3/4, subtract 1/4: 3 - 1 = 2, keep the 4 below: 2/4 = 1/2. Half the chocolate bar remains!",
+                            real: "This is how Tony tracks fuel consumption. Start with 3/4 tank, use 1/4 for flight, 1/2 tank remains. Running out mid-flight = bad day!",
+                            concept: "Subtracting fractions in context",
+                            funFact: "🍫 Fun break! You've earned it. In real life, Tony Stark loves cheeseburgers more than chocolate!"
+                        }
+                    }
+                ]
+            },
+            {
+                title: "Chapter 2: The Blueprint Challenge",
+                story: "The workshop has old blueprints everywhere! But some measurements have faded. You need to calculate them using multiplication and division. These blueprints hold the key to understanding your father's genius!",
+                icon: "📐",
+                easterEgg: "Howard Stark's blueprints included designs that wouldn't be possible until 40 years in the future!",
+                problems: [
+                    {
+                        question: "Blueprint says: 'Triple this measurement: <strong>1/3 × 3 = ?</strong>'",
+                        answer: "1",
+                        altAnswers: ["3/3", "1.0", "1.00"],
+                        hint: "Multiplying by 3 means 'three times as much'. So 1/3 three times equals?",
+                        explanation: {
+                            what: "You multiplied a fraction by a whole number.",
+                            why: "1/3 × 3 means '1/3, three times'. Multiply the top: 1 × 3 = 3. Keep bottom: 3. So 3/3 = 1. The threes cancel out!",
+                            real: "If one part is 1/3 meter long, and Tony needs 3 of them, that's 1 meter total. Simple multiplication saves time in the workshop.",
+                            concept: "Multiplying fractions by whole numbers",
+                            funFact: "📏 Tony's workshop has over 200 different tools, each precisely measured for building suits!"
+                        }
+                    },
+                    {
+                        question: "Next measurement: <strong>1/2 × 4 = ?</strong>",
+                        answer: "2",
+                        altAnswers: ["4/2", "2.0", "2.00"],
+                        hint: "Half of something, but you have 4 of them. (1 × 4) ÷ 2 = ?",
+                        explanation: {
+                            what: "You multiplied a fraction by a whole number again.",
+                            why: "1/2 × 4 = (1 × 4)/2 = 4/2 = 2. Think of it as: 'half of 4' = 2.",
+                            real: "If half a sheet of metal weighs 1/2 kg, four sheets weigh 2 kg. Tony needs to calculate weight for his suit's flight capability!",
+                            concept: "Fraction multiplication",
+                            funFact: "✈️ The Iron Man suit can fly at Mach 3 (2,300 mph) - that's faster than a speeding bullet!"
+                        }
+                    },
+                    {
+                        question: "Tricky one: <strong>1/2 × 1/2 = ?</strong>",
+                        answer: "1/4",
+                        altAnswers: ["0.25", ".25", "0.250"],
+                        hint: "Multiply tops together (1 × 1), then bottoms together (2 × 2)!",
+                        explanation: {
+                            what: "You multiplied two fractions together!",
+                            why: "Multiply tops: 1 × 1 = 1. Multiply bottoms: 2 × 2 = 4. Answer: 1/4. This is half OF a half!",
+                            real: "If Tony cuts something in half, then cuts that half in half again, he gets 1/4 of the original. Like cutting pizza slices!",
+                            concept: "Multiplying fractions by fractions",
+                            funFact: "🍕 Each time you cut something in half, you're dividing by 2. Two cuts = 1/4 size!"
+                        }
+                    },
+                    {
+                        question: "Division problem: <strong>1/2 ÷ 2 = ?</strong>",
+                        answer: "1/4",
+                        altAnswers: ["0.25", ".25", "0.250"],
+                        hint: "Dividing by 2 is the same as multiplying by 1/2. So this is 1/2 × 1/2!",
+                        explanation: {
+                            what: "You divided a fraction by a whole number.",
+                            why: "Dividing by 2 is the same as multiplying by 1/2. So 1/2 × 1/2 = 1/4. Division and multiplication are opposites!",
+                            real: "If Tony splits 1/2 pizza between 2 people, each gets 1/4 pizza. Fair sharing uses division!",
+                            concept: "Dividing fractions",
+                            funFact: "⚖️ Fairness in division is important. Tony always makes sure his AI J.A.R.V.I.S. divides computing power fairly!"
+                        }
+                    },
+                    {
+                        question: "The blueprint needs this: <strong>2/3 × 3 = ?</strong>",
+                        answer: "2",
+                        altAnswers: ["6/3", "2.0", "2.00"],
+                        hint: "Multiply the top by 3: (2 × 3) = 6. Then 6/3 = ?",
+                        explanation: {
+                            what: "You multiplied a fraction by a whole number.",
+                            why: "(2 × 3)/3 = 6/3 = 2. The 3s cancel out! When you multiply a fraction by its denominator, you get the numerator.",
+                            real: "If each section is 2/3 meter, and there are 3 sections, that's 2 meters total. Tony uses this for calculating suit panel sizes!",
+                            concept: "Canceling in fraction multiplication",
+                            funFact: "🎨 The red and gold colors of Iron Man's suit were chosen because they test well in all lighting conditions!"
+                        }
+                    },
+                    {
+                        question: "Final calculation: <strong>3/4 × 4/3 = ?</strong>",
+                        answer: "1",
+                        altAnswers: ["12/12", "1.0", "1.00"],
+                        hint: "Notice these fractions are 'flipped' versions of each other! What happens when you multiply them?",
+                        explanation: {
+                            what: "You multiplied fractions that are reciprocals!",
+                            why: "Multiply tops: 3 × 4 = 12. Multiply bottoms: 4 × 3 = 12. So 12/12 = 1. Notice: these fractions 'undo' each other. They're reciprocals!",
+                            real: "This is how Tony checks if two measurements are inverses of each other. Like checking if his scaling calculations are reversible!",
+                            concept: "Reciprocal fractions",
+                            funFact: "🔄 Reciprocals are everywhere! Speed and time are reciprocals: faster speed = less time. Tony uses this for flight calculations!"
+                        }
+                    }
+                ]
+            },
+            {
+                title: "Chapter 3: The Decimal Computer",
+                story: "You boot up an old computer. It only accepts answers in decimals! The screen flickers to life with a message: 'Welcome, Young Stark. Time to master decimal operations...'",
+                icon: "💻",
+                easterEgg: "This computer was built in 1970 but has technology that wouldn't exist until 2008!",
+                problems: [
+                    {
+                        question: "Convert this fraction to decimal: <strong>1/2 = ?</strong>",
+                        answer: "0.5",
+                        altAnswers: ["0.50", ".5", "0.500"],
+                        hint: "1 divided by 2. Think: How many times does 2 go into 1?",
+                        explanation: {
+                            what: "You converted a fraction to a decimal.",
+                            why: "1/2 means 1 ÷ 2. When you divide 1 by 2, you get 0.5. Think of it as: 'How many times does 2 go into 1?' Half a time = 0.5.",
+                            real: "Computer code uses decimals, not fractions. Tony must convert measurements for programming his suit's AI system!",
+                            concept: "Fractions to decimals",
+                            funFact: "💾 The first computer Tony built was at age 4. He's been converting fractions to decimals since kindergarten!"
+                        }
+                    },
+                    {
+                        question: "Now convert: <strong>1/4 = ?</strong>",
+                        answer: "0.25",
+                        altAnswers: [".25", "0.250"],
+                        hint: "1 divided by 4. Or think: 25 cents is 1/4 of a dollar!",
+                        explanation: {
+                            what: "Another fraction to decimal conversion.",
+                            why: "1 ÷ 4 = 0.25. Think: 'One dollar divided among 4 people = 25 cents each = $0.25'",
+                            real: "This appears everywhere in engineering - precision measurements, percentages, sensor readings. Quarter measurements are super common!",
+                            concept: "Fractions to decimals",
+                            funFact: "💰 In coding, 0.25 is used millions of times per second in Tony's suit calculations!"
+                        }
+                    },
+                    {
+                        question: "Computer displays: <strong>0.5 + 0.3 = ?</strong>",
+                        answer: "0.8",
+                        altAnswers: [".8", "0.80"],
+                        hint: "Line up the decimal points and add like normal numbers: 5 + 3 = ?",
+                        explanation: {
+                            what: "You added decimals.",
+                            why: "Line up the decimal points and add like normal: 0.5 + 0.3 = 0.8. Think dollars and cents: $0.50 + $0.30 = $0.80.",
+                            real: "When Tony measures voltages or distances with sensors, he's adding decimals. His helmet display shows everything in decimals!",
+                            concept: "Adding decimals",
+                            funFact: "📱 Your phone does billions of decimal additions per second to work!"
+                        }
+                    },
+                    {
+                        question: "Next calculation: <strong>1.5 - 0.7 = ?</strong>",
+                        answer: "0.8",
+                        altAnswers: [".8", "0.80"],
+                        hint: "Line up the decimal points. 15 - 7 = 8, so 1.5 - 0.7 = ?",
+                        explanation: {
+                            what: "You subtracted decimals.",
+                            why: "Line up decimal points: 1.5 - 0.7 = 0.8. Like money: $1.50 - $0.70 = $0.80. The decimal point stays in the same place!",
+                            real: "Tony subtracts decimals when calculating remaining battery life or fuel. 'J.A.R.V.I.S., how much power left?' '0.8 gigajoules, sir.'",
+                            concept: "Subtracting decimals",
+                            funFact: "🔋 Tony's arc reactor uses decimal precision to 10 decimal places - that's billionths of a unit!"
+                        }
+                    },
+                    {
+                        question: "Multiply: <strong>0.5 × 4 = ?</strong>",
+                        answer: "2",
+                        altAnswers: ["2.0", "2.00"],
+                        hint: "0.5 is the same as 1/2. So half of 4 = ?",
+                        explanation: {
+                            what: "You multiplied a decimal by a whole number.",
+                            why: "0.5 × 4 = 2. Think: 'Half of something, four times = 2 whole things'. Or: 50 cents × 4 = $2.00.",
+                            real: "If each part weighs 0.5 kg, four parts weigh 2 kg. Tony needs exact weight calculations for his suit's flight balance!",
+                            concept: "Multiplying decimals",
+                            funFact: "⚖️ The Iron Man suit must be perfectly balanced. Even 0.1 kg off-center affects flight!"
+                        }
+                    },
+                    {
+                        question: "Final test: Convert <strong>3/4</strong> to decimal = ?",
+                        answer: "0.75",
+                        altAnswers: [".75", "0.750"],
+                        hint: "3 divided by 4. Or think: three quarters = 75 cents!",
+                        explanation: {
+                            what: "You converted a harder fraction to decimal.",
+                            why: "3 ÷ 4 = 0.75. Think: 'Three quarters = 75 cents = $0.75'. Or: 75% of a dollar.",
+                            real: "Tony's suit is 3/4 charged = 75% = 0.75 full capacity. All three ways of saying the same thing!",
+                            concept: "Fractions to decimals conversion",
+                            funFact: "🎯 Master tip: To convert any fraction to decimal, just divide the top by the bottom!"
+                        }
+                    }
+                ]
+            },
+            {
+                title: "Chapter 4: The Percentage Puzzle",
+                story: "The workshop has a power generator that shows percentages. The generator hums with energy, but you need to understand percentages to manage the power supply and prevent an overload!",
+                icon: "⚡",
+                easterEgg: "The arc reactor runs at 3.86 gigajoules per second - that's like 3 million horsepower!",
+                problems: [
+                    {
+                        question: "The generator shows <strong>50%</strong> power. As a fraction, that's <strong>?</strong><br><em>(Write as a simplified fraction, like 1/2)</em>",
+                        answer: "1/2",
+                        altAnswers: ["50/100", "0.5", ".5"],
+                        hint: "Percent means 'per hundred'. 50% = 50/100. Can you simplify that?",
+                        explanation: {
+                            what: "You converted a percentage to a fraction.",
+                            why: "Percent means 'per hundred'. 50% = 50/100 = 1/2 (divide both by 50). It's half!",
+                            real: "Tony checks his suit's power percentage constantly. 50% = half power remaining. Quick mental math saves lives!",
+                            concept: "Percentages to fractions",
+                            funFact: "⚡ 'Percent' comes from Latin 'per centum' meaning 'by the hundred'. Math has been around for thousands of years!"
+                        }
+                    },
+                    {
+                        question: "What's <strong>25%</strong> as a fraction?",
+                        answer: "1/4",
+                        altAnswers: ["25/100", "0.25", ".25"],
+                        hint: "25% = 25/100. Divide both top and bottom by 25!",
+                        explanation: {
+                            what: "Another percentage to fraction conversion.",
+                            why: "25% = 25/100. Simplify by dividing both by 25: = 1/4. It's one quarter!",
+                            real: "If Tony's shield is 25% depleted, he's lost 1/4 of his protection. Time to get to safety!",
+                            concept: "Percentages to fractions",
+                            funFact: "🛡️ Tony's energy shields can absorb impacts up to 25 gigajoules before failing!"
+                        }
+                    },
+                    {
+                        question: "Convert <strong>75%</strong> to a decimal: ?",
+                        answer: "0.75",
+                        altAnswers: [".75", "0.750"],
+                        hint: "Quick trick: Move the decimal point two places left! 75. → 0.75",
+                        explanation: {
+                            what: "You converted percentage to decimal.",
+                            why: "75% means 75 per 100. Divide by 100: 75 ÷ 100 = 0.75. Quick trick: move decimal left 2 places!",
+                            real: "Computer systems show battery as decimals: 0.75 = 75% charged. Tony's HUD switches between both instantly!",
+                            concept: "Percentages to decimals",
+                            funFact: "🖥️ Tony's HUD (Heads-Up Display) updates 1,000 times per second with percentage calculations!"
+                        }
+                    },
+                    {
+                        question: "The generator has <strong>100 units</strong>. You use <strong>20 units</strong>. What percentage did you use?",
+                        answer: "20",
+                        altAnswers: ["20%"],
+                        hint: "20 out of 100 is 20/100. What percentage is that?",
+                        explanation: {
+                            what: "You calculated a percentage from numbers.",
+                            why: "Used 20 out of 100. That's 20/100 = 20%. Formula: (part/whole) × 100 = percentage.",
+                            real: "If Tony fires 20 out of 100 repulsor charges, he used 20% of his ammunition. Better make those shots count!",
+                            concept: "Calculating percentages",
+                            funFact: "💥 Each repulsor blast uses about 2% of Tony's total energy. That means 50 blasts per full charge!"
+                        }
+                    },
+                    {
+                        question: "What is <strong>50% of 80</strong>?",
+                        answer: "40",
+                        altAnswers: ["40.0", "40.00"],
+                        hint: "50% means half. What's half of 80?",
+                        explanation: {
+                            what: "You found a percentage of a number.",
+                            why: "50% means half. Half of 80 = 80 ÷ 2 = 40. Math way: 0.5 × 80 = 40.",
+                            real: "If Tony's maximum speed is 80 mph, and he's going 50% speed, he's going 40 mph. Speed control is crucial for precision flying!",
+                            concept: "Finding percentages of numbers",
+                            funFact: "🚀 Tony can actually fly much faster than 80 mph - his top speed is Mach 3 (over 2,000 mph)!"
+                        }
+                    },
+                    {
+                        question: "The power increased from <strong>50 to 75 units</strong>. What percentage increase?<br><em>(Just write the number)</em>",
+                        answer: "50",
+                        altAnswers: ["50%"],
+                        hint: "Increase = 75 - 50 = 25. Then (25/50) × 100 = ?",
+                        explanation: {
+                            what: "You calculated percentage increase!",
+                            why: "Increase = 75 - 50 = 25 units. Original = 50. Percentage = (25/50) × 100 = 50% increase. The power went up by half!",
+                            real: "When Tony upgrades his arc reactor from 50 to 75 gigajoules, that's a 50% power increase. Each upgrade makes him stronger!",
+                            concept: "Percentage change",
+                            funFact: "📈 Tony has upgraded his arc reactor 7 times, each time improving power by 30-50%!"
+                        }
+                    }
+                ]
+            },
+            {
+                title: "Chapter 5: The Order of Operations",
+                story: "You found the main circuit board! But to activate it, you must enter calculations in the CORRECT order. Remember PEMDAS: Parentheses, Exponents, Multiply/Divide (left to right), Add/Subtract (left to right). One wrong move and the circuit board fries!",
+                icon: "🔢",
+                easterEgg: "The circuit board contains technology that won't be invented for another 20 years. Tony's father was a genius ahead of his time!",
+                problems: [
+                    {
+                        question: "Activate sequence: <strong>2 + 3 × 4 = ?</strong>",
+                        answer: "14",
+                        altAnswers: ["14.0", "14.00"],
+                        hint: "Remember PEMDAS! Multiply BEFORE adding. Do 3 × 4 first!",
+                        explanation: {
+                            what: "You used order of operations correctly!",
+                            why: "PEMDAS says multiply BEFORE adding. So first: 3 × 4 = 12. Then: 2 + 12 = 14. NOT (2+3)×4 = 20!",
+                            real: "Circuit boards follow exact order. Wrong order = explosion! Tony must calculate in correct sequence or his suit malfunctions.",
+                            concept: "Order of operations (PEMDAS)",
+                            funFact: "💡 PEMDAS is also called BODMAS in some countries: Brackets, Orders, Division/Multiplication, Addition/Subtraction!"
+                        }
+                    },
+                    {
+                        question: "Next sequence: <strong>10 - 2 × 3 = ?</strong>",
+                        answer: "4",
+                        altAnswers: ["4.0", "4.00"],
+                        hint: "Multiply first! 2 × 3 = 6. Then subtract from 10.",
+                        explanation: {
+                            what: "Another order of operations problem.",
+                            why: "Multiply first: 2 × 3 = 6. Then subtract: 10 - 6 = 4. Don't do (10-2)×3 = 24!",
+                            real: "Programming code executes in order. Mess up the order = bugs in Tony's AI system. J.A.R.V.I.S. runs on perfect order!",
+                            concept: "Order of operations",
+                            funFact: "🤖 J.A.R.V.I.S. processes 100 billion calculations per second - all following PEMDAS!"
+                        }
+                    },
+                    {
+                        question: "With parentheses: <strong>(2 + 3) × 4 = ?</strong>",
+                        answer: "20",
+                        altAnswers: ["20.0", "20.00"],
+                        hint: "Parentheses are ALWAYS first! Do (2 + 3) first, then multiply by 4.",
+                        explanation: {
+                            what: "Parentheses changed everything!",
+                            why: "Parentheses are done FIRST. (2 + 3) = 5. Then: 5 × 4 = 20. This is different from 2 + 3 × 4 = 14!",
+                            real: "Parentheses group things together. Like (speed + acceleration) × time gives distance traveled. Tony's flight computer uses this constantly!",
+                            concept: "Parentheses in PEMDAS",
+                            funFact: "🎯 Changing where parentheses go completely changes the answer! That's the power of grouping."
+                        }
+                    },
+                    {
+                        question: "Complex: <strong>20 ÷ 4 + 3 × 2 = ?</strong>",
+                        answer: "11",
+                        altAnswers: ["11.0", "11.00"],
+                        hint: "Do multiply AND divide first (left to right): 20÷4 and 3×2. Then add those answers!",
+                        explanation: {
+                            what: "You handled multiple operations!",
+                            why: "Do multiply and divide first (left to right): 20 ÷ 4 = 5 and 3 × 2 = 6. Then add: 5 + 6 = 11.",
+                            real: "Complex calculations in engineering require exact order, or the rocket/circuit/building fails. One mistake = disaster!",
+                            concept: "Multiple operations in order",
+                            funFact: "🚀 SpaceX rockets use calculations with 50+ operations in one equation - all following PEMDAS perfectly!"
+                        }
+                    },
+                    {
+                        question: "Parentheses power: <strong>3 × (2 + 4) - 5 = ?</strong>",
+                        answer: "13",
+                        altAnswers: ["13.0", "13.00"],
+                        hint: "Step by step: 1) (2+4) first, 2) Then multiply by 3, 3) Finally subtract 5",
+                        explanation: {
+                            what: "You mastered parentheses priority!",
+                            why: "Step 1: (2 + 4) = 6. Step 2: 3 × 6 = 18. Step 3: 18 - 5 = 13. Always do what's in parentheses first!",
+                            real: "When Tony calculates trajectory: 3 × (current speed + acceleration) - wind resistance. The order matters for safe landing!",
+                            concept: "Parentheses with multiple operations",
+                            funFact: "✈️ Fighter pilots use similar calculations to predict where they'll be in the next second!"
+                        }
+                    },
+                    {
+                        question: "Final activation: <strong>100 - (20 + 30) ÷ 5 = ?</strong>",
+                        answer: "90",
+                        altAnswers: ["90.0", "90.00"],
+                        hint: "Order: 1) Parentheses (20+30), 2) Divide by 5, 3) Subtract from 100",
+                        explanation: {
+                            what: "You solved a complex PEMDAS problem!",
+                            why: "Step 1: (20 + 30) = 50. Step 2: 50 ÷ 5 = 10. Step 3: 100 - 10 = 90. Perfect execution!",
+                            real: "This is how Tony calculates remaining resources: Total - (used amount + waste) ÷ efficiency. Every mission depends on these calculations!",
+                            concept: "Complete PEMDAS mastery",
+                            funFact: "🎊 Congratulations! You've mastered the same math order that built the Iron Man suit!"
+                        }
+                    }
+                ]
+            }
+        ];
+
+        // Initialize game
+        function startGame() {
+            gameState.problemStartTime = Date.now();
+            loadChapter();
+        }
+
+        function loadChapter() {
+            const chapter = chapters[gameState.currentChapter];
+            gameState.currentProblem = 0;
+
+            const html = `
+                <div class="start-screen">
+                    <div class="chapter-title">
+                        ${chapter.icon} ${chapter.title}
+                    </div>
+                    <div class="story-box">
+                        ${addSATTooltips(chapter.story)}
+                    </div>
+                    <p>Get ready to solve <strong>${chapter.problems.length} challenging problems</strong>!</p>
+                    <p style="font-size: 0.9em; color: #ffc400; margin-top: 10px;">
+                        💡 <em>Tap yellow words to learn new vocabulary!</em>
+                    </p>
+                    <div style="margin: 20px 0; padding: 15px; background: rgba(255,196,0,0.1); border-radius: 10px; border: 2px dashed #ffc400;">
+                        <strong>💡 Easter Egg:</strong> ${chapter.easterEgg}
+                    </div>
+                    <button class="btn btn-primary" onclick="loadProblem()">START CHAPTER →</button>
+                </div>
+            `;
+
+            document.getElementById('gameArea').innerHTML = html;
+            updateStats();
+        }
+
+        function loadProblem() {
+            const chapter = chapters[gameState.currentChapter];
+            const problem = chapter.problems[gameState.currentProblem];
+            gameState.problemStartTime = Date.now();
+            gameState.problemAttempts = 0;
+            gameState.hintShown = false;
+
+            const attemptsLeft = gameState.maxAttemptsPerProblem;
+
+            const html = `
+                <div class="problem-card">
+                    <div class="problem-number">Problem ${gameState.currentProblem + 1}/${chapter.problems.length}</div>
+                    <div class="chapter-title">
+                        ${chapter.icon} ${chapter.title}
+                    </div>
+                    <div class="question">${addSATTooltips(problem.question)}</div>
+                    <input type="text" class="answer-input" id="answerInput" placeholder="Type your answer here..." onkeypress="if(event.key==='Enter') checkAnswer()" autocomplete="off">
+                    <div>
+                        <button class="btn btn-primary" onclick="checkAnswer()">
+                            SUBMIT ANSWER
+                            <span class="sound-wave">
+                                <span></span><span></span><span></span><span></span>
+                            </span>
+                        </button>
+                        <button class="hint-btn" onclick="showHint()">💡 Need a Hint?</button>
+                        <span class="attempt-counter" id="attemptCounter">Attempts: ${attemptsLeft} left</span>
+                    </div>
+                    <div id="hintContainer"></div>
+                </div>
+            `;
+
+            document.getElementById('gameArea').innerHTML = html;
+            document.getElementById('answerInput').focus();
+            updateStats();
+        }
+
+        function showHint() {
+            const chapter = chapters[gameState.currentChapter];
+            const problem = chapter.problems[gameState.currentProblem];
+            gameState.hintsUsed++;
+            
+            const hintHtml = `
+                <div class="hint-box">
+                    <strong>💡 Hint:</strong> ${problem.hint}
+                </div>
+            `;
+            
+            document.getElementById('hintContainer').innerHTML = hintHtml;
+            playSound(440, 0.1);
+        }
+
+        function checkAnswer() {
+            const chapter = chapters[gameState.currentChapter];
+            const problem = chapter.problems[gameState.currentProblem];
+            const userAnswer = document.getElementById('answerInput').value.trim().toLowerCase();
+
+            if (!userAnswer) {
+                alert('Please enter an answer first!');
+                return;
+            }
+
+            gameState.problemAttempts++;
+            gameState.totalAttempts++;
+
+            // Check if answer is correct
+            const correctAnswers = [problem.answer, ...problem.altAnswers].map(a => a.toLowerCase());
+            const isCorrect = correctAnswers.includes(userAnswer);
+
+            if (isCorrect) {
+                // Calculate time taken
+                const timeTaken = (Date.now() - gameState.problemStartTime) / 1000;
+                gameState.totalTime += timeTaken;
+
+                gameState.correctAnswers++;
+                gameState.score += 100;
+
+                // Bonus points based on attempts (first try = max bonus)
+                if (gameState.problemAttempts === 1) {
+                    gameState.score += 50;
+                } else if (gameState.problemAttempts === 2) {
+                    gameState.score += 25;
+                }
+
+                // Bonus for fast solve (under 30 seconds)
+                if (timeTaken < 30 && gameState.problemAttempts === 1) {
+                    gameState.score += 50;
+                    gameState.fastSolves++;
+                }
+
+                playCorrectSound();
+                updateStreak(true);
+
+                // Create confetti on correct answer
+                if (Math.random() > 0.5) {
+                    createConfetti();
+                }
+
+                showFeedback(true, problem, timeTaken);
+            } else {
+                // Wrong answer
+                playIncorrectSound();
+                const attemptsLeft = gameState.maxAttemptsPerProblem - gameState.problemAttempts;
+
+                // Auto-show hint on first wrong answer
+                if (!gameState.hintShown) {
+                    showHint();
+                }
+
+                if (attemptsLeft > 0) {
+                    // Still have attempts left - show try again message
+                    showTryAgain(attemptsLeft, problem);
+                } else {
+                    // No attempts left - show answer and move on
+                    const timeTaken = (Date.now() - gameState.problemStartTime) / 1000;
+                    gameState.totalTime += timeTaken;
+                    updateStreak(false);
+                    showFeedback(false, problem, timeTaken);
+                }
+            }
+        }
+
+        function showTryAgain(attemptsLeft, problem) {
+            const attemptCounter = document.getElementById('attemptCounter');
+            if (attemptCounter) {
+                attemptCounter.textContent = `Attempts: ${attemptsLeft} left`;
+                attemptCounter.className = attemptsLeft === 1 ? 'attempt-counter warning' : 'attempt-counter';
+            }
+
+            // Clear input and show encouragement
+            const input = document.getElementById('answerInput');
+            input.value = '';
+            input.focus();
+
+            // Show inline feedback
+            let tryAgainMsg = document.getElementById('tryAgainMsg');
+            if (!tryAgainMsg) {
+                tryAgainMsg = document.createElement('div');
+                tryAgainMsg.id = 'tryAgainMsg';
+                tryAgainMsg.style.cssText = 'background: rgba(255,100,100,0.2); border: 2px solid #ff6464; color: #ff6464; padding: 15px; border-radius: 10px; margin-top: 15px; animation: feedbackSlide 0.3s ease;';
+                document.getElementById('hintContainer').after(tryAgainMsg);
+            }
+
+            const encouragements = [
+                "Not quite! Check the hint and try again. You've got this! 💪",
+                "Almost there! Look at the hint carefully and give it another shot! 🎯",
+                "Keep trying! Great engineers never give up on the first try! 🔧"
+            ];
+            const msg = encouragements[gameState.maxAttemptsPerProblem - attemptsLeft - 1] || encouragements[0];
+
+            tryAgainMsg.innerHTML = `<strong>❌ ${msg}</strong><br><small>${attemptsLeft} attempt${attemptsLeft > 1 ? 's' : ''} remaining</small>`;
+        }
+
+        function showFeedback(correct, problem, timeTaken) {
+            const feedbackClass = correct ? 'correct' : 'incorrect';
+            const feedbackEmoji = correct ? '✅' : '❌';
+            const feedbackTitle = correct ? 'CORRECT! EXCELLENT WORK!' : 'Not quite right...';
+
+            let feedbackMsg = '';
+            if (correct) {
+                const attemptBonus = gameState.problemAttempts === 1 ? ' 🎯 FIRST TRY BONUS +50!' :
+                                    gameState.problemAttempts === 2 ? ' 👍 SECOND TRY BONUS +25!' : '';
+                const speedBonus = timeTaken < 30 && gameState.problemAttempts === 1 ? ' ⚡ SPEED BONUS +50!' : '';
+                feedbackMsg = `You solved it in ${timeTaken.toFixed(1)} seconds!${attemptBonus}${speedBonus}`;
+            } else {
+                feedbackMsg = `The correct answer is: <strong>${problem.answer}</strong><br><small>Don't worry - learning from mistakes is how engineers grow!</small>`;
+            }
+
+            const html = `
+                <div class="feedback ${feedbackClass}">
+                    <h3>${feedbackEmoji} ${feedbackTitle}</h3>
+                    <p>${feedbackMsg}</p>
+                </div>
+                <div class="explanation">
+                    <div class="explanation-title">🧠 FEYNMAN EXPLANATION</div>
+                    <p style="font-size: 0.85em; color: #ffc400; margin-bottom: 15px;">
+                        💡 <em>Tap yellow words to learn new vocabulary!</em>
+                    </p>
+                    <div class="explanation-section">
+                        <span class="explanation-label">🎯 What You Did:</span>
+                        ${addSATTooltips(problem.explanation.what)}
+                    </div>
+                    <div class="explanation-section">
+                        <span class="explanation-label">🔍 Why It Works:</span>
+                        ${addSATTooltips(problem.explanation.why)}
+                    </div>
+                    <div class="explanation-section">
+                        <span class="explanation-label">🦾 Real World (Tony Stark Style):</span>
+                        ${addSATTooltips(problem.explanation.real)}
+                    </div>
+                    <div class="explanation-section">
+                        <span class="explanation-label">📚 Concept Mastered:</span>
+                        ${addSATTooltips(problem.explanation.concept)}
+                    </div>
+                    ${problem.explanation.funFact ? `
+                    <div class="explanation-section" style="background: rgba(255,196,0,0.1); border-left-color: #ffc400;">
+                        <span class="explanation-label">⭐ Fun Fact:</span>
+                        ${addSATTooltips(problem.explanation.funFact)}
+                    </div>
+                    ` : ''}
+                    <div id="hintContainer"></div>
+                </div>
+                <div style="margin-top: 25px; text-align: center;">
+                    <button class="btn btn-primary" onclick="nextProblem()">CONTINUE MISSION →</button>
+                </div>
+            `;
+
+            document.getElementById('gameArea').innerHTML = html;
+        }
+
+        function nextProblem() {
+            const chapter = chapters[gameState.currentChapter];
+            gameState.currentProblem++;
+            
+            if (gameState.currentProblem >= chapter.problems.length) {
+                // Chapter complete
+                gameState.currentChapter++;
+                if (gameState.currentChapter >= chapters.length) {
+                    showVictory();
+                } else {
+                    showChapterComplete();
+                }
+            } else {
+                loadProblem();
+            }
+        }
+
+        function showChapterComplete() {
+            const prevChapter = chapters[gameState.currentChapter - 1];
+            playLevelUpSound();
+            createConfetti();
+            
+            const html = `
+                <div class="victory-screen">
+                    <h2>🎉 CHAPTER COMPLETE! 🎉</h2>
+                    <div class="achievement">
+                        <div style="font-size: 3em; margin-bottom: 15px;">${prevChapter.icon}</div>
+                        You mastered <strong>${prevChapter.title}</strong>!<br><br>
+                        <strong>🏆 Achievement Unlocked:</strong> Workshop Explorer Level ${gameState.currentChapter}
+                    </div>
+                    <p style="font-size: 1.3em; margin: 25px 0;">
+                        Your skills are growing, young Stark. Ready for the next challenge?
+                    </p>
+                    <div class="stats" style="margin: 30px 0;">
+                        <div class="stat-box">
+                            <div class="stat-label">Chapter Score</div>
+                            <div class="stat-value">100%</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Level Up!</div>
+                            <div class="stat-value">${gameState.currentChapter + 1}</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="loadChapter()">START NEXT CHAPTER →</button>
+                </div>
+            `;
+            document.getElementById('gameArea').innerHTML = html;
+            updateStats();
+        }
+
+        function showVictory() {
+            playLevelUpSound();
+            createConfetti();
+            setTimeout(createConfetti, 1000);
+            setTimeout(createConfetti, 2000);
+            
+            const accuracy = Math.round((gameState.correctAnswers / gameState.totalAttempts) * 100);
+            const avgTime = (gameState.totalTime / gameState.correctAnswers).toFixed(1);
+            const totalMinutes = Math.floor(gameState.totalTime / 60);
+            const totalSeconds = Math.floor(gameState.totalTime % 60);
+            
+            const html = `
+                <div class="victory-screen">
+                    <h2>🏆 MISSION COMPLETE! 🏆</h2>
+                    <div class="arc-reactor" style="width: 120px; height: 120px; margin: 20px auto;"></div>
+                    <div class="achievement">
+                        <div style="font-size: 2.5em; margin-bottom: 15px;">⚡ IRON ACADEMY GRADUATE ⚡</div>
+                        <strong>THE WORKSHOP AWAKENING</strong><br><br>
+                        You've unlocked the secrets of your father's workshop!<br>
+                        You're ready to begin your journey as a young inventor.<br><br>
+                        <em>"The truth is... you're ready to be a hero."</em>
+                    </div>
+                    
+                    <div class="stats" style="margin-top: 30px;">
+                        <div class="stat-box">
+                            <div class="stat-icon">🎯</div>
+                            <div class="stat-label">Problems Solved</div>
+                            <div class="stat-value">${gameState.correctAnswers}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-label">Final Accuracy</div>
+                            <div class="stat-value">${accuracy}%</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-icon">💰</div>
+                            <div class="stat-label">Total Score</div>
+                            <div class="stat-value">${gameState.score}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-icon">🔥</div>
+                            <div class="stat-label">Max Streak</div>
+                            <div class="stat-value">${gameState.maxStreak}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(0,217,255,0.1); padding: 25px; border-radius: 15px; margin: 30px 0; border: 2px solid rgba(0,217,255,0.3);">
+                        <h3 style="color: #00d9ff; margin-bottom: 20px; font-size: 1.8em;">📈 YOUR STATS</h3>
+                        <div style="text-align: left; font-size: 1.2em; line-height: 2;">
+                            ⏱️ Total Time: <strong>${totalMinutes}m ${totalSeconds}s</strong><br>
+                            ⚡ Average Time per Problem: <strong>${avgTime}s</strong><br>
+                            🚀 Fast Solves (under 30s): <strong>${gameState.fastSolves}</strong><br>
+                            💡 Hints Used: <strong>${gameState.hintsUsed}</strong><br>
+                            🎯 First Try Success: <strong>${Math.round((gameState.correctAnswers / gameState.totalAttempts) * 100)}%</strong>
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(255,196,0,0.1); padding: 25px; border-radius: 15px; margin: 30px 0; border: 2px solid rgba(255,196,0,0.3);">
+                        <h3 style="color: #ffc400; margin-bottom: 20px; font-size: 1.8em;">🎓 SKILLS MASTERED</h3>
+                        <div style="text-align: left; font-size: 1.2em; line-height: 2;">
+                            ✅ <strong>Fractions:</strong> Add, subtract, multiply, divide<br>
+                            ✅ <strong>Decimals:</strong> Conversion and operations<br>
+                            ✅ <strong>Percentages:</strong> Conversion and calculations<br>
+                            ✅ <strong>Order of Operations:</strong> PEMDAS mastery<br>
+                            ✅ <strong>Real-World Application:</strong> Engineering problems
+                        </div>
+                    </div>
+                    
+                    ${accuracy >= 90 ? `
+                    <div class="achievement" style="background: linear-gradient(135deg, rgba(255,215,0,0.3), rgba(255,165,0,0.2)); border-color: gold;">
+                        <div style="font-size: 2.5em;">🌟 PERFECT ENGINEER 🌟</div>
+                        You achieved ${accuracy}% accuracy!<br>
+                        Tony Stark would be proud!
+                    </div>
+                    ` : ''}
+                    
+                    ${gameState.maxStreak >= 10 ? `
+                    <div class="achievement" style="background: linear-gradient(135deg, rgba(255,0,0,0.3), rgba(255,100,0,0.2)); border-color: #ff0000;">
+                        <div style="font-size: 2.5em;">🔥 STREAK MASTER 🔥</div>
+                        Maximum streak of ${gameState.maxStreak}!<br>
+                        You're on fire!
+                    </div>
+                    ` : ''}
+                    
+                    <div style="margin-top: 40px;">
+                        <p style="font-size: 1.3em; margin-bottom: 20px; color: #00d9ff;">
+                            "Sometimes you gotta run before you can walk." - Tony Stark<br>
+                            Keep learning, keep building, keep growing! 🚀
+                        </p>
+                        <button class="btn btn-primary" onclick="location.reload()">🔄 PLAY AGAIN</button>
+                        <button class="btn btn-secondary" onclick="shareResults()">📤 SHARE RESULTS</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('gameArea').innerHTML = html;
+        }
+
+        function shareResults() {
+            const accuracy = Math.round((gameState.correctAnswers / gameState.totalAttempts) * 100);
+            const shareText = `🎓 I just completed Iron Academy! 
+⚡ Score: ${gameState.score}
+🎯 Accuracy: ${accuracy}%
+🔥 Max Streak: ${gameState.maxStreak}
+
+Ready to unlock YOUR potential? #IronAcademy #STEMEducation`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Iron Academy Results',
+                    text: shareText
+                });
+            } else {
+                alert('Results:\n\n' + shareText);
+            }
+        }
+
+        function updateStats() {
+            const totalProblems = chapters.reduce((sum, ch) => sum + ch.problems.length, 0);
+            const solvedProblems = (gameState.currentChapter * 6) + Math.min(gameState.currentProblem, 6);
+            const accuracy = gameState.totalAttempts > 0 
+                ? Math.round((gameState.correctAnswers / gameState.totalAttempts) * 100)
+                : 100;
+            const level = Math.floor(solvedProblems / 5) + 1;
+            
+            document.getElementById('chapterNum').textContent = gameState.currentChapter + 1;
+            document.getElementById('problemsSolved').textContent = `${solvedProblems}/${totalProblems}`;
+            document.getElementById('accuracy').textContent = `${accuracy}%`;
+            document.getElementById('level').textContent = level;
+            
+            const progress = (solvedProblems / totalProblems) * 100;
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${progress}%`;
+            progressBar.textContent = `${Math.round(progress)}%`;
+            
+            // Level up animation
+            const currentLevel = parseInt(document.getElementById('level').textContent);
+            if (currentLevel > gameState.lastLevel) {
+                playLevelUpSound();
+                gameState.lastLevel = currentLevel;
+            }
+        }
+
+        // Initialize lastLevel
+        gameState.lastLevel = 1;
+
+        // SAT Vocabulary Dictionary
+        const satVocabulary = {
+            'denominator': {
+                word: 'Denominator',
+                meaning: 'The bottom number in a fraction that shows how many equal parts the whole is divided into.',
+                example: 'In 3/4, the denominator is 4 - meaning the pizza is cut into 4 slices.',
+                memory: 'Think "Down-ominator" - it\'s DOWN below the line!'
+            },
+            'numerator': {
+                word: 'Numerator',
+                meaning: 'The top number in a fraction that shows how many parts you have.',
+                example: 'In 3/4, the numerator is 3 - meaning you have 3 of the 4 slices.',
+                memory: 'The "Number" you\'re counting is on top!'
+            },
+            'reciprocal': {
+                word: 'Reciprocal',
+                meaning: 'A fraction flipped upside down. Multiplying a number by its reciprocal always gives 1.',
+                example: 'The reciprocal of 3/4 is 4/3. And 3/4 × 4/3 = 1!',
+                memory: 'Recipe-rocal: flip the recipe upside down!'
+            },
+            'simplify': {
+                word: 'Simplify',
+                meaning: 'To reduce a fraction to its smallest form by dividing top and bottom by the same number.',
+                example: '4/8 simplifies to 1/2 (divide both by 4).',
+                memory: 'Make it SIMPLE - find the biggest number that divides both!'
+            },
+            'convert': {
+                word: 'Convert',
+                meaning: 'To change from one form to another while keeping the same value.',
+                example: 'Convert 1/2 to decimal = 0.5. Same value, different look!',
+                memory: 'Like converting dollars to yen - different form, same worth!'
+            },
+            'percentage': {
+                word: 'Percentage',
+                meaning: 'A number expressed as parts per hundred. The symbol % means "per 100".',
+                example: '50% means 50 out of 100, which equals 1/2.',
+                memory: 'Per-CENT = per hundred (cent = 100, like century)!'
+            },
+            'pemdas': {
+                word: 'PEMDAS',
+                meaning: 'The order of operations: Parentheses, Exponents, Multiply/Divide, Add/Subtract.',
+                example: '2 + 3 × 4 = 14 (multiply first!), not 20.',
+                memory: 'Please Excuse My Dear Aunt Sally!'
+            },
+            'parentheses': {
+                word: 'Parentheses',
+                meaning: 'Brackets ( ) that group numbers together. Always solve what\'s inside first!',
+                example: '(2 + 3) × 4 = 20, but 2 + 3 × 4 = 14.',
+                memory: 'Parentheses are like VIP - they get served FIRST!'
+            },
+            'alloy': {
+                word: 'Alloy',
+                meaning: 'A mixture of two or more metals combined to make a stronger material.',
+                example: 'Tony\'s suit uses a gold-titanium alloy - stronger than either metal alone!',
+                memory: 'ALL + OY = ALL metals jOYned together!'
+            },
+            'precision': {
+                word: 'Precision',
+                meaning: 'Being exact and accurate, with careful attention to detail.',
+                example: 'Rocket science needs precision - being off by 0.01% could miss the moon!',
+                memory: 'Pre-CISION = cutting (cision) beforehand to be exact!'
+            },
+            'trajectory': {
+                word: 'Trajectory',
+                meaning: 'The path an object follows when moving through space.',
+                example: 'Tony calculates his flight trajectory to avoid buildings.',
+                memory: 'Tra-JECT-ory = the path you\'re proJECTed to take!'
+            },
+            'sequence': {
+                word: 'Sequence',
+                meaning: 'Things arranged in a specific order, one after another.',
+                example: 'The activation sequence must be followed exactly or the machine won\'t work.',
+                memory: 'Like a movie SEQUEL - it follows in order!'
+            }
+        };
+
+        // Function to add SAT word markup
+        function addSATTooltips(text) {
+            let result = text;
+            for (const [key, vocab] of Object.entries(satVocabulary)) {
+                const regex = new RegExp(`\\b(${key}s?|${vocab.word}s?)\\b`, 'gi');
+                result = result.replace(regex, `<span class="sat-word" onclick="showVocabPanel('${key}')">$1</span>`);
+            }
+            return result;
+        }
+
+        // Show vocabulary panel
+        function showVocabPanel(wordKey) {
+            const vocab = satVocabulary[wordKey];
+            if (!vocab) return;
+
+            // Remove existing panel
+            const existing = document.getElementById('vocabPanel');
+            if (existing) existing.remove();
+
+            const panel = document.createElement('div');
+            panel.id = 'vocabPanel';
+            panel.className = 'vocab-panel';
+            panel.innerHTML = `
+                <div class="vocab-header" onclick="closeVocabPanel()">
+                    <span>📚 Vocabulary Builder</span>
+                    <button class="vocab-close">✕ Close</button>
+                </div>
+                <div class="vocab-content">
+                    <div class="vocab-word-title">🎯 ${vocab.word}</div>
+                    <div class="vocab-section">
+                        <span class="vocab-section-label">📖 What it means:</span>
+                        <p>${vocab.meaning}</p>
+                    </div>
+                    <div class="vocab-section">
+                        <span class="vocab-section-label">💡 Example:</span>
+                        <p>${vocab.example}</p>
+                    </div>
+                    <div class="vocab-section" style="border-left-color: #ffc400;">
+                        <span class="vocab-section-label" style="color: #ffc400;">🧠 Memory Trick:</span>
+                        <p>${vocab.memory}</p>
+                    </div>
+                </div>
+            `;
+
+            // Insert after the question or hint container
+            const hintContainer = document.getElementById('hintContainer');
+            if (hintContainer) {
+                hintContainer.after(panel);
+            } else {
+                document.querySelector('.problem-card')?.appendChild(panel);
+            }
+
+            // Scroll into view smoothly
+            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function closeVocabPanel() {
+            const panel = document.getElementById('vocabPanel');
+            if (panel) {
+                panel.style.animation = 'slideDown 0.2s ease reverse';
+                setTimeout(() => panel.remove(), 200);
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'h' && e.ctrlKey) {
+                e.preventDefault();
+                const hintBtn = document.querySelector('.hint-btn');
+                if (hintBtn) hintBtn.click();
+            }
+        });
+
+        // Start the game
+        startGame();
+        
+        // Easter egg: Konami code
+        let konamiCode = [];
+        const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        
+        document.addEventListener('keydown', (e) => {
+            konamiCode.push(e.key);
+            konamiCode = konamiCode.slice(-10);
+            
+            if (konamiCode.join(',') === konamiSequence.join(',')) {
+                alert('🎮 KONAMI CODE ACTIVATED! 🎮\n\nEaster Egg Found!\n\n"I am Iron Man." - Tony Stark\n\nBonus: +500 Score!');
+                gameState.score += 500;
+                updateStats();
+                createConfetti();
+                playLevelUpSound();
+            }
+        });
+    </script>
+</body>
+</html>
