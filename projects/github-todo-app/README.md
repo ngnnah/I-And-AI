@@ -111,9 +111,29 @@ Go to https://github.com/new and create a private repo (e.g., `my-todos`)
 
 Using `ngnnah` as username and `test-private-file-based-todo-app` as repo:
 
-- Repo: https://github.com/ngnnah/test-private-file-based-todo-app
-- Fine-grained PAT scoped to only that repo
-- Permission: Contents read/write only
+- **Repo**: https://github.com/ngnnah/test-private-file-based-todo-app
+- **Todos stored at**: https://github.com/ngnnah/test-private-file-based-todo-app/blob/main/todos.json (private)
+- **Fine-grained PAT**: scoped to only that repo, Contents read/write only
+
+### How Sync Works
+
+```
+You click "Add"
+      ↓
+┌─────────────────────────────────────────────────────┐
+│ 1. Todo added to local array                        │
+│ 2. UI re-renders (instant feedback)                 │
+│ 3. PUT request sent to GitHub Contents API          │
+│    → GitHub base64-decodes the content              │
+│    → GitHub commits new todos.json                  │
+│    → Returns new file SHA                           │
+│ 4. App stores SHA for next update                   │
+└─────────────────────────────────────────────────────┘
+      ↓
+todos.json updated in your repo (new git commit created)
+```
+
+The SHA ensures you don't overwrite concurrent changes - if someone else edited the file, GitHub returns a conflict error.
 
 ## Development
 

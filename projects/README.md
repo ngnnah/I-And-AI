@@ -24,7 +24,7 @@ A progressive math learning game with Pokemon theme. Three difficulty levels tak
 - Per-question progress saving
 - Sound effects and animations
 
-![Pokemon Math World](../resources/screenshots/20260126-012641_pokemon-math-world_deployed.png)
+![Pokemon Math World](../resources/screenshots/20260126-015909_pokemon-math-world_world-select.png)
 
 ---
 
@@ -40,7 +40,7 @@ Math learning game for Grade 5-6 students with Tony Stark / Iron Man theme.
 - Progress saving with localStorage
 - 6 chapters covering pre-algebra concepts
 
-![Iron Academy](../resources/screenshots/20260126-014147_iron-academy_deployed.png)
+![Iron Academy](../resources/screenshots/20260126-015909_iron-academy_start.png)
 
 ---
 
@@ -55,7 +55,7 @@ A client-side TODO application that uses GitHub as a backend via the GitHub API.
 - GitHub OAuth authentication
 - Create, complete, and delete tasks
 
-![GitHub TODO App](../resources/screenshots/20260126-014147_github-todo-app_deployed.png)
+![GitHub TODO App](../resources/screenshots/20260126-015909_github-todo-app_login.png)
 
 ---
 
