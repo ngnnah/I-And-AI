@@ -76,15 +76,52 @@ Each difficulty level saves progress separately to localStorage:
 | Division           | -              | -              | Yes             |
 | Word Problems      | -              | -              | Yes             |
 
+## Project Structure
+
+```
+pokemon-math-world/
+├── index.html           # Main entry point
+├── css/
+│   └── styles.css       # All styles
+└── js/
+    ├── main.js          # App initialization
+    ├── data/
+    │   ├── pokemon.js   # Pokemon stats, types, sprites
+    │   ├── trainers.js  # Trainer and gym leader data
+    │   └── levels.js    # Level configs and question generators
+    ├── game/
+    │   ├── state.js     # Game state and localStorage persistence
+    │   ├── questions.js # Question generation utilities
+    │   ├── audio.js     # Sound effects (Web Audio API)
+    │   └── utils.js     # Confetti, screen management, helpers
+    └── screens/
+        ├── world-select.js  # Level selection
+        ├── setup.js         # Character creation
+        ├── chapter.js       # Chapter selection
+        ├── battle.js        # Battle/question screen
+        ├── catch.js         # Catch animation
+        └── victory.js       # Level completion
+```
+
 ## Tech Stack
 
-- **Single HTML file** (~1400 lines) - no build process
+- **ES Modules** - Modular JavaScript, no build required
 - **Vanilla JavaScript** - no frameworks
 - **CSS3** - animations, gradients, responsive design
 - **localStorage API** - persistent game state per level
 - **Web Audio API** - sound effects
 - **PokeAPI sprites** - Pokemon images
 - **Pokemon Showdown sprites** - Trainer avatars
+
+## Development
+
+To run locally:
+
+```bash
+cd projects/pokemon-math-world
+python3 -m http.server 8080
+# Open http://localhost:8080
+```
 
 ## Tools Used
 
