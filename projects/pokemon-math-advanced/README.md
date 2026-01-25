@@ -1,6 +1,6 @@
 # Pokemon Math Adventure
 
-A math learning game for gifted 1st-2nd graders who love Pokemon. Built for my 6-7 year old nephew (IQ 135) who needed more challenge than basic addition.
+A math learning game for 1st-2nd graders who love Pokemon. Built for my 6-7 year old nephew who needed more challenge than basic addition.
 
 **Live Demo**: https://ngnnah.github.io/I-And-AI/projects/pokemon-math-advanced/
 
@@ -22,17 +22,17 @@ A math learning game for gifted 1st-2nd graders who love Pokemon. Built for my 6
 All game progress is saved to **browser localStorage** automatically. No account or server needed.
 
 **What's saved:**
-| Data | Description |
-|------|-------------|
-| `playerName` | Your custom name |
-| `trainer` | Selected trainer character |
-| `starter` | Your first Pokemon choice |
-| `team` | Current 3-Pokemon battle team |
-| `collection` | All Pokemon you've caught |
-| `badges` | Gym badges earned |
-| `stars` | Progress currency |
-| `currentChapter` | Story progress |
-| `bestStreak` | Longest correct answer streak |
+| Data             | Description                   |
+| ---------------- | ----------------------------- |
+| `playerName`     | Your custom name              |
+| `trainer`        | Selected trainer character    |
+| `starter`        | Your first Pokemon choice     |
+| `team`           | Current 3-Pokemon battle team |
+| `collection`     | All Pokemon you've caught     |
+| `badges`         | Gym badges earned             |
+| `stars`          | Progress currency             |
+| `currentChapter` | Story progress                |
+| `bestStreak`     | Longest correct answer streak |
 
 **Storage keys:**
 
@@ -50,16 +50,6 @@ All game progress is saved to **browser localStorage** automatically. No account
 - **Web Audio API** - sound effects
 - **PokeAPI sprites** - Pokemon images
 - **Pokemon Showdown sprites** - Trainer avatars
-
-## Development Timeline
-
-| Date         | Milestone                                            |
-| ------------ | ---------------------------------------------------- |
-| Jan 25, 2026 | Initial version with Boy/Girl trainer selection      |
-| Jan 25, 2026 | Added 8 real Pokemon trainers (Ash, Red, Blue, etc.) |
-| Jan 25, 2026 | Added name input and personalization                 |
-| Jan 25, 2026 | Trainer avatars in battle scenes                     |
-| Jan 25, 2026 | Fixed sprites (switched to Pokemon Showdown CDN)     |
 
 ## Tools Used
 
