@@ -826,24 +826,35 @@
             font-weight: 400;
         }
 
-        /* Easter egg hint button */
+        /* Hint button - Mobile friendly */
         .hint-btn {
             background: linear-gradient(135deg, rgba(255, 196, 0, 0.2), rgba(255, 149, 0, 0.2));
             border: 2px solid #ffc400;
             color: #ffc400;
             padding: 12px 25px;
+            min-height: 48px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 1em;
             font-weight: 600;
             transition: all 0.3s ease;
             margin-top: 15px;
+            -webkit-appearance: none;
+            appearance: none;
+            touch-action: manipulation;
         }
 
-        .hint-btn:hover {
+        @media (hover: hover) {
+            .hint-btn:hover {
+                background: linear-gradient(135deg, rgba(255, 196, 0, 0.4), rgba(255, 149, 0, 0.3));
+                transform: scale(1.05);
+                box-shadow: 0 5px 20px rgba(255, 196, 0, 0.4);
+            }
+        }
+
+        .hint-btn:active {
+            transform: scale(0.98);
             background: linear-gradient(135deg, rgba(255, 196, 0, 0.4), rgba(255, 149, 0, 0.3));
-            transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(255, 196, 0, 0.4);
         }
 
         .hint-box {
@@ -1073,9 +1084,22 @@
     </style>
 </head>
 <body>
-    <!-- Floating particles -->
+    <!-- iOS viewport height fix + Floating particles -->
     <script>
-        for (let i = 0; i < 20; i++) {
+        // Fix iOS 100vh issue
+        function setVH() {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+        setVH();
+        window.addEventListener('resize', setVH);
+        window.addEventListener('orientationchange', () => setTimeout(setVH, 100));
+
+        // Reduce particles on mobile for better performance
+        const isMobile = window.innerWidth < 768 || 'ontouchstart' in window;
+        const particleCount = isMobile ? 8 : 20;
+
+        for (let i = 0; i < particleCount; i++) {
             const particle = document.createElement('div');
             particle.className = 'particle';
             particle.style.left = Math.random() * 100 + '%';
@@ -1153,23 +1177,48 @@
         };
 
         // Sound effects (simple beep sounds using Web Audio API)
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
+        // iOS requires AudioContext to be created after user gesture
+        let audioContext = null;
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            // Resume if suspended (iOS requirement)
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }
+
+        // Initialize audio on first user interaction
+        document.addEventListener('touchstart', initAudio, { once: true });
+        document.addEventListener('click', initAudio, { once: true });
+
         function playSound(frequency, duration, type = 'sine') {
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.value = frequency;
-            oscillator.type = type;
-            
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + duration);
+            if (!audioContext) {
+                initAudio();
+            }
+            if (!audioContext || audioContext.state === 'suspended') return;
+
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            } catch (e) {
+                // Silently fail if audio doesn't work
+                console.log('Audio not available');
+            }
         }
 
         function playCorrectSound() {
@@ -1707,16 +1756,18 @@
                         ${chapter.icon} ${chapter.title}
                     </div>
                     <div class="question">${addSATTooltips(problem.question)}</div>
-                    <input type="text" class="answer-input" id="answerInput" placeholder="Type your answer here..." onkeypress="if(event.key==='Enter') checkAnswer()" autocomplete="off">
-                    <div>
+                    <input type="text" class="answer-input" id="answerInput" placeholder="Type your answer here..." onkeypress="if(event.key==='Enter') checkAnswer()" autocomplete="off" inputmode="text" enterkeyhint="done">
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
                         <button class="btn btn-primary" onclick="checkAnswer()">
                             SUBMIT ANSWER
                             <span class="sound-wave">
                                 <span></span><span></span><span></span><span></span>
                             </span>
                         </button>
-                        <button class="hint-btn" onclick="showHint()">💡 Need a Hint?</button>
-                        <span class="attempt-counter" id="attemptCounter">Attempts: ${attemptsLeft} left</span>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                            <button class="hint-btn" onclick="showHint()" style="flex: 1; min-width: 150px;">💡 Need a Hint?</button>
+                            <span class="attempt-counter" id="attemptCounter">Attempts: ${attemptsLeft} left</span>
+                        </div>
                     </div>
                     <div id="hintContainer"></div>
                 </div>
