@@ -11,13 +11,30 @@ This repo documents my journey integrating AI-assisted development into daily li
 - **Automation**: Streamlining repetitive tasks with AI assistance
 - **Learning notes**: Patterns, prompts, and techniques that work
 
+## Mini-Projects (GitHub Pages)
+
+Interactive web apps deployed at **https://ngnnah.github.io/I-And-AI/**
+
+| Project                                                                    | Description                                                                                                                  | Tech         |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| [Iron Academy](https://ngnnah.github.io/I-And-AI/projects/iron-academy/)   | Math learning game (Grade 5-6) with Tony Stark theme. Feynman explanations, SAT vocabulary builder, 3 attempts per question. | HTML/JS, PWA |
+| [GitHub TODO](https://ngnnah.github.io/I-And-AI/projects/github-todo-app/) | Client-side TODO app using GitHub API as backend                                                                             | HTML/JS      |
+
 ## Structure
 
 ```
 .
 ├── .claude/
 │   ├── agents/        # Specialized subagents for complex workflows
+│   ├── hooks/         # Automated checks on file operations
 │   └── skills/        # Custom slash commands
+├── .github/
+│   └── workflows/     # CI/CD for GitHub Pages deployment
+├── projects/          # Source code for mini-projects
+│   ├── iron-academy/
+│   └── github-todo-app/
+├── public/            # GitHub Pages root (auto-deployed)
+│   └── projects/
 ├── CLAUDE.md          # Claude Code workspace config
 └── README.md
 ```
@@ -76,6 +93,9 @@ Custom skills available in this workspace:
 
 | Date       | Change                                                              |
 | ---------- | ------------------------------------------------------------------- |
+| 2026-01-25 | Added Iron Academy math game with mobile/iOS support                |
+| 2026-01-25 | Set up GitHub Pages with CI/CD deployment                           |
+| 2026-01-24 | Added GitHub TODO app mini-project                                  |
 | 2026-01-22 | Added `/check-links`, `/validate-urls`, `/web-screenshot` skills    |
 | 2026-01-22 | Added `/seasons` skill for Japanese micro-season awareness          |
 | 2026-01-22 | Added utility skills: `/calc`, `/datetime`, `/pdf`, `/ics`          |
