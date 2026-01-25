@@ -1100,9 +1100,9 @@
             return generateWordProblem();
           }
 
-          const operations = difficulty <= 2 ? ['add', 'sub', 'mult2', 'mult5'] :
-                            difficulty === 3 ? ['add', 'sub', 'mult', 'div'] :
-                            ['add', 'sub', 'mult', 'div', 'mixed'];
+          const operations = difficulty <= 2 ? ['add', 'sub', 'mult2', 'mult5', 'missing'] :
+                            difficulty === 3 ? ['add', 'sub', 'mult', 'div', 'missing'] :
+                            ['add', 'sub', 'mult', 'div', 'mixed', 'missing'];
           const type = operations[Math.floor(Math.random() * operations.length)];
 
           if (type === 'add') {
@@ -1114,6 +1114,21 @@
             const b = Math.floor(Math.random() * 30) + 5;
             const a = answer + b;
             return { question: `${a} - ${b} = ?`, answer, choices: generateChoices(answer, 4) };
+          } else if (type === 'missing') {
+            // Missing number problems with larger numbers
+            const a = Math.floor(Math.random() * 40) + 10;
+            const b = Math.floor(Math.random() * 40) + 10;
+            const sum = a + b;
+            const variant = Math.floor(Math.random() * 4);
+            if (variant === 0) {
+              return { question: `${a} + ? = ${sum}`, answer: b, choices: generateChoices(b, 4) };
+            } else if (variant === 1) {
+              return { question: `? + ${b} = ${sum}`, answer: a, choices: generateChoices(a, 4) };
+            } else if (variant === 2) {
+              return { question: `${sum} - ? = ${a}`, answer: b, choices: generateChoices(b, 4) };
+            } else {
+              return { question: `${sum} - ${b} = ?`, answer: a, choices: generateChoices(a, 4) };
+            }
           } else if (type === 'mult2') {
             const b = Math.floor(Math.random() * 10) + 1;
             return { question: `2 x ${b} = ?`, answer: 2 * b, choices: generateChoices(2 * b, 4) };

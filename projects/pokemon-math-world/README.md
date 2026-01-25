@@ -69,7 +69,7 @@ Each difficulty level saves progress separately to localStorage:
 | Addition 10-25     | -              | Yes            | Yes             |
 | Addition 25-100    | -              | -              | Yes             |
 | Subtraction        | -              | Yes            | Yes             |
-| Missing Numbers    | -              | Yes            | -               |
+| Missing Numbers    | -              | Yes            | Yes (to 100)    |
 | Multiplication 2s  | -              | -              | Yes             |
 | Multiplication 5s  | -              | -              | Yes             |
 | Multiplication All | -              | -              | Yes             |
