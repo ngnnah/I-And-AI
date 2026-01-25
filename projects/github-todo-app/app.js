@@ -187,15 +187,26 @@ async function login() {
 }
 
 function logout() {
-  clearConfig();
+  // Check if user opted to remember before clearing
+  const savedConfig = loadConfig();
+  const remembered = loadRemembered();
+  const shouldRemember = savedConfig && remembered?.rememberToken;
+
   config = null;
   todos = [];
   fileSha = null;
   document.getElementById('auth-form').classList.remove('hidden');
   document.getElementById('todo-app').classList.add('hidden');
-  // Clear token field and uncheck remember
-  document.getElementById('token').value = '';
-  document.getElementById('remember-token').checked = false;
+
+  if (shouldRemember) {
+    // Keep token pre-filled for easy reconnection
+    document.getElementById('token').value = savedConfig.token;
+    document.getElementById('remember-token').checked = true;
+  } else {
+    clearConfig();
+    document.getElementById('token').value = '';
+    document.getElementById('remember-token').checked = false;
+  }
 }
 
 async function showApp() {
