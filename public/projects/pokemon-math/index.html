@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#3B82F6">
+  <title>Pokemon Math Adventure</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;700;800&display=swap');
+
+    :root {
+      --vh: 1vh;
+      --primary: #3B82F6;
+      --primary-dark: #2563EB;
+      --success: #22C55E;
+      --success-dark: #16A34A;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --pokemon-yellow: #FFCB05;
+      --pokemon-blue: #3D7DCA;
+      --pokemon-red: #FF0000;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(180deg, #87CEEB 0%, #98FB98 100%);
+      min-height: 100vh;
+      min-height: calc(var(--vh, 1vh) * 100);
+      padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+
+    /* === SCREENS === */
+    .screen {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* === START SCREEN === */
+    .start-screen {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .logo {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2rem, 8vw, 3rem);
+      color: var(--pokemon-yellow);
+      text-shadow:
+        3px 3px 0 var(--pokemon-blue),
+        -1px -1px 0 var(--pokemon-blue),
+        1px -1px 0 var(--pokemon-blue),
+        -1px 1px 0 var(--pokemon-blue);
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: #1F2937;
+      margin-bottom: 20px;
+    }
+
+    .mascot {
+      width: 200px;
+      height: 200px;
+      margin: 20px auto;
+      animation: bounce 1s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    .start-btn {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.8rem;
+      padding: 20px 50px;
+      background: linear-gradient(180deg, var(--pokemon-yellow) 0%, #E5B800 100%);
+      border: 4px solid #B8860B;
+      border-radius: 50px;
+      color: #1F2937;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #8B6914, 0 10px 20px rgba(0,0,0,0.2);
+      transition: all 0.1s;
+      touch-action: manipulation;
+    }
+
+    .start-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #8B6914;
+    }
+
+    .collection-preview {
+      margin-top: 30px;
+      padding: 15px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .collection-preview h3 {
+      color: #374151;
+      margin-bottom: 10px;
+    }
+
+    .mini-pokemon {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .mini-pokemon img {
+      width: 50px;
+      height: 50px;
+      filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2));
+    }
+
+    .mini-pokemon .empty {
+      width: 50px;
+      height: 50px;
+      background: #E5E7EB;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9CA3AF;
+      font-size: 1.5rem;
+    }
+
+    /* === GAME SCREEN === */
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      background: rgba(255,255,255,0.95);
+      border-radius: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-icon {
+      font-size: 1.5rem;
+    }
+
+    .stat-value {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.3rem;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: #6B7280;
+      text-transform: uppercase;
+    }
+
+    .streak-fire {
+      animation: pulse 0.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    /* Battle Area */
+    .battle-area {
+      background: linear-gradient(180deg, #B8E0FF 0%, #90EE90 70%, #228B22 100%);
+      border-radius: 25px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: inset 0 0 30px rgba(0,0,0,0.1), 0 8px 20px rgba(0,0,0,0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Grass decoration */
+    .battle-area::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: repeating-linear-gradient(
+        90deg,
+        #228B22 0px,
+        #228B22 20px,
+        #32CD32 20px,
+        #32CD32 40px
+      );
+      border-radius: 0 0 25px 25px;
+    }
+
+    .encounter-text {
+      text-align: center;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.3rem;
+      color: #1F2937;
+      background: rgba(255,255,255,0.9);
+      padding: 10px 20px;
+      border-radius: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .pokemon-display {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .wild-pokemon {
+      text-align: center;
+    }
+
+    .wild-pokemon img {
+      width: 180px;
+      height: 180px;
+      animation: wildAppear 0.5s ease-out, float 2s ease-in-out infinite;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+      image-rendering: pixelated;
+    }
+
+    @keyframes wildAppear {
+      from {
+        opacity: 0;
+        transform: scale(0.5) translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .pokemon-name {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.5rem;
+      color: #1F2937;
+      background: white;
+      padding: 8px 25px;
+      border-radius: 25px;
+      display: inline-block;
+      margin-top: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .pokemon-name .type {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.8rem;
+      padding: 3px 10px;
+      border-radius: 10px;
+      color: white;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    /* Question Area */
+    .question-area {
+      background: white;
+      border-radius: 25px;
+      padding: 25px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .question-prompt {
+      text-align: center;
+      font-size: 1rem;
+      color: #6B7280;
+      margin-bottom: 10px;
+    }
+
+    .question {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2.5rem, 10vw, 4rem);
+      text-align: center;
+      color: #1F2937;
+      margin: 20px 0;
+      padding: 15px;
+      background: linear-gradient(180deg, #F3F4F6 0%, #E5E7EB 100%);
+      border-radius: 20px;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .answer-btn {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.5rem;
+      padding: 25px 20px;
+      background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border: none;
+      border-radius: 20px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #1D4ED8, 0 8px 15px rgba(0,0,0,0.2);
+      transition: all 0.1s;
+      touch-action: manipulation;
+      min-height: 100px;
+    }
+
+    .answer-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #1D4ED8;
+    }
+
+    .answer-btn.correct {
+      background: linear-gradient(180deg, var(--success) 0%, var(--success-dark) 100%);
+      box-shadow: 0 6px 0 #15803D, 0 8px 15px rgba(0,0,0,0.2);
+      animation: correctPulse 0.5s ease;
+    }
+
+    .answer-btn.wrong {
+      background: linear-gradient(180deg, var(--danger) 0%, #DC2626 100%);
+      box-shadow: 0 6px 0 #B91C1C, 0 8px 15px rgba(0,0,0,0.2);
+      animation: shake 0.5s ease;
+    }
+
+    @keyframes correctPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    /* Message */
+    .message {
+      text-align: center;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.3rem;
+      padding: 15px;
+      margin-top: 15px;
+      border-radius: 15px;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .message.success {
+      background: linear-gradient(180deg, #DCFCE7 0%, #BBF7D0 100%);
+      color: var(--success-dark);
+    }
+
+    .message.encouragement {
+      background: linear-gradient(180deg, #FEF3C7 0%, #FDE68A 100%);
+      color: #92400E;
+    }
+
+    /* === CATCH SCREEN === */
+    .catch-screen {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .catch-animation {
+      position: relative;
+      height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pokeball {
+      width: 100px;
+      height: 100px;
+      animation: pokeballShake 0.5s ease-in-out 3, pokeballSuccess 0.5s ease 1.5s forwards;
+    }
+
+    @keyframes pokeballShake {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-20deg); }
+      75% { transform: rotate(20deg); }
+    }
+
+    @keyframes pokeballSuccess {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .caught-pokemon {
+      display: none;
+      animation: caughtAppear 0.5s ease;
+    }
+
+    .caught-pokemon.show {
+      display: block;
+    }
+
+    .caught-pokemon img {
+      width: 200px;
+      height: 200px;
+      animation: celebrateBounce 0.5s ease infinite;
+      filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));
+    }
+
+    @keyframes caughtAppear {
+      from {
+        opacity: 0;
+        transform: scale(0) rotate(-180deg);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    @keyframes celebrateBounce {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+    }
+
+    .catch-message {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2rem;
+      color: var(--pokemon-yellow);
+      text-shadow:
+        2px 2px 0 var(--pokemon-blue),
+        -1px -1px 0 var(--pokemon-blue);
+      margin: 20px 0;
+    }
+
+    .catch-stats {
+      background: rgba(255,255,255,0.95);
+      border-radius: 20px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .catch-stats h3 {
+      color: #374151;
+      margin-bottom: 15px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #E5E7EB;
+    }
+
+    .stat-row:last-child {
+      border-bottom: none;
+    }
+
+    .continue-btn {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.5rem;
+      padding: 18px 40px;
+      background: linear-gradient(180deg, var(--success) 0%, var(--success-dark) 100%);
+      border: none;
+      border-radius: 25px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #15803D, 0 8px 15px rgba(0,0,0,0.2);
+      transition: all 0.1s;
+      touch-action: manipulation;
+      margin-top: 10px;
+    }
+
+    .continue-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #15803D;
+    }
+
+    /* === COLLECTION SCREEN === */
+    .collection-screen {
+      padding: 15px;
+    }
+
+    .collection-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .collection-header h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2rem;
+      color: var(--pokemon-yellow);
+      text-shadow:
+        2px 2px 0 var(--pokemon-blue),
+        -1px -1px 0 var(--pokemon-blue);
+    }
+
+    .collection-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .collection-item {
+      background: white;
+      border-radius: 15px;
+      padding: 15px 10px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+
+    .collection-item:active {
+      transform: scale(0.95);
+    }
+
+    .collection-item img {
+      width: 80px;
+      height: 80px;
+      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
+    }
+
+    .collection-item.locked img {
+      filter: grayscale(100%) brightness(0.3);
+    }
+
+    .collection-item .name {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #374151;
+      margin-top: 5px;
+    }
+
+    .collection-item.locked .name {
+      color: #9CA3AF;
+    }
+
+    .back-btn {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.3rem;
+      padding: 15px 35px;
+      background: linear-gradient(180deg, #6B7280 0%, #4B5563 100%);
+      border: none;
+      border-radius: 25px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #374151;
+      touch-action: manipulation;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .back-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #374151;
+    }
+
+    /* === CONFETTI === */
+    .confetti-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+      overflow: hidden;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      animation: confettiFall 3s ease-out forwards;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    /* === STARS === */
+    .stars-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .star {
+      position: absolute;
+      font-size: 3rem;
+      animation: starBurst 0.8s ease-out forwards;
+    }
+
+    @keyframes starBurst {
+      0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1) rotate(360deg) translateY(-100px);
+        opacity: 0;
+      }
+    }
+
+    /* === SETTINGS === */
+    .settings-btn {
+      position: fixed;
+      top: max(15px, env(safe-area-inset-top));
+      right: max(15px, env(safe-area-inset-right));
+      width: 50px;
+      height: 50px;
+      background: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      z-index: 100;
+      touch-action: manipulation;
+    }
+
+    .settings-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* === TYPE COLORS === */
+    .type-fire { background: linear-gradient(135deg, #F08030 0%, #DD6610 100%); }
+    .type-water { background: linear-gradient(135deg, #6890F0 0%, #4A70D0 100%); }
+    .type-grass { background: linear-gradient(135deg, #78C850 0%, #5CA030 100%); }
+    .type-electric { background: linear-gradient(135deg, #F8D030 0%, #D8B010 100%); }
+    .type-normal { background: linear-gradient(135deg, #A8A878 0%, #8A8A58 100%); }
+    .type-flying { background: linear-gradient(135deg, #A890F0 0%, #8A70D0 100%); }
+    .type-bug { background: linear-gradient(135deg, #A8B820 0%, #8A9A10 100%); }
+    .type-poison { background: linear-gradient(135deg, #A040A0 0%, #802080 100%); }
+    .type-fairy { background: linear-gradient(135deg, #EE99AC 0%, #DD7798 100%); }
+    .type-psychic { background: linear-gradient(135deg, #F85888 0%, #D83868 100%); }
+    .type-rock { background: linear-gradient(135deg, #B8A038 0%, #9A8020 100%); }
+    .type-ground { background: linear-gradient(135deg, #E0C068 0%, #C0A048 100%); }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 400px) {
+      .answer-btn {
+        font-size: 2rem;
+        padding: 20px 15px;
+        min-height: 80px;
+      }
+
+      .wild-pokemon img {
+        width: 150px;
+        height: 150px;
+      }
+    }
+
+    @media (hover: hover) {
+      .start-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 0 #8B6914, 0 12px 25px rgba(0,0,0,0.25);
+      }
+
+      .answer-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 0 #1D4ED8, 0 10px 20px rgba(0,0,0,0.25);
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="settings-btn" onclick="toggleSound()" id="soundBtn" title="Sound">🔊</button>
+
+  <div class="container">
+    <!-- START SCREEN -->
+    <div class="screen active" id="startScreen">
+      <div class="start-screen">
+        <h1 class="logo">Pokemon Math!</h1>
+        <p class="subtitle">Catch Pokemon with your math powers!</p>
+
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png"
+             alt="Pikachu" class="mascot" id="mascot">
+
+        <button class="start-btn" onclick="startGame()">
+          LET'S GO!
+        </button>
+
+        <div class="collection-preview" id="collectionPreview">
+          <h3>Your Pokemon: <span id="collectionCount">0</span> / 15</h3>
+          <div class="mini-pokemon" id="miniCollection"></div>
+        </div>
+
+        <button class="back-btn" style="margin-top: 20px;" onclick="showCollection()">
+          View Collection
+        </button>
+      </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div class="screen" id="gameScreen">
+      <div class="game-header">
+        <div class="stat">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-value" id="score">0</div>
+          <div class="stat-label">Stars</div>
+        </div>
+        <div class="stat">
+          <div class="stat-icon" id="streakIcon">🔥</div>
+          <div class="stat-value" id="streak">0</div>
+          <div class="stat-label">Streak</div>
+        </div>
+        <div class="stat">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-value" id="progress">0/3</div>
+          <div class="stat-label">Catch</div>
+        </div>
+      </div>
+
+      <div class="battle-area">
+        <div class="encounter-text" id="encounterText">
+          A wild Pokemon appeared!
+        </div>
+
+        <div class="pokemon-display">
+          <div class="wild-pokemon">
+            <img src="" alt="Wild Pokemon" id="wildPokemon">
+            <div class="pokemon-name" id="pokemonName">
+              Pikachu <span class="type type-electric">Electric</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-area">
+        <div class="question-prompt">Answer to throw a Pokeball!</div>
+        <div class="question" id="question">5 + 3 = ?</div>
+
+        <div class="answers" id="answers">
+          <button class="answer-btn" onclick="checkAnswer(8)">8</button>
+          <button class="answer-btn" onclick="checkAnswer(7)">7</button>
+        </div>
+
+        <div class="message" id="message"></div>
+      </div>
+    </div>
+
+    <!-- CATCH SCREEN -->
+    <div class="screen" id="catchScreen">
+      <div class="catch-screen">
+        <div class="catch-animation" id="catchAnimation">
+          <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
+               alt="Pokeball" class="pokeball" id="pokeball">
+          <div class="caught-pokemon" id="caughtPokemon">
+            <img src="" alt="Caught Pokemon" id="caughtPokemonImg">
+          </div>
+        </div>
+
+        <div class="catch-message" id="catchMessage">
+          GOTCHA!
+        </div>
+
+        <div class="catch-stats">
+          <h3 id="caughtName">Pikachu was caught!</h3>
+          <div class="stat-row">
+            <span>Stars earned:</span>
+            <span id="starsEarned">⭐ 30</span>
+          </div>
+          <div class="stat-row">
+            <span>Best streak:</span>
+            <span id="bestStreak">🔥 3</span>
+          </div>
+          <div class="stat-row">
+            <span>Total Pokemon:</span>
+            <span id="totalPokemon">🎉 5</span>
+          </div>
+        </div>
+
+        <button class="continue-btn" onclick="continueGame()">
+          CATCH MORE!
+        </button>
+      </div>
+    </div>
+
+    <!-- COLLECTION SCREEN -->
+    <div class="screen" id="collectionScreen">
+      <div class="collection-screen">
+        <div class="collection-header">
+          <h1>My Pokemon!</h1>
+          <p>Catch them all by solving math!</p>
+        </div>
+
+        <div class="collection-grid" id="collectionGrid"></div>
+
+        <button class="back-btn" onclick="backToStart()">
+          Back
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="confetti-container" id="confetti"></div>
+  <div class="stars-container" id="stars"></div>
+
+  <script>
+    // === POKEMON DATA (cute, popular Pokemon for kids) ===
+    const POKEMON = [
+      { id: 25, name: 'Pikachu', type: 'electric' },
+      { id: 1, name: 'Bulbasaur', type: 'grass' },
+      { id: 4, name: 'Charmander', type: 'fire' },
+      { id: 7, name: 'Squirtle', type: 'water' },
+      { id: 133, name: 'Eevee', type: 'normal' },
+      { id: 39, name: 'Jigglypuff', type: 'fairy' },
+      { id: 35, name: 'Clefairy', type: 'fairy' },
+      { id: 52, name: 'Meowth', type: 'normal' },
+      { id: 54, name: 'Psyduck', type: 'water' },
+      { id: 10, name: 'Caterpie', type: 'bug' },
+      { id: 16, name: 'Pidgey', type: 'flying' },
+      { id: 19, name: 'Rattata', type: 'normal' },
+      { id: 43, name: 'Oddish', type: 'grass' },
+      { id: 74, name: 'Geodude', type: 'rock' },
+      { id: 129, name: 'Magikarp', type: 'water' }
+    ];
+
+    // === ENCOURAGING MESSAGES ===
+    const CORRECT_MESSAGES = [
+      "Super! 🌟",
+      "Amazing! ⭐",
+      "Wow! 🎉",
+      "Great job! 💪",
+      "You're awesome! 🌈",
+      "Perfect! ✨",
+      "Fantastic! 🎊",
+      "You rock! 🎸"
+    ];
+
+    const TRY_AGAIN_MESSAGES = [
+      "Almost! Try again! 💪",
+      "So close! You can do it! 🌟",
+      "One more try! 🎯",
+      "You got this! ⭐"
+    ];
+
+    const ENCOUNTER_MESSAGES = [
+      "A wild {name} appeared! 🌟",
+      "Oh! A {name} wants to play! ⭐",
+      "Look! It's {name}! 🎉",
+      "Wow! You found {name}! ✨"
+    ];
+
+    // === GAME STATE ===
+    let gameState = {
+      score: 0,
+      streak: 0,
+      bestStreak: 0,
+      questionsCorrect: 0,
+      questionsToWin: 3,
+      currentPokemon: null,
+      currentAnswer: 0,
+      collection: [],
+      soundEnabled: true
+    };
+
+    // === AUDIO ===
+    let audioContext = null;
+
+    function initAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+    }
+
+    function playSound(type) {
+      if (!gameState.soundEnabled) return;
+      initAudio();
+      if (!audioContext) return;
+
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      if (type === 'correct') {
+        oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+        oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+        oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.4);
+      } else if (type === 'wrong') {
+        oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.3);
+      } else if (type === 'catch') {
+        oscillator.frequency.setValueAtTime(392, audioContext.currentTime);
+        oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime + 0.15);
+        oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.3);
+        oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.45);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.7);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.7);
+      }
+    }
+
+    function toggleSound() {
+      gameState.soundEnabled = !gameState.soundEnabled;
+      document.getElementById('soundBtn').textContent = gameState.soundEnabled ? '🔊' : '🔇';
+      localStorage.setItem('pokemon-math-sound', gameState.soundEnabled);
+      if (gameState.soundEnabled) {
+        initAudio();
+      }
+    }
+
+    // === STORAGE ===
+    function saveGame() {
+      localStorage.setItem('pokemon-math-save', JSON.stringify({
+        score: gameState.score,
+        bestStreak: gameState.bestStreak,
+        collection: gameState.collection
+      }));
+    }
+
+    function loadGame() {
+      const saved = localStorage.getItem('pokemon-math-save');
+      if (saved) {
+        const data = JSON.parse(saved);
+        gameState.score = data.score || 0;
+        gameState.bestStreak = data.bestStreak || 0;
+        gameState.collection = data.collection || [];
+      }
+
+      const soundSaved = localStorage.getItem('pokemon-math-sound');
+      if (soundSaved !== null) {
+        gameState.soundEnabled = soundSaved === 'true';
+        document.getElementById('soundBtn').textContent = gameState.soundEnabled ? '🔊' : '🔇';
+      }
+    }
+
+    // === UI HELPERS ===
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    function getPokemonSprite(id) {
+      return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+    }
+
+    function randomItem(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    // === CONFETTI & STARS ===
+    function showConfetti() {
+      const container = document.getElementById('confetti');
+      container.innerHTML = '';
+
+      const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'];
+
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.backgroundColor = randomItem(colors);
+        confetti.style.animationDelay = Math.random() * 0.5 + 's';
+        confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        container.appendChild(confetti);
+      }
+
+      setTimeout(() => container.innerHTML = '', 3500);
+    }
+
+    function showStars() {
+      const container = document.getElementById('stars');
+      container.innerHTML = '';
+
+      const starEmojis = ['⭐', '🌟', '✨', '💫'];
+
+      for (let i = 0; i < 8; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.textContent = randomItem(starEmojis);
+        star.style.left = (Math.random() - 0.5) * 200 + 'px';
+        star.style.top = (Math.random() - 0.5) * 200 + 'px';
+        star.style.animationDelay = Math.random() * 0.3 + 's';
+        container.appendChild(star);
+      }
+
+      setTimeout(() => container.innerHTML = '', 1000);
+    }
+
+    // === GAME LOGIC ===
+    function startGame() {
+      initAudio();
+      gameState.streak = 0;
+      gameState.questionsCorrect = 0;
+      showScreen('gameScreen');
+      spawnPokemon();
+    }
+
+    function spawnPokemon() {
+      // Get uncaught Pokemon, or random if all caught
+      let available = POKEMON.filter(p => !gameState.collection.includes(p.id));
+      if (available.length === 0) {
+        available = POKEMON;
+      }
+
+      gameState.currentPokemon = randomItem(available);
+      gameState.questionsCorrect = 0;
+
+      // Update UI
+      const pokemon = gameState.currentPokemon;
+      document.getElementById('wildPokemon').src = getPokemonSprite(pokemon.id);
+      document.getElementById('pokemonName').innerHTML = `
+        ${pokemon.name}
+        <span class="type type-${pokemon.type}">${pokemon.type}</span>
+      `;
+
+      const encounterMsg = randomItem(ENCOUNTER_MESSAGES).replace('{name}', pokemon.name);
+      document.getElementById('encounterText').textContent = encounterMsg;
+
+      updateProgress();
+      generateQuestion();
+    }
+
+    function generateQuestion() {
+      // Simple addition for 1st grade (0-10)
+      const num1 = Math.floor(Math.random() * 6); // 0-5
+      const num2 = Math.floor(Math.random() * 6); // 0-5
+      const answer = num1 + num2;
+
+      gameState.currentAnswer = answer;
+
+      document.getElementById('question').textContent = `${num1} + ${num2} = ?`;
+
+      // Generate 2 answer choices (correct + 1 wrong)
+      let wrongAnswer;
+      do {
+        wrongAnswer = answer + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 3) + 1);
+        if (wrongAnswer < 0) wrongAnswer = answer + Math.floor(Math.random() * 3) + 1;
+      } while (wrongAnswer === answer || wrongAnswer < 0);
+
+      const answers = [answer, wrongAnswer].sort(() => Math.random() - 0.5);
+
+      const answersDiv = document.getElementById('answers');
+      answersDiv.innerHTML = '';
+
+      answers.forEach(ans => {
+        const btn = document.createElement('button');
+        btn.className = 'answer-btn';
+        btn.textContent = ans;
+        btn.onclick = () => checkAnswer(ans, btn);
+        answersDiv.appendChild(btn);
+      });
+
+      document.getElementById('message').textContent = '';
+      document.getElementById('message').className = 'message';
+    }
+
+    function checkAnswer(selected, btn) {
+      const buttons = document.querySelectorAll('.answer-btn');
+      buttons.forEach(b => b.disabled = true);
+
+      if (selected === gameState.currentAnswer) {
+        // Correct!
+        playSound('correct');
+        btn.classList.add('correct');
+        showStars();
+
+        gameState.streak++;
+        gameState.score += 10 * gameState.streak;
+        gameState.questionsCorrect++;
+
+        if (gameState.streak > gameState.bestStreak) {
+          gameState.bestStreak = gameState.streak;
+        }
+
+        updateUI();
+
+        const message = randomItem(CORRECT_MESSAGES);
+        document.getElementById('message').textContent = message;
+        document.getElementById('message').className = 'message success';
+
+        // Streak animation
+        if (gameState.streak >= 3) {
+          document.getElementById('streakIcon').classList.add('streak-fire');
+        }
+
+        setTimeout(() => {
+          if (gameState.questionsCorrect >= gameState.questionsToWin) {
+            catchPokemon();
+          } else {
+            generateQuestion();
+            buttons.forEach(b => b.disabled = false);
+          }
+        }, 1200);
+
+      } else {
+        // Wrong
+        playSound('wrong');
+        btn.classList.add('wrong');
+
+        gameState.streak = 0;
+        document.getElementById('streakIcon').classList.remove('streak-fire');
+        updateUI();
+
+        const message = randomItem(TRY_AGAIN_MESSAGES);
+        document.getElementById('message').textContent = message;
+        document.getElementById('message').className = 'message encouragement';
+
+        setTimeout(() => {
+          btn.classList.remove('wrong');
+          buttons.forEach(b => b.disabled = false);
+        }, 1000);
+      }
+    }
+
+    function catchPokemon() {
+      playSound('catch');
+      showScreen('catchScreen');
+
+      const pokemon = gameState.currentPokemon;
+
+      // Reset animation
+      document.getElementById('pokeball').style.animation = 'none';
+      document.getElementById('caughtPokemon').classList.remove('show');
+
+      // Trigger reflow
+      void document.getElementById('pokeball').offsetWidth;
+
+      // Start animation
+      document.getElementById('pokeball').style.animation = 'pokeballShake 0.5s ease-in-out 3, pokeballSuccess 0.5s ease 1.5s forwards';
+
+      setTimeout(() => {
+        document.getElementById('pokeball').style.display = 'none';
+        document.getElementById('caughtPokemon').classList.add('show');
+        document.getElementById('caughtPokemonImg').src = getPokemonSprite(pokemon.id);
+
+        showConfetti();
+
+        // Add to collection if not already caught
+        if (!gameState.collection.includes(pokemon.id)) {
+          gameState.collection.push(pokemon.id);
+        }
+
+        // Update catch screen
+        document.getElementById('catchMessage').textContent =
+          gameState.collection.includes(pokemon.id) && gameState.collection.length > 1 ? 'GOTCHA!' : '🎉 NEW POKEMON! 🎉';
+        document.getElementById('caughtName').textContent = `${pokemon.name} was caught!`;
+        document.getElementById('starsEarned').textContent = `⭐ ${gameState.questionsCorrect * 10}`;
+        document.getElementById('bestStreak').textContent = `🔥 ${gameState.bestStreak}`;
+        document.getElementById('totalPokemon').textContent = `🎉 ${gameState.collection.length}`;
+
+        saveGame();
+      }, 2000);
+    }
+
+    function continueGame() {
+      // Reset for new Pokemon
+      document.getElementById('pokeball').style.display = 'block';
+      document.getElementById('pokeball').style.animation = 'none';
+      document.getElementById('caughtPokemon').classList.remove('show');
+
+      showScreen('gameScreen');
+      spawnPokemon();
+    }
+
+    function updateUI() {
+      document.getElementById('score').textContent = gameState.score;
+      document.getElementById('streak').textContent = gameState.streak;
+    }
+
+    function updateProgress() {
+      document.getElementById('progress').textContent = `${gameState.questionsCorrect}/${gameState.questionsToWin}`;
+    }
+
+    // === COLLECTION ===
+    function showCollection() {
+      showScreen('collectionScreen');
+      renderCollection();
+    }
+
+    function renderCollection() {
+      const grid = document.getElementById('collectionGrid');
+      grid.innerHTML = '';
+
+      POKEMON.forEach(pokemon => {
+        const caught = gameState.collection.includes(pokemon.id);
+
+        const item = document.createElement('div');
+        item.className = `collection-item ${caught ? '' : 'locked'}`;
+        item.innerHTML = `
+          <img src="${getPokemonSprite(pokemon.id)}" alt="${pokemon.name}">
+          <div class="name">${caught ? pokemon.name : '???'}</div>
+        `;
+        grid.appendChild(item);
+      });
+    }
+
+    function updateMiniCollection() {
+      const container = document.getElementById('miniCollection');
+      container.innerHTML = '';
+
+      // Show first 6 caught Pokemon + empty slots
+      const maxShow = 6;
+
+      for (let i = 0; i < maxShow; i++) {
+        if (gameState.collection[i]) {
+          const img = document.createElement('img');
+          img.src = getPokemonSprite(gameState.collection[i]);
+          img.alt = 'Pokemon';
+          container.appendChild(img);
+        } else {
+          const empty = document.createElement('div');
+          empty.className = 'empty';
+          empty.textContent = '?';
+          container.appendChild(empty);
+        }
+      }
+
+      document.getElementById('collectionCount').textContent = gameState.collection.length;
+    }
+
+    function backToStart() {
+      showScreen('startScreen');
+      updateMiniCollection();
+    }
+
+    // === iOS VIEWPORT FIX ===
+    function setVH() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', setVH);
+    setVH();
+
+    // === INIT ===
+    document.addEventListener('DOMContentLoaded', () => {
+      loadGame();
+      updateMiniCollection();
+
+      // Update mascot with random starter
+      const starters = [1, 4, 7, 25];
+      document.getElementById('mascot').src = getPokemonSprite(randomItem(starters));
+    });
+
+    // Touch support for audio
+    document.addEventListener('touchstart', initAudio, { once: true });
+    document.addEventListener('click', initAudio, { once: true });
+  </script>
+</body>
+</html>
