@@ -13,11 +13,15 @@
       padding: 20px;
       background: #f5f5f5;
     }
-    h1 { text-align: center; margin-bottom: 20px; color: #333; }
+    h1 { text-align: center; margin-bottom: 8px; color: #333; }
+    .subtitle { text-align: center; color: #666; font-size: 14px; margin-bottom: 20px; }
+    .subtitle a { color: #0366d6; text-decoration: none; }
+    .subtitle a:hover { text-decoration: underline; }
     .auth-form, .todo-app { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .auth-form { margin-bottom: 20px; }
     .auth-form.hidden, .todo-app.hidden { display: none; }
     label { display: block; margin-bottom: 5px; font-weight: 500; }
+    .label-hint { font-weight: normal; color: #666; font-size: 12px; }
     input[type="text"], input[type="password"] {
       width: 100%;
       padding: 10px;
@@ -26,6 +30,7 @@
       border-radius: 4px;
       font-size: 14px;
     }
+    input:focus { outline: none; border-color: #2ea44f; box-shadow: 0 0 0 2px rgba(46,164,79,0.2); }
     button {
       padding: 10px 20px;
       background: #2ea44f;
@@ -39,10 +44,11 @@
     button:disabled { background: #94d3a2; cursor: not-allowed; }
     button.secondary { background: #6c757d; }
     button.secondary:hover { background: #5a6268; }
-    button.danger { background: #dc3545; }
+    button.danger { background: #dc3545; padding: 5px 10px; font-size: 12px; }
     button.danger:hover { background: #c82333; }
     .user-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
     .user-info span { color: #666; }
+    .user-info a { color: #0366d6; text-decoration: none; font-size: 13px; }
     .add-todo { display: flex; gap: 10px; margin-bottom: 20px; }
     .add-todo input { flex: 1; margin-bottom: 0; }
     .todo-list { list-style: none; }
@@ -54,50 +60,94 @@
       gap: 10px;
     }
     .todo-item:last-child { border-bottom: none; }
-    .todo-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
-    .todo-item .text { flex: 1; }
+    .todo-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; flex-shrink: 0; }
+    .todo-item .text { flex: 1; word-break: break-word; }
     .todo-item.done .text { text-decoration: line-through; color: #999; }
-    .todo-item button { padding: 5px 10px; font-size: 12px; }
-    .error { color: #dc3545; margin-bottom: 15px; padding: 10px; background: #f8d7da; border-radius: 4px; }
+    .error { color: #dc3545; margin-bottom: 15px; padding: 10px; background: #f8d7da; border-radius: 4px; font-size: 14px; }
     .loading { text-align: center; color: #666; padding: 20px; }
     .empty { text-align: center; color: #999; padding: 40px; }
-    .help { font-size: 12px; color: #666; margin-top: 10px; }
-    .help a { color: #0366d6; }
+
+    /* Setup guide */
+    .setup-guide { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; }
+    .setup-guide h3 { font-size: 14px; color: #333; margin-bottom: 12px; }
+    .setup-steps { font-size: 13px; color: #555; }
+    .setup-steps ol { padding-left: 20px; }
+    .setup-steps li { margin-bottom: 8px; line-height: 1.5; }
+    .setup-steps a { color: #0366d6; }
+    .setup-steps code { background: #f1f1f1; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+    .setup-steps .note { background: #fff8e6; padding: 8px 10px; border-radius: 4px; margin-top: 10px; border-left: 3px solid #f0ad4e; }
+
+    /* Saving indicator */
+    .saving { opacity: 0.6; pointer-events: none; }
+    .status-bar { font-size: 12px; color: #666; text-align: right; padding: 5px 0; }
+    .status-bar.error { color: #dc3545; }
+    .status-bar.success { color: #2ea44f; }
   </style>
 </head>
 <body>
   <h1>GitHub TODO App</h1>
+  <p class="subtitle">Your todos, stored in your own GitHub repo. <a href="https://github.com/ngnnah/test-private-file-based-todo-app" target="_blank">Learn more</a></p>
 
   <div id="auth-form" class="auth-form">
     <div id="auth-error" class="error" style="display: none;"></div>
+
     <label for="username">GitHub Username</label>
-    <input type="text" id="username" placeholder="your-username">
-    <label for="repo">Repository Name</label>
-    <input type="text" id="repo" placeholder="my-todos" value="my-todos">
-    <label for="token">Personal Access Token</label>
-    <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx">
-    <button id="login-btn" onclick="login()">Connect</button>
-    <p class="help">
-      Create a <a href="https://github.com/new" target="_blank">private repo</a> and
-      <a href="https://github.com/settings/tokens/new?scopes=repo&description=GitHub%20TODO%20App" target="_blank">generate a PAT</a> with repo scope.
-    </p>
+    <input type="text" id="username" placeholder="your-username" autocomplete="username">
+
+    <label for="repo">
+      Repository Name
+      <span class="label-hint">(private repo recommended)</span>
+    </label>
+    <input type="text" id="repo" placeholder="my-todos" autocomplete="off">
+
+    <label for="token">
+      Personal Access Token
+      <span class="label-hint">(fine-grained, with Contents read/write)</span>
+    </label>
+    <input type="password" id="token" placeholder="github_pat_xxxxxxxxxxxx" autocomplete="off">
+
+    <button id="login-btn" onclick="login()">Connect to GitHub</button>
+
+    <div class="setup-guide">
+      <h3>First time? Follow these steps:</h3>
+      <div class="setup-steps">
+        <ol>
+          <li><a href="https://github.com/new" target="_blank">Create a private repository</a> (e.g., <code>my-todos</code>)</li>
+          <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank">Create a fine-grained PAT</a>:
+            <ul style="margin-top: 5px;">
+              <li>Token name: <code>todo-app</code></li>
+              <li>Repository access: <strong>Only select repositories</strong> → select your todo repo</li>
+              <li>Permissions → Repository permissions → <strong>Contents: Read and write</strong></li>
+            </ul>
+          </li>
+          <li>Copy the token and paste it above</li>
+        </ol>
+        <div class="note">
+          <strong>Why fine-grained PAT?</strong> It's scoped to only your todo repo. Even if leaked, it can't access your other repositories.
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="todo-app" class="todo-app hidden">
     <div class="user-info">
       <span id="user-display"></span>
-      <button class="secondary" onclick="logout()">Disconnect</button>
+      <div>
+        <a id="repo-link" href="#" target="_blank" style="margin-right: 15px;">View on GitHub</a>
+        <button class="secondary" onclick="logout()">Disconnect</button>
+      </div>
     </div>
     <div id="app-error" class="error" style="display: none;"></div>
     <div class="add-todo">
       <input type="text" id="new-todo" placeholder="What needs to be done?" onkeypress="if(event.key==='Enter')addTodo()">
-      <button onclick="addTodo()">Add</button>
+      <button id="add-btn" onclick="addTodo()">Add</button>
     </div>
     <div id="todo-container">
       <div class="loading">Loading...</div>
     </div>
+    <div id="status-bar" class="status-bar"></div>
   </div>
 
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

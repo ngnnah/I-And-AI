@@ -1,6 +1,7 @@
 // GitHub TODO App - Core Logic
 
 const STORAGE_KEY = 'github-todo-config';
+const REMEMBER_KEY = 'github-todo-remember';
 const TODOS_FILE = 'todos.json';
 
 let config = null;
@@ -11,6 +12,11 @@ let fileSha = null;
 
 function saveConfig(cfg) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+  // Also save username/repo for remembering after disconnect
+  localStorage.setItem(REMEMBER_KEY, JSON.stringify({
+    username: cfg.username,
+    repo: cfg.repo
+  }));
 }
 
 function loadConfig() {
@@ -18,8 +24,14 @@ function loadConfig() {
   return stored ? JSON.parse(stored) : null;
 }
 
+function loadRemembered() {
+  const stored = localStorage.getItem(REMEMBER_KEY);
+  return stored ? JSON.parse(stored) : null;
+}
+
 function clearConfig() {
   localStorage.removeItem(STORAGE_KEY);
+  // Keep remembered username/repo
 }
 
 // --- GitHub API ---
@@ -54,8 +66,8 @@ async function fetchTodos() {
   return { todos: content.todos || [], sha: data.sha };
 }
 
-async function saveTodos(todos, sha) {
-  const content = btoa(JSON.stringify({ todos }, null, 2));
+async function saveTodos(todosToSave, sha) {
+  const content = btoa(JSON.stringify({ todos: todosToSave }, null, 2));
   const body = {
     message: `Update todos: ${new Date().toISOString()}`,
     content,
@@ -80,6 +92,14 @@ function showError(elementId, message) {
 
 function hideError(elementId) {
   document.getElementById(elementId).style.display = 'none';
+}
+
+function showStatus(message, type = '') {
+  const el = document.getElementById('status-bar');
+  if (el) {
+    el.textContent = message;
+    el.className = 'status-bar' + (type ? ' ' + type : '');
+  }
 }
 
 function renderTodos() {
@@ -125,6 +145,7 @@ async function login() {
 
   hideError('auth-error');
   document.getElementById('login-btn').disabled = true;
+  document.getElementById('login-btn').textContent = 'Connecting...';
 
   config = { username, repo, token };
 
@@ -134,10 +155,20 @@ async function login() {
     saveConfig(config);
     showApp();
   } catch (error) {
-    showError('auth-error', `Connection failed: ${error.message}`);
+    let message = error.message;
+    // Provide helpful suggestions based on error
+    if (message.includes('Bad credentials')) {
+      message = 'Invalid token. Please check your Personal Access Token.';
+    } else if (message.includes('Not Found')) {
+      message = `Repository "${repo}" not found. Check the repo name and ensure your token has access to it.`;
+    } else if (message.includes('not accessible')) {
+      message = 'Token doesn\'t have access. Ensure your fine-grained PAT has "Contents: Read and write" permission.';
+    }
+    showError('auth-error', message);
     config = null;
   } finally {
     document.getElementById('login-btn').disabled = false;
+    document.getElementById('login-btn').textContent = 'Connect to GitHub';
   }
 }
 
@@ -148,7 +179,7 @@ function logout() {
   fileSha = null;
   document.getElementById('auth-form').classList.remove('hidden');
   document.getElementById('todo-app').classList.add('hidden');
-  document.getElementById('username').value = '';
+  // Keep username/repo pre-filled, clear only token
   document.getElementById('token').value = '';
 }
 
@@ -156,15 +187,19 @@ async function showApp() {
   document.getElementById('auth-form').classList.add('hidden');
   document.getElementById('todo-app').classList.remove('hidden');
   document.getElementById('user-display').textContent = `${config.username}/${config.repo}`;
+  document.getElementById('repo-link').href = `https://github.com/${config.username}/${config.repo}`;
 
   setLoading(true);
+  showStatus('Loading todos...');
   try {
     const result = await fetchTodos();
     todos = result.todos;
     fileSha = result.sha;
     renderTodos();
+    showStatus(todos.length > 0 ? `${todos.length} todo${todos.length === 1 ? '' : 's'} loaded` : '', 'success');
   } catch (error) {
     showError('app-error', `Failed to load todos: ${error.message}`);
+    showStatus('');
   }
 }
 
@@ -184,13 +219,16 @@ async function addTodo() {
   todos.push(newTodo);
   renderTodos();
   input.value = '';
+  showStatus('Saving...', '');
 
   try {
     fileSha = await saveTodos(todos, fileSha);
+    showStatus('Saved', 'success');
   } catch (error) {
     todos.pop();
     renderTodos();
     showError('app-error', `Failed to save: ${error.message}`);
+    showStatus('Save failed', 'error');
   }
 }
 
@@ -198,13 +236,16 @@ async function toggleTodo(index) {
   hideError('app-error');
   todos[index].done = !todos[index].done;
   renderTodos();
+  showStatus('Saving...', '');
 
   try {
     fileSha = await saveTodos(todos, fileSha);
+    showStatus('Saved', 'success');
   } catch (error) {
     todos[index].done = !todos[index].done;
     renderTodos();
     showError('app-error', `Failed to save: ${error.message}`);
+    showStatus('Save failed', 'error');
   }
 }
 
@@ -212,21 +253,35 @@ async function deleteTodo(index) {
   hideError('app-error');
   const removed = todos.splice(index, 1)[0];
   renderTodos();
+  showStatus('Saving...', '');
 
   try {
     fileSha = await saveTodos(todos, fileSha);
+    showStatus('Saved', 'success');
   } catch (error) {
     todos.splice(index, 0, removed);
     renderTodos();
     showError('app-error', `Failed to save: ${error.message}`);
+    showStatus('Save failed', 'error');
   }
 }
 
 // --- Init ---
 
 function init() {
+  // Pre-fill remembered username/repo
+  const remembered = loadRemembered();
+  if (remembered) {
+    document.getElementById('username').value = remembered.username || '';
+    document.getElementById('repo').value = remembered.repo || '';
+  }
+
+  // Auto-login if full config exists
   config = loadConfig();
   if (config) {
+    // Also pre-fill form in case user disconnects
+    document.getElementById('username').value = config.username;
+    document.getElementById('repo').value = config.repo;
     showApp();
   }
 }
