@@ -16,6 +16,15 @@ export async function handleCardFlip(gameId) {
   }
 
   const game = snapshot.val();
+
+  // DEBUG: Log current turn before flip
+  console.log('🃏 Card Flip:', {
+    currentTurnPlayerId: game.gameState?.currentTurnPlayerId?.substring(0, 8),
+    currentTurnPlayerName: game.players[game.gameState?.currentTurnPlayerId]?.name,
+    currentTurnIndex: game.gameState?.currentTurnIndex,
+    deckIndex: game.deck.currentIndex
+  });
+
   const nextIndex = game.deck.currentIndex + 1;
 
   // Check if game is over
@@ -92,6 +101,17 @@ export async function handleNaming(gameId, creatureId, name, playerId, acknowled
   const currentIndex = game.gameState.currentTurnIndex || 0;
   const nextTurnIndex = (currentIndex + 1) % playerIds.length;
   const nextTurnPlayerId = playerIds[nextTurnIndex];
+
+  // DEBUG: Log turn rotation
+  console.log('🔄 Turn Rotation:', {
+    playerIds,
+    playerNames: playerIds.map(id => `${game.players[id].name} (${id.substring(0, 8)}...)`),
+    joinedAtTimes: playerIds.map(id => new Date(game.players[id].joinedAt).toISOString()),
+    currentIndex,
+    nextTurnIndex,
+    currentPlayerId: game.gameState.currentTurnPlayerId?.substring(0, 8),
+    nextPlayerId: nextTurnPlayerId?.substring(0, 8)
+  });
 
   // Prepare atomic update
   const updates = {

@@ -200,11 +200,12 @@ function updateCardDisplay(game) {
  */
 function updatePileInfo(game) {
     const pileSize = game.gameState?.currentPile?.length || 0;
-    const deckIndex = game.deck?.currentIndex || 0;
+    const deckIndex = game.deck?.currentIndex ?? -1; // Start at -1, so no cards flipped = -1
     const deckSize = game.deck?.cards?.length || 0;
 
     pileCountSpan.textContent = `Pile: ${pileSize} cards`;
-    deckProgressSpan.textContent = `Deck: ${deckIndex}/${deckSize}`;
+    // currentIndex is the index of last flipped card, so add 1 to show count
+    deckProgressSpan.textContent = `Deck: ${deckIndex + 1}/${deckSize}`;
 }
 
 /**
