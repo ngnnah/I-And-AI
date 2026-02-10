@@ -27,9 +27,11 @@ export async function handleCardFlip(gameId) {
 
   const nextIndex = game.deck.currentIndex + 1;
 
-  // Check if game is over
+  // Check if game is over (no more cards to flip)
   if (nextIndex >= game.deck.cards.length) {
-    throw new Error("Deck exhausted");
+    // Game is over - don't throw error, let checkAndHandleGameEnd handle it
+    console.log('🎮 No more cards to flip, game should end naturally');
+    return;
   }
 
   const nextCard = game.deck.cards[nextIndex];

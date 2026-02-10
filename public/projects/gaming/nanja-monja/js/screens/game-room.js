@@ -174,8 +174,11 @@ function updateGameHeader(game) {
     renderPlayerList(game.players);
 }
 
+// Track previous card for animation
+let previousCard = null;
+
 /**
- * Update card display
+ * Update card display with flip animation
  */
 function updateCardDisplay(game) {
     const { currentCard } = game.gameState || {};
@@ -185,13 +188,37 @@ function updateCardDisplay(game) {
         currentCardImg.classList.add('hidden');
         cardPlaceholder.classList.remove('hidden');
         cardPlaceholder.textContent = game.status === 'waiting' ? 'Waiting to start...' : 'Ready to flip...';
+        previousCard = null;
     } else {
-        // Show current card
         const cardSetId = game.cardSetId || 'creatures';
         const imgPath = getCardImage(cardSetId, currentCard);
-        currentCardImg.src = imgPath;
-        currentCardImg.classList.remove('hidden');
-        cardPlaceholder.classList.add('hidden');
+
+        // Check if card changed (for animation)
+        const cardChanged = previousCard !== null && previousCard !== currentCard;
+
+        if (cardChanged && !currentCardImg.classList.contains('hidden')) {
+            // Animate card flip: fade out old card, then fade in new card
+            currentCardImg.classList.add('flipping-out');
+
+            setTimeout(() => {
+                // Change image and animate in
+                currentCardImg.src = imgPath;
+                currentCardImg.classList.remove('flipping-out');
+                currentCardImg.classList.add('flipping-in');
+
+                // Remove animation class after animation completes
+                setTimeout(() => {
+                    currentCardImg.classList.remove('flipping-in');
+                }, 300);
+            }, 200);
+        } else {
+            // First card or no animation needed
+            currentCardImg.src = imgPath;
+            currentCardImg.classList.remove('hidden');
+            cardPlaceholder.classList.add('hidden');
+        }
+
+        previousCard = currentCard;
     }
 }
 
