@@ -28,6 +28,7 @@ import { navigateTo } from '../main.js';
 const gameIdDisplay = document.getElementById('game-id-display');
 const playerListContainer = document.getElementById('player-list');
 const gameStatusDiv = document.getElementById('game-status');
+const phaseBanner = document.getElementById('phase-banner');
 
 // DOM elements - Card Area
 const cardArea = document.getElementById('card-area');
@@ -207,6 +208,7 @@ function updateActionButtons(game) {
     shoutBtn.classList.add('hidden');
     skipRoundBtn.classList.add('hidden');
     acknowledgmentSection.classList.add('hidden');
+    phaseBanner.classList.add('hidden');
     hideNamingError();
 
     // Hide claimant selection if it exists
@@ -260,6 +262,9 @@ function updateActionButtons(game) {
 
             if (allCreaturesNamed) {
                 // All creatures named - only host can flip (shouting phase)
+                // Show phase transition banner to all players
+                phaseBanner.classList.remove('hidden');
+
                 if (isLocalPlayerHost()) {
                     flipCardBtn.classList.remove('hidden');
                     setStatusMessage("Flip the next card");
@@ -286,6 +291,9 @@ function updateActionButtons(game) {
             }
         } else if (roundType === 'shouting') {
             // Shouting round - all players can shout
+            // Show phase banner to remind players we're in shouting phase
+            phaseBanner.classList.remove('hidden');
+
             const creatureName = game.gameState.creatureNames[game.gameState.currentCard];
             shoutBtn.textContent = `I shouted "${creatureName}"!`;
             shoutBtn.disabled = false; // Re-enable button for new round

@@ -432,6 +432,51 @@ label {
     font-weight: 600;
 }
 
+.phase-banner {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    animation: slideInDown 0.5s ease-out;
+}
+
+.phase-icon {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.phase-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: white;
+}
+
+.phase-text strong {
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.phase-detail {
+    font-size: 0.875rem;
+    opacity: 0.95;
+}
+
+@keyframes slideInDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
 .card-area {
     display: flex;
     justify-content: center;
