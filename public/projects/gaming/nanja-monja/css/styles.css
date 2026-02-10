@@ -1,0 +1,718 @@
+/* ===== CSS Reset & Base Styles ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #4CAF50;
+    --primary-hover: #45a049;
+    --secondary-color: #2196F3;
+    --danger-color: #f44336;
+    --warning-color: #ff9800;
+    --bg-color: #f5f5f5;
+    --card-bg: #ffffff;
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --border-color: #dddddd;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    background-color: var(--bg-color);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== Screen & Layout ===== */
+.screen {
+    display: none;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.screen:not(.hidden) {
+    display: block;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ===== Typography ===== */
+h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    color: var(--text-primary);
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+/* ===== Buttons ===== */
+button {
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 15px 24px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    background-color: var(--primary-color);
+    color: white;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    padding: 10px 20px;
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-secondary:hover {
+    opacity: 0.9;
+}
+
+.btn-danger {
+    padding: 10px 20px;
+    background-color: #e74c3c;
+    color: white;
+    font-weight: 600;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background-color: #c0392b;
+}
+
+.btn-action {
+    width: 100%;
+    padding: 18px 24px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    background-color: var(--warning-color);
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+.btn-link {
+    background: none;
+    color: var(--secondary-color);
+    text-decoration: underline;
+    padding: 5px 10px;
+    font-size: 0.875rem;
+}
+
+.btn-link:hover {
+    opacity: 0.8;
+}
+
+/* ===== Inputs ===== */
+input[type="text"] {
+    width: 100%;
+    padding: 15px;
+    font-size: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    background-color: white;
+    transition: border-color 0.2s;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+/* ===== Error Messages ===== */
+.error {
+    padding: 10px;
+    margin-bottom: 1rem;
+    background-color: #ffebee;
+    color: var(--danger-color);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+/* ===== Player Setup Screen ===== */
+#screen-player-setup .container {
+    padding-top: 20vh;
+}
+
+/* ===== Lobby Screen ===== */
+.player-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 1.5rem;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+#lobby-player-name {
+    font-weight: 600;
+    font-size: 1.125rem;
+}
+
+#games-section {
+    margin-top: 2rem;
+}
+
+.game-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem;
+    font-style: italic;
+}
+
+.game-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    padding: 15px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s;
+}
+
+.game-item:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.game-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.game-id {
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: var(--primary-color);
+}
+
+.game-host, .game-players {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.game-item.ongoing {
+    border: 2px solid var(--primary-color);
+    background-color: #f0f8ff;
+}
+
+.games-section-header {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 1.5rem 0 0.75rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.games-section-header:first-child {
+    margin-top: 0;
+}
+
+.status-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+    font-weight: 600;
+}
+
+.status-badge.playing {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.status-badge.paused {
+    background-color: #FF9800;
+    color: white;
+}
+
+.status-badge.waiting {
+    background-color: #2196F3;
+    color: white;
+}
+
+/* History Section */
+#history-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--border-color);
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 1rem;
+}
+
+.history-item {
+    padding: 12px 15px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--secondary-color);
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.history-date {
+    font-weight: 500;
+}
+
+.history-duration {
+    background-color: var(--bg-color);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.history-winner {
+    font-weight: 600;
+    color: var(--warning-color);
+    margin-bottom: 4px;
+    font-size: 0.95rem;
+}
+
+.history-players {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.join-btn {
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 6px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ===== Game Room Screen ===== */
+#game-header {
+    margin-bottom: 1.5rem;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+#screen-game-room .game-id {
+    text-align: left;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--secondary-color);
+    margin-bottom: 0;
+    letter-spacing: 0.1em;
+}
+
+#toggle-creatures-btn {
+    font-size: 0.875rem;
+    padding: 4px 8px;
+}
+
+.player-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 15px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.player-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: var(--bg-color);
+    border-radius: 6px;
+}
+
+.player-name {
+    font-weight: 600;
+}
+
+.player-score {
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.player-host {
+    font-size: 0.75rem;
+    color: var(--warning-color);
+    margin-left: 5px;
+}
+
+.game-status {
+    text-align: center;
+    padding: 10px;
+    margin-bottom: 1rem;
+    background-color: var(--secondary-color);
+    color: white;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.card-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+    margin-bottom: 1rem;
+    padding: 20px;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+}
+
+.creature-card {
+    max-width: 100%;
+    max-height: 280px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.card-placeholder {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 1.125rem;
+    font-style: italic;
+}
+
+.pile-info {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    margin-bottom: 1rem;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    font-weight: 600;
+}
+
+.actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.naming-section {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.naming-section input {
+    margin-top: 0.5rem;
+}
+
+.naming-section .btn-primary {
+    margin-top: 0.5rem;
+}
+
+.status-message {
+    margin-top: 1rem;
+    padding: 12px;
+    text-align: center;
+    background-color: #e3f2fd;
+    color: var(--secondary-color);
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.game-controls {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.host-controls {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.host-controls button {
+    flex: 1;
+    max-width: 150px;
+}
+
+/* ===== Game Over Screen ===== */
+.winner-text {
+    font-size: 2.5rem;
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.game-summary {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+.score-table {
+    width: 100%;
+    margin-bottom: 2rem;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.score-table thead {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.score-table th,
+.score-table td {
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.score-table tbody tr {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.score-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.score-table tbody tr:nth-child(even) {
+    background-color: var(--bg-color);
+}
+
+.score-table td:last-child {
+    font-weight: 700;
+    color: var(--primary-color);
+    text-align: right;
+}
+
+/* ===== Creatures Dropdown ===== */
+.creatures-dropdown {
+    margin-bottom: 1rem;
+    padding: 10px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.creature-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px;
+    margin-bottom: 6px;
+    background-color: var(--bg-color);
+    border-radius: 6px;
+}
+
+.creature-item img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.creature-item-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+/* ===== Acknowledgment Section ===== */
+.acknowledgment-section {
+    margin: 1rem 0;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 8px;
+    text-align: center;
+}
+
+.ack-message {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.ack-message span {
+    color: #FFD700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.ack-status {
+    margin-top: 10px;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* ===== Claimant Selection (Host picks winner) ===== */
+.claimant-selection {
+    margin: 1rem 0;
+    padding: 15px;
+    background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.claimant-btn {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px 20px;
+    font-size: 1rem;
+    background-color: white;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.claimant-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: scale(1.02);
+}
+
+/* ===== Responsive Breakpoints ===== */
+
+/* ===== Keyboard Shortcuts ===== */
+.keyboard-hint {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: #999;
+    opacity: 0.8;
+}
+
+kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    font-family: monospace;
+    font-size: 0.875rem;
+    background-color: var(--card-bg);
+    border: 1px solid #555;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* ===== Responsive Breakpoints ===== */
+@media (min-width: 768px) {
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    .container {
+        max-width: 800px;
+    }
+
+    .card-area {
+        min-height: 400px;
+    }
+
+    .creature-card {
+        max-height: 380px;
+    }
+
+    .game-item {
+        grid-template-columns: auto 1fr auto;
+    }
+}
+
+@media (min-width: 1024px) {
+    .container {
+        max-width: 900px;
+    }
+}

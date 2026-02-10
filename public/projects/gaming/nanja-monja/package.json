@@ -1,0 +1,17 @@
+{
+  "name": "nanja-monja",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multiplayer memory card game",
+  "scripts": {
+    "test": "node --test tests/**/*.test.js",
+    "test:watch": "node --test --watch tests/**/*.test.js"
+  },
+  "keywords": [
+    "game",
+    "multiplayer",
+    "cards"
+  ],
+  "author": "",
+  "license": "MIT"
+}

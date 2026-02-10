@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nanja Monja - Multiplayer Card Game</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Player Setup Screen -->
+    <div id="screen-player-setup" class="screen">
+        <div class="container">
+            <h1>🎴 Nanja Monja</h1>
+            <p class="subtitle">Multiplayer Memory Card Game</p>
+            <input
+                id="player-name-input"
+                type="text"
+                placeholder="Enter your name"
+                maxlength="20"
+                autocomplete="off"
+            >
+            <button id="continue-btn" class="btn-primary">Continue to Lobby</button>
+            <div id="name-error" class="error hidden"></div>
+            <p class="keyboard-hint">⌨️ Press <kbd>Enter</kbd> to continue</p>
+        </div>
+    </div>
+
+    <!-- Lobby Screen -->
+    <div id="screen-lobby" class="screen hidden">
+        <div class="container">
+            <h1>Game Lobby</h1>
+            <div id="lobby-player-info" class="player-info">
+                <span id="lobby-player-name"></span>
+                <button id="change-name-btn" class="btn-link">Change Name</button>
+            </div>
+
+            <button id="create-game-btn" class="btn-primary">Create New Game</button>
+
+            <div id="games-section">
+                <h2>Available Games</h2>
+                <div id="game-list" class="game-list">
+                    <p class="empty-state">No games available. Create one!</p>
+                </div>
+                <p class="keyboard-hint">⌨️ <kbd>C</kbd> to create | <kbd>1-9</kbd> to join games</p>
+            </div>
+
+            <div id="history-section">
+                <h2>Recent Games</h2>
+                <div id="history-list" class="history-list">
+                    <p class="empty-state">No completed games yet</p>
+                </div>
+                <button id="toggle-history-btn" class="btn-link" style="display: none;">Show More</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Room Screen -->
+    <div id="screen-game-room" class="screen hidden">
+        <div class="container">
+            <div id="game-header">
+                <div class="header-top">
+                    <div id="game-id-display" class="game-id"></div>
+                    <button id="toggle-creatures-btn" class="btn-link">📋 Named Creatures</button>
+                </div>
+                <div id="creatures-dropdown" class="creatures-dropdown hidden"></div>
+                <div id="player-list" class="player-list"></div>
+            </div>
+
+            <div id="game-status" class="game-status"></div>
+
+            <div id="card-area" class="card-area">
+                <img id="current-card" class="creature-card hidden" alt="Current creature">
+                <div id="card-placeholder" class="card-placeholder">
+                    Ready to start...
+                </div>
+            </div>
+
+            <div id="pile-info" class="pile-info">
+                <span id="pile-count">Pile: 0 cards</span>
+                <span id="deck-progress">Deck: 0/60</span>
+            </div>
+
+            <div id="actions" class="actions">
+                <button id="start-game-btn" class="btn-primary hidden">Start Game</button>
+                <button id="flip-card-btn" class="btn-primary hidden">Flip Next Card</button>
+
+                <div id="naming-section" class="naming-section hidden">
+                    <label for="creature-name-input">Name this creature:</label>
+                    <input
+                        id="creature-name-input"
+                        type="text"
+                        placeholder="Enter a creative name"
+                        maxlength="50"
+                        autocomplete="off"
+                    >
+                    <button id="submit-name-btn" class="btn-primary">Submit Name</button>
+                    <div id="naming-error" class="error hidden"></div>
+                </div>
+
+                <!-- Acknowledgment Section (shown after naming) -->
+                <div id="acknowledgment-section" class="acknowledgment-section hidden">
+                    <div class="ack-message">
+                        <span id="ack-creature-name"></span> named!
+                    </div>
+                    <button id="acknowledge-btn" class="btn-primary">Got it! ✓</button>
+                    <div id="ack-status" class="ack-status"></div>
+                </div>
+
+                <button id="shout-btn" class="btn-action hidden">I shouted!</button>
+                <button id="skip-round-btn" class="btn-secondary hidden">Skip Round (No Winner)</button>
+            </div>
+
+            <div id="status-message" class="status-message"></div>
+
+            <div id="game-controls" class="game-controls">
+                <button id="leave-game-btn" class="btn-link">← Leave Game</button>
+                <div id="host-controls" class="host-controls hidden">
+                    <button id="pause-game-btn" class="btn-secondary">⏸ Pause</button>
+                    <button id="end-game-btn" class="btn-danger">⏹ End Game</button>
+                </div>
+            </div>
+
+            <p class="keyboard-hint">⌨️ <kbd>Space</kbd> flip | <kbd>Enter</kbd> submit | <kbd>S</kbd> shout | <kbd>A</kbd> acknowledge | <kbd>L</kbd> leave</p>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="screen-game-over" class="screen hidden">
+        <div class="container">
+            <h1 id="winner-text" class="winner-text"></h1>
+            <div id="game-summary" class="game-summary"></div>
+
+            <table id="score-table" class="score-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Cards Won</th>
+                    </tr>
+                </thead>
+                <tbody id="score-table-body"></tbody>
+            </table>
+
+            <button id="back-to-lobby-btn" class="btn-primary">Back to Lobby</button>
+            <p class="keyboard-hint">⌨️ Press <kbd>B</kbd> or <kbd>Enter</kbd> to return</p>
+        </div>
+    </div>
+
+    <!-- App Entry Point (ES6 Module) -->
+    <!-- Firebase SDK is imported directly in JS modules -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
