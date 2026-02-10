@@ -333,7 +333,10 @@ function updateActionButtons(game) {
  */
 function checkAcknowledgmentStatus(game) {
     const acknowledgements = game.gameState?.nameAcknowledgements || {};
-    const activePlayers = Object.keys(game.players).filter(id => game.players[id].isActive);
+    // Sort player IDs by joinedAt timestamp to ensure consistent ordering
+    const activePlayers = Object.keys(game.players)
+        .filter(id => game.players[id].isActive)
+        .sort((a, b) => game.players[a].joinedAt - game.players[b].joinedAt);
     const acknowledgedPlayers = Object.keys(acknowledgements).filter(id => acknowledgements[id]);
 
     const hasAcknowledged = acknowledgements[localPlayer.id] === true;
@@ -637,9 +640,10 @@ async function handleSubmitName() {
         const creatureId = currentGame.data.gameState.currentCard;
 
         // Prepare acknowledgments (namer auto-acknowledges)
-        const activePlayers = Object.keys(currentGame.data.players).filter(
-            id => currentGame.data.players[id].isActive
-        );
+        // Sort player IDs by joinedAt timestamp to ensure consistent ordering
+        const activePlayers = Object.keys(currentGame.data.players)
+            .filter(id => currentGame.data.players[id].isActive)
+            .sort((a, b) => currentGame.data.players[a].joinedAt - currentGame.data.players[b].joinedAt);
         const ackObj = {};
         activePlayers.forEach(id => {
             // Namer auto-acknowledges (they already know the name)

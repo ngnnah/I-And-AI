@@ -27,7 +27,10 @@ export async function handleCardFlip(gameId) {
 
   // Initialize gameState if missing (Firebase drops empty objects/arrays/nulls)
   if (!game.gameState) {
-    const playerIds = Object.keys(game.players);
+    // Sort player IDs by joinedAt timestamp to ensure consistent ordering
+    const playerIds = Object.keys(game.players).sort((a, b) =>
+      game.players[a].joinedAt - game.players[b].joinedAt
+    );
     game.gameState = {
       currentCard: null,
       currentPile: [],
@@ -82,7 +85,10 @@ export async function handleNaming(gameId, creatureId, name, playerId, acknowled
   const game = gameSnapshot.val();
 
   // Rotate turn to next player
-  const playerIds = Object.keys(game.players).filter(id => game.players[id].isActive);
+  // Sort player IDs by joinedAt timestamp to ensure consistent ordering
+  const playerIds = Object.keys(game.players)
+    .filter(id => game.players[id].isActive)
+    .sort((a, b) => game.players[a].joinedAt - game.players[b].joinedAt);
   const currentIndex = game.gameState.currentTurnIndex || 0;
   const nextTurnIndex = (currentIndex + 1) % playerIds.length;
   const nextTurnPlayerId = playerIds[nextTurnIndex];
@@ -162,7 +168,10 @@ export async function checkAndClearAcknowledgements(gameId) {
   }
 
   const game = snapshot.val();
-  const activePlayers = Object.keys(game.players).filter(id => game.players[id].isActive);
+  // Sort player IDs by joinedAt timestamp to ensure consistent ordering
+  const activePlayers = Object.keys(game.players)
+    .filter(id => game.players[id].isActive)
+    .sort((a, b) => game.players[a].joinedAt - game.players[b].joinedAt);
   const acknowledgements = game.gameState.nameAcknowledgements || {};
   const acknowledgedPlayers = Object.keys(acknowledgements).filter(id => acknowledgements[id]);
 
@@ -244,7 +253,10 @@ export async function handlePileWin(gameId, playerId) {
   const currentCards = game.players[playerId].cardsWon || 0;
 
   // Rotate turn to next player
-  const playerIds = Object.keys(game.players).filter(id => game.players[id].isActive);
+  // Sort player IDs by joinedAt timestamp to ensure consistent ordering
+  const playerIds = Object.keys(game.players)
+    .filter(id => game.players[id].isActive)
+    .sort((a, b) => game.players[a].joinedAt - game.players[b].joinedAt);
   const currentIndex = game.gameState.currentTurnIndex || 0;
   const nextTurnIndex = (currentIndex + 1) % playerIds.length;
   const nextTurnPlayerId = playerIds[nextTurnIndex];
