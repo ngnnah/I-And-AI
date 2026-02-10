@@ -78,7 +78,7 @@ export function generatePlayerId() {
  * @param {string} playerId - Host player ID
  * @returns {Promise<string>} Game ID
  */
-export async function createGame(playerName, playerId) {
+export async function createGame(playerName, playerId, cardSetId = 'creatures') {
   const gameId = generateGameId();
   const displayName = generateDisplayName();
   const gameRef = ref(database, `games/${gameId}`);
@@ -95,6 +95,7 @@ export async function createGame(playerName, playerId) {
     displayName: displayName,
     createdBy: playerName,
     hostId: playerId,
+    cardSetId: cardSetId,  // Store selected card set
     players: {
       [playerId]: {
         name: playerName,

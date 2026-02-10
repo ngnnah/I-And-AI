@@ -6,10 +6,13 @@
 import { createGame, joinGame, listenToAllGames, getGameHistory } from '../game/firebase-config.js';
 import { localPlayer, setCurrentGameId, clearStoredPlayerName } from '../game/game-state.js';
 import { navigateTo } from '../main.js';
+import { getAllCardSets } from '../data/card-sets.js';
 
 // DOM elements
 const playerNameDisplay = document.getElementById('lobby-player-name');
 const changeNameBtn = document.getElementById('change-name-btn');
+const cardSetSelect = document.getElementById('card-set-select');
+const setDescription = document.getElementById('set-description');
 const createGameBtn = document.getElementById('create-game-btn');
 const gameListContainer = document.getElementById('game-list');
 const historyContainer = document.getElementById('history-list');
@@ -144,6 +147,37 @@ function createGameItem(gameId, game, isOngoing = false) {
 }
 
 /**
+ * Populate card set selector with available sets
+ */
+function populateCardSetSelector() {
+    const cardSets = getAllCardSets();
+
+    cardSetSelect.innerHTML = '';
+    cardSets.forEach(set => {
+        const option = document.createElement('option');
+        option.value = set.id;
+        option.textContent = set.name;
+        cardSetSelect.appendChild(option);
+    });
+
+    // Show description of the first set
+    updateSetDescription();
+}
+
+/**
+ * Update set description when selection changes
+ */
+function updateSetDescription() {
+    const selectedSetId = cardSetSelect.value;
+    const cardSets = getAllCardSets();
+    const selectedSet = cardSets.find(set => set.id === selectedSetId);
+
+    if (selectedSet) {
+        setDescription.textContent = selectedSet.description;
+    }
+}
+
+/**
  * Handle create game button click
  */
 async function handleCreateGame() {
@@ -151,10 +185,11 @@ async function handleCreateGame() {
         createGameBtn.disabled = true;
         createGameBtn.textContent = 'Creating...';
 
-        const gameId = await createGame(localPlayer.name, localPlayer.id);
+        const selectedSetId = cardSetSelect.value;
+        const gameId = await createGame(localPlayer.name, localPlayer.id, selectedSetId);
         setCurrentGameId(gameId);
 
-        console.log(`Game created: ${gameId}`);
+        console.log(`Game created: ${gameId} with card set: ${selectedSetId}`);
         navigateTo('game-room');
     } catch (error) {
         console.error('Failed to create game:', error);
@@ -299,6 +334,9 @@ function handleToggleHistory() {
  * Initialize screen
  */
 function init() {
+    // Populate card set selector
+    populateCardSetSelector();
+
     // Event delegation for join buttons (since they're dynamically created)
     gameListContainer.addEventListener('click', (e) => {
         if (e.target.classList.contains('join-btn')) {
@@ -311,6 +349,7 @@ function init() {
     createGameBtn.addEventListener('click', handleCreateGame);
     changeNameBtn.addEventListener('click', handleChangeName);
     toggleHistoryBtn.addEventListener('click', handleToggleHistory);
+    cardSetSelect.addEventListener('change', updateSetDescription);
 
     // Listen to screen changes
     window.addEventListener('screen-changed', (e) => {

@@ -20,7 +20,7 @@ import {
     isLocalPlayerHost,
     clearCurrentGame
 } from '../game/game-state.js';
-import { getCreatureImage, CREATURES } from '../data/creatures.js';
+import { getCardImage, getSetSize, getCard } from '../data/card-sets.js';
 import { validateCreatureName, getRoundType } from '../game/game-logic.js';
 import { navigateTo } from '../main.js';
 
@@ -109,7 +109,9 @@ function renderPlayerList(players) {
 
     const currentTurnPlayerId = currentGame.data.gameState?.currentTurnPlayerId;
     const creatureNames = currentGame.data.gameState?.creatureNames || {};
-    const allCreaturesNamed = Object.keys(creatureNames).length === CREATURES.length;
+    const cardSetId = currentGame.data.cardSetId || 'creatures';
+    const setSize = getSetSize(cardSetId);
+    const allCreaturesNamed = Object.keys(creatureNames).length === setSize;
     const roundType = currentGame.data.gameState?.roundType;
 
     Object.entries(players).forEach(([playerId, player]) => {
@@ -185,7 +187,8 @@ function updateCardDisplay(game) {
         cardPlaceholder.textContent = game.status === 'waiting' ? 'Waiting to start...' : 'Ready to flip...';
     } else {
         // Show current card
-        const imgPath = getCreatureImage(currentCard);
+        const cardSetId = game.cardSetId || 'creatures';
+        const imgPath = getCardImage(cardSetId, currentCard);
         currentCardImg.src = imgPath;
         currentCardImg.classList.remove('hidden');
         cardPlaceholder.classList.add('hidden');
@@ -265,7 +268,9 @@ function updateActionButtons(game) {
             // Ready to flip next card
             // Check if all creatures have been named
             const creatureNames = game.gameState?.creatureNames || {};
-            const allCreaturesNamed = Object.keys(creatureNames).length === CREATURES.length;
+            const cardSetId = game.cardSetId || 'creatures';
+            const setSize = getSetSize(cardSetId);
+            const allCreaturesNamed = Object.keys(creatureNames).length === setSize;
 
             if (allCreaturesNamed) {
                 // All creatures named - only host can flip (shouting phase)
@@ -299,7 +304,9 @@ function updateActionButtons(game) {
         } else if (roundType === 'shouting') {
             // Shouting round - all players can shout
             const creatureNames = game.gameState?.creatureNames || {};
-            const allCreaturesNamed = Object.keys(creatureNames).length === CREATURES.length;
+            const cardSetId = game.cardSetId || 'creatures';
+            const setSize = getSetSize(cardSetId);
+            const allCreaturesNamed = Object.keys(creatureNames).length === setSize;
 
             // Only show phase banner if all creatures have been discovered
             if (allCreaturesNamed) {
@@ -400,12 +407,14 @@ function renderCreaturesDropdown() {
         return;
     }
 
+    const cardSetId = currentGame.data?.cardSetId || 'creatures';
+
     entries.forEach(([creatureId, name]) => {
         const item = document.createElement('div');
         item.className = 'creature-item';
 
         const img = document.createElement('img');
-        img.src = getCreatureImage(parseInt(creatureId));
+        img.src = getCardImage(cardSetId, parseInt(creatureId));
         img.alt = name;
 
         const nameSpan = document.createElement('span');
