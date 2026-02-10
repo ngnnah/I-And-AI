@@ -139,7 +139,8 @@ describe('shuffleDeck', () => {
 
 describe('isGameOver', () => {
     it('should return true when all cards are flipped', () => {
-        const deck = { cards: [0, 1, 2, 3], currentIndex: 3 };
+        // After flipping last card (index 3), currentIndex advances to 4
+        const deck = { cards: [0, 1, 2, 3], currentIndex: 4 };
         assert.strictEqual(isGameOver(deck), true);
     });
 
@@ -149,8 +150,18 @@ describe('isGameOver', () => {
     });
 
     it('should return false at start of game', () => {
-        const deck = { cards: [0, 1, 2, 3], currentIndex: -1 };
+        const deck = { cards: [0, 1, 2, 3], currentIndex: 0 };
         assert.strictEqual(isGameOver(deck), false);
+    });
+
+    it('should work correctly for 9-card deck (3x3 setting)', () => {
+        // After flipping all 9 cards (indices 0-8), currentIndex advances to 9
+        const deck = { cards: new Array(9), currentIndex: 9 };
+        assert.strictEqual(isGameOver(deck), true);
+
+        // After flipping 8 cards (through index 7), one more card remains
+        const deckWith1Left = { cards: new Array(9), currentIndex: 8 };
+        assert.strictEqual(isGameOver(deckWith1Left), false);
     });
 });
 
