@@ -44,44 +44,31 @@
 
             <div id="game-settings" class="game-settings">
                 <h3 class="game-settings-title">Game Settings:</h3>
-                <div class="game-settings-grid">
-                    <div class="setting-group">
-                        <label for="variation-input">
-                            <span class="setting-label">Variation</span>
-                            <span class="setting-description">Number of different cards</span>
+                <div class="game-settings-compact">
+                    <div class="setting-row">
+                        <label class="setting-label">
+                            Variation: <span id="variation-value" class="setting-value">12</span> <span class="setting-info" id="variation-info">of 12</span>
                         </label>
-                        <div class="setting-control">
-                            <input
-                                type="number"
-                                id="variation-input"
-                                class="setting-input"
-                                min="2"
-                                max="12"
-                                value="12"
-                            />
-                            <span class="setting-info" id="variation-info">of 12</span>
+                        <div class="setting-buttons" id="variation-buttons">
+                            <button class="setting-btn" data-value="3">3</button>
+                            <button class="setting-btn" data-value="6">6</button>
+                            <button class="setting-btn" data-value="9">9</button>
+                            <button class="setting-btn selected" data-value="12">12</button>
                         </div>
                     </div>
-                    <div class="setting-group">
-                        <label for="duplication-input">
-                            <span class="setting-label">Duplication</span>
-                            <span class="setting-description">Copies of each card</span>
+                    <div class="setting-row">
+                        <label class="setting-label">
+                            Duplication: <span id="duplication-value" class="setting-value">5</span> copies
                         </label>
-                        <div class="setting-control">
-                            <input
-                                type="number"
-                                id="duplication-input"
-                                class="setting-input"
-                                min="1"
-                                max="10"
-                                value="5"
-                            />
-                            <span class="setting-info">copies</span>
+                        <div class="setting-buttons" id="duplication-buttons">
+                            <button class="setting-btn" data-value="3">3</button>
+                            <button class="setting-btn selected" data-value="5">5</button>
+                            <button class="setting-btn" data-value="7">7</button>
+                            <button class="setting-btn" data-value="10">10</button>
                         </div>
                     </div>
                     <div class="setting-summary">
-                        <strong>Total cards:</strong>
-                        <span id="total-cards-display">60</span>
+                        Total: <span id="total-cards-display" class="setting-value-lg">60</span> cards
                     </div>
                 </div>
             </div>

@@ -16,8 +16,10 @@ const createGameBtn = document.getElementById('create-game-btn');
 const gameListContainer = document.getElementById('game-list');
 const historyContainer = document.getElementById('history-list');
 const toggleHistoryBtn = document.getElementById('toggle-history-btn');
-const variationInput = document.getElementById('variation-input');
-const duplicationInput = document.getElementById('duplication-input');
+const variationButtons = document.getElementById('variation-buttons');
+const duplicationButtons = document.getElementById('duplication-buttons');
+const variationValue = document.getElementById('variation-value');
+const duplicationValue = document.getElementById('duplication-value');
 const variationInfo = document.getElementById('variation-info');
 const totalCardsDisplay = document.getElementById('total-cards-display');
 
@@ -29,6 +31,10 @@ let showAllHistory = false;
 
 // Selected card set
 let selectedCardSetId = 'creatures';
+
+// Selected game settings
+let selectedVariation = 12;
+let selectedDuplication = 5;
 
 /**
  * Render the game list
@@ -223,12 +229,12 @@ function updateVariationLimits() {
 
     if (selectedSet) {
         const maxCards = selectedSet.cards.length;
-        variationInput.max = maxCards;
         variationInfo.textContent = `of ${maxCards}`;
 
         // Ensure current value doesn't exceed max
-        if (parseInt(variationInput.value) > maxCards) {
-            variationInput.value = maxCards;
+        if (selectedVariation > maxCards) {
+            selectedVariation = maxCards;
+            updateVariationUI();
         }
 
         updateTotalCards();
@@ -239,10 +245,62 @@ function updateVariationLimits() {
  * Update total cards calculation
  */
 function updateTotalCards() {
-    const variation = parseInt(variationInput.value) || 12;
-    const duplication = parseInt(duplicationInput.value) || 5;
-    const total = variation * duplication;
+    const total = selectedVariation * selectedDuplication;
     totalCardsDisplay.textContent = total;
+}
+
+/**
+ * Handle variation button click
+ */
+function handleVariationClick(value) {
+    selectedVariation = parseInt(value);
+    updateVariationUI();
+    updateTotalCards();
+}
+
+/**
+ * Handle duplication button click
+ */
+function handleDuplicationClick(value) {
+    selectedDuplication = parseInt(value);
+    updateDuplicationUI();
+    updateTotalCards();
+}
+
+/**
+ * Update variation UI (selected state and display value)
+ */
+function updateVariationUI() {
+    variationValue.textContent = selectedVariation;
+
+    // Update button states
+    const buttons = variationButtons.querySelectorAll('.setting-btn');
+    buttons.forEach(btn => {
+        const btnValue = parseInt(btn.dataset.value);
+        if (btnValue === selectedVariation) {
+            btn.classList.add('selected');
+        } else {
+            btn.classList.remove('selected');
+        }
+    });
+}
+
+/**
+ * Update duplication UI (selected state and display value)
+ */
+function updateDuplicationUI() {
+    duplicationValue.textContent = selectedDuplication;
+
+    // Update button states
+    const buttons = duplicationButtons.querySelectorAll('.setting-btn');
+    buttons.forEach(btn => {
+        const btnValue = parseInt(btn.dataset.value);
+        if (btnValue === selectedDuplication) {
+            btn.classList.add('selected');
+        } else {
+            btn.classList.remove('selected');
+        }
+    });
 }
 
 /**
@@ -253,12 +311,10 @@ async function handleCreateGame() {
         createGameBtn.disabled = true;
         createGameBtn.textContent = 'Creating...';
 
-        const variation = parseInt(variationInput.value) || 12;
-        const duplication = parseInt(duplicationInput.value) || 5;
-        const gameId = await createGame(localPlayer.name, localPlayer.id, selectedCardSetId, variation, duplication);
+        const gameId = await createGame(localPlayer.name, localPlayer.id, selectedCardSetId, selectedVariation, selectedDuplication);
         setCurrentGameId(gameId);
 
-        console.log(`Game created: ${gameId} with card set: ${selectedCardSetId}`);
+        console.log(`Game created: ${gameId} with card set: ${selectedCardSetId}, variation: ${selectedVariation}, duplication: ${selectedDuplication}`);
         navigateTo('game-room');
     } catch (error) {
         console.error('Failed to create game:', error);
@@ -406,9 +462,18 @@ function init() {
     // Populate card set selector
     populateCardSetSelector();
 
-    // Event listeners for game settings inputs
-    variationInput.addEventListener('input', updateTotalCards);
-    duplicationInput.addEventListener('input', updateTotalCards);
+    // Event listeners for game settings buttons
+    variationButtons.addEventListener('click', (e) => {
+        if (e.target.classList.contains('setting-btn')) {
+            handleVariationClick(e.target.dataset.value);
+        }
+    });
+
+    duplicationButtons.addEventListener('click', (e) => {
+        if (e.target.classList.contains('setting-btn')) {
+            handleDuplicationClick(e.target.dataset.value);
+        }
+    });
 
     // Initialize variation limits and total cards
     updateVariationLimits();
