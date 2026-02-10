@@ -110,7 +110,7 @@ function renderPlayerList(players) {
     const currentTurnPlayerId = currentGame.data.gameState?.currentTurnPlayerId;
     const creatureNames = currentGame.data.gameState?.creatureNames || {};
     const cardSetId = currentGame.data.cardSetId || 'creatures';
-    const setSize = getSetSize(cardSetId);
+    const setSize = currentGame.data.variation || getSetSize(cardSetId); // Use game's variation setting
     const allCreaturesNamed = Object.keys(creatureNames).length === setSize;
     const roundType = currentGame.data.gameState?.roundType;
 
@@ -269,7 +269,7 @@ function updateActionButtons(game) {
             // Check if all creatures have been named
             const creatureNames = game.gameState?.creatureNames || {};
             const cardSetId = game.cardSetId || 'creatures';
-            const setSize = getSetSize(cardSetId);
+            const setSize = currentGame.data.variation || getSetSize(cardSetId); // Use game's variation setting
             const allCreaturesNamed = Object.keys(creatureNames).length === setSize;
 
             if (allCreaturesNamed) {
@@ -305,7 +305,7 @@ function updateActionButtons(game) {
             // Shouting round - all players can shout
             const creatureNames = game.gameState?.creatureNames || {};
             const cardSetId = game.cardSetId || 'creatures';
-            const setSize = getSetSize(cardSetId);
+            const setSize = currentGame.data.variation || getSetSize(cardSetId); // Use game's variation setting
             const allCreaturesNamed = Object.keys(creatureNames).length === setSize;
 
             // Only show phase banner if all creatures have been discovered
