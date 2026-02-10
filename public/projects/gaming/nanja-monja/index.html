@@ -39,6 +39,51 @@
                 <div id="card-set-gallery" class="card-set-gallery">
                     <!-- Card set tiles populated by JavaScript -->
                 </div>
+                </div>
+            </div>
+
+            <div id="game-settings" class="game-settings">
+                <h3 class="game-settings-title">Game Settings:</h3>
+                <div class="game-settings-grid">
+                    <div class="setting-group">
+                        <label for="variation-input">
+                            <span class="setting-label">Variation</span>
+                            <span class="setting-description">Number of different cards</span>
+                        </label>
+                        <div class="setting-control">
+                            <input
+                                type="number"
+                                id="variation-input"
+                                class="setting-input"
+                                min="2"
+                                max="12"
+                                value="12"
+                            />
+                            <span class="setting-info" id="variation-info">of 12</span>
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label for="duplication-input">
+                            <span class="setting-label">Duplication</span>
+                            <span class="setting-description">Copies of each card</span>
+                        </label>
+                        <div class="setting-control">
+                            <input
+                                type="number"
+                                id="duplication-input"
+                                class="setting-input"
+                                min="1"
+                                max="10"
+                                value="5"
+                            />
+                            <span class="setting-info">copies</span>
+                        </div>
+                    </div>
+                    <div class="setting-summary">
+                        <strong>Total cards:</strong>
+                        <span id="total-cards-display">60</span>
+                    </div>
+                </div>
             </div>
 
             <button id="create-game-btn" class="btn-primary">Create New Game</button>

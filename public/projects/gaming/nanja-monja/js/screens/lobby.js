@@ -16,6 +16,10 @@ const createGameBtn = document.getElementById('create-game-btn');
 const gameListContainer = document.getElementById('game-list');
 const historyContainer = document.getElementById('history-list');
 const toggleHistoryBtn = document.getElementById('toggle-history-btn');
+const variationInput = document.getElementById('variation-input');
+const duplicationInput = document.getElementById('duplication-input');
+const variationInfo = document.getElementById('variation-info');
+const totalCardsDisplay = document.getElementById('total-cards-display');
 
 // Firebase unsubscribe function
 let unsubscribeGames = null;
@@ -205,6 +209,40 @@ function handleCardSetSelection(setId) {
     if (selectedTile) {
         selectedTile.classList.add('selected');
     }
+
+    // Update variation limits for the new card set
+    updateVariationLimits();
+}
+
+/**
+ * Update variation max and info based on selected card set
+ */
+function updateVariationLimits() {
+    const cardSets = getAllCardSets();
+    const selectedSet = cardSets.find(set => set.id === selectedCardSetId);
+
+    if (selectedSet) {
+        const maxCards = selectedSet.cards.length;
+        variationInput.max = maxCards;
+        variationInfo.textContent = `of ${maxCards}`;
+
+        // Ensure current value doesn't exceed max
+        if (parseInt(variationInput.value) > maxCards) {
+            variationInput.value = maxCards;
+        }
+
+        updateTotalCards();
+    }
+}
+
+/**
+ * Update total cards calculation
+ */
+function updateTotalCards() {
+    const variation = parseInt(variationInput.value) || 12;
+    const duplication = parseInt(duplicationInput.value) || 5;
+    const total = variation * duplication;
+    totalCardsDisplay.textContent = total;
 }
 
 /**
@@ -215,7 +253,9 @@ async function handleCreateGame() {
         createGameBtn.disabled = true;
         createGameBtn.textContent = 'Creating...';
 
-        const gameId = await createGame(localPlayer.name, localPlayer.id, selectedCardSetId);
+        const variation = parseInt(variationInput.value) || 12;
+        const duplication = parseInt(duplicationInput.value) || 5;
+        const gameId = await createGame(localPlayer.name, localPlayer.id, selectedCardSetId, variation, duplication);
         setCurrentGameId(gameId);
 
         console.log(`Game created: ${gameId} with card set: ${selectedCardSetId}`);
@@ -365,6 +405,13 @@ function handleToggleHistory() {
 function init() {
     // Populate card set selector
     populateCardSetSelector();
+
+    // Event listeners for game settings inputs
+    variationInput.addEventListener('input', updateTotalCards);
+    duplicationInput.addEventListener('input', updateTotalCards);
+
+    // Initialize variation limits and total cards
+    updateVariationLimits();
 
     // Event delegation for join buttons (since they're dynamically created)
     gameListContainer.addEventListener('click', (e) => {

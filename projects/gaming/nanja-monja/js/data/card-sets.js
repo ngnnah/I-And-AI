@@ -1,6 +1,6 @@
 /**
  * Card Sets for Nanja Monja Game
- * Multiple themed sets of cards for variety
+ * Each set contains exactly 12 cards
  */
 
 export const CARD_SETS = {
@@ -9,23 +9,18 @@ export const CARD_SETS = {
     name: 'Creatures',
     description: 'Strange and wonderful creatures',
     cards: [
-      { id: 0, name: 'Avocado', imgPath: 'assets/creatures/avocado.png' },
-      { id: 1, name: 'Cat', imgPath: 'assets/creatures/cat.png' },
-      { id: 2, name: 'Cat Box', imgPath: 'assets/creatures/cat-box.png' },
-      { id: 3, name: 'Cat Dino', imgPath: 'assets/creatures/cat-dino.png' },
-      { id: 4, name: 'Chameleon', imgPath: 'assets/creatures/chameleon.png' },
-      { id: 5, name: 'Cloud', imgPath: 'assets/creatures/cloud.png' },
-      { id: 6, name: 'Cool', imgPath: 'assets/creatures/cool.png' },
-      { id: 7, name: 'Cute', imgPath: 'assets/creatures/cute.png' },
-      { id: 8, name: 'Dinosaur', imgPath: 'assets/creatures/dinosaur.png' },
-      { id: 9, name: 'Frog', imgPath: 'assets/creatures/frog.png' },
-      { id: 10, name: 'Hedgehog', imgPath: 'assets/creatures/hedgehog.png' },
-      { id: 11, name: 'Ice Cream', imgPath: 'assets/creatures/ice-cream.png' },
-      { id: 12, name: 'Kitty', imgPath: 'assets/creatures/kitty.png' },
-      { id: 13, name: 'Panda', imgPath: 'assets/creatures/panda.png' },
-      { id: 14, name: 'Penguin', imgPath: 'assets/creatures/penguin.png' },
-      { id: 15, name: 'Sun', imgPath: 'assets/creatures/sun.png' },
-      { id: 16, name: 'Turtle', imgPath: 'assets/creatures/turtle.png' },
+      { id: 0, name: 'Cat Box', imgPath: 'assets/creatures/cat-box.png' },
+      { id: 1, name: 'Cat Dino', imgPath: 'assets/creatures/cat-dino.png' },
+      { id: 2, name: 'Cat', imgPath: 'assets/creatures/cat.png' },
+      { id: 3, name: 'Chameleon', imgPath: 'assets/creatures/chameleon.png' },
+      { id: 4, name: 'Cool', imgPath: 'assets/creatures/cool.png' },
+      { id: 5, name: 'Dinosaur', imgPath: 'assets/creatures/dinosaur.png' },
+      { id: 6, name: 'Frog', imgPath: 'assets/creatures/frog.png' },
+      { id: 7, name: 'Hedgehog', imgPath: 'assets/creatures/hedgehog.png' },
+      { id: 8, name: 'Kitty', imgPath: 'assets/creatures/kitty.png' },
+      { id: 9, name: 'Panda', imgPath: 'assets/creatures/panda.png' },
+      { id: 10, name: 'Penguin', imgPath: 'assets/creatures/penguin.png' },
+      { id: 11, name: 'Turtle', imgPath: 'assets/creatures/turtle.png' },
     ]
   },
   animals: {
@@ -64,7 +59,6 @@ export const CARD_SETS = {
       { id: 9, name: 'Rainbow', imgPath: 'assets/cats/rainbow.png' },
       { id: 10, name: 'Rose', imgPath: 'assets/cats/rose.png' },
       { id: 11, name: 'Sun', imgPath: 'assets/cats/sun.png' },
-      { id: 12, name: 'Water', imgPath: 'assets/cats/water.png' },
     ]
   },
   nature: {
@@ -111,7 +105,7 @@ export function getCardSet(setId) {
 /**
  * Get card image path by set ID and card ID
  * @param {string} setId - Card set ID
- * @param {number} cardId - Card ID
+ * @param {number} cardId - Card ID (0-11)
  * @returns {string} Image path
  */
 export function getCardImage(setId, cardId) {
@@ -125,7 +119,7 @@ export function getCardImage(setId, cardId) {
 /**
  * Get card data by set ID and card ID
  * @param {string} setId - Card set ID
- * @param {number} cardId - Card ID
+ * @param {number} cardId - Card ID (0-11)
  * @returns {object} Card object
  */
 export function getCard(setId, cardId) {
@@ -139,7 +133,7 @@ export function getCard(setId, cardId) {
 /**
  * Get number of cards in a set
  * @param {string} setId - Card set ID
- * @returns {number} Number of cards
+ * @returns {number} Number of cards (always 12)
  */
 export function getSetSize(setId) {
   const cardSet = getCardSet(setId);

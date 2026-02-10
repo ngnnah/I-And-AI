@@ -6,11 +6,18 @@ import { CREATURES } from '../data/creatures.js';
  * Dynamically uses the number of creatures defined in CREATURES array
  * @returns {number[]} Array of creature IDs
  */
-export function createDeck() {
+/**
+ * Create a deck of cards with configurable variation and duplication
+ * @param {number} variation - Number of different cards to use (1-12, default: 12)
+ * @param {number} duplication - Number of copies of each card (default: 5)
+ * @returns {number[]} Array of creature IDs
+ */
+export function createDeck(variation = 12, duplication = 5) {
   const deck = [];
-  const numCreatures = CREATURES.length;
+  const numCreatures = Math.min(variation, CREATURES.length);
+  
   for (let creatureId = 0; creatureId < numCreatures; creatureId++) {
-    for (let copy = 0; copy < 5; copy++) {
+    for (let copy = 0; copy < duplication; copy++) {
       deck.push(creatureId);
     }
   }

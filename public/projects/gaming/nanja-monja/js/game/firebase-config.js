@@ -78,7 +78,7 @@ export function generatePlayerId() {
  * @param {string} playerId - Host player ID
  * @returns {Promise<string>} Game ID
  */
-export async function createGame(playerName, playerId, cardSetId = 'creatures') {
+export async function createGame(playerName, playerId, cardSetId = 'creatures', variation = 12, duplication = 5) {
   const gameId = generateGameId();
   const displayName = generateDisplayName();
   const gameRef = ref(database, `games/${gameId}`);
@@ -87,7 +87,7 @@ export async function createGame(playerName, playerId, cardSetId = 'creatures') 
   const { createDeck, shuffleDeck } = await import('./game-logic.js');
 
   // Create and shuffle deck
-  const deck = shuffleDeck(createDeck());
+  const deck = shuffleDeck(createDeck(variation, duplication));
 
   const gameData = {
     createdAt: Date.now(),
@@ -96,6 +96,8 @@ export async function createGame(playerName, playerId, cardSetId = 'creatures') 
     createdBy: playerName,
     hostId: playerId,
     cardSetId: cardSetId,  // Store selected card set
+    variation: variation,  // Number of different cards
+    duplication: duplication,  // Copies of each card
     players: {
       [playerId]: {
         name: playerName,
