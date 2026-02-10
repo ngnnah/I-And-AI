@@ -314,7 +314,7 @@ function updateActionButtons(game) {
             }
 
             const creatureName = game.gameState.creatureNames[game.gameState.currentCard];
-            shoutBtn.textContent = `I shouted "${creatureName}"!`;
+            shoutBtn.textContent = "I shouted!";
             shoutBtn.disabled = false; // Re-enable button for new round
             shoutBtn.classList.remove('hidden');
 
