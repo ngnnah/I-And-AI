@@ -85,9 +85,10 @@ export function collectPile(playerId, gameState, players) {
  * @returns {boolean} True if game over
  */
 export function isGameOver(deck) {
-  // Deck size is dynamically calculated as cards.length
-  // currentIndex points to the next card to flip, so game is over when it reaches length
-  return deck.currentIndex >= deck.cards.length;
+  // currentIndex is the index of the last card that was flipped
+  // Game is over when there are no more cards to flip (currentIndex + 1 >= length)
+  // Special case: if currentIndex is -1, no cards have been flipped yet
+  return deck.currentIndex >= 0 && (deck.currentIndex + 1 >= deck.cards.length);
 }
 
 /**

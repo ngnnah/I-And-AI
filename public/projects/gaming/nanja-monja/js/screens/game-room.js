@@ -196,8 +196,16 @@ function updateCardDisplay(game) {
         // Check if card changed (for animation)
         const cardChanged = previousCard !== null && previousCard !== currentCard;
 
+        console.log('🎴 Card Display:', {
+            previousCard,
+            currentCard,
+            cardChanged,
+            isHidden: currentCardImg.classList.contains('hidden')
+        });
+
         if (cardChanged && !currentCardImg.classList.contains('hidden')) {
             // Animate card flip: fade out old card, then fade in new card
+            console.log('✨ Starting card flip animation');
             currentCardImg.classList.add('flipping-out');
 
             setTimeout(() => {
@@ -205,14 +213,17 @@ function updateCardDisplay(game) {
                 currentCardImg.src = imgPath;
                 currentCardImg.classList.remove('flipping-out');
                 currentCardImg.classList.add('flipping-in');
+                console.log('✨ Card flipping in');
 
                 // Remove animation class after animation completes
                 setTimeout(() => {
                     currentCardImg.classList.remove('flipping-in');
-                }, 300);
-            }, 200);
+                    console.log('✨ Animation complete');
+                }, 400);
+            }, 300);
         } else {
             // First card or no animation needed
+            console.log('📍 No animation (first card or hidden)');
             currentCardImg.src = imgPath;
             currentCardImg.classList.remove('hidden');
             cardPlaceholder.classList.add('hidden');
