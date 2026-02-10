@@ -98,6 +98,25 @@ export const CARD_SETS = {
       { id: 10, name: 'Turtle', imgPath: 'assets/summer/turtle.png' },
       { id: 11, name: 'Watermelon', imgPath: 'assets/summer/watermelon.png' },
     ]
+  },
+  toys: {
+    id: 'toys',
+    name: 'Toys',
+    description: 'Fun and colorful children\'s toys',
+    cards: [
+      { id: 0, name: 'Alphabetical', imgPath: 'assets/toys/alphabetical.png' },
+      { id: 1, name: 'Avocado', imgPath: 'assets/toys/avocado.png' },
+      { id: 2, name: 'Baby Car', imgPath: 'assets/toys/baby-car.png' },
+      { id: 3, name: 'Cute', imgPath: 'assets/toys/cute.png' },
+      { id: 4, name: 'Drum', imgPath: 'assets/toys/drum.png' },
+      { id: 5, name: 'Horse Toy', imgPath: 'assets/toys/horse-toy.png' },
+      { id: 6, name: 'Ice Cream', imgPath: 'assets/toys/ice-cream.png' },
+      { id: 7, name: 'Robots', imgPath: 'assets/toys/robots.png' },
+      { id: 8, name: 'Sand Bucket', imgPath: 'assets/toys/sand-bucket.png' },
+      { id: 9, name: 'Stacker', imgPath: 'assets/toys/stacker.png' },
+      { id: 10, name: 'Sun', imgPath: 'assets/toys/sun.png' },
+      { id: 11, name: 'Water', imgPath: 'assets/toys/water.png' },
+    ]
   }
 };
 

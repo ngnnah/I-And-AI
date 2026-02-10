@@ -20,7 +20,7 @@ describe('getAllCardSets', () => {
     it('should return an array of card sets', () => {
         const sets = getAllCardSets();
         assert.ok(Array.isArray(sets));
-        assert.strictEqual(sets.length, 5); // Exactly 5 sets
+        assert.strictEqual(sets.length, 6); // Exactly 6 sets
     });
 
     it('should include all expected sets', () => {
@@ -31,6 +31,7 @@ describe('getAllCardSets', () => {
         assert.ok(setIds.includes('cats'));
         assert.ok(setIds.includes('nature'));
         assert.ok(setIds.includes('summer'));
+        assert.ok(setIds.includes('toys'));
     });
 
     it('each set should have exactly 12 cards', () => {
@@ -81,6 +82,13 @@ describe('getCardSet', () => {
         assert.strictEqual(set.cards.length, 12);
     });
 
+    it('should return the toys set', () => {
+        const set = getCardSet('toys');
+        assert.strictEqual(set.id, 'toys');
+        assert.strictEqual(set.name, 'Toys');
+        assert.strictEqual(set.cards.length, 12);
+    });
+
     it('should throw error for invalid set ID', () => {
         assert.throws(() => {
             getCardSet('invalid_set');
@@ -112,6 +120,11 @@ describe('getCardImage', () => {
     it('should return correct image path for summer set', () => {
         const imgPath = getCardImage('summer', 0);
         assert.strictEqual(imgPath, 'assets/summer/beach-ball.png');
+    });
+
+    it('should return correct image path for toys set', () => {
+        const imgPath = getCardImage('toys', 0);
+        assert.strictEqual(imgPath, 'assets/toys/alphabetical.png');
     });
 
     it('should throw error for invalid card ID (negative)', () => {
@@ -179,6 +192,15 @@ describe('getCard', () => {
         });
     });
 
+    it('should return correct card data for toys', () => {
+        const card = getCard('toys', 0);
+        assert.deepStrictEqual(card, {
+            id: 0,
+            name: 'Alphabetical',
+            imgPath: 'assets/toys/alphabetical.png'
+        });
+    });
+
     it('should throw error for invalid card ID', () => {
         assert.throws(() => {
             getCard('creatures', 12);
@@ -193,6 +215,7 @@ describe('getSetSize', () => {
         assert.strictEqual(getSetSize('cats'), 12);
         assert.strictEqual(getSetSize('nature'), 12);
         assert.strictEqual(getSetSize('summer'), 12);
+        assert.strictEqual(getSetSize('toys'), 12);
     });
 
     it('should throw error for invalid set ID', () => {
