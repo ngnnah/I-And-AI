@@ -108,13 +108,20 @@ function renderPlayerList(players) {
     }
 
     const currentTurnPlayerId = currentGame.data.gameState?.currentTurnPlayerId;
+    const creatureNames = currentGame.data.gameState?.creatureNames || {};
+    const allCreaturesNamed = Object.keys(creatureNames).length === CREATURES.length;
+    const roundType = currentGame.data.gameState?.roundType;
 
     Object.entries(players).forEach(([playerId, player]) => {
         const item = document.createElement('div');
         item.className = 'player-item';
 
         const isHost = playerId === currentGame.data.hostId;
-        const isCurrentTurn = playerId === currentTurnPlayerId;
+        // During shouting phase (all creatures named), only host flips
+        // So show turn indicator for host if all creatures named and not in a naming round
+        const isCurrentTurn = allCreaturesNamed && !roundType
+            ? isHost  // Only host can flip after all creatures named
+            : playerId === currentTurnPlayerId;  // Normal turn-based in naming phase
         const cardsWon = player.cardsWon || 0;
 
         item.innerHTML = `
@@ -291,8 +298,13 @@ function updateActionButtons(game) {
             }
         } else if (roundType === 'shouting') {
             // Shouting round - all players can shout
-            // Show phase banner to remind players we're in shouting phase
-            phaseBanner.classList.remove('hidden');
+            const creatureNames = game.gameState?.creatureNames || {};
+            const allCreaturesNamed = Object.keys(creatureNames).length === CREATURES.length;
+
+            // Only show phase banner if all creatures have been discovered
+            if (allCreaturesNamed) {
+                phaseBanner.classList.remove('hidden');
+            }
 
             const creatureName = game.gameState.creatureNames[game.gameState.currentCard];
             shoutBtn.textContent = `I shouted "${creatureName}"!`;

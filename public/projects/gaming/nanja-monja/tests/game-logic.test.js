@@ -12,7 +12,10 @@ import {
     shuffleDeck,
     isGameOver,
     getRoundType,
-    calculateWinner
+    calculateWinner,
+    isFirstTime,
+    collectPile,
+    countVotes
 } from '../js/game/game-logic.js';
 
 describe('validatePlayerName', () => {
@@ -224,5 +227,202 @@ describe('calculateWinner', () => {
         assert.strictEqual(result.tiedPlayers.length, 2);
         // Winner should be one of the players
         assert.ok(result.winnerId in players);
+    });
+});
+
+describe('isFirstTime', () => {
+    it('should return true for first time seeing a creature', () => {
+        const gameState = { creatureNames: {} };
+        assert.strictEqual(isFirstTime(0, gameState), true);
+    });
+
+    it('should return false for creatures already named', () => {
+        const gameState = { creatureNames: { 0: 'Fluffy' } };
+        assert.strictEqual(isFirstTime(0, gameState), false);
+    });
+
+    it('should handle empty creatureNames object', () => {
+        const gameState = { creatureNames: {} };
+        assert.strictEqual(isFirstTime(5, gameState), true);
+    });
+
+    it('should handle missing creatureNames property', () => {
+        const gameState = {};
+        assert.strictEqual(isFirstTime(0, gameState), true);
+    });
+
+    it('should return true for different creature IDs', () => {
+        const gameState = { creatureNames: { 0: 'Fluffy', 1: 'Spike' } };
+        assert.strictEqual(isFirstTime(2, gameState), true);
+    });
+});
+
+describe('collectPile', () => {
+    it('should award pile to winner', () => {
+        const gameState = { currentPile: [0, 1, 2, 3, 4] };
+        const players = {
+            'p1': { name: 'Alice', cardsWon: 10 },
+            'p2': { name: 'Bob', cardsWon: 5 }
+        };
+
+        const result = collectPile('p1', gameState, players);
+
+        assert.strictEqual(result['p1'].cardsWon, 15); // 10 + 5 pile cards
+        assert.strictEqual(result['p2'].cardsWon, 5); // unchanged
+        assert.deepStrictEqual(gameState.currentPile, []); // pile cleared
+    });
+
+    it('should initialize cardsWon if not present', () => {
+        const gameState = { currentPile: [0, 1, 2] };
+        const players = {
+            'p1': { name: 'Alice' } // no cardsWon field
+        };
+
+        const result = collectPile('p1', gameState, players);
+
+        assert.strictEqual(result['p1'].cardsWon, 3);
+        assert.deepStrictEqual(gameState.currentPile, []);
+    });
+
+    it('should handle empty pile', () => {
+        const gameState = { currentPile: [] };
+        const players = {
+            'p1': { name: 'Alice', cardsWon: 10 }
+        };
+
+        const result = collectPile('p1', gameState, players);
+
+        assert.strictEqual(result['p1'].cardsWon, 10); // unchanged
+        assert.deepStrictEqual(gameState.currentPile, []);
+    });
+
+    it('should handle missing pile (undefined)', () => {
+        const gameState = {};
+        const players = {
+            'p1': { name: 'Alice', cardsWon: 10 }
+        };
+
+        const result = collectPile('p1', gameState, players);
+
+        assert.strictEqual(result['p1'].cardsWon, 10); // unchanged (0 pile size)
+        assert.deepStrictEqual(gameState.currentPile, []);
+    });
+
+    it('should return unchanged players for invalid player ID', () => {
+        const gameState = { currentPile: [0, 1, 2] };
+        const players = {
+            'p1': { name: 'Alice', cardsWon: 10 }
+        };
+
+        const result = collectPile('p_invalid', gameState, players);
+
+        // Should return players unchanged
+        assert.deepStrictEqual(result, players);
+    });
+});
+
+describe('countVotes', () => {
+    it('should count votes correctly', () => {
+        const votes = {
+            'v1': 'p1', // voter 1 votes for player 1
+            'v2': 'p1', // voter 2 votes for player 1
+            'v3': 'p2'  // voter 3 votes for player 2
+        };
+        const claimants = ['p1', 'p2'];
+
+        const result = countVotes(votes, claimants);
+
+        assert.strictEqual(result.winnerId, 'p1');
+        assert.deepStrictEqual(result.voteCounts, { p1: 2, p2: 1 });
+        assert.strictEqual(result.isTie, false);
+        assert.deepStrictEqual(result.tiedPlayers, []);
+    });
+
+    it('should handle tie votes (random selection)', () => {
+        const votes = {
+            'v1': 'p1',
+            'v2': 'p2'
+        };
+        const claimants = ['p1', 'p2'];
+
+        const result = countVotes(votes, claimants);
+
+        // Winner should be one of the tied players
+        assert.ok(result.winnerId === 'p1' || result.winnerId === 'p2');
+        assert.deepStrictEqual(result.voteCounts, { p1: 1, p2: 1 });
+        assert.strictEqual(result.isTie, true);
+        assert.strictEqual(result.tiedPlayers.length, 2);
+        assert.ok(result.tiedPlayers.includes('p1'));
+        assert.ok(result.tiedPlayers.includes('p2'));
+    });
+
+    it('should handle no votes (all claimants at 0)', () => {
+        const votes = {};
+        const claimants = ['p1', 'p2', 'p3'];
+
+        const result = countVotes(votes, claimants);
+
+        // Should pick one randomly
+        assert.ok(['p1', 'p2', 'p3'].includes(result.winnerId));
+        assert.deepStrictEqual(result.voteCounts, { p1: 0, p2: 0, p3: 0 });
+        assert.strictEqual(result.isTie, true);
+    });
+
+    it('should ignore votes for non-claimants', () => {
+        const votes = {
+            'v1': 'p1',
+            'v2': 'p3', // p3 is not a claimant
+            'v3': 'p2'
+        };
+        const claimants = ['p1', 'p2'];
+
+        const result = countVotes(votes, claimants);
+
+        // p3 vote should be ignored
+        assert.strictEqual(result.voteCounts.p1, 1);
+        assert.strictEqual(result.voteCounts.p2, 1);
+        assert.ok(!result.voteCounts.hasOwnProperty('p3'));
+    });
+
+    it('should handle single claimant', () => {
+        const votes = {
+            'v1': 'p1',
+            'v2': 'p1'
+        };
+        const claimants = ['p1'];
+
+        const result = countVotes(votes, claimants);
+
+        assert.strictEqual(result.winnerId, 'p1');
+        assert.deepStrictEqual(result.voteCounts, { p1: 2 });
+        assert.strictEqual(result.isTie, false);
+    });
+
+    it('should handle empty claimants array', () => {
+        const votes = { 'v1': 'p1' };
+        const claimants = [];
+
+        const result = countVotes(votes, claimants);
+
+        assert.strictEqual(result.winnerId, null);
+        assert.deepStrictEqual(result.voteCounts, {});
+        assert.strictEqual(result.isTie, false);
+        assert.deepStrictEqual(result.tiedPlayers, []);
+    });
+
+    it('should handle three-way tie', () => {
+        const votes = {
+            'v1': 'p1',
+            'v2': 'p2',
+            'v3': 'p3'
+        };
+        const claimants = ['p1', 'p2', 'p3'];
+
+        const result = countVotes(votes, claimants);
+
+        assert.ok(['p1', 'p2', 'p3'].includes(result.winnerId));
+        assert.deepStrictEqual(result.voteCounts, { p1: 1, p2: 1, p3: 1 });
+        assert.strictEqual(result.isTie, true);
+        assert.strictEqual(result.tiedPlayers.length, 3);
     });
 });
