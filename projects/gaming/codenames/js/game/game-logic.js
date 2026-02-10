@@ -68,7 +68,7 @@ export function validateClue(word, number, boardWords) {
   if (boardWords.map(w => w.toUpperCase()).includes(trimmed)) {
     return { valid: false, error: 'Clue cannot be a word on the board' };
   }
-  if (typeof number !== 'number' || number < 0 || number > 9) {
+  if (typeof number !== 'number' || !Number.isInteger(number) || number < 0 || number > 9) {
     return { valid: false, error: 'Number must be between 0 and 9' };
   }
   return { valid: true, error: null };
