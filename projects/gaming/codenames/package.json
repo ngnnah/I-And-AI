@@ -1,0 +1,9 @@
+{
+  "name": "codenames",
+  "version": "1.0.0",
+  "description": "Multiplayer Codenames board game",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/**/*.test.js"
+  }
+}

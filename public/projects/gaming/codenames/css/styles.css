@@ -1,0 +1,468 @@
+/* ===== Variables ===== */
+:root {
+  --red: #d32f2f;
+  --red-light: #ffcdd2;
+  --red-bg: rgba(211, 47, 47, 0.12);
+  --blue: #1565c0;
+  --blue-light: #bbdefb;
+  --blue-bg: rgba(21, 101, 192, 0.12);
+  --neutral: #8d6e63;
+  --neutral-light: #d7ccc8;
+  --assassin: #212121;
+  --assassin-light: #616161;
+  --bg: #1a1a2e;
+  --bg-card: #2a2a4a;
+  --bg-surface: rgba(255, 255, 255, 0.06);
+  --text: #e4e4e4;
+  --text-muted: #888;
+  --border: rgba(255, 255, 255, 0.12);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ===== Utility ===== */
+.hidden { display: none !important; }
+
+/* ===== Buttons ===== */
+.btn {
+  border: none;
+  border-radius: var(--radius);
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+.btn:hover { opacity: 0.88; }
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-secondary { background: var(--bg-surface); color: var(--text); border: 1px solid var(--border); }
+.btn-link { background: none; color: var(--text-muted); padding: 4px 8px; text-decoration: underline; }
+.btn-sm { font-size: 0.85rem; padding: 6px 12px; }
+.btn-wide { width: 100%; max-width: 360px; }
+.btn-outline-red { background: none; border: 1px dashed var(--red); color: var(--red-light); }
+.btn-outline-blue { background: none; border: 1px dashed var(--blue); color: var(--blue-light); }
+
+.link { color: var(--blue-light); text-decoration: underline; cursor: pointer; font-size: 0.85rem; }
+
+.error-message { color: #ef5350; font-size: 0.85rem; margin-top: 6px; }
+
+.hint { color: var(--text-muted); font-size: 0.8rem; margin-top: 12px; }
+
+/* ===== Screen: Player Setup ===== */
+.screen { min-height: 100vh; }
+
+.setup-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  gap: 16px;
+}
+
+.game-title {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 6px;
+  background: linear-gradient(135deg, var(--red) 0%, var(--blue) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle { color: var(--text-muted); font-size: 1.1rem; }
+
+.input-group { width: 100%; max-width: 320px; }
+
+input[type="text"], select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  color: var(--text);
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+input[type="text"]:focus, select:focus { border-color: var(--blue); }
+
+/* ===== Screen: Lobby ===== */
+.lobby-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+.lobby-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.game-title-sm {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 3px;
+  background: linear-gradient(135deg, var(--red) 0%, var(--blue) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.lobby-section {
+  margin-top: 28px;
+}
+
+.lobby-section h2 {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.join-row {
+  display: flex;
+  gap: 8px;
+}
+
+.join-row input { flex: 1; text-transform: uppercase; }
+
+.game-list { display: flex; flex-direction: column; gap: 8px; }
+
+.game-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+}
+
+.game-list-item .game-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.game-list-item .game-name { font-weight: 600; }
+.game-list-item .game-meta { color: var(--text-muted); font-size: 0.8rem; }
+
+.empty-message { color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 20px; }
+
+/* ===== Screen: Game Room ===== */
+.game-room-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px 12px;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.game-header-left { display: flex; align-items: center; gap: 12px; }
+.game-name { font-weight: 700; font-size: 1.1rem; }
+.game-code {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+}
+.game-code:hover { border-color: var(--blue); }
+
+/* -- Phase: Setup -- */
+.phase-instruction { color: var(--text-muted); text-align: center; margin-bottom: 16px; }
+
+.teams-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.team-panel {
+  background: var(--bg-surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+
+.team-panel.team-red { border-color: rgba(211, 47, 47, 0.4); }
+.team-panel.team-blue { border-color: rgba(21, 101, 192, 0.4); }
+
+.team-title { font-size: 1rem; margin-bottom: 12px; text-align: center; }
+.team-title.red { color: var(--red-light); }
+.team-title.blue { color: var(--blue-light); }
+
+.role-section { margin-bottom: 12px; }
+.role-section label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.role-slot {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.role-slot:hover { border-color: var(--text-muted); }
+.role-slot.filled { border-style: solid; cursor: default; font-weight: 600; }
+.role-slot.filled.is-me { border-color: #66bb6a; background: rgba(102, 187, 106, 0.1); }
+.slot-empty { color: var(--text-muted); font-size: 0.85rem; }
+
+.operatives-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.operative-item {
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+.operative-item.is-me { border-left: 3px solid #66bb6a; }
+
+/* -- Phase: Playing -- */
+.score-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  background: var(--bg-surface);
+  border-radius: var(--radius);
+}
+
+.turn-indicator {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.turn-indicator.red { color: var(--red-light); }
+.turn-indicator.blue { color: var(--blue-light); }
+
+.scores { display: flex; gap: 16px; font-size: 0.9rem; }
+.score.red { color: var(--red-light); }
+.score.blue { color: var(--blue-light); }
+
+/* -- Board -- */
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.card {
+  aspect-ratio: 1.4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4px;
+  border-radius: var(--radius);
+  font-size: 0.75rem;
+  font-weight: 600;
+  word-break: break-word;
+  line-height: 1.2;
+  cursor: default;
+  transition: transform 0.1s, box-shadow 0.15s;
+  border: 2px solid transparent;
+  user-select: none;
+}
+
+/* Unrevealed card */
+.card.unrevealed {
+  background: #3a3a5c;
+  color: var(--text);
+  border-color: var(--border);
+}
+.card.unrevealed.clickable {
+  cursor: pointer;
+}
+.card.unrevealed.clickable:hover {
+  transform: scale(1.04);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  border-color: var(--text-muted);
+}
+
+/* Revealed cards */
+.card.revealed-red { background: var(--red); color: #fff; border-color: var(--red); }
+.card.revealed-blue { background: var(--blue); color: #fff; border-color: var(--blue); }
+.card.revealed-neutral { background: var(--neutral); color: #fff; border-color: var(--neutral); }
+.card.revealed-assassin { background: var(--assassin); color: #fff; border-color: #444; }
+
+/* Spymaster overlay — colored border on unrevealed cards */
+.card.spy-red { border-color: var(--red); background: rgba(211, 47, 47, 0.15); }
+.card.spy-blue { border-color: var(--blue); background: rgba(21, 101, 192, 0.15); }
+.card.spy-neutral { border-color: var(--neutral); background: rgba(141, 110, 99, 0.12); }
+.card.spy-assassin { border-color: var(--assassin-light); background: rgba(33, 33, 33, 0.3); color: #ef5350; }
+
+/* Revealed + spymaster dimmed */
+.card.revealed-dimmed { opacity: 0.5; }
+
+/* Finished board — all revealed */
+.board-finished .card { cursor: default; }
+
+/* -- Clue Area -- */
+.clue-area {
+  background: var(--bg-surface);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.clue-input-section { width: 100%; }
+
+.clue-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.clue-input-row input { flex: 1; text-transform: uppercase; }
+.clue-input-row select { width: 60px; text-align: center; }
+
+.current-clue-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.1rem;
+}
+.clue-label { color: var(--text-muted); font-size: 0.85rem; }
+.clue-word { font-weight: 800; letter-spacing: 2px; font-size: 1.3rem; }
+.clue-number {
+  background: var(--bg-card);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.guesses-remaining { font-size: 0.8rem; color: var(--text-muted); }
+
+.status-message {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* -- Clue Log -- */
+.clue-log-section {
+  margin-top: 8px;
+}
+.clue-log-section h3 {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.clue-log {
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.log-entry {
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  font-size: 0.85rem;
+  border-left: 3px solid var(--border);
+}
+.log-entry.log-red { border-left-color: var(--red); }
+.log-entry.log-blue { border-left-color: var(--blue); }
+
+.log-clue { font-weight: 600; }
+.log-guesses { margin-top: 4px; color: var(--text-muted); font-size: 0.8rem; }
+.log-correct { color: #66bb6a; }
+.log-wrong { color: #ef5350; }
+.log-passed { color: var(--text-muted); font-style: italic; }
+
+/* -- Phase: Finished -- */
+.winner-banner {
+  text-align: center;
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+}
+.winner-banner.red-wins { background: var(--red-bg); border: 2px solid var(--red); }
+.winner-banner.blue-wins { background: var(--blue-bg); border: 2px solid var(--blue); }
+.winner-banner h2 { font-size: 1.6rem; margin-bottom: 4px; }
+.winner-banner .red-wins-text { color: var(--red-light); }
+.winner-banner .blue-wins-text { color: var(--blue-light); }
+
+.finished-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 520px) {
+  .game-title { font-size: 2rem; letter-spacing: 4px; }
+  .teams-container { grid-template-columns: 1fr; }
+  .card { font-size: 0.6rem; aspect-ratio: 1.2; }
+  .clue-input-row { flex-wrap: wrap; }
+  .clue-input-row input { min-width: 0; }
+  .lobby-header { flex-direction: column; gap: 8px; align-items: flex-start; }
+}
