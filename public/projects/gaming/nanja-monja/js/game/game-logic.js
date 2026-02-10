@@ -1,5 +1,5 @@
 // Core game logic for Nanja Monja
-import { CREATURES } from '../data/creatures.js';
+import { CREATURES } from '../data/card-sets.js';
 
 /**
  * Create a deck of cards (N creatures × 5 copies each)
