@@ -340,12 +340,21 @@ export async function checkAndHandleGameEnd(gameId, forceEnd = false) {
 
   const game = snapshot.val();
 
+  console.log('🏁 Check Game End:', {
+    forceEnd,
+    currentIndex: game.deck?.currentIndex,
+    deckLength: game.deck?.cards?.length,
+    isGameOver: isGameOver(game.deck)
+  });
+
   // Force end or check if deck is exhausted
   if (forceEnd || isGameOver(game.deck)) {
+    console.log('🎮 Game ending now!');
     await handleGameEnd(gameId);
     return true;
   }
 
+  console.log('⏩ Game continues');
   return false;
 }
 

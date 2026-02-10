@@ -174,8 +174,8 @@ function updateGameHeader(game) {
     renderPlayerList(game.players);
 }
 
-// Track previous card for animation
-let previousCard = null;
+// Track previous deck index for animation (detects new card flip)
+let previousDeckIndex = -1;
 
 /**
  * Update card display with flip animation
@@ -188,22 +188,24 @@ function updateCardDisplay(game) {
         currentCardImg.classList.add('hidden');
         cardPlaceholder.classList.remove('hidden');
         cardPlaceholder.textContent = game.status === 'waiting' ? 'Waiting to start...' : 'Ready to flip...';
-        previousCard = null;
+        previousDeckIndex = -1;
     } else {
         const cardSetId = game.cardSetId || 'creatures';
         const imgPath = getCardImage(cardSetId, currentCard);
+        const currentDeckIndex = game.deck?.currentIndex ?? -1;
 
-        // Check if card changed (for animation)
-        const cardChanged = previousCard !== null && previousCard !== currentCard;
+        // Check if a new card was flipped (deck index changed)
+        const newCardFlipped = previousDeckIndex !== -1 && currentDeckIndex !== previousDeckIndex;
 
         console.log('🎴 Card Display:', {
-            previousCard,
+            previousDeckIndex,
+            currentDeckIndex,
             currentCard,
-            cardChanged,
+            newCardFlipped,
             isHidden: currentCardImg.classList.contains('hidden')
         });
 
-        if (cardChanged && !currentCardImg.classList.contains('hidden')) {
+        if (newCardFlipped && !currentCardImg.classList.contains('hidden')) {
             // Animate card flip: fade out old card, then fade in new card
             console.log('✨ Starting card flip animation');
             currentCardImg.classList.add('flipping-out');
@@ -229,7 +231,7 @@ function updateCardDisplay(game) {
             cardPlaceholder.classList.add('hidden');
         }
 
-        previousCard = currentCard;
+        previousDeckIndex = currentDeckIndex;
     }
 }
 
