@@ -79,6 +79,25 @@ export const CARD_SETS = {
       { id: 10, name: 'Sun', imgPath: 'assets/nature/sun.png' },
       { id: 11, name: 'Tree', imgPath: 'assets/nature/tree.png' },
     ]
+  },
+  summer: {
+    id: 'summer',
+    name: 'Summer',
+    description: 'Fun summer beach and vacation vibes',
+    cards: [
+      { id: 0, name: 'Beach Ball', imgPath: 'assets/summer/beach-ball.png' },
+      { id: 1, name: 'Coconut Drink', imgPath: 'assets/summer/coconut-drink.png' },
+      { id: 2, name: 'Crab', imgPath: 'assets/summer/crab.png' },
+      { id: 3, name: 'Flip Flops', imgPath: 'assets/summer/flip-flops.png' },
+      { id: 4, name: 'Ice Cream Cone', imgPath: 'assets/summer/ice-cream-cone.png' },
+      { id: 5, name: 'Photo Camera', imgPath: 'assets/summer/photo-camera.png' },
+      { id: 6, name: 'Rubber Ring Unicorn', imgPath: 'assets/summer/rubber-ring-unicorn.png' },
+      { id: 7, name: 'Rubber Ring', imgPath: 'assets/summer/rubber-ring.png' },
+      { id: 8, name: 'Summer', imgPath: 'assets/summer/summer.png' },
+      { id: 9, name: 'Sun', imgPath: 'assets/summer/sun.png' },
+      { id: 10, name: 'Turtle', imgPath: 'assets/summer/turtle.png' },
+      { id: 11, name: 'Watermelon', imgPath: 'assets/summer/watermelon.png' },
+    ]
   }
 };
 
