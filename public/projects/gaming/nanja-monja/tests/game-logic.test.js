@@ -15,7 +15,8 @@ import {
     calculateWinner,
     isFirstTime,
     collectPile,
-    countVotes
+    countVotes,
+    canPlayerFlipCard
 } from '../js/game/game-logic.js';
 
 describe('validatePlayerName', () => {
@@ -424,5 +425,164 @@ describe('countVotes', () => {
         assert.deepStrictEqual(result.voteCounts, { p1: 1, p2: 1, p3: 1 });
         assert.strictEqual(result.isTie, true);
         assert.strictEqual(result.tiedPlayers.length, 3);
+    });
+});
+
+describe('canPlayerFlipCard', () => {
+    it('during naming phase, only current turn player can flip', () => {
+        const gameState = {
+            creatureNames: { 0: 'Fluffy', 1: 'Spike' }, // 2 out of 12 named
+            currentTurnPlayerId: 'p2',
+            roundType: null // Ready to flip
+        };
+        const hostId = 'p1';
+        const setSize = 12;
+
+        // Current turn player can flip
+        assert.strictEqual(canPlayerFlipCard('p2', gameState, hostId, setSize), true);
+
+        // Host cannot flip (not their turn)
+        assert.strictEqual(canPlayerFlipCard('p1', gameState, hostId, setSize), false);
+
+        // Other players cannot flip
+        assert.strictEqual(canPlayerFlipCard('p3', gameState, hostId, setSize), false);
+    });
+
+    it('after all creatures named, only host can flip', () => {
+        const gameState = {
+            creatureNames: {
+                0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F',
+                6: 'G', 7: 'H', 8: 'I', 9: 'J', 10: 'K', 11: 'L'
+            }, // All 12 named
+            currentTurnPlayerId: 'p2', // Turn should be ignored now
+            roundType: null // Ready to flip
+        };
+        const hostId = 'p1';
+        const setSize = 12;
+
+        // Host can flip
+        assert.strictEqual(canPlayerFlipCard('p1', gameState, hostId, setSize), true);
+
+        // Current turn player cannot flip (turn-based flipping ends)
+        assert.strictEqual(canPlayerFlipCard('p2', gameState, hostId, setSize), false);
+
+        // Other players cannot flip
+        assert.strictEqual(canPlayerFlipCard('p3', gameState, hostId, setSize), false);
+    });
+
+    it('no one can flip during naming round', () => {
+        const gameState = {
+            creatureNames: { 0: 'Fluffy' },
+            currentTurnPlayerId: 'p2',
+            currentCard: 1,
+            roundType: 'naming' // Currently in naming round
+        };
+        const hostId = 'p1';
+        const setSize = 12;
+
+        // No one can flip during a round
+        assert.strictEqual(canPlayerFlipCard('p1', gameState, hostId, setSize), false);
+        assert.strictEqual(canPlayerFlipCard('p2', gameState, hostId, setSize), false);
+        assert.strictEqual(canPlayerFlipCard('p3', gameState, hostId, setSize), false);
+    });
+
+    it('no one can flip during shouting round', () => {
+        const gameState = {
+            creatureNames: {
+                0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F',
+                6: 'G', 7: 'H', 8: 'I', 9: 'J', 10: 'K', 11: 'L'
+            },
+            currentTurnPlayerId: 'p2',
+            currentCard: 5,
+            roundType: 'shouting' // Currently in shouting round
+        };
+        const hostId = 'p1';
+        const setSize = 12;
+
+        // No one can flip during a round
+        assert.strictEqual(canPlayerFlipCard('p1', gameState, hostId, setSize), false);
+        assert.strictEqual(canPlayerFlipCard('p2', gameState, hostId, setSize), false);
+    });
+
+    it('handles empty creatureNames object', () => {
+        const gameState = {
+            creatureNames: {}, // No creatures named yet
+            currentTurnPlayerId: 'p1',
+            roundType: null
+        };
+        const hostId = 'p1';
+        const setSize = 12;
+
+        // First player's turn
+        assert.strictEqual(canPlayerFlipCard('p1', gameState, hostId, setSize), true);
+        assert.strictEqual(canPlayerFlipCard('p2', gameState, hostId, setSize), false);
+    });
+
+    it('handles different card set sizes', () => {
+        // Test with a hypothetical 6-card set
+        const gameState = {
+            creatureNames: { 0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F' },
+            currentTurnPlayerId: 'p2',
+            roundType: null
+        };
+        const hostId = 'p1';
+        const setSize = 6; // Different set size
+
+        // All 6 creatures named - only host can flip
+        assert.strictEqual(canPlayerFlipCard('p1', gameState, hostId, setSize), true);
+        assert.strictEqual(canPlayerFlipCard('p2', gameState, hostId, setSize), false);
+    });
+
+    it('returns false for invalid inputs', () => {
+        const validGameState = {
+            creatureNames: {},
+            currentTurnPlayerId: 'p1',
+            roundType: null
+        };
+
+        // Missing playerId
+        assert.strictEqual(canPlayerFlipCard(null, validGameState, 'p1', 12), false);
+
+        // Missing gameState
+        assert.strictEqual(canPlayerFlipCard('p1', null, 'p1', 12), false);
+
+        // Missing hostId
+        assert.strictEqual(canPlayerFlipCard('p1', validGameState, null, 12), false);
+
+        // Missing setSize
+        assert.strictEqual(canPlayerFlipCard('p1', validGameState, 'p1', null), false);
+    });
+
+    it('transition from naming to shouting phase', () => {
+        const hostId = 'p1';
+        const setSize = 12;
+
+        // Naming phase: 11 out of 12 creatures named
+        const namingPhaseState = {
+            creatureNames: {
+                0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F',
+                6: 'G', 7: 'H', 8: 'I', 9: 'J', 10: 'K'
+            },
+            currentTurnPlayerId: 'p3',
+            roundType: null
+        };
+
+        // In naming phase, turn player can flip
+        assert.strictEqual(canPlayerFlipCard('p3', namingPhaseState, hostId, setSize), true);
+        assert.strictEqual(canPlayerFlipCard('p1', namingPhaseState, hostId, setSize), false);
+
+        // Shouting phase: all 12 creatures named
+        const shoutingPhaseState = {
+            creatureNames: {
+                0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F',
+                6: 'G', 7: 'H', 8: 'I', 9: 'J', 10: 'K', 11: 'L'
+            },
+            currentTurnPlayerId: 'p3', // Turn should now be ignored
+            roundType: null
+        };
+
+        // In shouting phase, only host can flip
+        assert.strictEqual(canPlayerFlipCard('p1', shoutingPhaseState, hostId, setSize), true);
+        assert.strictEqual(canPlayerFlipCard('p3', shoutingPhaseState, hostId, setSize), false);
     });
 });

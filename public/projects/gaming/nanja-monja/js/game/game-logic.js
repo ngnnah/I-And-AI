@@ -227,3 +227,37 @@ export function validateCreatureName(name) {
 
   return { valid: true, error: null };
 }
+
+/**
+ * Determine if a player can flip the next card
+ * During naming phase (not all creatures named): only current turn player can flip
+ * After all creatures named (shouting phase): only host can flip
+ *
+ * @param {string} playerId - Player ID to check
+ * @param {object} gameState - Current game state
+ * @param {string} hostId - Host player ID
+ * @param {number} setSize - Number of creatures in the card set (e.g., 12)
+ * @returns {boolean} True if player can flip
+ */
+export function canPlayerFlipCard(playerId, gameState, hostId, setSize) {
+  // Safety checks
+  if (!playerId || !gameState || !hostId || !setSize) {
+    return false;
+  }
+
+  // If currently in a round (naming or shouting), no one can flip
+  if (gameState.roundType) {
+    return false;
+  }
+
+  const creatureNames = gameState.creatureNames || {};
+  const allCreaturesNamed = Object.keys(creatureNames).length === setSize;
+
+  if (allCreaturesNamed) {
+    // All creatures named - only host can flip (shouting phase)
+    return playerId === hostId;
+  } else {
+    // Still naming creatures - turn-based flipping
+    return playerId === gameState.currentTurnPlayerId;
+  }
+}
