@@ -37,6 +37,8 @@ const redTotalEl = document.getElementById('red-total');
 const blueScoreEl = document.getElementById('blue-score');
 const blueTotalEl = document.getElementById('blue-total');
 const boardEl = document.getElementById('board');
+const playerRoster = document.getElementById('player-roster');
+const boardLegend = document.getElementById('board-legend');
 const clueInputSection = document.getElementById('clue-input-section');
 const clueWordInput = document.getElementById('clue-word-input');
 const clueNumberSelect = document.getElementById('clue-number-select');
@@ -224,6 +226,12 @@ function renderPlayingPhase(data) {
   blueScoreEl.textContent = gs.blueRevealed;
   blueTotalEl.textContent = gs.blueTotal;
 
+  // Legend (spymaster only)
+  boardLegend.classList.toggle('hidden', !isLocalPlayerSpymaster());
+
+  // Player roster
+  renderPlayerRoster(data);
+
   // Board
   renderBoard(data, boardEl, false);
 
@@ -232,6 +240,42 @@ function renderPlayingPhase(data) {
 
   // Clue log
   renderClueLog(data.clueLog, clueLogEl);
+}
+
+function renderPlayerRoster(data) {
+  const players = data.players || {};
+  const gs = data.gameState;
+  const localId = getLocalPlayer().id;
+  const activeTurn = gs.currentTurn;
+
+  const buildTeamHtml = (team) => {
+    const teamPlayers = Object.entries(players)
+      .filter(([, p]) => p.isActive && p.team === team)
+      .sort((a, b) => {
+        // Spymaster first, then operatives
+        if (a[1].role === 'spymaster') return -1;
+        if (b[1].role === 'spymaster') return 1;
+        return 0;
+      });
+
+    if (teamPlayers.length === 0) return '';
+
+    const playersHtml = teamPlayers.map(([id, p]) => {
+      const isYou = id === localId;
+      const isActive = team === activeTurn;
+      const classes = ['roster-player'];
+      if (isActive) classes.push('is-active-turn');
+      if (isYou) classes.push('is-you');
+      const roleLabel = p.role === 'spymaster' ? 'SPY' : 'OP';
+      const roleClass = p.role === 'spymaster' ? 'spymaster' : 'operative';
+      const name = isYou ? `${p.name} (you)` : p.name;
+      return `<span class="${classes.join(' ')}"><span class="roster-role ${roleClass}">${roleLabel}</span> ${name}</span>`;
+    }).join('');
+
+    return `<div class="roster-team ${team}">${playersHtml}</div>`;
+  };
+
+  playerRoster.innerHTML = buildTeamHtml('red') + buildTeamHtml('blue');
 }
 
 function renderBoard(data, container, isFinished) {

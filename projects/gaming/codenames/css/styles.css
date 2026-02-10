@@ -294,6 +294,85 @@ input[type="text"]:focus, select:focus { border-color: var(--blue); }
 .score.red { color: var(--red-light); }
 .score.blue { color: var(--blue-light); }
 
+/* -- Player Roster -- */
+.player-roster {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 8px;
+  font-size: 0.75rem;
+}
+.roster-team {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.roster-team.red { color: var(--red-light); }
+.roster-team.blue { color: var(--blue-light); }
+.roster-label {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.5px;
+  opacity: 0.7;
+}
+.roster-players {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.roster-player {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.roster-role {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 1px 4px;
+  border-radius: 3px;
+  letter-spacing: 0.3px;
+}
+.roster-role.spymaster {
+  background: rgba(255, 255, 255, 0.15);
+}
+.roster-role.operative {
+  opacity: 0.6;
+}
+.roster-player.is-active-turn {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.roster-player.is-you {
+  font-weight: 700;
+}
+
+/* -- Legend (spymaster only) -- */
+.board-legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 8px;
+  font-size: 0.75rem;
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.legend-swatch.swatch-red { background: rgba(211, 47, 47, 0.5); border-color: var(--red); }
+.legend-swatch.swatch-blue { background: rgba(21, 101, 192, 0.5); border-color: var(--blue); }
+.legend-swatch.swatch-neutral { background: rgba(161, 136, 127, 0.4); border-color: #a1887f; }
+.legend-swatch.swatch-assassin { background: #1a1a1a; border-color: #ef5350; }
+
 /* -- Board -- */
 .board {
   display: grid;
@@ -341,14 +420,19 @@ input[type="text"]:focus, select:focus { border-color: var(--blue); }
 .card.revealed-neutral { background: var(--neutral); color: #fff; border-color: var(--neutral); }
 .card.revealed-assassin { background: var(--assassin); color: #fff; border-color: #444; }
 
-/* Spymaster overlay — colored border on unrevealed cards */
-.card.spy-red { border-color: var(--red); background: rgba(211, 47, 47, 0.15); }
-.card.spy-blue { border-color: var(--blue); background: rgba(21, 101, 192, 0.15); }
-.card.spy-neutral { border-color: var(--neutral); background: rgba(141, 110, 99, 0.12); }
-.card.spy-assassin { border-color: var(--assassin-light); background: rgba(33, 33, 33, 0.3); color: #ef5350; }
+/* Spymaster overlay — strong colored backgrounds on unrevealed cards */
+.card.spy-red { border-color: var(--red); background: rgba(211, 47, 47, 0.35); color: #ffcdd2; }
+.card.spy-blue { border-color: var(--blue); background: rgba(21, 101, 192, 0.35); color: #bbdefb; }
+.card.spy-neutral { border-color: #a1887f; background: rgba(161, 136, 127, 0.25); color: #d7ccc8; }
+.card.spy-assassin {
+  border-color: #ef5350;
+  background: #1a1a1a;
+  color: #ef5350;
+  box-shadow: inset 0 0 12px rgba(239, 83, 80, 0.25);
+}
 
 /* Revealed + spymaster dimmed */
-.card.revealed-dimmed { opacity: 0.5; }
+.card.revealed-dimmed { opacity: 0.45; }
 
 /* Finished board — all revealed */
 .board-finished .card { cursor: default; }
