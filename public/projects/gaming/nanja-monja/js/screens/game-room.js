@@ -200,11 +200,12 @@ function updateCardDisplay(game) {
  */
 function updatePileInfo(game) {
     const pileSize = game.gameState?.currentPile?.length || 0;
-    const deckIndex = game.deck?.currentIndex || 0;
+    const deckIndex = game.deck?.currentIndex ?? -1; // Start at -1, so no cards flipped = -1
     const deckSize = game.deck?.cards?.length || 0;
 
     pileCountSpan.textContent = `Pile: ${pileSize} cards`;
-    deckProgressSpan.textContent = `Deck: ${deckIndex}/${deckSize}`;
+    // currentIndex is the index of last flipped card, so add 1 to show count
+    deckProgressSpan.textContent = `Deck: ${deckIndex + 1}/${deckSize}`;
 }
 
 /**
@@ -314,7 +315,7 @@ function updateActionButtons(game) {
             }
 
             const creatureName = game.gameState.creatureNames[game.gameState.currentCard];
-            shoutBtn.textContent = `I shouted "${creatureName}"!`;
+            shoutBtn.textContent = "I shouted!";
             shoutBtn.disabled = false; // Re-enable button for new round
             shoutBtn.classList.remove('hidden');
 
@@ -333,7 +334,10 @@ function updateActionButtons(game) {
  */
 function checkAcknowledgmentStatus(game) {
     const acknowledgements = game.gameState?.nameAcknowledgements || {};
-    const activePlayers = Object.keys(game.players).filter(id => game.players[id].isActive);
+    // Sort player IDs by joinedAt timestamp to ensure consistent ordering
+    const activePlayers = Object.keys(game.players)
+        .filter(id => game.players[id].isActive)
+        .sort((a, b) => game.players[a].joinedAt - game.players[b].joinedAt);
     const acknowledgedPlayers = Object.keys(acknowledgements).filter(id => acknowledgements[id]);
 
     const hasAcknowledged = acknowledgements[localPlayer.id] === true;
@@ -637,9 +641,10 @@ async function handleSubmitName() {
         const creatureId = currentGame.data.gameState.currentCard;
 
         // Prepare acknowledgments (namer auto-acknowledges)
-        const activePlayers = Object.keys(currentGame.data.players).filter(
-            id => currentGame.data.players[id].isActive
-        );
+        // Sort player IDs by joinedAt timestamp to ensure consistent ordering
+        const activePlayers = Object.keys(currentGame.data.players)
+            .filter(id => currentGame.data.players[id].isActive)
+            .sort((a, b) => currentGame.data.players[a].joinedAt - currentGame.data.players[b].joinedAt);
         const ackObj = {};
         activePlayers.forEach(id => {
             // Namer auto-acknowledges (they already know the name)
