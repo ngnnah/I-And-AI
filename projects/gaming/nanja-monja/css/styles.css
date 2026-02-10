@@ -887,10 +887,13 @@ kbd {
 /* Game Settings */
 .game-settings {
     margin-bottom: 1.5rem;
+    margin-left: auto;
+    margin-right: auto;
     padding: 16px 20px;
     background-color: var(--card-bg);
     border-radius: 12px;
     box-shadow: var(--shadow);
+    max-width: 500px;
 }
 
 .game-settings-title {
