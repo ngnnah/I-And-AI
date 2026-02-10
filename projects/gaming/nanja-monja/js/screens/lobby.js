@@ -11,8 +11,7 @@ import { getAllCardSets } from '../data/card-sets.js';
 // DOM elements
 const playerNameDisplay = document.getElementById('lobby-player-name');
 const changeNameBtn = document.getElementById('change-name-btn');
-const cardSetSelect = document.getElementById('card-set-select');
-const setDescription = document.getElementById('set-description');
+const cardSetGallery = document.getElementById('card-set-gallery');
 const createGameBtn = document.getElementById('create-game-btn');
 const gameListContainer = document.getElementById('game-list');
 const historyContainer = document.getElementById('history-list');
@@ -23,6 +22,9 @@ let unsubscribeGames = null;
 
 // History state
 let showAllHistory = false;
+
+// Selected card set
+let selectedCardSetId = 'creatures';
 
 /**
  * Render the game list
@@ -147,33 +149,61 @@ function createGameItem(gameId, game, isOngoing = false) {
 }
 
 /**
- * Populate card set selector with available sets
+ * Populate card set selector with tile gallery
  */
 function populateCardSetSelector() {
     const cardSets = getAllCardSets();
 
-    cardSetSelect.innerHTML = '';
-    cardSets.forEach(set => {
-        const option = document.createElement('option');
-        option.value = set.id;
-        option.textContent = set.name;
-        cardSetSelect.appendChild(option);
-    });
+    cardSetGallery.innerHTML = '';
 
-    // Show description of the first set
-    updateSetDescription();
+    cardSets.forEach(set => {
+        const tile = document.createElement('div');
+        tile.className = 'card-set-tile';
+        tile.dataset.setId = set.id;
+
+        // Mark first set as selected by default
+        if (set.id === selectedCardSetId) {
+            tile.classList.add('selected');
+        }
+
+        // Create preview images (show first 4 cards)
+        const previewHTML = set.cards.slice(0, 4).map(card =>
+            `<img src="${card.imgPath}" alt="${card.name}" class="card-set-preview-img">`
+        ).join('');
+
+        tile.innerHTML = `
+            <div class="card-set-tile-checkmark">✓</div>
+            <div class="card-set-tile-header">
+                <span class="card-set-tile-name">${set.name}</span>
+                <span class="card-set-tile-count">${set.cards.length} cards</span>
+            </div>
+            <div class="card-set-tile-description">${set.description}</div>
+            <div class="card-set-tile-preview">
+                ${previewHTML}
+            </div>
+        `;
+
+        // Add click handler
+        tile.addEventListener('click', () => handleCardSetSelection(set.id));
+
+        cardSetGallery.appendChild(tile);
+    });
 }
 
 /**
- * Update set description when selection changes
+ * Handle card set selection
  */
-function updateSetDescription() {
-    const selectedSetId = cardSetSelect.value;
-    const cardSets = getAllCardSets();
-    const selectedSet = cardSets.find(set => set.id === selectedSetId);
+function handleCardSetSelection(setId) {
+    selectedCardSetId = setId;
 
-    if (selectedSet) {
-        setDescription.textContent = selectedSet.description;
+    // Update UI - remove selected class from all tiles
+    const allTiles = cardSetGallery.querySelectorAll('.card-set-tile');
+    allTiles.forEach(tile => tile.classList.remove('selected'));
+
+    // Add selected class to clicked tile
+    const selectedTile = cardSetGallery.querySelector(`[data-set-id="${setId}"]`);
+    if (selectedTile) {
+        selectedTile.classList.add('selected');
     }
 }
 
@@ -185,11 +215,10 @@ async function handleCreateGame() {
         createGameBtn.disabled = true;
         createGameBtn.textContent = 'Creating...';
 
-        const selectedSetId = cardSetSelect.value;
-        const gameId = await createGame(localPlayer.name, localPlayer.id, selectedSetId);
+        const gameId = await createGame(localPlayer.name, localPlayer.id, selectedCardSetId);
         setCurrentGameId(gameId);
 
-        console.log(`Game created: ${gameId} with card set: ${selectedSetId}`);
+        console.log(`Game created: ${gameId} with card set: ${selectedCardSetId}`);
         navigateTo('game-room');
     } catch (error) {
         console.error('Failed to create game:', error);
@@ -349,7 +378,6 @@ function init() {
     createGameBtn.addEventListener('click', handleCreateGame);
     changeNameBtn.addEventListener('click', handleChangeName);
     toggleHistoryBtn.addEventListener('click', handleToggleHistory);
-    cardSetSelect.addEventListener('change', updateSetDescription);
 
     // Listen to screen changes
     window.addEventListener('screen-changed', (e) => {

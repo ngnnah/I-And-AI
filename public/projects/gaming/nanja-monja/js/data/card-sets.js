@@ -9,18 +9,23 @@ export const CARD_SETS = {
     name: 'Creatures',
     description: 'Strange and wonderful creatures',
     cards: [
-      { id: 0, name: 'Cat Box', imgPath: 'assets/creatures/cat-box.png' },
-      { id: 1, name: 'Cat Dino', imgPath: 'assets/creatures/cat-dino.png' },
-      { id: 2, name: 'Chameleon', imgPath: 'assets/creatures/chameleon.png' },
-      { id: 3, name: 'Cloud', imgPath: 'assets/creatures/cloud.png' },
-      { id: 4, name: 'Dinosaur', imgPath: 'assets/creatures/dinosaur.png' },
-      { id: 5, name: 'Frog', imgPath: 'assets/creatures/frog.png' },
-      { id: 6, name: 'Hedgehog', imgPath: 'assets/creatures/hedgehog.png' },
-      { id: 7, name: 'Ice Cream', imgPath: 'assets/creatures/ice-cream.png' },
-      { id: 8, name: 'Panda', imgPath: 'assets/creatures/panda.png' },
-      { id: 9, name: 'Penguin', imgPath: 'assets/creatures/penguin.png' },
-      { id: 10, name: 'Sun', imgPath: 'assets/creatures/sun.png' },
-      { id: 11, name: 'Turtle', imgPath: 'assets/creatures/turtle.png' },
+      { id: 0, name: 'Avocado', imgPath: 'assets/creatures/avocado.png' },
+      { id: 1, name: 'Cat', imgPath: 'assets/creatures/cat.png' },
+      { id: 2, name: 'Cat Box', imgPath: 'assets/creatures/cat-box.png' },
+      { id: 3, name: 'Cat Dino', imgPath: 'assets/creatures/cat-dino.png' },
+      { id: 4, name: 'Chameleon', imgPath: 'assets/creatures/chameleon.png' },
+      { id: 5, name: 'Cloud', imgPath: 'assets/creatures/cloud.png' },
+      { id: 6, name: 'Cool', imgPath: 'assets/creatures/cool.png' },
+      { id: 7, name: 'Cute', imgPath: 'assets/creatures/cute.png' },
+      { id: 8, name: 'Dinosaur', imgPath: 'assets/creatures/dinosaur.png' },
+      { id: 9, name: 'Frog', imgPath: 'assets/creatures/frog.png' },
+      { id: 10, name: 'Hedgehog', imgPath: 'assets/creatures/hedgehog.png' },
+      { id: 11, name: 'Ice Cream', imgPath: 'assets/creatures/ice-cream.png' },
+      { id: 12, name: 'Kitty', imgPath: 'assets/creatures/kitty.png' },
+      { id: 13, name: 'Panda', imgPath: 'assets/creatures/panda.png' },
+      { id: 14, name: 'Penguin', imgPath: 'assets/creatures/penguin.png' },
+      { id: 15, name: 'Sun', imgPath: 'assets/creatures/sun.png' },
+      { id: 16, name: 'Turtle', imgPath: 'assets/creatures/turtle.png' },
     ]
   },
   animals: {
@@ -40,6 +45,45 @@ export const CARD_SETS = {
       { id: 9, name: 'Pig', imgPath: 'assets/animals/pig.png' },
       { id: 10, name: 'Tiger', imgPath: 'assets/animals/tiger.png' },
       { id: 11, name: 'Zebra', imgPath: 'assets/animals/zebra.png' },
+    ]
+  },
+  cats: {
+    id: 'cats',
+    name: 'Cats',
+    description: 'Adorable cats in various scenarios',
+    cards: [
+      { id: 0, name: 'Beehive', imgPath: 'assets/cats/beehive.png' },
+      { id: 1, name: 'Cactus', imgPath: 'assets/cats/cactus.png' },
+      { id: 2, name: 'Crown', imgPath: 'assets/cats/crown.png' },
+      { id: 3, name: 'Eat', imgPath: 'assets/cats/eat.png' },
+      { id: 4, name: 'Flower', imgPath: 'assets/cats/flower.png' },
+      { id: 5, name: 'Fly', imgPath: 'assets/cats/fly.png' },
+      { id: 6, name: 'Garden', imgPath: 'assets/cats/garden.png' },
+      { id: 7, name: 'Hydrant', imgPath: 'assets/cats/hydrant.png' },
+      { id: 8, name: 'Leaf', imgPath: 'assets/cats/leaf.png' },
+      { id: 9, name: 'Rainbow', imgPath: 'assets/cats/rainbow.png' },
+      { id: 10, name: 'Rose', imgPath: 'assets/cats/rose.png' },
+      { id: 11, name: 'Sun', imgPath: 'assets/cats/sun.png' },
+      { id: 12, name: 'Water', imgPath: 'assets/cats/water.png' },
+    ]
+  },
+  nature: {
+    id: 'nature',
+    name: 'Nature',
+    description: 'Beautiful nature and outdoor scenes',
+    cards: [
+      { id: 0, name: 'Biking', imgPath: 'assets/nature/biking.png' },
+      { id: 1, name: 'Chicken', imgPath: 'assets/nature/chicken.png' },
+      { id: 2, name: 'Duck', imgPath: 'assets/nature/duck.png' },
+      { id: 3, name: 'Fever', imgPath: 'assets/nature/fever.png' },
+      { id: 4, name: 'Frog', imgPath: 'assets/nature/frog.png' },
+      { id: 5, name: 'Jungle', imgPath: 'assets/nature/jungle.png' },
+      { id: 6, name: 'Mountain', imgPath: 'assets/nature/mountain.png' },
+      { id: 7, name: 'Palm Tree', imgPath: 'assets/nature/palm-tree.png' },
+      { id: 8, name: 'Planet', imgPath: 'assets/nature/planet.png' },
+      { id: 9, name: 'Plant', imgPath: 'assets/nature/plant.png' },
+      { id: 10, name: 'Sun', imgPath: 'assets/nature/sun.png' },
+      { id: 11, name: 'Tree', imgPath: 'assets/nature/tree.png' },
     ]
   }
 };
@@ -67,7 +111,7 @@ export function getCardSet(setId) {
 /**
  * Get card image path by set ID and card ID
  * @param {string} setId - Card set ID
- * @param {number} cardId - Card ID (0-11)
+ * @param {number} cardId - Card ID
  * @returns {string} Image path
  */
 export function getCardImage(setId, cardId) {
@@ -81,7 +125,7 @@ export function getCardImage(setId, cardId) {
 /**
  * Get card data by set ID and card ID
  * @param {string} setId - Card set ID
- * @param {number} cardId - Card ID (0-11)
+ * @param {number} cardId - Card ID
  * @returns {object} Card object
  */
 export function getCard(setId, cardId) {

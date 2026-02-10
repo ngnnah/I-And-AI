@@ -16,18 +16,28 @@ import {
     getCreature
 } from '../js/data/card-sets.js';
 
+// Expected card counts for each set
+const EXPECTED_CARD_COUNTS = {
+    creatures: 17,
+    animals: 12,
+    cats: 13,
+    nature: 12
+};
+
 describe('getAllCardSets', () => {
     it('should return an array of card sets', () => {
         const sets = getAllCardSets();
         assert.ok(Array.isArray(sets));
-        assert.ok(sets.length >= 2); // At least creatures and animals
+        assert.ok(sets.length >= 4); // At least 4 sets
     });
 
-    it('should include creatures and animals sets', () => {
+    it('should include all expected sets', () => {
         const sets = getAllCardSets();
         const setIds = sets.map(s => s.id);
         assert.ok(setIds.includes('creatures'));
         assert.ok(setIds.includes('animals'));
+        assert.ok(setIds.includes('cats'));
+        assert.ok(setIds.includes('nature'));
     });
 
     it('each set should have required properties', () => {
@@ -37,7 +47,8 @@ describe('getAllCardSets', () => {
             assert.ok(set.name);
             assert.ok(set.description);
             assert.ok(Array.isArray(set.cards));
-            assert.strictEqual(set.cards.length, 12);
+            // Each set has its expected number of cards
+            assert.strictEqual(set.cards.length, EXPECTED_CARD_COUNTS[set.id]);
         });
     });
 });
@@ -47,13 +58,27 @@ describe('getCardSet', () => {
         const set = getCardSet('creatures');
         assert.strictEqual(set.id, 'creatures');
         assert.strictEqual(set.name, 'Creatures');
-        assert.strictEqual(set.cards.length, 12);
+        assert.strictEqual(set.cards.length, 17);
     });
 
     it('should return the animals set', () => {
         const set = getCardSet('animals');
         assert.strictEqual(set.id, 'animals');
         assert.strictEqual(set.name, 'Animals');
+        assert.strictEqual(set.cards.length, 12);
+    });
+
+    it('should return the cats set', () => {
+        const set = getCardSet('cats');
+        assert.strictEqual(set.id, 'cats');
+        assert.strictEqual(set.name, 'Cats');
+        assert.strictEqual(set.cards.length, 13);
+    });
+
+    it('should return the nature set', () => {
+        const set = getCardSet('nature');
+        assert.strictEqual(set.id, 'nature');
+        assert.strictEqual(set.name, 'Nature');
         assert.strictEqual(set.cards.length, 12);
     });
 
@@ -67,12 +92,22 @@ describe('getCardSet', () => {
 describe('getCardImage', () => {
     it('should return correct image path for creatures set', () => {
         const imgPath = getCardImage('creatures', 0);
-        assert.strictEqual(imgPath, 'assets/creatures/cat-box.png');
+        assert.strictEqual(imgPath, 'assets/creatures/avocado.png');
     });
 
     it('should return correct image path for animals set', () => {
         const imgPath = getCardImage('animals', 0);
         assert.strictEqual(imgPath, 'assets/animals/bear.png');
+    });
+
+    it('should return correct image path for cats set', () => {
+        const imgPath = getCardImage('cats', 0);
+        assert.strictEqual(imgPath, 'assets/cats/beehive.png');
+    });
+
+    it('should return correct image path for nature set', () => {
+        const imgPath = getCardImage('nature', 0);
+        assert.strictEqual(imgPath, 'assets/nature/biking.png');
     });
 
     it('should throw error for invalid card ID (negative)', () => {
@@ -81,9 +116,15 @@ describe('getCardImage', () => {
         }, /Invalid card ID/);
     });
 
-    it('should throw error for invalid card ID (too large)', () => {
+    it('should throw error for invalid card ID (too large for creatures)', () => {
         assert.throws(() => {
-            getCardImage('creatures', 12);
+            getCardImage('creatures', 17);
+        }, /Invalid card ID/);
+    });
+
+    it('should throw error for invalid card ID (too large for animals)', () => {
+        assert.throws(() => {
+            getCardImage('animals', 12);
         }, /Invalid card ID/);
     });
 
@@ -99,8 +140,8 @@ describe('getCard', () => {
         const card = getCard('creatures', 0);
         assert.deepStrictEqual(card, {
             id: 0,
-            name: 'Cat Box',
-            imgPath: 'assets/creatures/cat-box.png'
+            name: 'Avocado',
+            imgPath: 'assets/creatures/avocado.png'
         });
     });
 
@@ -113,6 +154,24 @@ describe('getCard', () => {
         });
     });
 
+    it('should return correct card data for cats', () => {
+        const card = getCard('cats', 0);
+        assert.deepStrictEqual(card, {
+            id: 0,
+            name: 'Beehive',
+            imgPath: 'assets/cats/beehive.png'
+        });
+    });
+
+    it('should return correct card data for nature', () => {
+        const card = getCard('nature', 0);
+        assert.deepStrictEqual(card, {
+            id: 0,
+            name: 'Biking',
+            imgPath: 'assets/nature/biking.png'
+        });
+    });
+
     it('should throw error for invalid card ID', () => {
         assert.throws(() => {
             getCard('creatures', 20);
@@ -121,12 +180,20 @@ describe('getCard', () => {
 });
 
 describe('getSetSize', () => {
-    it('should return 12 for creatures set', () => {
-        assert.strictEqual(getSetSize('creatures'), 12);
+    it('should return 17 for creatures set', () => {
+        assert.strictEqual(getSetSize('creatures'), 17);
     });
 
     it('should return 12 for animals set', () => {
         assert.strictEqual(getSetSize('animals'), 12);
+    });
+
+    it('should return 13 for cats set', () => {
+        assert.strictEqual(getSetSize('cats'), 13);
+    });
+
+    it('should return 12 for nature set', () => {
+        assert.strictEqual(getSetSize('nature'), 12);
     });
 
     it('should throw error for invalid set ID', () => {
@@ -137,9 +204,9 @@ describe('getSetSize', () => {
 });
 
 describe('Backward Compatibility', () => {
-    it('CREATURES should be an array of 12 cards', () => {
+    it('CREATURES should be an array of 17 cards', () => {
         assert.ok(Array.isArray(CREATURES));
-        assert.strictEqual(CREATURES.length, 12);
+        assert.strictEqual(CREATURES.length, 17);
     });
 
     it('CREATURES should match creatures set cards', () => {
@@ -175,11 +242,25 @@ describe('Card Set Data Integrity', () => {
         assert.strictEqual(ids.length, uniqueIds.length);
     });
 
-    it('card IDs should be sequential from 0 to 11', () => {
+    it('all cats should have unique IDs within set', () => {
+        const set = getCardSet('cats');
+        const ids = set.cards.map(c => c.id);
+        const uniqueIds = [...new Set(ids)];
+        assert.strictEqual(ids.length, uniqueIds.length);
+    });
+
+    it('all nature cards should have unique IDs within set', () => {
+        const set = getCardSet('nature');
+        const ids = set.cards.map(c => c.id);
+        const uniqueIds = [...new Set(ids)];
+        assert.strictEqual(ids.length, uniqueIds.length);
+    });
+
+    it('card IDs should be sequential from 0 to N-1', () => {
         const sets = getAllCardSets();
         sets.forEach(set => {
             const ids = set.cards.map(c => c.id).sort((a, b) => a - b);
-            const expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+            const expected = Array.from({ length: set.cards.length }, (_, i) => i);
             assert.deepStrictEqual(ids, expected);
         });
     });
