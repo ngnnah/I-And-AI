@@ -85,9 +85,9 @@ export function collectPile(playerId, gameState, players) {
  * @returns {boolean} True if game over
  */
 export function isGameOver(deck) {
-  // currentIndex represents the number of cards flipped (or next index to flip)
-  // Game is over when currentIndex >= length (all cards have been flipped)
-  return deck.currentIndex >= deck.cards.length;
+  // currentIndex is the index of the last card flipped (starts at -1)
+  // Game is over when currentIndex + 1 >= length (all cards have been flipped)
+  return deck.currentIndex >= 0 && (deck.currentIndex + 1 >= deck.cards.length);
 }
 
 /**
