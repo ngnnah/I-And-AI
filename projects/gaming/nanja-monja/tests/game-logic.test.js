@@ -165,6 +165,16 @@ describe('isGameOver', () => {
         const deckWith1Left = { cards: new Array(9), currentIndex: 7 };
         assert.strictEqual(isGameOver(deckWith1Left), false);
     });
+
+    it('should return false after tiebreaker card is appended', () => {
+        // Deck is exhausted (all 4 cards flipped)
+        const deck = { cards: [0, 1, 2, 3], currentIndex: 3 };
+        assert.strictEqual(isGameOver(deck), true);
+
+        // Tiebreaker: append one more card to deck
+        deck.cards.push(0);
+        assert.strictEqual(isGameOver(deck), false);
+    });
 });
 
 describe('getRoundType', () => {

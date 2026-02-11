@@ -260,7 +260,16 @@ function updateActionButtons(game) {
     skipRoundBtn.classList.add('hidden');
     acknowledgmentSection.classList.add('hidden');
     phaseBanner.classList.add('hidden');
+    phaseBanner.style.backgroundColor = '';
+    phaseBanner.textContent = 'All creatures discovered! Shouting phase only';
     hideNamingError();
+
+    // Show tiebreaker banner if in tiebreaker mode
+    if (game.gameState?.tiebreaker) {
+        phaseBanner.textContent = 'TIEBREAKER ROUND!';
+        phaseBanner.style.backgroundColor = '#ff5722';
+        phaseBanner.classList.remove('hidden');
+    }
 
     // Hide claimant selection if it exists
     const claimantContainer = document.getElementById('claimant-selection');
@@ -637,9 +646,8 @@ async function handleFlip() {
     try {
         flipCardBtn.disabled = true;
         await handleCardFlip(currentGame.id);
-
-        // Check if game ended after flip
-        await checkAndHandleGameEnd(currentGame.id);
+        // Don't check game end here - let the round (naming/shouting) complete first.
+        // checkAndHandleGameEnd is called after naming and after pile award.
     } catch (error) {
         console.error('Failed to flip card:', error);
         alert('Failed to flip card: ' + error.message);
@@ -742,6 +750,9 @@ async function handleSkipRound() {
         });
 
         console.log('Round skipped');
+
+        // Check if game should end (e.g., last card's round was skipped)
+        await checkAndHandleGameEnd(currentGame.id);
     } catch (error) {
         console.error('Failed to skip round:', error);
         alert('Failed to skip round: ' + error.message);

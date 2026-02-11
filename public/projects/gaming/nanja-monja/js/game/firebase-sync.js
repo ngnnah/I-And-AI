@@ -349,6 +349,34 @@ export async function checkAndHandleGameEnd(gameId, forceEnd = false) {
 
   // Force end or check if deck is exhausted
   if (forceEnd || isGameOver(game.deck)) {
+    const { calculateWinner } = await import('./game-logic.js');
+    const { isTie } = calculateWinner(game.players);
+    const tiebreakerCount = game.gameState?.tiebreakerCount || 0;
+    const MAX_TIEBREAKERS = 5;
+
+    // If tied and not force-ending, add a tiebreaker card
+    if (isTie && !forceEnd && tiebreakerCount < MAX_TIEBREAKERS) {
+      const creatureNames = game.gameState?.creatureNames || {};
+      const namedCreatureIds = Object.keys(creatureNames).map(Number);
+
+      if (namedCreatureIds.length > 0) {
+        // Pick a random already-named creature (guarantees a shouting round)
+        const randomCreatureId = namedCreatureIds[
+          Math.floor(Math.random() * namedCreatureIds.length)
+        ];
+        const newCards = [...game.deck.cards, randomCreatureId];
+
+        await update(gameRef, {
+          'deck/cards': newCards,
+          'gameState/tiebreaker': true,
+          'gameState/tiebreakerCount': tiebreakerCount + 1
+        });
+
+        console.log('🔄 Tiebreaker! Added card for creature', randomCreatureId);
+        return false; // Game continues
+      }
+    }
+
     console.log('🎮 Game ending now!');
     await handleGameEnd(gameId);
     return true;
