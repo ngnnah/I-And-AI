@@ -260,14 +260,12 @@ function updateActionButtons(game) {
     skipRoundBtn.classList.add('hidden');
     acknowledgmentSection.classList.add('hidden');
     phaseBanner.classList.add('hidden');
-    phaseBanner.style.backgroundColor = '';
     phaseBanner.textContent = 'All creatures discovered! Shouting phase only';
     hideNamingError();
 
     // Show tiebreaker banner if in tiebreaker mode
     if (game.gameState?.tiebreaker) {
-        phaseBanner.textContent = 'TIEBREAKER ROUND!';
-        phaseBanner.style.backgroundColor = '#ff5722';
+        phaseBanner.textContent = '\u2694\uFE0F TIEBREAKER ROUND! \u2694\uFE0F';
         phaseBanner.classList.remove('hidden');
     }
 

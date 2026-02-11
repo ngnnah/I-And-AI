@@ -32,7 +32,9 @@ btnCreateGame.addEventListener('click', async () => {
   btnCreateGame.disabled = true;
   try {
     const { id, name } = getLocalPlayer();
-    const gameId = await createGame(name, id);
+    const modeEl = document.querySelector('input[name="game-mode"]:checked');
+    const gameMode = modeEl ? modeEl.value : 'words';
+    const gameId = await createGame(name, id, gameMode);
     setCurrentGameId(gameId);
     navigateTo('game-room');
   } catch (err) {
@@ -100,11 +102,12 @@ function renderGameList(allGames) {
     for (const [gid, game] of myGames) {
       const playerCount = Object.values(game.players || {}).filter(p => p.isActive).length;
       const statusLabel = game.status === 'setup' ? 'Setting up' : 'In progress';
+      const modeTag = game.gameMode && game.gameMode !== 'words' ? ` &middot; ${game.gameMode === 'pictures' ? 'Pictures' : 'DIY'}` : '';
       html += `
         <div class="game-list-item">
           <div class="game-info">
             <span class="game-name">${game.displayName}</span>
-            <span class="game-meta">${gid} &middot; ${playerCount} players &middot; ${statusLabel}</span>
+            <span class="game-meta">${gid} &middot; ${playerCount} players &middot; ${statusLabel}${modeTag}</span>
           </div>
           <button class="btn btn-sm btn-primary btn-resume" data-game-id="${gid}">Resume</button>
         </div>`;
@@ -119,11 +122,12 @@ function renderGameList(allGames) {
     for (const [gid, game] of joinableGames) {
       const playerCount = Object.values(game.players || {}).filter(p => p.isActive).length;
       const statusHint = game.status === 'playing' ? ' &middot; In progress' : '';
+      const modeTag = game.gameMode && game.gameMode !== 'words' ? ` &middot; ${game.gameMode === 'pictures' ? 'Pictures' : 'DIY'}` : '';
       html += `
         <div class="game-list-item">
           <div class="game-info">
             <span class="game-name">${game.displayName}</span>
-            <span class="game-meta">${gid} &middot; ${playerCount} players &middot; by ${game.createdBy}${statusHint}</span>
+            <span class="game-meta">${gid} &middot; ${playerCount} players &middot; by ${game.createdBy}${statusHint}${modeTag}</span>
           </div>
           <button class="btn btn-sm btn-secondary btn-join-game" data-game-id="${gid}">Join</button>
         </div>`;

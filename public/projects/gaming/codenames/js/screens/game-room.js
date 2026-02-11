@@ -9,6 +9,7 @@ import {
   getLocalPlayerTeam, getLocalPlayerData, isLocalPlayerTurn
 } from '../game/game-state.js';
 import { validateClue, canStartGame } from '../game/game-logic.js';
+import { getModeConfig } from '../data/game-modes.js';
 import {
   handleTeamJoin, handleStartGame, handleGiveClue,
   handleCardReveal, handleEndGuessing, handleNewGame
@@ -288,9 +289,12 @@ function renderPlayerRoster(data) {
 
 function renderBoard(data, container, isFinished) {
   const gs = data.gameState;
-  const words = data.board.words;
   const colorMap = data.board.colorMap;
   const revealed = gs.revealedCards;
+  const totalCards = colorMap.length;
+  const gameMode = data.gameMode || 'words';
+  const config = getModeConfig(gameMode);
+  const isPicture = config.cardType === 'image';
   const isSpy = isLocalPlayerSpymaster();
   const myTeam = getLocalPlayerTeam();
   const canClick = !isFinished && gs.phase === 'guess' && gs.currentTurn === myTeam && !isSpy;
@@ -298,22 +302,32 @@ function renderBoard(data, container, isFinished) {
   const isOperative = myData?.role === 'operative';
 
   container.innerHTML = '';
+  container.className = isFinished
+    ? (isPicture ? 'board board-pictures board-finished' : 'board board-finished')
+    : (isPicture ? 'board board-pictures' : 'board');
 
-  for (let i = 0; i < 25; i++) {
+  for (let i = 0; i < totalCards; i++) {
     const card = document.createElement('div');
-    card.className = 'card';
-    card.textContent = words[i];
+    card.className = isPicture ? 'card card-picture' : 'card';
+
+    if (isPicture) {
+      const img = document.createElement('img');
+      const cardId = data.board.cardIds[i];
+      img.src = `${config.imageDir}card-${cardId}.jpg`;
+      img.alt = `Card ${cardId}`;
+      img.draggable = false;
+      card.appendChild(img);
+    } else {
+      card.textContent = data.board.words[i];
+    }
 
     if (revealed[i] || isFinished) {
-      // Revealed card
       const color = colorMap[i];
       card.classList.add(`revealed-${color}`);
       if (isSpy && !isFinished) card.classList.add('revealed-dimmed');
     } else if (isSpy) {
-      // Spymaster sees color overlay on unrevealed
       card.classList.add(`spy-${colorMap[i]}`);
     } else {
-      // Operative — unrevealed
       card.classList.add('unrevealed');
       if (canClick && isOperative) {
         card.classList.add('clickable');
@@ -394,7 +408,7 @@ async function handleGiveClueClick() {
 
   const word = clueWordInput.value.trim();
   const number = parseInt(clueNumberSelect.value, 10);
-  const { valid, error } = validateClue(word, number, game.data.board.words);
+  const { valid, error } = validateClue(word, number, game.data.board.words || []);
 
   if (!valid) {
     clueError.textContent = error;

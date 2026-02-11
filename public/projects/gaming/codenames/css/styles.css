@@ -132,6 +132,33 @@ input[type="text"]:focus, select:focus { border-color: var(--blue); }
   font-size: 0.9rem;
 }
 
+.mode-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  width: 100%;
+}
+.mode-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 6px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: center;
+  background: var(--bg-surface);
+  transition: border-color 0.15s, background 0.15s;
+}
+.mode-option:has(input:checked) {
+  border-color: var(--blue);
+  background: rgba(21, 101, 192, 0.12);
+}
+.mode-option input[type="radio"] { display: none; }
+.mode-label { font-weight: 600; font-size: 0.9rem; }
+.mode-desc { font-size: 0.65rem; color: var(--text-muted); margin-top: 2px; }
+
 .lobby-section {
   margin-top: 28px;
 }
@@ -437,6 +464,66 @@ input[type="text"]:focus, select:focus { border-color: var(--blue); }
 
 /* Finished board — all revealed */
 .board-finished .card { cursor: default; }
+
+/* -- Picture Cards -- */
+.card-picture {
+  aspect-ratio: 1;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+}
+.card-picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  display: block;
+}
+/* Spymaster color overlay on picture cards via ::after */
+.card-picture.spy-red::after,
+.card-picture.spy-blue::after,
+.card-picture.spy-neutral::after,
+.card-picture.spy-assassin::after,
+.card-picture.revealed-red::after,
+.card-picture.revealed-blue::after,
+.card-picture.revealed-neutral::after,
+.card-picture.revealed-assassin::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.card-picture.spy-red { border-color: var(--red); }
+.card-picture.spy-red::after { background: rgba(211, 47, 47, 0.45); }
+.card-picture.spy-blue { border-color: var(--blue); }
+.card-picture.spy-blue::after { background: rgba(21, 101, 192, 0.45); }
+.card-picture.spy-neutral { border-color: #a1887f; }
+.card-picture.spy-neutral::after { background: rgba(161, 136, 127, 0.35); }
+.card-picture.spy-assassin { border-color: #ef5350; }
+.card-picture.spy-assassin::after { background: rgba(0, 0, 0, 0.7); box-shadow: inset 0 0 12px rgba(239, 83, 80, 0.4); }
+
+.card-picture.revealed-red { border-color: var(--red); }
+.card-picture.revealed-red::after { background: rgba(211, 47, 47, 0.55); }
+.card-picture.revealed-blue { border-color: var(--blue); }
+.card-picture.revealed-blue::after { background: rgba(21, 101, 192, 0.55); }
+.card-picture.revealed-neutral { border-color: var(--neutral); }
+.card-picture.revealed-neutral::after { background: rgba(141, 110, 99, 0.5); }
+.card-picture.revealed-assassin { border-color: #444; }
+.card-picture.revealed-assassin::after { background: rgba(33, 33, 33, 0.8); }
+
+/* Override text-card background styles for picture cards */
+.card-picture.revealed-red,
+.card-picture.revealed-blue,
+.card-picture.revealed-neutral,
+.card-picture.revealed-assassin,
+.card-picture.spy-red,
+.card-picture.spy-blue,
+.card-picture.spy-neutral,
+.card-picture.spy-assassin {
+  background: transparent;
+  color: inherit;
+}
 
 /* -- Clue Area -- */
 .clue-area {

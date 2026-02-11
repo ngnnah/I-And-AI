@@ -62,9 +62,10 @@ export function generatePlayerId() {
  * Create a new game
  * @param {string} playerName
  * @param {string} playerId
+ * @param {string} [gameMode="words"] - "words", "pictures", or "diy"
  * @returns {Promise<string>} Game ID
  */
-export async function createGame(playerName, playerId) {
+export async function createGame(playerName, playerId, gameMode = 'words') {
   const gameId = generateGameId();
   const displayName = generateDisplayName();
   const gameRef = ref(database, `games/${gameId}`);
@@ -73,6 +74,7 @@ export async function createGame(playerName, playerId) {
     createdAt: Date.now(),
     status: "setup",
     displayName,
+    gameMode,
     createdBy: playerName,
     hostId: playerId,
     players: {

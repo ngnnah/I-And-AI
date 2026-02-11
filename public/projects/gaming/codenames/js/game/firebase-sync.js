@@ -5,6 +5,7 @@
 
 import { database, ref, get, update, set } from './firebase-config.js';
 import { generateBoard, checkGuessResult, checkWinCondition } from './game-logic.js';
+import { getModeConfig } from '../data/game-modes.js';
 import { getLocalPlayer, getCurrentGame } from './game-state.js';
 
 /**
@@ -26,27 +27,37 @@ export async function handleTeamJoin(gameId, playerId, team, role) {
  * @param {string} gameId
  */
 export async function handleStartGame(gameId) {
+  const snapshot = await get(ref(database, `games/${gameId}`));
+  const gameData = snapshot.val();
+  const gameMode = gameData?.gameMode || 'words';
+  const config = getModeConfig(gameMode);
+
   const startingTeam = Math.random() < 0.5 ? 'red' : 'blue';
-  const board = generateBoard(startingTeam);
+  const board = generateBoard(startingTeam, gameMode);
 
   const updates = {
     status: 'playing',
     startingTeam,
     startedAt: Date.now(),
-    'board/words': board.words,
     'board/colorMap': board.colorMap,
     'gameState/currentTurn': startingTeam,
     'gameState/phase': 'clue',
-    'gameState/revealedCards': new Array(25).fill(false),
+    'gameState/revealedCards': new Array(config.totalCards).fill(false),
     'gameState/currentClue': null,
     'gameState/guessesRemaining': 0,
     'gameState/redRevealed': 0,
     'gameState/blueRevealed': 0,
-    'gameState/redTotal': startingTeam === 'red' ? 9 : 8,
-    'gameState/blueTotal': startingTeam === 'blue' ? 9 : 8,
+    'gameState/redTotal': startingTeam === 'red' ? config.startingCount : config.otherCount,
+    'gameState/blueTotal': startingTeam === 'blue' ? config.startingCount : config.otherCount,
     'gameState/winner': null,
     'gameState/winReason': null
   };
+
+  if (config.cardType === 'text') {
+    updates['board/words'] = board.words;
+  } else {
+    updates['board/cardIds'] = board.cardIds;
+  }
 
   await update(ref(database, `games/${gameId}`), updates);
 }
@@ -123,7 +134,7 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     'gameState/blueRevealed': blueRevealed,
     [`clueLog/${logIndex}/guesses/${guessIndex}`]: {
       cardIndex,
-      word: game.board.words[cardIndex],
+      word: game.board.words ? game.board.words[cardIndex] : `Card ${cardIndex + 1}`,
       result
     }
   };

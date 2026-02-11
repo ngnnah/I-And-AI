@@ -3,6 +3,7 @@
  */
 
 import { getRandomWords } from '../data/word-lists.js';
+import { getModeConfig } from '../data/game-modes.js';
 
 /**
  * Fisher-Yates shuffle (in-place)
@@ -18,28 +19,39 @@ export function shuffleArray(arr) {
 }
 
 /**
- * Generate a 5x5 board with words and a secret color map
+ * Generate a board with cards and a secret color map
  * @param {string} startingTeam - "red" or "blue"
- * @returns {{ words: string[], colorMap: string[] }}
+ * @param {string} [gameMode="words"] - "words", "pictures", or "diy"
+ * @returns {{ words?: string[], cardIds?: number[], colorMap: string[] }}
  */
-export function generateBoard(startingTeam) {
-  const words = getRandomWords(25);
-
-  // Starting team gets 9 cards, other gets 8, 7 neutral, 1 assassin
-  const startingCount = 9;
-  const otherCount = 8;
-  const neutralCount = 7;
+export function generateBoard(startingTeam, gameMode = 'words') {
+  const config = getModeConfig(gameMode);
   const otherTeam = startingTeam === 'red' ? 'blue' : 'red';
 
   const colors = [
-    ...Array(startingCount).fill(startingTeam),
-    ...Array(otherCount).fill(otherTeam),
-    ...Array(neutralCount).fill('neutral'),
-    'assassin'
+    ...Array(config.startingCount).fill(startingTeam),
+    ...Array(config.otherCount).fill(otherTeam),
+    ...Array(config.neutralCount).fill('neutral'),
+    ...Array(config.assassinCount).fill('assassin')
   ];
   shuffleArray(colors);
 
-  return { words, colorMap: colors };
+  if (config.cardType === 'text') {
+    return { words: getRandomWords(config.totalCards), colorMap: colors };
+  }
+  return { cardIds: getRandomCardIds(config.totalImages, config.totalCards), colorMap: colors };
+}
+
+/**
+ * Pick N unique random card IDs from a pool of totalImages
+ * @param {number} totalImages - Size of the image pool
+ * @param {number} count - How many to pick
+ * @returns {number[]} Array of unique card IDs (0-indexed)
+ */
+export function getRandomCardIds(totalImages, count) {
+  const all = Array.from({ length: totalImages }, (_, i) => i);
+  shuffleArray(all);
+  return all.slice(0, count);
 }
 
 /**
@@ -101,7 +113,7 @@ export function checkWinCondition(revealedCards, colorMap, redTotal, blueTotal) 
   let redRevealed = 0;
   let blueRevealed = 0;
 
-  for (let i = 0; i < 25; i++) {
+  for (let i = 0; i < revealedCards.length; i++) {
     if (revealedCards[i]) {
       if (colorMap[i] === 'red') redRevealed++;
       else if (colorMap[i] === 'blue') blueRevealed++;
