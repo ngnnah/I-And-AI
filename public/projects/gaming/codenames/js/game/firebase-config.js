@@ -114,8 +114,10 @@ export async function joinGame(gameId, playerName, playerId) {
     return true;
   }
 
-  // New player — only allowed during setup
-  if (game.status !== "setup") throw new Error("Cannot join a game in progress");
+  // New player — allowed during setup or playing (mid-game join as operative)
+  if (game.status !== "setup" && game.status !== "playing") {
+    throw new Error("Cannot join a finished game");
+  }
 
   await set(ref(database, `games/${gameId}/players/${playerId}`), {
     name: playerName,

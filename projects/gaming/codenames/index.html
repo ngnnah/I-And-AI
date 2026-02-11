@@ -107,6 +107,18 @@
         <button id="btn-start-game" class="btn btn-primary btn-wide hidden">Start Game</button>
       </div>
 
+      <!-- Mid-game team picker overlay -->
+      <div id="mid-game-picker" class="mid-game-picker hidden">
+        <div class="picker-box">
+          <h3>Pick a Team</h3>
+          <p>Game is in progress. Join as operative:</p>
+          <div class="picker-buttons">
+            <button class="btn btn-picker-red" data-pick-team="red">Join Red Team</button>
+            <button class="btn btn-picker-blue" data-pick-team="blue">Join Blue Team</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Phase: Playing -->
       <div id="phase-playing" class="phase hidden">
         <!-- Turn & Score bar -->

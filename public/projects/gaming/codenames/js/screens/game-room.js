@@ -29,6 +29,9 @@ const blueOperatives = document.getElementById('blue-operatives');
 const setupErrors = document.getElementById('setup-errors');
 const btnStartGame = document.getElementById('btn-start-game');
 
+// Mid-game picker
+const midGamePicker = document.getElementById('mid-game-picker');
+
 // Playing phase
 const phasePlaying = document.getElementById('phase-playing');
 const turnIndicator = document.getElementById('turn-indicator');
@@ -108,6 +111,11 @@ function handleGameUpdate(data) {
   phaseSetup.classList.toggle('hidden', data.status !== 'setup');
   phasePlaying.classList.toggle('hidden', data.status !== 'playing');
   phaseFinished.classList.toggle('hidden', data.status !== 'finished');
+
+  // Mid-game picker: show if game is playing but local player has no team
+  const myData = getLocalPlayerData();
+  const needsTeamPick = data.status === 'playing' && (!myData || !myData.team);
+  midGamePicker.classList.toggle('hidden', !needsTeamPick);
 
   if (data.status === 'setup') renderSetupPhase(data);
   else if (data.status === 'playing') renderPlayingPhase(data);
@@ -503,6 +511,17 @@ btnNewGame.addEventListener('click', async () => {
 btnBackLobby.addEventListener('click', () => {
   clearCurrentGame();
   navigateTo('lobby');
+});
+
+// Mid-game team picker
+midGamePicker.addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-pick-team]');
+  if (!btn) return;
+  const team = btn.dataset.pickTeam;
+  const game = getCurrentGame();
+  if (!game.id) return;
+  const myId = getLocalPlayer().id;
+  await handleTeamJoin(game.id, myId, team, 'operative');
 });
 
 // Leave game

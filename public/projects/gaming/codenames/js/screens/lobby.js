@@ -88,7 +88,7 @@ function renderGameList(allGames) {
     const isMyGame = game.players && game.players[myId];
     if (isMyGame) {
       myGames.push([gid, game]);
-    } else if (game.status === 'setup') {
+    } else if (game.status === 'setup' || game.status === 'playing') {
       joinableGames.push([gid, game]);
     }
   }
@@ -118,11 +118,12 @@ function renderGameList(allGames) {
     }
     for (const [gid, game] of joinableGames) {
       const playerCount = Object.values(game.players || {}).filter(p => p.isActive).length;
+      const statusHint = game.status === 'playing' ? ' &middot; In progress' : '';
       html += `
         <div class="game-list-item">
           <div class="game-info">
             <span class="game-name">${game.displayName}</span>
-            <span class="game-meta">${gid} &middot; ${playerCount} players &middot; by ${game.createdBy}</span>
+            <span class="game-meta">${gid} &middot; ${playerCount} players &middot; by ${game.createdBy}${statusHint}</span>
           </div>
           <button class="btn btn-sm btn-secondary btn-join-game" data-game-id="${gid}">Join</button>
         </div>`;

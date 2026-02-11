@@ -179,6 +179,7 @@ input[type="text"]:focus, select:focus { border-color: var(--blue); }
   max-width: 720px;
   margin: 0 auto;
   padding: 16px 12px;
+  position: relative;
 }
 
 .game-header {
@@ -484,6 +485,58 @@ input[type="text"]:focus, select:focus { border-color: var(--blue); }
   font-size: 0.9rem;
   text-align: center;
 }
+
+/* -- Mid-game Team Picker -- */
+.mid-game-picker {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: var(--radius);
+}
+.picker-box {
+  text-align: center;
+  padding: 32px 24px;
+}
+.picker-box h3 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+.picker-box p {
+  color: #999;
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+}
+.picker-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.btn-picker-red {
+  background: var(--red);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-size: 0.9rem;
+}
+.btn-picker-red:hover { background: #c62828; }
+.btn-picker-blue {
+  background: var(--blue);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-size: 0.9rem;
+}
+.btn-picker-blue:hover { background: #0d47a1; }
 
 /* -- Clue Log -- */
 .clue-log-section {
