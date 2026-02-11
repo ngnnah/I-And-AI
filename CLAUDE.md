@@ -122,6 +122,15 @@ Best practices:
 | `data-io-verifier` | verifying data integrity at boundaries        |
 | `test-generator`   | generating pytest test cases                  |
 
+## Deployment (GitHub Pages)
+
+This repo deploys to GitHub Pages from the `public/` directory on `main`.
+
+- **Deploy process**: Copy project files to `public/` then commit and push
+  - Example: `rsync -av --delete --exclude='.git' --exclude='node_modules' projects/gaming/codenames/ public/projects/gaming/codenames/`
+- **Gotcha — `.gitignore` `data/` pattern**: The gitignore has `data/` which matches any `data/` directory, including `js/data/`. Files in `js/data/` (e.g., `word-lists.js`, `game-modes.js`) must be force-added: `git add -f path/to/js/data/file.js` for both `projects/` and `public/` copies.
+- After pushing, GitHub Pages rebuilds automatically (takes ~1 min)
+
 ## Documentation Maintenance
 
 When making code changes:
