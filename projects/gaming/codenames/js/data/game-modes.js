@@ -49,7 +49,7 @@ export const GAME_MODES = {
   },
 };
 
-export const DEFAULT_MODE = 'words';
+export const DEFAULT_MODE = 'pictures';
 
 export function getModeConfig(mode) {
   return GAME_MODES[mode] || GAME_MODES[DEFAULT_MODE];

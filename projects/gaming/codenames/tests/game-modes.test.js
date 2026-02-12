@@ -69,14 +69,14 @@ describe('getModeConfig', () => {
   });
 
   it('falls back to words for unknown mode', () => {
-    assert.equal(getModeConfig('unknown').totalCards, 25);
-    assert.equal(getModeConfig(null).totalCards, 25);
-    assert.equal(getModeConfig(undefined).totalCards, 25);
+    assert.equal(getModeConfig('unknown').totalCards, 20);
+    assert.equal(getModeConfig(null).totalCards, 20);
+    assert.equal(getModeConfig(undefined).totalCards, 20);
   });
 });
 
 describe('DEFAULT_MODE', () => {
-  it('is words', () => {
-    assert.equal(DEFAULT_MODE, 'words');
+  it('is pictures', () => {
+    assert.equal(DEFAULT_MODE, 'pictures');
   });
 });
