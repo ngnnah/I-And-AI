@@ -2,6 +2,8 @@
  * Game mode configurations for Codenames
  */
 
+import { DIY_CARDS } from './diy-cards.js';
+
 export const GAME_MODES = {
   words: {
     label: 'Words',
@@ -15,6 +17,7 @@ export const GAME_MODES = {
     cardType: 'text',
     imageDir: null,
     totalImages: null,
+    cardList: null,
   },
   pictures: {
     label: 'Pictures',
@@ -28,6 +31,7 @@ export const GAME_MODES = {
     cardType: 'image',
     imageDir: 'images/cards/',
     totalImages: 280,
+    cardList: null,
   },
   diy: {
     label: 'DIY',
@@ -40,7 +44,8 @@ export const GAME_MODES = {
     assassinCount: 1,
     cardType: 'image',
     imageDir: 'images/diy/',
-    totalImages: 0, // set when user populates directory
+    totalImages: DIY_CARDS.length,
+    cardList: DIY_CARDS,
   },
 };
 

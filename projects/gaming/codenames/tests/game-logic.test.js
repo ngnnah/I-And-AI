@@ -399,6 +399,23 @@ describe('checkWinCondition (20-card board)', () => {
   });
 });
 
+describe('generateBoard (diy mode)', () => {
+  it('returns 20 cardIds and 20 colors', () => {
+    const board = generateBoard('red', 'diy');
+    assert.equal(board.cardIds.length, 20);
+    assert.equal(board.colorMap.length, 20);
+    assert.equal(board.words, undefined);
+  });
+
+  it('cardIds are unique and in range 0-127', () => {
+    const board = generateBoard('red', 'diy');
+    assert.equal(new Set(board.cardIds).size, 20);
+    for (const id of board.cardIds) {
+      assert.ok(id >= 0 && id < 128);
+    }
+  });
+});
+
 describe('validateClue (picture mode — empty boardWords)', () => {
   it('allows any word when boardWords is empty', () => {
     assert.equal(validateClue('ANYTHING', 2, []).valid, true);

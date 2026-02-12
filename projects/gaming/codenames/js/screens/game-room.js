@@ -313,7 +313,9 @@ function renderBoard(data, container, isFinished) {
     if (isPicture) {
       const img = document.createElement('img');
       const cardId = data.board.cardIds[i];
-      img.src = `${config.imageDir}card-${cardId}.jpg`;
+      img.src = config.cardList
+        ? `${config.imageDir}${config.cardList[cardId]}`
+        : `${config.imageDir}card-${cardId}.jpg`;
       img.alt = `Card ${cardId}`;
       img.draggable = false;
       card.appendChild(img);

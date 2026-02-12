@@ -40,6 +40,20 @@ describe('GAME_MODES', () => {
     assert.equal(GAME_MODES.pictures.totalImages, 280);
   });
 
+  it('diy mode has 128 images from cardList', () => {
+    assert.equal(GAME_MODES.diy.totalImages, 128);
+    assert.equal(GAME_MODES.diy.cardList.length, 128);
+  });
+
+  it('diy cardList has no duplicates', () => {
+    assert.equal(new Set(GAME_MODES.diy.cardList).size, GAME_MODES.diy.cardList.length);
+  });
+
+  it('pictures and words have no cardList', () => {
+    assert.equal(GAME_MODES.pictures.cardList, null);
+    assert.equal(GAME_MODES.words.cardList, null);
+  });
+
   it('all modes use 5 grid columns', () => {
     for (const mode of Object.values(GAME_MODES)) {
       assert.equal(mode.gridCols, 5);
