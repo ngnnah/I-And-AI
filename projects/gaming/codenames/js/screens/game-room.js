@@ -310,7 +310,7 @@ function renderBoard(data, container, isFinished) {
     const card = document.createElement('div');
     card.className = isPicture ? 'card card-picture' : 'card';
 
-    if (isPicture) {
+    if (isPicture && data.board.cardIds) {
       const img = document.createElement('img');
       const cardId = data.board.cardIds[i];
       img.src = config.cardList
@@ -320,7 +320,7 @@ function renderBoard(data, container, isFinished) {
       img.draggable = false;
       card.appendChild(img);
     } else {
-      card.textContent = data.board.words[i];
+      card.textContent = data.board.words ? data.board.words[i] : `Card ${i + 1}`;
     }
 
     if (revealed[i] || isFinished) {
