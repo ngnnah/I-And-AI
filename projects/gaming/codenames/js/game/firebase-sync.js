@@ -36,9 +36,8 @@ export async function handleStartGame(gameId) {
   const board = generateBoard(startingTeam, gameMode);
 
   // Generate inspiration words for spymasters
-  const inspirationWords = board.words 
-    ? generateInspirationWords(board.words)
-    : ['CLUE', 'HINT', 'WORD']; // Placeholder for picture modes
+  // For word mode: exclude board words; for picture modes: use any random words
+  const inspirationWords = generateInspirationWords(board.words || []);
 
   const updates = {
     status: 'playing',
@@ -243,34 +242,12 @@ export async function handleNewGame(gameId) {
     board: null,
     gameState: null,
     clueLog: null,
-    inspirationWords: null,
     ...playerUpdates
   });
 }
 
-/**
- * Regenerate inspiration words for spymasters
- * @param {string} gameId
- */
-export async function handleRegenerateInspiration(gameId) {
-  const snapshot = await get(ref(database, `games/${gameId}`));
-  if (!snapshot.exists()) return;
-  const game = snapshot.val();
-  const boardWords = game.board?.words || [];
-  const currentInspiration = game.inspirationWords || [];
-  
-  // Generate new words, excluding both board words and current inspiration
-  const excludeWords = [...boardWords, ...currentInspiration];
-  const newWords = boardWords.length > 0 
-    ? generateInspirationWords(boardWords, excludeWords)
-    : ['CLUE', 'HINT', 'WORD'];
-
-  console.log('Regenerating inspiration:', { current: currentInspiration, new: newWords });
-
-  await update(ref(database, `games/${gameId}`), {
-    inspirationWords: newWords
-  });
-}
+// Note: Inspiration word regeneration moved to client-side (game-room.js)
+// This function is no longer used but kept for backward compatibility
 
 /**
  * Cancel/delete a game (host only)
@@ -295,10 +272,8 @@ export async function handleRematch(gameId) {
   const startingTeam = Math.random() < 0.5 ? 'red' : 'blue';
   const board = generateBoard(startingTeam, gameMode);
 
-  // Generate new inspiration words
-  const inspirationWords = board.words 
-    ? generateInspirationWords(board.words)
-    : ['CLUE', 'HINT', 'WORD'];
+  // Generate new inspiration words (works for all modes)
+  const inspirationWords = generateInspirationWords(board.words || []);
 
   const updates = {
     status: 'playing',

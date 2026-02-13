@@ -8,12 +8,12 @@ import {
   clearCurrentGame, isLocalPlayerHost, isLocalPlayerSpymaster,
   getLocalPlayerTeam, getLocalPlayerData, isLocalPlayerTurn
 } from '../game/game-state.js';
-import { validateClue, canStartGame, calculateRound, getActionPrompt } from '../game/game-logic.js';
+import { validateClue, canStartGame, calculateRound, getActionPrompt, generateInspirationWords } from '../game/game-logic.js';
 import { getModeConfig } from '../data/game-modes.js';
 import {
   handleTeamJoin, handleStartGame, handleGiveClue,
   handleCardReveal, handleEndGuessing, handleNewGame,
-  handleRegenerateInspiration, handleCancelGame, handleRematch
+  handleCancelGame, handleRematch
 } from '../game/firebase-sync.js';
 import { navigateTo } from '../main.js';
 
@@ -272,18 +272,15 @@ btnCancelGame.addEventListener('click', async () => {
   }
 });
 
-// Regenerate inspiration words
-btnRegenerateInspiration.addEventListener('click', async () => {
+// Regenerate inspiration words (client-side only)
+btnRegenerateInspiration.addEventListener('click', () => {
   const game = getCurrentGame();
-  if (!game.id) return;
-  btnRegenerateInspiration.disabled = true;
-  try {
-    await handleRegenerateInspiration(game.id);
-  } catch (err) {
-    console.error('Regenerate inspiration error:', err);
-  } finally {
-    setTimeout(() => { btnRegenerateInspiration.disabled = false; }, 500);
-  }
+  const boardWords = game.board?.words || [];
+  const newWords = generateInspirationWords(boardWords);
+  
+  inspirationWord1.textContent = newWords[0] || '—';
+  inspirationWord2.textContent = newWords[1] || '—';
+  inspirationWord3.textContent = newWords[2] || '—';
 });
 
 // --- Playing Phase ---
@@ -328,10 +325,15 @@ function renderPlayingPhase(data) {
   // Inspiration panel (spymasters only)
   const isSpy = isLocalPlayerSpymaster();
   inspirationPanel.classList.toggle('hidden', !isSpy);
-  if (isSpy && data.inspirationWords) {
-    inspirationWord1.textContent = data.inspirationWords[0] || '—';
-    inspirationWord2.textContent = data.inspirationWords[1] || '—';
-    inspirationWord3.textContent = data.inspirationWords[2] || '—';
+  if (isSpy) {
+    // Generate local inspiration words if not already displayed
+    if (!inspirationWord1.textContent || inspirationWord1.textContent === '—') {
+      const boardWords = data.board?.words || [];
+      const words = generateInspirationWords(boardWords);
+      inspirationWord1.textContent = words[0] || '—';
+      inspirationWord2.textContent = words[1] || '—';
+      inspirationWord3.textContent = words[2] || '—';
+    }
   }
 
   // Legend (spymaster only)
