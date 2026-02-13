@@ -1,111 +1,116 @@
 # I-And-AI
 
-Personal workspace for learning and applying AI tools in data engineering workflows. A space for collaboration between human and AI—experiments, workflows, and growth.
+AI-assisted mini-project workspace focused on educational games and lightweight web apps, deployed via GitHub Pages.
 
-## About
+**Live site:** https://ngnnah.github.io/I-And-AI/
 
-This repo documents my journey integrating AI-assisted development into daily life and work:
+## What this repo contains
 
-- **AI-powered coding**: Using Claude Code, Cursor, and other AI dev tools
-- **Data engineering workflows**: ETL pipelines, SQL optimization, data modeling
-- **Automation**: Streamlining repetitive tasks with AI assistance
-- **Learning notes**: Patterns, prompts, and techniques that work
+This repository is split between:
 
-## Mini-Projects (GitHub Pages)
+- `projects/`: source-first development copies
+- `public/`: GitHub Pages deployment artifact (served as-is by Actions)
 
-Interactive web apps deployed at **https://ngnnah.github.io/I-And-AI/**
+The current portfolio includes:
 
-| Project                                                                              | Description                                                                                                                                | Tech         |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------ |
-| [Pokemon Math World](https://ngnnah.github.io/I-And-AI/projects/pokemon-math-world/) | 3 difficulty levels: Trainer School, Pokemon League, Champion's Road. Add/sub to 100, multiplication, division, word problems, 40+ Pokemon | HTML/JS, PWA |
-| [Iron Academy](https://ngnnah.github.io/I-And-AI/projects/iron-academy/)             | Math learning game (Grade 5-6) with Tony Stark theme. Feynman explanations, SAT vocabulary builder, 3 attempts per question.               | HTML/JS, PWA |
-| [GitHub TODO](https://ngnnah.github.io/I-And-AI/projects/github-todo-app/)           | Client-side TODO app using GitHub API as backend                                                                                           | HTML/JS      |
+- **Pokemon Math World** (`projects/pokemon-math-world`)  
+  Multi-level math game for elementary learners (addition, subtraction, multiplication, division, word problems).
+- **Iron Academy** (`projects/iron-academy`)  
+  Story-driven Grade 5-6 math game with hints, explanations, and local progress.
+- **GitHub TODO App** (`projects/github-todo-app`)  
+  Static TODO app that stores tasks in a user-owned GitHub repo through the Contents API.
+- **Nanja Monja** (`projects/gaming/nanja-monja`)  
+  Real-time multiplayer memory card game.
+- **Codenames** (`projects/gaming/codenames`)  
+  Real-time multiplayer team word game.
 
-## Structure
+## Repository layout
 
-```
+```text
 .
-├── .claude/
-│   ├── agents/        # Specialized subagents for complex workflows
-│   ├── hooks/         # Automated checks on file operations
-│   └── skills/        # Custom slash commands
-├── .github/
-│   └── workflows/     # CI/CD for GitHub Pages deployment
-├── projects/          # Source code for mini-projects
+├── .github/workflows/deploy.yml    # Deploys GitHub Pages from ./public on push to main
+├── CLAUDE.md                       # Workspace guidance for AI-assisted development
+├── projects/                       # Source projects (edit here first)
+│   ├── pokemon-math-world/
 │   ├── iron-academy/
-│   └── github-todo-app/
-├── public/            # GitHub Pages root (auto-deployed)
+│   ├── github-todo-app/
+│   └── gaming/
+│       ├── nanja-monja/
+│       └── codenames/
+├── public/                         # Published site root for GitHub Pages
+│   ├── index.html                  # Landing page linking to projects
 │   └── projects/
-├── CLAUDE.md          # Claude Code workspace config
-└── README.md
+├── resources/screenshots/          # Documentation screenshots
+└── tools/                          # Small Python helpers (date/pdf utilities)
 ```
 
-## Hooks
+## Development workflow
 
-Automated checks that run on file operations:
+1. Implement changes in `projects/<app>/`.
+2. Validate locally (open directly or run a local static server).
+3. Sync deployable files into `public/projects/<app>/`.
+4. Update `public/index.html` when adding/removing a project.
+5. Commit + push to `main` (GitHub Actions deploys automatically).
 
-| Hook              | Trigger           | Purpose                                     |
-| ----------------- | ----------------- | ------------------------------------------- |
-| `protect-secrets` | Before Edit/Write | Prevents committing secrets and credentials |
-| `format`          | After Edit/Write  | Auto-formats files after editing            |
+### Sync example
 
-## Subagents
+```bash
+rsync -av --delete --exclude='.git' --exclude='node_modules' \
+  projects/gaming/codenames/ public/projects/gaming/codenames/
+```
 
-Specialized agents for data engineering workflows:
+## Local run and tests
 
-| Agent              | Purpose                                                     |
-| ------------------ | ----------------------------------------------------------- |
-| `code-architect`   | Design and plan code structure before implementation        |
-| `code-simplifier`  | Reduce complexity and improve readability                   |
-| `dag-validator`    | Validate DAG structures in Airflow/dbt/Prefect pipelines    |
-| `data-io-verifier` | Verify data integrity at input/output boundaries            |
-| `data-profiler`    | Profile and analyze data from CSV, Excel, DOCX, PDF files   |
-| `test-generator`   | Generate pytest test cases for data engineering Python code |
+### Python tooling (root)
 
-## Claude Skills
+This repo uses `uv` (see `pyproject.toml`):
 
-Custom skills available in this workspace:
+```bash
+uv sync
+uv run python tools/datetime_util.py
+uv run python tools/pdf_util.py --help
+```
 
-| Skill              | Description                                       |
-| ------------------ | ------------------------------------------------- |
-| `/calc`            | Perform calculations and unit conversions         |
-| `/check-links`     | Validate internal links and relative paths        |
-| `/commit`          | Create well-crafted git commits                   |
-| `/data-pipeline`   | Generate ETL/ELT pipeline code                    |
-| `/datetime`        | Date, time, and timezone conversions              |
-| `/ics`             | Extract events and generate .ics calendar files   |
-| `/pdf`             | Read, extract, and analyze PDF documents          |
-| `/pr`              | Create GitHub pull requests                       |
-| `/review`          | Code review for bugs, security, and style         |
-| `/seasons`         | Display current Japanese micro-season (kō)        |
-| `/skill-creator`   | Create new skills and agents for Claude Code      |
-| `/sql`             | Write, optimize, or explain SQL queries           |
-| `/validate-skills` | Validate skills and agents follow best practices  |
-| `/validate-urls`   | Validate external URLs and capture screenshots    |
-| `/web-screenshot`  | Save web images to git-tracked screenshots folder |
+### GitHub TODO App
 
-## Tech Stack
+```bash
+cd projects/github-todo-app
+npm install
+npm start
+npm test
+npm run test:e2e
+```
 
-- **Languages**: Python, SQL
-- **Data**: PostgreSQL, dbt
-- **Tools**: Claude Code, GitHub CLI, Linear
+### Nanja Monja
 
-## Changelog
+```bash
+cd projects/gaming/nanja-monja
+npm test
+npm run test:watch
+```
 
-| Date       | Change                                                              |
-| ---------- | ------------------------------------------------------------------- |
-| 2026-01-26 | Added Pokemon Math World (combined 3-level version with modular JS) |
-| 2026-01-25 | Added Pokemon Math Adventure (9 chapters, gym battles, 25+ Pokemon) |
-| 2026-01-25 | Added Pokemon Math Beginner for 1st graders (addition 0-10)         |
-| 2026-01-25 | Added Iron Academy math game with mobile/iOS support                |
-| 2026-01-25 | Set up GitHub Pages with CI/CD deployment                           |
-| 2026-01-24 | Added GitHub TODO app mini-project                                  |
-| 2026-01-22 | Added `/check-links`, `/validate-urls`, `/web-screenshot` skills    |
-| 2026-01-22 | Added `/seasons` skill for Japanese micro-season awareness          |
-| 2026-01-22 | Added utility skills: `/calc`, `/datetime`, `/pdf`, `/ics`          |
-| 2026-01-22 | Added `data-profiler` agent and `/data-pipeline` skill              |
-| 2026-01-22 | Added `test-generator` agent for pytest generation                  |
-| 2026-01-22 | Added `/skill-creator` and `/validate-skills` skills                |
-| 2026-01-22 | Added Documentation Maintenance guidelines to CLAUDE.md             |
-| 2026-01-22 | Added secrets protection hook and skills validation hook            |
-| 2026-01-22 | Initial setup: 4 data engineering agents, 4 core skills, Linear MCP |
+### Codenames
+
+```bash
+cd projects/gaming/codenames
+npm test
+```
+
+## Deployment
+
+- Workflow file: `.github/workflows/deploy.yml`
+- Trigger: push to `main` (or manual dispatch)
+- Publish source: `./public`
+- URL: https://ngnnah.github.io/I-And-AI/
+
+## Important repo conventions
+
+- Keep source and deployed copies in sync (`projects/` and `public/projects/`).
+- `data/` is ignored globally in `.gitignore`; if a project uses `js/data/`, add those files with `git add -f` when needed.
+- Avoid committing secrets/tokens; e.g. the TODO app should use fine-grained GitHub PATs scoped to one repository.
+
+## Ongoing development priorities
+
+- Keep each project README current when behavior or setup changes.
+- Add test coverage when changing game logic in multiplayer apps.
+- Prefer small, isolated changes and keep deploy sync steps explicit in commits.
