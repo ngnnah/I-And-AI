@@ -4,6 +4,7 @@
 
 import { getRandomWords, WORD_LIST } from '../data/word-lists.js';
 import { getModeConfig } from '../data/game-modes.js';
+import { getRandomPictureClues } from '../data/picture-clues.js';
 
 /**
  * Fisher-Yates shuffle (in-place)
