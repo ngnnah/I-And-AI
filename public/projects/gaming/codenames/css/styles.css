@@ -571,7 +571,7 @@ input[type="text"]:focus, select:focus {
 /* -- Board -- */
 .board {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 6px;
   margin-bottom: 12px;
 }
@@ -1071,35 +1071,33 @@ input[type="text"]:focus, select:focus {
   opacity: 0.8;
 }
 
-/* Inspiration Panel - Compact single row */
+/* Inspiration Panel - Compact single row, integrated into clue section */
 .inspiration-panel {
   background: linear-gradient(135deg, #7b1fa2 0%, #4a148c 100%);
-  border-radius: var(--radius-lg);
-  padding: 10px 14px;
-  margin-top: 12px;
-  margin-bottom: 12px;
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  margin-top: 8px;
   border: 2px solid rgba(123, 31, 162, 0.5);
 }
 
 .inspiration-content {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   justify-content: center;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  flex-wrap: wrap;
 }
 
 .inspiration-word {
   background: rgba(255, 255, 255, 0.95);
   color: #4a148c;
-  padding: 6px 12px;
+  padding: 5px 10px;
   border-radius: var(--radius);
   font-weight: 700;
-  font-size: 0.8rem;
-  min-width: 60px;
+  font-size: 0.75rem;
+  min-width: 55px;
   text-align: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   flex-shrink: 0;
   white-space: nowrap;
 }
@@ -1109,9 +1107,9 @@ input[type="text"]:focus, select:focus {
   color: #fff;
   border: 2px solid rgba(255, 255, 255, 0.5);
   font-weight: 600;
-  padding: 6px 12px;
-  font-size: 0.85rem;
-  min-width: 90px;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  min-width: 80px;
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
@@ -1181,29 +1179,25 @@ input[type="text"]:focus, select:focus {
     padding: 3px 6px;
   }
   
-  .inspiration-content {
-    flex-direction: column;
-  }
-  
+  /* Inspiration stays horizontal on mobile for clean single-row layout */
   .inspiration-panel {
-    padding: 8px 10px;
+    padding: 6px 8px;
   }
   
   .inspiration-content {
-    gap: 6px;
+    gap: 4px;
   }
   
   .inspiration-word {
-    font-size: 0.7rem;
-    padding: 4px 8px;
-    min-width: auto;
+    font-size: 0.65rem;
+    padding: 4px 6px;
+    min-width: 45px;
   }
   
   .btn-inspiration {
     font-size: 0.7rem;
-    padding: 5px 8px;
-    min-width: auto;
-    flex-shrink: 0;
+    padding: 4px 8px;
+    min-width: 70px;
   }
 }
 
