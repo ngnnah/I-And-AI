@@ -190,11 +190,15 @@ function renderDiscuss(game) {
     
     if (isLocalPlayerHost()) {
         readyToPlaceBtn.classList.remove('hidden');
-        themeControls.classList.remove('hidden');
+        if (themeControls) {
+            themeControls.classList.remove('hidden');
+        }
         discussHint.classList.add('hidden');
     } else {
         readyToPlaceBtn.classList.add('hidden');
-        themeControls.classList.add('hidden');
+        if (themeControls) {
+            themeControls.classList.add('hidden');
+        }
         discussHint.classList.remove('hidden');
     }
 }
@@ -702,6 +706,13 @@ function init() {
     categoryBtns.forEach(btn => {
         btn.addEventListener('click', () => handleCategoryFilter(btn.dataset.category));
     });
+
+    // Event delegation for placement controls
+    placedList.addEventListener('click', (e) => {
+        const target = e.target;
+        const index = parseInt(target.dataset.index);
+        if (isNaN(index)) return;
+
         if (target.classList.contains('move-up-btn')) {
             handlePlacementAction('move-up', { index });
         } else if (target.classList.contains('move-down-btn')) {
