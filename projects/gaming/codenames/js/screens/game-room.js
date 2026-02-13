@@ -78,6 +78,7 @@ const btnNewGame = document.getElementById('btn-new-game');
 const btnBackLobby = document.getElementById('btn-back-lobby');
 
 let unsubscribeGame = null;
+let previouslyRevealedCards = []; // Track which cards were revealed in previous render
 
 // --- Lifecycle ---
 
@@ -93,6 +94,9 @@ function startListening() {
   const game = getCurrentGame();
   if (!game.id) { navigateTo('lobby'); return; }
 
+  // Reset card tracking for new game session
+  previouslyRevealedCards = [];
+
   // Rejoin (reactivate) on reconnect
   const { id, name } = getLocalPlayer();
   joinGame(game.id, name, id).catch(() => {});
@@ -102,6 +106,7 @@ function startListening() {
 
 function stopListening() {
   if (unsubscribeGame) { unsubscribeGame(); unsubscribeGame = null; }
+  previouslyRevealedCards = []; // Clear tracking when leaving
 }
 
 // --- Main Update Handler ---
@@ -427,9 +432,16 @@ function renderBoard(data, container, isFinished) {
       card.textContent = data.board.words ? data.board.words[i] : `Card ${i + 1}`;
     }
 
-    if (revealed[i] || isFinished) {
+    const isRevealed = revealed[i] || isFinished;
+    const wasAlreadyRevealed = previouslyRevealedCards[i];
+    const isNewlyRevealed = isRevealed && !wasAlreadyRevealed && !isFinished;
+
+    if (isRevealed) {
       const color = colorMap[i];
       card.classList.add(`revealed-${color}`);
+      if (isNewlyRevealed) {
+        card.classList.add('just-revealed');
+      }
       if (isSpy && !isFinished) card.classList.add('revealed-dimmed');
     } else if (isSpy) {
       card.classList.add(`spy-${colorMap[i]}`);
@@ -442,6 +454,11 @@ function renderBoard(data, container, isFinished) {
     }
 
     container.appendChild(card);
+  }
+  
+  // Update the tracking array for next render
+  if (!isFinished) {
+    previouslyRevealedCards = [...revealed];
   }
 }
 
