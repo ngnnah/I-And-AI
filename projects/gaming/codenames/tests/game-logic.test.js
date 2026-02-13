@@ -515,13 +515,14 @@ describe('getActionPrompt', () => {
   it('tells operative to wait for spymaster during clue phase', () => {
     const gameState = { currentTurn: 'red', phase: 'clue' };
     const prompt = getActionPrompt(gameState, 'red', 'operative', mockPlayers);
-    assert.ok(prompt.includes('Waiting') || prompt.includes('Alice'));
+    assert.ok(prompt.includes('Red') && (prompt.includes('Alice') || prompt.includes('giving')));
   });
 
   it('tells player to wait when other team is playing', () => {
     const gameState = { currentTurn: 'blue', phase: 'clue' };
     const prompt = getActionPrompt(gameState, 'red', 'spymaster', mockPlayers);
-    assert.ok(prompt.includes('Blue team'));
+    assert.ok(prompt.includes('Blue'));
+    assert.ok(prompt.includes('Charlie') || prompt.includes('giving'));
   });
 });
 

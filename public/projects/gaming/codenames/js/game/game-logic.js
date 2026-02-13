@@ -2,7 +2,7 @@
  * Pure game logic for Codenames — no side effects, fully testable
  */
 
-import { getRandomWords } from '../data/word-lists.js';
+import { getRandomWords, WORD_LIST } from '../data/word-lists.js';
 import { getModeConfig } from '../data/game-modes.js';
 
 /**
@@ -182,8 +182,16 @@ export function calculateGuessesAllowed(clueNumber) {
  */
 export function generateInspirationWords(boardWords) {
   const boardWordsUpper = boardWords.map(w => w.toUpperCase());
-  const availableWords = getRandomWords(200).filter(w => !boardWordsUpper.includes(w));
-  return availableWords.slice(0, 3);
+  const availableWords = WORD_LIST.filter(w => !boardWordsUpper.includes(w));
+  
+  // Shuffle available words
+  const shuffled = [...availableWords];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  
+  return shuffled.slice(0, 3);
 }
 
 /**
@@ -202,6 +210,7 @@ export function calculateRound(clueLog, startingTeam) {
 
 /**
  * Get action prompt text for a player based on game state
+ * Returns concise status with player name and action
  * @param {object} gameState - Current game state
  * @param {string} localPlayerTeam - Local player's team ("red" or "blue" or null)
  * @param {string} localPlayerRole - Local player's role ("spymaster" or "operative" or null)
@@ -216,27 +225,32 @@ export function getActionPrompt(gameState, localPlayerTeam, localPlayerRole, pla
   const { currentTurn, phase } = gameState;
   const isMyTeamsTurn = currentTurn === localPlayerTeam;
   const isSpymaster = localPlayerRole === 'spymaster';
+  const teamName = currentTurn.charAt(0).toUpperCase() + currentTurn.slice(1);
+
+  // Find the active player
+  const activePlayer = Object.values(players).find(p => 
+    p.team === currentTurn && 
+    ((phase === 'clue' && p.role === 'spymaster') ||
+     (phase === 'guess' && p.role === 'operative'))
+  );
+  const activeName = activePlayer?.name || 'Player';
 
   if (isMyTeamsTurn) {
     if (phase === 'clue' && isSpymaster) {
-      return '🎯 YOUR TURN! Give your team a clue (word + number)';
+      return `🎯 YOUR TURN: Give a clue`;
     }
     if (phase === 'guess' && !isSpymaster) {
-      return '🎯 YOUR TURN! Guess cards or click Pass';
+      return `🎯 YOUR TURN: Guess cards`;
     }
     if (phase === 'clue' && !isSpymaster) {
-      // Find spymaster name
-      const spymaster = Object.values(players).find(
-        p => p.team === localPlayerTeam && p.role === 'spymaster'
-      );
-      return `⏳ Waiting for ${spymaster?.name || 'spymaster'} to give a clue...`;
+      return `${teamName} (${activeName}) is giving a clue...`;
     }
     if (phase === 'guess' && isSpymaster) {
-      return '⏳ Waiting for your operatives to guess...';
+      return `${teamName} operatives are guessing...`;
     }
   } else {
-    const otherTeamName = currentTurn === 'red' ? 'Red' : 'Blue';
-    return `⏳ ${otherTeamName} team is playing...`;
+    const action = phase === 'clue' ? 'giving a clue' : 'guessing';
+    return `${teamName} (${activeName}) is ${action}...`;
   }
 
   return '';

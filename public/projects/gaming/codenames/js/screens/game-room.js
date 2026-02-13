@@ -20,6 +20,7 @@ import { navigateTo } from '../main.js';
 // --- DOM Elements ---
 const gameDisplayName = document.getElementById('game-display-name');
 const gameCode = document.getElementById('game-code');
+const localPlayerInfo = document.getElementById('local-player-info');
 const btnLeaveGame = document.getElementById('btn-leave-game');
 
 // Setup phase
@@ -38,7 +39,6 @@ const midGamePicker = document.getElementById('mid-game-picker');
 // Playing phase
 const phasePlaying = document.getElementById('phase-playing');
 const roundIndicator = document.getElementById('round-indicator');
-const turnIndicator = document.getElementById('turn-indicator');
 const actionPrompt = document.getElementById('action-prompt');
 const redScoreEl = document.getElementById('red-score');
 const redTotalEl = document.getElementById('red-total');
@@ -118,6 +118,18 @@ function handleGameUpdate(data) {
   // Header
   gameDisplayName.textContent = data.displayName || '';
   gameCode.textContent = game.id;
+  
+  // Update local player info in header
+  const myData = getLocalPlayerData();
+  if (myData && myData.team && myData.role) {
+    const teamName = myData.team.charAt(0).toUpperCase() + myData.team.slice(1);
+    const roleLabel = myData.role === 'spymaster' ? 'Spymaster' : 'Operative';
+    localPlayerInfo.textContent = `${myData.name} • ${teamName} ${roleLabel}`;
+    localPlayerInfo.className = `local-player-info ${myData.team}`;
+    localPlayerInfo.classList.remove('hidden');
+  } else {
+    localPlayerInfo.classList.add('hidden');
+  }
 
   // Show correct phase
   phaseSetup.classList.toggle('hidden', data.status !== 'setup');
@@ -285,13 +297,8 @@ function renderPlayingPhase(data) {
   const currentRound = calculateRound(data.clueLog, data.startingTeam);
   roundIndicator.textContent = `Round ${currentRound}`;
 
-  // Score bar
+  // Scores
   const turnTeam = gs.currentTurn;
-  const turnLabel = turnTeam === 'red' ? "Red Team's Turn" : "Blue Team's Turn";
-  const phaseLabel = gs.phase === 'clue' ? '(giving clue)' : '(guessing)';
-  turnIndicator.textContent = `${turnLabel} ${phaseLabel}`;
-  turnIndicator.className = `turn-indicator ${turnTeam}`;
-
   redScoreEl.textContent = gs.redRevealed;
   redTotalEl.textContent = gs.redTotal;
   blueScoreEl.textContent = gs.blueRevealed;
@@ -301,16 +308,23 @@ function renderPlayingPhase(data) {
   const isHost = isLocalPlayerHost();
   btnCancelGame.classList.toggle('hidden', !isHost);
 
-  // Action prompt
+  // Action prompt with team colors
   const myTeam = getLocalPlayerTeam();
   const myRole = getLocalPlayerData()?.role;
   const promptText = getActionPrompt(gs, myTeam, myRole, data.players);
   actionPrompt.textContent = promptText;
+  
+  // Set color classes
   const isMyTurn = gs.currentTurn === myTeam && (
     (gs.phase === 'clue' && myRole === 'spymaster') ||
     (gs.phase === 'guess' && myRole === 'operative')
   );
-  actionPrompt.classList.toggle('my-turn', isMyTurn);
+  actionPrompt.className = 'action-prompt';
+  if (isMyTurn) {
+    actionPrompt.classList.add('my-turn');
+  } else {
+    actionPrompt.classList.add(`${turnTeam}-turn`);
+  }
 
   // Inspiration panel (spymasters only)
   const isSpy = isLocalPlayerSpymaster();
