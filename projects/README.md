@@ -69,6 +69,24 @@ A client-side TODO application that uses GitHub as a backend via the GitHub API.
 
 ### Multiplayer Games
 
+#### Ito 🎴
+
+Cooperative number guessing game where players describe their secret numbers using themes without revealing the values. The group then arranges themselves from lowest to highest. Perfect for family game night over video call!
+
+**Features:**
+
+- Real-time multiplayer via Firebase
+- 55 family-friendly themes across 6 categories
+- Kids (1-10) and Adults (1-100) difficulty modes
+- Host-led placement system (no drag/drop sync issues)
+- Cooperative scoring with rounds cleared tracking
+- Mobile-first design with big, touch-friendly buttons
+- **100+ comprehensive tests** covering game logic, themes, state, and scenarios
+
+**Tech:** Vanilla JS, Firebase Realtime Database, Vitest
+
+---
+
 #### Nanja Monja 🎴
 
 Multiplayer memory card game where players create funny names for quirky creatures. When the same card appears, race to shout its name!
@@ -96,22 +114,6 @@ The classic team word-guessing game. Spymasters give one-word clues to help team
 - DIY custom word cards
 - Spymaster and operative views
 - Team-based gameplay (Red vs Blue)
-
-**Tech:** Vanilla JS, Firebase Realtime Database
-
----
-
-#### Ito 🎨
-
-Cooperative number game where players describe secret numbers using creative themes. Arrange players from lowest to highest without revealing numbers!
-
-**Features:**
-
-- Real-time cooperative gameplay
-- 55+ built-in themes (food, animals, feelings, personal)
-- Kid-friendly (1-10) and adult (1-100) difficulty modes
-- Host-led player arrangement
-- Track cleared rounds and celebrate success
 
 **Tech:** Vanilla JS, Firebase Realtime Database
 

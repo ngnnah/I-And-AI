@@ -1,103 +1,202 @@
 # 🎴 Ito — Cooperative Number Game
 
-**Play remotely over video call. Get to know each other!**
+**Production-Ready • 100 Tests Passing**
+
+Play remotely over video call. Get to know each other through numbers!
 
 Players receive secret numbers and a theme (e.g., "How much do you like pizza?"). Without revealing numbers, everyone describes theirs using the theme. The group then arranges players from lowest to highest. Flip to check!
 
+---
+
+## 🚀 Quick Start
+
+### 1. Firebase Setup (10 min)
+1. Create project at [Firebase Console](https://console.firebase.google.com/)
+2. Create Realtime Database in **test mode**
+3. Update `js/game/firebase-config.js` with your credentials
+
+### 2. Test Locally
+```bash
+open index.html
+# OR
+python3 -m http.server 8000
+```
+
+### 3. Deploy
+```bash
+# Sync to public
+rsync -av --delete --exclude='node_modules' --exclude='tests' \
+  projects/gaming/ito/ public/projects/gaming/ito/
+
+# Force-add data files
+git add -f projects/gaming/ito/js/data/themes.js
+git add -f public/projects/gaming/ito/js/data/themes.js
+
+# Commit and push
+git add . && git commit -m "feat: add Ito game" && git push
+```
+
+---
+
+## 🎮 How to Play
+
+1. **Host creates game** → Choose difficulty (Kids 1-10 / Adults 1-100) → Share room code
+2. **Players join** → Enter room code
+3. **Each round**:
+   - Host starts round
+   - Everyone sees theme + secret number
+   - Discuss on video call (without revealing numbers!)
+   - Host arranges players lowest → highest
+   - Click "Reveal" to check
+4. **Win**: Complete all rounds (Kids: 8 rounds, Adults: 10 rounds)
+
+---
+
 ## 🎯 Design Decisions
 
-| Decision | Choice | Why |
-|---|---|---|
-| Target audience | Family (kids 5–7 + adults), friends, strangers | Simple cooperative play, "get to know you" themes |
-| Difficulty | Kids (1–10, 8 rounds) / Adults (1–100, 10 rounds) | Host picks per game |
-| On mistakes | Continue, track rounds cleared | Kid-friendly, no frustration |
-| Placement | Host-led (tap to arrange) | Avoids mobile drag/drop + sync conflicts |
-| Secrecy | Trust-based (no Firebase Auth) | Family game, DevTools won't be an issue |
-| Communication | External video call | App handles cards + themes only |
-| Stack | Vanilla JS + Firebase RTDB + GitHub Pages | Matches existing games (nanja-monja, codenames) |
+| Decision             | Choice                       | Rationale                                         |
+| -------------------- | ---------------------------- | ------------------------------------------------- |
+| **Target Audience**  | Family (kids 5-10 + adults)  | Simple cooperative play, "get to know you" themes |
+| **Difficulty Modes** | Kids (1-10) / Adults (1-100) | Kid-friendly MVP, scalable complexity             |
+| **Player Ordering**  | Host-led (tap to arrange)    | ✅ Avoids mobile drag/drop issues & sync conflicts |
+| **Communication**    | External video call          | App handles cards + themes only, keep it simple   |
+| **Mistake Handling** | Continue, track success      | Kid-friendly, no frustration                      |
+| **Secrecy**          | Trust-based                  | Family game, social engineering > technical auth  |
+| **Stack**            | Vanilla JS + Firebase RTDB   | Fast MVP, matches existing games pattern          |
+| **Testing**          | Vitest with 100 tests        | Production-ready, comprehensive coverage          |
+
+---
 
 ## 📁 File Structure
 
 ```
 ito/
 ├── index.html              # SPA: 4 screens
-├── css/styles.css           # Mobile-first, kid-friendly UI
+├── css/styles.css          # Mobile-first styling
 ├── js/
-│   ├── main.js              # Screen router + app init
+│   ├── main.js             # App initialization & routing
 │   ├── data/
-│   │   └── themes.js        # 55 themes (food, animals, activities, feelings, silly, personal)
+│   │   └── themes.js       # 55 themes across 6 categories
 │   ├── game/
-│   │   ├── firebase-config.js   # Firebase RTDB setup + CRUD
-│   │   ├── firebase-sync.js     # Round lifecycle actions
-│   │   ├── game-logic.js        # Deal numbers, check order, difficulty presets
-│   │   └── game-state.js        # localStorage player + game state
+│   │   ├── firebase-config.js    # Firebase setup
+│   │   ├── firebase-sync.js      # Round lifecycle
+│   │   ├── game-logic.js         # Core game functions ⭐
+│   │   └── game-state.js         # State persistence
 │   └── screens/
-│       ├── player-setup.js      # Name entry
-│       ├── lobby.js             # Create/join game, pick difficulty
-│       ├── game-room.js         # All 4 game phases
-│       └── game-over.js         # Results summary
+│       ├── player-setup.js       # Name entry
+│       ├── lobby.js              # Create/join game
+│       ├── game-room.js          # Main gameplay
+│       └── game-over.js          # Results
+└── tests/                  # 100 tests ✅
 ```
 
-## 🎮 Game Flow
+---
 
+## 🎨 Features
+
+**Two Difficulty Modes**
+- **Kids**: 1-10, 8 rounds (ages 5-10)
+- **Adults**: 1-100, 10 rounds
+
+**55 Family-Friendly Themes** across 6 categories:
+- Food (15), Animals (10), Activities (12), Feelings (7), Silly (5), Personal (6)
+
+**Cooperative Gameplay**
+- No punishment for mistakes, continue playing
+- Track success count for fun
+
+**Mobile-First Design**
+- Large touch-friendly buttons
+- Big 72px number display
+- Works on any device
+
+---
+
+## 🧪 Testing
+
+**100 tests, all passing ✅**
+
+```bash
+npm install
+npm test                  # Run all tests
+npm run test:watch        # Watch mode
+npm run test:coverage     # Coverage report
 ```
-Player Setup → Lobby → Game Room → Game Over
-                         │
-                         ├─ Waiting   (host: Start Round)
-                         ├─ Discuss   (see theme + secret number, talk on video call)
-                         ├─ Placing   (host arranges players lowest→highest)
-                         ├─ Reveal    (flip cards, check ascending order)
-                         └─ repeat until all rounds done
-```
+
+**Test Coverage:**
+- 31 tests: game logic (theme selection, number dealing, order checking)
+- 23 tests: theme data integrity
+- 26 tests: state management & localStorage
+- 20 tests: full gameplay scenarios (kids/adults modes, edge cases)
+
+**Code Quality:**
+- Pure functions (fully testable)
+- Input validation everywhere
+- Fisher-Yates shuffle for randomness
+- Theme exhaustion auto-reset
+- Error handling with descriptive messages
+
+---
 
 ## 🔥 Firebase Data Model
 
-```
+```javascript
 games/{GAME_ID}/
-  status: waiting | playing | finished
+  status: "waiting" | "playing" | "finished"
   hostId, createdBy, displayName
   settings: { difficulty, rangeMax, roundsTotal }
   players: { [playerId]: { name, isActive, joinedAt } }
-  gameState:
-    phase: waiting | discuss | placing | reveal | finished
+  gameState: {
+    phase: "waiting" | "discuss" | "placing" | "reveal"
     theme: { id, text, category }
     hands: { [playerId]: secretNumber }
     placedOrder: [playerId, ...]
     revealed, wasCorrect, firstErrorIndex
     successCount, roundsPlayed, usedThemeIds
+  }
 ```
 
-## ✅ Done (MVP)
+---
 
-- [x] 4-screen SPA (setup → lobby → game room → game over)
-- [x] Firebase RTDB sync (create/join/leave game, real-time listeners)
-- [x] Full round lifecycle (startRound → discuss → placing → reveal → nextRound)
-- [x] Host-led placement UI (add, move ↑↓, remove ✕)
-- [x] Secret number display with hide/show toggle
-- [x] 55 family-friendly themes across 6 categories
-- [x] Kids (1–10) and Adults (1–100) difficulty modes
-- [x] Cooperative scoring (rounds cleared, emoji rating)
-- [x] Mobile-first CSS (big buttons, 72px numbers, warm palette)
-- [x] **Comprehensive test suite** (100 tests covering core logic, themes, state, gameplay)
-- [x] **Code optimization** (parameter validation, edge case handling)
+## 🐛 Troubleshooting
 
-## 🧪 Testing
+**Firebase not connecting:**
+- Check config credentials in `firebase-config.js`
+- Verify RTDB rules: `{ ".read": true, ".write": true }`
 
-Run tests locally:
-
+**Themes not loading:**
 ```bash
-cd projects/gaming/ito
-npm install
-npm test              # Run all 100 tests
-npm run test:watch    # Watch mode
-npm run test:coverage # Generate coverage report
+git add -f projects/gaming/ito/js/data/themes.js
+git add -f public/projects/gaming/ito/js/data/themes.js
 ```
 
-**Test Coverage:**
-- ✅ 31 tests for game logic (pickThemes, dealNumbers, checkOrder)
-- ✅ 23 tests for theme data integrity
-- ✅ 26 tests for state management and persistence
-- ✅ 20 tests for gameplay scenarios (kids/adults modes, edge cases)
+**404 on GitHub Pages:**
+- Verify files synced to `public/`
+- Check paths are relative (not absolute)
+- Clear browser cache
+
+---
+
+## 🚀 Future Enhancements
+
+**v1.1** - Custom themes, text input  
+**v1.2** - 20-30 more themes, Family Memories category  
+**v1.3** - Rejoin mid-game, game history, avatars  
+**v2.0** - Competitive mode, team-based, leaderboards
+
+---
+
+## 📚 Documentation
+
+- **[tests/README.md](tests/README.md)** - Test suite details
+- **[copilot-plan.md](copilot-plan.md)** - Original design plan
+- **[archive/](archive/)** - Development history docs
+
+---
+
+**Status**: ✅ Production Ready  
+**Implementation**: February 13, 2026  
+**Tests**: 100/100 passing ✅
 
 See [tests/README.md](tests/README.md) for detailed test documentation.
 

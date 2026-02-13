@@ -13,16 +13,26 @@ This repository is split between:
 
 The current portfolio includes:
 
+### Educational Games
+
 - **Pokemon Math World** (`projects/pokemon-math-world`)  
-  Multi-level math game for elementary learners (addition, subtraction, multiplication, division, word problems).
+  Multi-level math game for elementary learners (addition, subtraction, multiplication, division, word problems). 40+ Pokemon, 3 difficulty levels, local progress saving.
 - **Iron Academy** (`projects/iron-academy`)  
-  Story-driven Grade 5-6 math game with hints, explanations, and local progress.
-- **GitHub TODO App** (`projects/github-todo-app`)  
-  Static TODO app that stores tasks in a user-owned GitHub repo through the Contents API.
+  Story-driven Grade 5-6 math game with Feynman-style explanations, SAT vocabulary builder, and 3 attempts per question with hints.
+
+### Multiplayer Games
+
+- **Ito** (`projects/gaming/ito`)  
+  Cooperative number guessing game. Players describe secret numbers using themes without revealing values. Great for family game night over video call.
 - **Nanja Monja** (`projects/gaming/nanja-monja`)  
-  Real-time multiplayer memory card game.
+  Real-time multiplayer memory card game where players create funny names for quirky creatures.
 - **Codenames** (`projects/gaming/codenames`)  
-  Real-time multiplayer team word game.
+  The classic team word-guessing game with spymasters and operatives.
+
+### Productivity Tools
+
+- **GitHub TODO App** (`projects/github-todo-app`)  
+  Static TODO app that stores tasks in a user-owned GitHub repo through the Contents API. Zero backend required.
 
 ## Repository layout
 
@@ -35,6 +45,7 @@ The current portfolio includes:
 │   ├── iron-academy/
 │   ├── github-todo-app/
 │   └── gaming/
+│       ├── ito/
 │       ├── nanja-monja/
 │       └── codenames/
 ├── public/                         # Published site root for GitHub Pages
@@ -94,6 +105,16 @@ npm run test:watch
 ```bash
 cd projects/gaming/codenames
 npm test
+```
+
+### Ito
+
+```bash
+cd projects/gaming/ito
+npm install
+npm test
+npm run test:watch
+npm run test:coverage
 ```
 
 ## Deployment
