@@ -403,8 +403,6 @@ function renderBoard(data, container, isFinished) {
   const isSpy = isLocalPlayerSpymaster();
   const myTeam = getLocalPlayerTeam();
   const canClick = !isFinished && gs.phase === 'guess' && gs.currentTurn === myTeam && !isSpy;
-  const myData = getLocalPlayerData();
-  const isOperative = myData?.role === 'operative';
 
   container.innerHTML = '';
   container.className = isFinished
@@ -436,7 +434,7 @@ function renderBoard(data, container, isFinished) {
       card.classList.add(`spy-${colorMap[i]}`);
     } else {
       card.classList.add('unrevealed');
-      if (canClick && isOperative) {
+      if (canClick) {
         card.classList.add('clickable');
         card.addEventListener('click', () => onCardClick(i));
       }
