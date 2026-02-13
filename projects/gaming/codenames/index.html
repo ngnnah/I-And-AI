@@ -185,15 +185,6 @@
               <button id="btn-give-clue" class="btn btn-primary">Give Clue</button>
             </div>
             <div id="clue-error" class="error-message hidden"></div>
-            <!-- Inspiration Words Panel (integrated into clue section) -->
-            <div id="inspiration-panel" class="inspiration-panel hidden">
-              <div class="inspiration-content">
-                <button id="btn-regenerate-inspiration" class="btn btn-inspiration">✨ Inspire</button>
-                <span class="inspiration-word" id="inspiration-word-1">—</span>
-                <span class="inspiration-word" id="inspiration-word-2">—</span>
-                <span class="inspiration-word" id="inspiration-word-3">—</span>
-              </div>
-            </div>
           </div>
           <!-- Current clue display (shown to everyone during guess phase) -->
           <div id="current-clue-display" class="current-clue-display hidden">
@@ -206,6 +197,16 @@
           <div id="status-message" class="status-message"></div>
           <!-- End guessing button -->
           <button id="btn-end-guessing" class="btn btn-secondary hidden">End Guessing</button>
+        </div>
+
+        <!-- Inspiration Words Panel (spymaster only, always visible) -->
+        <div id="inspiration-panel" class="inspiration-panel hidden">
+          <div class="inspiration-content">
+            <button id="btn-regenerate-inspiration" class="btn btn-inspiration">✨ Inspire</button>
+            <span class="inspiration-word" id="inspiration-word-1">—</span>
+            <span class="inspiration-word" id="inspiration-word-2">—</span>
+            <span class="inspiration-word" id="inspiration-word-3">—</span>
+          </div>
         </div>
 
         <!-- Legend (spymaster only) -->
