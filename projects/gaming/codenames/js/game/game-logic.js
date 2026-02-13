@@ -176,12 +176,22 @@ export function calculateGuessesAllowed(clueNumber) {
 
 /**
  * Generate 3 random inspiration words for spymasters
- * Excludes words that are on the board
- * @param {string[]} boardWords - Words currently on the board
+ * For word mode: Excludes words that are on the board
+ * For picture mode: Uses visual/conceptual clue words
+ * @param {string[]} boardWords - Words currently on the board (empty for picture mode)
  * @param {string[]} excludeWords - Additional words to exclude (e.g., current inspiration)
+ * @param {string} gameMode - Current game mode ('words', 'pictures', 'diy')
  * @returns {string[]} Array of 3 inspiration words
  */
-export function generateInspirationWords(boardWords, excludeWords = []) {
+export function generateInspirationWords(boardWords = [], excludeWords = [], gameMode = 'words') {
+  const config = getModeConfig(gameMode);
+  
+  // For picture/DIY modes, use specialized visual clue words
+  if (config.cardType === 'image') {
+    return getRandomPictureClues(3);
+  }
+  
+  // For word mode, exclude board words
   const boardWordsUpper = boardWords.map(w => w.toUpperCase());
   const excludeWordsUpper = excludeWords.map(w => w.toUpperCase());
   const allExcluded = [...new Set([...boardWordsUpper, ...excludeWordsUpper])];

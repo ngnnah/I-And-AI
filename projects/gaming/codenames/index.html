@@ -154,16 +154,6 @@
           <div id="player-roster" class="player-roster"></div>
         </div>
 
-        <!-- Inspiration Words Panel (Spymaster only) -->
-        <div id="inspiration-panel" class="inspiration-panel hidden">
-          <div class="inspiration-content">
-            <button id="btn-regenerate-inspiration" class="btn btn-inspiration">✨ New Ideas</button>
-            <span class="inspiration-word" id="inspiration-word-1">—</span>
-            <span class="inspiration-word" id="inspiration-word-2">—</span>
-            <span class="inspiration-word" id="inspiration-word-3">—</span>
-          </div>
-        </div>
-
         <!-- Legend (spymaster only) -->
         <div id="board-legend" class="board-legend hidden">
           <div class="legend-item"><span class="legend-swatch swatch-red"></span> Red</div>
@@ -181,18 +171,16 @@
           <div id="clue-input-section" class="clue-input-section hidden">
             <div class="clue-input-row">
               <input type="text" id="clue-word-input" placeholder="One-word clue" maxlength="30" autocomplete="off">
-              <select id="clue-number-select">
-                <option value="0">0</option>
-                <option value="1" selected>1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
-              </select>
+              <div class="clue-number-buttons" id="clue-number-buttons">
+                <button class="btn-clue-number" data-number="0">0</button>
+                <button class="btn-clue-number" data-number="1">1</button>
+                <button class="btn-clue-number" data-number="2">2</button>
+                <button class="btn-clue-number" data-number="3">3</button>
+                <button class="btn-clue-number" data-number="4">4</button>
+                <button class="btn-clue-number" data-number="5">5</button>
+                <button class="btn-clue-number" data-number="6">6</button>
+                <button class="btn-clue-number" data-number="9" title="Unlimited">∞</button>
+              </div>
               <button id="btn-give-clue" class="btn btn-primary">Give Clue</button>
             </div>
             <div id="clue-error" class="error-message hidden"></div>
@@ -208,6 +196,16 @@
           <div id="status-message" class="status-message"></div>
           <!-- End guessing button -->
           <button id="btn-end-guessing" class="btn btn-secondary hidden">End Guessing</button>
+        </div>
+
+        <!-- Inspiration Words Panel (Spymaster only) -->
+        <div id="inspiration-panel" class="inspiration-panel hidden">
+          <div class="inspiration-content">
+            <button id="btn-regenerate-inspiration" class="btn btn-inspiration">✨ Inspire</button>
+            <span class="inspiration-word" id="inspiration-word-1">—</span>
+            <span class="inspiration-word" id="inspiration-word-2">—</span>
+            <span class="inspiration-word" id="inspiration-word-3">—</span>
+          </div>
         </div>
 
         <!-- Clue Log -->

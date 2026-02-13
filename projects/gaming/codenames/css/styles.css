@@ -678,9 +678,40 @@ input[type="text"]:focus, select:focus {
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
 }
-.clue-input-row input { flex: 1; text-transform: uppercase; }
-.clue-input-row select { width: 60px; text-align: center; }
+.clue-input-row input { flex: 1; text-transform: uppercase; min-width: 150px; }
+
+.clue-number-buttons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.btn-clue-number {
+  background: var(--bg-surface);
+  border: 2px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-width: 36px;
+}
+
+.btn-clue-number:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--blue-light);
+}
+
+.btn-clue-number.selected {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+  transform: scale(1.05);
+}
 
 .current-clue-display {
   display: flex;
@@ -916,7 +947,8 @@ input[type="text"]:focus, select:focus {
 .inspiration-panel {
   background: linear-gradient(135deg, #7b1fa2 0%, #4a148c 100%);
   border-radius: var(--radius-lg);
-  padding: 12px 16px;
+  padding: 10px 14px;
+  margin-top: 12px;
   margin-bottom: 12px;
   border: 2px solid rgba(123, 31, 162, 0.5);
 }
@@ -932,11 +964,11 @@ input[type="text"]:focus, select:focus {
 .inspiration-word {
   background: rgba(255, 255, 255, 0.95);
   color: #4a148c;
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: var(--radius);
   font-weight: 700;
-  font-size: 0.95rem;
-  min-width: 70px;
+  font-size: 0.8rem;
+  min-width: 60px;
   text-align: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
@@ -946,9 +978,9 @@ input[type="text"]:focus, select:focus {
   color: #fff;
   border: 2px solid rgba(255, 255, 255, 0.5);
   font-weight: 600;
-  padding: 8px 14px;
-  font-size: 0.9rem;
-  min-width: 110px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  min-width: 90px;
   transition: all 0.2s ease;
 }
 
@@ -989,7 +1021,8 @@ input[type="text"]:focus, select:focus {
   .teams-container { grid-template-columns: 1fr; }
   .card { font-size: 0.6rem; aspect-ratio: 1.2; }
   .clue-input-row { flex-wrap: wrap; }
-  .clue-input-row input { min-width: 0; }
+  .clue-input-row input { min-width: 0; width: 100%; }
+  .clue-number-buttons { width: 100%; justify-content: center; }
   .lobby-header { flex-direction: column; gap: 8px; align-items: flex-start; }
   
   /* Mobile optimizations for new status panel */
@@ -1021,10 +1054,16 @@ input[type="text"]:focus, select:focus {
   }
   
   .inspiration-word {
-    font-size: 0.9rem;
-    padding: 8px 12px;
+    font-size: 0.7rem;
+    padding: 5px 10px;
+    min-width: 50px;
   }
   
   .btn-inspiration {
-    font-size: 0.9rem;\n    width: 100%;\n  }\n}
+    font-size: 0.75rem;
+    padding: 5px 10px;
+    width: 100%;
+    min-width: 80px;
+  }
+}
 

@@ -37,7 +37,7 @@ export async function handleStartGame(gameId) {
 
   // Generate inspiration words for spymasters
   // For word mode: exclude board words; for picture modes: use any random words
-  const inspirationWords = generateInspirationWords(board.words || []);
+  const inspirationWords = generateInspirationWords(board.words || [], [], gameMode);
 
   const updates = {
     status: 'playing',
@@ -273,7 +273,7 @@ export async function handleRematch(gameId) {
   const board = generateBoard(startingTeam, gameMode);
 
   // Generate new inspiration words (works for all modes)
-  const inspirationWords = generateInspirationWords(board.words || []);
+  const inspirationWords = generateInspirationWords(board.words || [], [], gameMode);
 
   const updates = {
     status: 'playing',

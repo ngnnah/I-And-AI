@@ -55,7 +55,7 @@ const playerRoster = document.getElementById('player-roster');
 const boardLegend = document.getElementById('board-legend');
 const clueInputSection = document.getElementById('clue-input-section');
 const clueWordInput = document.getElementById('clue-word-input');
-const clueNumberSelect = document.getElementById('clue-number-select');
+const clueNumberButtons = document.getElementById('clue-number-buttons');
 const btnGiveClue = document.getElementById('btn-give-clue');
 const clueError = document.getElementById('clue-error');
 const currentClueDisplay = document.getElementById('current-clue-display');
@@ -79,6 +79,7 @@ const btnBackLobby = document.getElementById('btn-back-lobby');
 
 let unsubscribeGame = null;
 let previouslyRevealedCards = []; // Track which cards were revealed in previous render
+let selectedClueNumber = 1; // Track the currently selected clue number
 
 // --- Lifecycle ---
 
@@ -281,7 +282,8 @@ btnCancelGame.addEventListener('click', async () => {
 btnRegenerateInspiration.addEventListener('click', () => {
   const game = getCurrentGame();
   const boardWords = game.board?.words || [];
-  const newWords = generateInspirationWords(boardWords);
+  const gameMode = game.data?.gameMode || 'pictures';
+  const newWords = generateInspirationWords(boardWords, [], gameMode);
   
   inspirationWord1.textContent = newWords[0] || '—';
   inspirationWord2.textContent = newWords[1] || '—';
@@ -334,7 +336,8 @@ function renderPlayingPhase(data) {
     // Generate local inspiration words if not already displayed
     if (!inspirationWord1.textContent || inspirationWord1.textContent === '—') {
       const boardWords = data.board?.words || [];
-      const words = generateInspirationWords(boardWords);
+      const gameMode = data.gameMode || 'pictures';
+      const words = generateInspirationWords(boardWords, [], gameMode);
       inspirationWord1.textContent = words[0] || '—';
       inspirationWord2.textContent = words[1] || '—';
       inspirationWord3.textContent = words[2] || '—';
@@ -524,13 +527,31 @@ clueWordInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') handleGiveClueClick();
 });
 
+// Clue number button selection
+clueNumberButtons.addEventListener('click', (e) => {
+  const btn = e.target.closest('.btn-clue-number');
+  if (!btn) return;
+  
+  const number = parseInt(btn.dataset.number, 10);
+  selectedClueNumber = number;
+  
+  // Update button states
+  clueNumberButtons.querySelectorAll('.btn-clue-number').forEach(b => {
+    b.classList.toggle('selected', b === btn);
+  });
+});
+
+// Initialize first button as selected
+const firstBtn = clueNumberButtons.querySelector('.btn-clue-number[data-number="1"]');
+if (firstBtn) firstBtn.classList.add('selected');
+
 async function handleGiveClueClick() {
   clueError.classList.add('hidden');
   const game = getCurrentGame();
   if (!game.id || !game.data) return;
 
   const word = clueWordInput.value.trim();
-  const number = parseInt(clueNumberSelect.value, 10);
+  const number = selectedClueNumber;
   const { valid, error } = validateClue(word, number, game.data.board.words || []);
 
   if (!valid) {
@@ -545,7 +566,11 @@ async function handleGiveClueClick() {
     const myTeam = getLocalPlayerTeam();
     await handleGiveClue(game.id, word, number, myName, myTeam);
     clueWordInput.value = '';
-    clueNumberSelect.value = '1';
+    // Reset to number 1
+    selectedClueNumber = 1;
+    clueNumberButtons.querySelectorAll('.btn-clue-number').forEach(b => {
+      b.classList.toggle('selected', b.dataset.number === '1');
+    });
   } catch (err) {
     console.error('Give clue error:', err);
   } finally {
