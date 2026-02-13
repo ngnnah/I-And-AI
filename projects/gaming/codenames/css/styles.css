@@ -417,7 +417,7 @@ input[type="text"]:focus, select:focus { border-color: var(--blue); }
 .legend-swatch.swatch-red { background: rgba(211, 47, 47, 0.5); border-color: var(--red); }
 .legend-swatch.swatch-blue { background: rgba(21, 101, 192, 0.5); border-color: var(--blue); }
 .legend-swatch.swatch-neutral { background: rgba(161, 136, 127, 0.4); border-color: #a1887f; }
-.legend-swatch.swatch-assassin { background: #1a1a1a; border-color: #ef5350; }
+.legend-swatch.swatch-assassin { background: #1a1a1a; border-color: #000; }
 
 /* -- Board -- */
 .board {
@@ -727,9 +727,9 @@ input[type="text"]:focus, select:focus { border-color: var(--blue); }
 }
 
 .action-prompt.my-turn {
-  background: linear-gradient(135deg, rgba(21, 101, 192, 0.2), rgba(21, 101, 192, 0.3));
-  border-color: var(--blue);
-  color: var(--blue-light);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.3));
+  border-color: #4caf50;
+  color: #81c784;
   animation: pulse-active 1.5s ease-in-out infinite;
 }
 
@@ -781,64 +781,50 @@ input[type="text"]:focus, select:focus { border-color: var(--blue); }
   opacity: 0.8;
 }
 
-/* Inspiration Panel */
+/* Inspiration Panel - Compact single row */
 .inspiration-panel {
-  background: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%);
+  background: linear-gradient(135deg, #7b1fa2 0%, #4a148c 100%);
   border-radius: var(--radius-lg);
-  padding: 16px;
-  margin-bottom: 16px;
-  border: 2px solid rgba(156, 39, 176, 0.5);
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  border: 2px solid rgba(123, 31, 162, 0.5);
 }
 
-.inspiration-header {
+.inspiration-content {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
-}
-
-.inspiration-icon {
-  font-size: 1.4rem;
-}
-
-.inspiration-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #fff;
-}
-
-.inspiration-words {
-  display: flex;
-  gap: 8px;
   justify-content: center;
-  margin-bottom: 12px;
   flex-wrap: wrap;
 }
 
 .inspiration-word {
   background: rgba(255, 255, 255, 0.95);
-  color: #5e35b1;
-  padding: 10px 16px;
+  color: #4a148c;
+  padding: 8px 14px;
   border-radius: var(--radius);
   font-weight: 700;
-  font-size: 1rem;
-  min-width: 80px;
+  font-size: 0.95rem;
+  min-width: 70px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .btn-inspiration {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   color: #fff;
-  border: 2px solid rgba(255, 255, 255, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.5);
   font-weight: 600;
-  padding: 10px;
-  min-height: 44px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  min-width: 110px;
+  transition: all 0.2s ease;
 }
 
 .btn-inspiration:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.7);
+  transform: translateY(-1px);
 }
 
 /* Cancel Game Button */
@@ -899,7 +885,7 @@ input[type="text"]:focus, select:focus { border-color: var(--blue); }
     padding: 3px 6px;
   }
   
-  .inspiration-words {
+  .inspiration-content {
     flex-direction: column;
   }
   
@@ -909,7 +895,5 @@ input[type="text"]:focus, select:focus { border-color: var(--blue); }
   }
   
   .btn-inspiration {
-    font-size: 0.9rem;
-  }
-}
+    font-size: 0.9rem;\n    width: 100%;\n  }\n}
 

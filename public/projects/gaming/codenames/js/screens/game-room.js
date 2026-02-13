@@ -380,9 +380,9 @@ function renderPlayerRoster(data) {
     const classes = ['player-badge', p.team];
     if (isActivePlayer) classes.push('active');
     
-    const roleIcon = p.role === 'spymaster' ? '👁️' : '🕵️';
+    const roleIcon = p.role === 'spymaster' ? '🎯' : '🔍';
     const roleLabel = p.role === 'spymaster' ? 'SPY' : 'OP';
-    const name = isYou ? `${p.name}⭐` : p.name;
+    const name = isYou ? `${p.name} 👤` : p.name;
     const teamLabel = p.team.charAt(0).toUpperCase() + p.team.slice(1);
     
     return `<span class="${classes.join(' ')}" title="${p.name} - ${teamLabel} ${roleLabel}">
