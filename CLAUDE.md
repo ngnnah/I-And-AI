@@ -4,11 +4,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Context
 
-This is a personal learning repository for a data engineer working in B2G telecom software. The focus is on AI-assisted development workflows and data engineering.
+Personal project repository focused on:
+- Educational games and interactive web apps (GitHub Pages)
+- AI-assisted development workflows
+- Rapid MVP prototyping and iteration
+
+**Live site:** https://ngnnah.github.io/I-And-AI/
+
+## Core Philosophy: "Ship Fast, Iterate Smart"
+
+- **Bias for action** - Working MVP beats perfect architecture
+- **Progressive complexity** - Start simple, scale based on real usage
+- **User delight first** - Playability and UX over technical perfection
+- **Test what matters** - Focus on core game logic and critical user flows
 
 ## MCP Integrations
 
-- **Linear**: Enabled for issue tracking and project management. Use Linear MCP tools to create, update, and query issues.
+- **Linear**: Issue tracking and project management
+- **Context7**: Up-to-date library documentation
+- **GitKraken**: Enhanced git operations and PR workflows
 
 ## Python Environment
 
@@ -22,11 +36,132 @@ This project uses **uv** for package and environment management.
 
 Always use `uv run` instead of activating the venv manually or calling `python` directly.
 
+## New Project Development: Plan First
+
+**CRITICAL WORKFLOW:** When starting any new project (app/game/product/major feature):
+
+1. **Create a planning document FIRST** - Do NOT jump to implementation
+2. **Use modern frameworks** - Prefer mature tools over vanilla JS/CSS:
+   - Games: Phaser.js, PixiJS, Kaboom.js, Godot
+   - Apps: Astro, Next.js, SvelteKit (see `.github/copilot-instructions.md` for full stack)
+   - UI: Tailwind CSS + shadcn/ui or DaisyUI
+3. **Present for review** - Share architecture, tech choices, file structure for approval
+4. **Wait for approval** - Begin implementation only after plan is reviewed
+
+### Planning Document Template
+
+```markdown
+# [Project Name] - Implementation Plan
+
+## Overview
+- Purpose: [concise description]
+- Users: [target audience]
+- MVP features: [core functionality only]
+
+## Tech Stack
+- Framework: [specific tool + version]
+- UI: [styling approach]
+- State: [management solution]
+- Backend: [if needed]
+- Testing: [strategy]
+
+## Architecture
+```
+project-name/
+├── src/
+│   ├── components/
+│   ├── state/
+│   └── utils/
+├── package.json
+└── [config files]
+```
+
+## Key Data Models
+[State structure, types, interfaces]
+
+## User Flows
+1. [Primary flow]
+2. [Secondary flow]
+
+## Implementation Phases
+1. [Setup & scaffolding]
+2. [Core features]
+3. [Polish & deploy]
+
+## Open Questions
+- [Decisions needed]
+```
+
+## Repository Structure
+
+```text
+.
+├── projects/           # Source code (edit here first)
+│   ├── pokemon-math-world/
+│   ├── iron-academy/
+│   ├── github-todo-app/
+│   └── gaming/
+│       ├── nanja-monja/
+│       ├── codenames/
+│       └── ito/
+├── public/            # GitHub Pages deployment (sync from projects/)
+│   ├── index.html     # Landing page
+│   └── projects/      # Deployed copies
+├── .claude/           # AI agent workflows and skills
+│   ├── agents/        # Specialized development modes
+│   └── skills/        # Reusable automation patterns
+└── tools/             # Python utilities (datetime, pdf)
+```
+
+## Modern Stack for Rapid Development (2026)
+
+### Game Frameworks
+- **Phaser.js** - 2D games (arcade, platformer, puzzle)
+- **PixiJS** - High-performance 2D rendering
+- **Three.js / React Three Fiber** - 3D games
+- **Kaboom.js** - Simple game programming
+- **Godot HTML5** - Full game engine
+
+### App Frameworks
+- **Astro** - Static-first (perfect for GitHub Pages)
+- **Next.js** - React with SSG mode
+- **SvelteKit** - Svelte with static adapter
+- **Vite + React/Vue/Svelte** - Fast dev builds
+
+### UI & Styling
+- **Tailwind CSS** - Utility-first CSS
+- **shadcn/ui** - React components on Radix
+- **DaisyUI** - Tailwind component library
+- **UnoCSS** - Instant atomic CSS
+
+### Multiplayer & Backend
+- **Supabase** - Postgres + Realtime + Auth
+- **Colyseus** - Multiplayer game server
+- **PartyKit** - Realtime edge computing
+- **Firebase** - Current choice for simple multiplayer
+
+### State Management
+- **Zustand** - Minimal, flexible
+- **Jotai** - Atomic state
+- **TanStack Query** - Server state, caching
+
+### Testing
+- **Vitest** - Vite-native testing
+- **Testing Library** - User-centric testing
+- **Playwright** - E2E testing (current choice)
+
 ## Code Style
 
-- Python: Follow PEP 8, use type hints for function signatures
-- SQL: Uppercase keywords, lowercase identifiers, use CTEs over nested subqueries
-- Keep files focused and small; split when exceeding ~200 lines
+**JavaScript/Web:**
+- Descriptive names: `currentPlayer`, not `p`
+- Semantic HTML with ARIA labels
+- Mobile-first, responsive by default
+- Test core logic, skip CSS details
+- Accessibility: keyboard nav, screen readers
+
+**Python:**
+- Follow PEP 8, use type hints
+- Keep files focused
 
 ## Commits
 
@@ -34,18 +169,74 @@ Always use `uv run` instead of activating the venv manually or calling `python` 
 - Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
 - Keep commits atomic and focused
 
-## Data Engineering Patterns
-
-- Prefer idempotent operations (re-runnable without side effects)
-- Use incremental loads over full refreshes when possible
-- Document data lineage and transformations
-- Handle nulls explicitly
-
 ## Security
 
 - Never commit credentials, API keys, or secrets
 - Use environment variables for configuration
 - Sanitize inputs in any data pipelines
+- Check for XSS vulnerabilities in web apps
+- Verify Firebase security rules
+
+## Development Workflow
+
+### Standard Development Cycle
+
+1. **Implement** changes in `projects/<app>/`
+2. **Test locally** (open HTML directly or use local server)
+3. **Sync** to `public/projects/<app>/` for deployment
+4. **Update** `public/index.html` if adding/removing projects
+5. **Commit & push** to `main` (auto-deploys via GitHub Actions)
+
+### Sync Example
+
+```bash
+rsync -av --delete --exclude='.git' --exclude='node_modules' \
+  projects/gaming/codenames/ public/projects/gaming/codenames/
+```
+
+### Important Git Gotcha
+
+- `.gitignore` excludes `data/` globally (matches `js/data/`)
+- **Must force-add** game data: `git add -f path/to/js/data/*.js`
+- Do this for **both** `projects/` and `public/` copies
+
+## Testing Priorities
+
+**Test:** Game logic (scoring, win conditions, turn validation), state transitions, critical user flows
+**Skip:** CSS details, animation timing, UI text, third-party library internals
+
+```bash
+npm test              # Vitest/Jest tests
+npm run test:e2e      # Playwright E2E  
+uv run pytest         # Python utilities
+```
+
+## Current Projects
+
+**Educational Games** (Pokemon Math World, Iron Academy)
+- Level progression, immediate feedback, local storage
+- Structure: `js/data/`, `js/game/`, `js/screens/`
+
+**Multiplayer Games** (Nanja Monja, Codenames, Ito)  
+- Firebase Realtime sync, optimistic UI, room codes
+- Structure: `firebase-config.js`, `firebase-sync.js`, `game-state.js`, `game-logic.js`
+
+**GitHub TODO App**
+- Static app using GitHub Contents API, PAT storage
+
+## Quick Reference
+
+**Game State Pattern:** Phase-based FSM, player map, board array, score object
+**Firebase Sync:** Listen on `gameRef.on('value')`, optimistic UI with rollback
+**Local Storage:** JSON stringify/parse wrapper
+**Responsive Grid:** `grid-template-columns: repeat(auto-fit, minmax(120px, 1fr))`
+
+## Troubleshooting
+
+**Firebase issues** → Check credentials, security rules, network
+**Game desyncs** → Verify atomic updates, handle race conditions
+**GitHub Pages 404** → Use relative paths, verify rsync, force-add data files
+**Flaky tests** → Mock randomness/timers, clean up listeners, reset state
 
 ## Skills and Agents
 

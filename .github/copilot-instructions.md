@@ -11,6 +11,60 @@
 - **User delight first** - Playability and UX over technical perfection
 - **Test what matters** - Focus on core game logic and critical user flows
 
+## New Project Workflow: Plan Before Implementation
+
+**CRITICAL:** For any new project (app/game/product/major feature), **create a high-level overview/plan for manual review FIRST**. Do NOT jump straight to implementation.
+
+### Planning Phase (Required)
+
+1. **Understand scope** - Clarify core features, user flows, and success criteria
+2. **Choose modern tools** - Select appropriate frameworks from the Modern Stack section below
+   - **Prefer mature frameworks over vanilla JS/CSS** - Bootstrap into optimal MVP from start
+   - For games: Phaser.js, PixiJS, or Godot over manual canvas
+   - For apps: Astro, Next.js, or SvelteKit over plain HTML/JS
+   - For UI: Tailwind CSS + shadcn/ui over custom CSS
+3. **Design architecture** - Propose file structure, state management, data flows
+4. **List dependencies** - package.json, build tools, deployment config
+5. **Present for review** - Share plan as markdown for approval before coding
+
+### Implementation Phase (After Approval)
+
+- Follow the approved architecture
+- Use Standard Development Cycle (see below)
+- Iterate based on feedback
+
+**Example Plan Template:**
+
+```markdown
+# [Project Name] - Implementation Plan
+
+## Overview
+- **Purpose:** [1-2 sentence description]
+- **Target users:** [who will use this]
+- **Core features:** [bullet list of MVP features]
+
+## Tech Stack
+- **Framework:** [e.g., Astro + React]
+- **UI:** [e.g., Tailwind CSS + DaisyUI]
+- **State:** [e.g., Zustand]
+- **Backend:** [e.g., Supabase] (if needed)
+- **Testing:** [e.g., Vitest + Playwright]
+
+## Architecture
+- File structure (show key directories)
+- Data models/state structure
+- Key user flows (numbered steps)
+
+## Implementation Steps
+1. [Setup and scaffolding]
+2. [Core feature A]
+3. [Core feature B]
+4. [Testing and deployment]
+
+## Open Questions
+- [Any uncertainties or choices needing input]
+```
+
 ## Repository Structure
 
 ```text
@@ -115,10 +169,31 @@ rsync -av --delete --exclude='.git' --exclude='node_modules' \
 **Test Generation** - Add test coverage for game rules and state transitions
 **Code Review** - Check for XSS, race conditions, memory leaks, accessibility
 
+## MCP Integrations
+
+- **Linear**: Issue tracking and project management
+- **Context7**: Up-to-date library documentation
+- **GitKraken**: Enhanced git operations and PR workflows
+
 ## Available Skills (`.claude/skills/`)
 
-**Common:** `commit`, `pr`, `review`, `datetime`, `calc`, `seasons`, `check-links`, `validate-urls`
-**Specialized:** `data-pipeline`, `sql`, `pdf`, `ics`, `web-screenshot`, `skill-creator`, `validate-skills`
+| Skill              | Trigger                                 |
+| ------------------ | --------------------------------------- |
+| `commit`           | create git commits                      |
+| `pr`               | create GitHub pull requests             |
+| `review`           | code review for bugs, security          |
+| `datetime`         | time, timezone, date calculations       |
+| `calc`             | calculations, unit conversions, math    |
+| `seasons`          | Japanese micro-season awareness         |
+| `check-links`      | validate internal links, relative paths |
+| `validate-urls`    | check external URLs for link rot        |
+| `data-pipeline`    | generate ETL/ELT pipelines              |
+| `sql`              | write, optimize, explain SQL            |
+| `pdf`              | read and analyze PDFs                   |
+| `ics`              | create calendar events from bookings    |
+| `web-screenshot`   | save images from web content            |
+| `skill-creator`    | create new skills/agents                |
+| `validate-skills`  | audit .claude/ directory                |
 
 ## Current Projects
 
