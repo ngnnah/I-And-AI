@@ -1,6 +1,6 @@
 # 🎴 Ito — Cooperative Number Game
 
-**Production-Ready • 100 Tests Passing**
+**Production-Ready • 123 Tests Passing**
 
 Play remotely over video call. Get to know each other through numbers!
 
@@ -101,6 +101,12 @@ ito/
 **55 Family-Friendly Themes** across 6 categories:
 - Food (15), Animals (10), Activities (12), Feelings (7), Silly (5), Personal (6)
 
+**Theme Selector & Customization**
+- 🔄 Random theme button for hosts
+- 🔍 Browse all themes by category
+- Search themes in English or Vietnamese
+- Create custom questions on the fly
+
 **Cooperative Gameplay**
 - No punishment for mistakes, continue playing
 - Track success count for fun
@@ -114,7 +120,7 @@ ito/
 
 ## 🧪 Testing
 
-**100 tests, all passing ✅**
+**123 tests, all passing ✅**
 
 ```bash
 npm install
@@ -128,6 +134,8 @@ npm run test:coverage     # Coverage report
 - 23 tests: theme data integrity
 - 26 tests: state management & localStorage
 - 20 tests: full gameplay scenarios (kids/adults modes, edge cases)
+- 15 tests: theme selector & custom themes
+- 8 tests: UI smoke tests (modal, buttons, elements)
 
 **Code Quality:**
 - Pure functions (fully testable)
@@ -196,7 +204,7 @@ git add -f public/projects/gaming/ito/js/data/themes.js
 
 **Status**: ✅ Production Ready  
 **Implementation**: February 13, 2026  
-**Tests**: 100/100 passing ✅
+**Tests**: 123/123 passing ✅
 
 See [tests/README.md](tests/README.md) for detailed test documentation.
 
