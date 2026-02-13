@@ -38,6 +38,19 @@ function createGameState(startingTeam = 'red') {
 }
 
 /**
+ * Generate a safe clue word that's not on the board
+ */
+function getSafeClueWord(boardWords) {
+  const safeWords = ['TESTCLUE', 'HINT', 'CLUEWORD', 'SAFECLUE', 'MYWORD'];
+  const boardWordsUpper = boardWords.map(w => w.toUpperCase());
+  for (const word of safeWords) {
+    if (!boardWordsUpper.includes(word)) return word;
+  }
+  // Fallback: generate a unique word
+  return 'CLUE' + Math.random().toString(36).substring(2, 6).toUpperCase();
+}
+
+/**
  * Simulate giving a clue — mirrors firebase-sync handleGiveClue logic
  */
 function giveClue(gs, word, number, spymasterName) {
@@ -282,8 +295,9 @@ describe('Turn switching logic', () => {
   it('voluntary end guessing switches turn', () => {
     const gs = createGameState('red');
     const redCards = findCardsByColor(gs, 'red');
+    const safeClue = getSafeClueWord(gs.board.words);
 
-    giveClue(gs, 'PLAY', 3, 'Alice');
+    giveClue(gs, safeClue, 3, 'Alice');
     revealCard(gs, redCards[0]); // correct, continue
     assert.equal(gs.currentTurn, 'red');
 
@@ -330,8 +344,9 @@ describe('Guess result tracking in clue log', () => {
   it('logs assassin hit correctly', () => {
     const gs = createGameState('red');
     const assassinIndex = gs.board.colorMap.indexOf('assassin');
+    const safeClue = getSafeClueWord(gs.board.words);
 
-    giveClue(gs, 'DEATH', 1, 'Alice');
+    giveClue(gs, safeClue, 1, 'Alice');
     revealCard(gs, assassinIndex);
 
     assert.equal(gs.clueLog[0].guesses[0].result, 'assassin');
