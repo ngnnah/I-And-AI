@@ -6,6 +6,7 @@
 import { listenToGame, leaveGame } from '../game/firebase-config.js';
 import {
     startRound,
+    changeTheme,
     startPlacing,
     setPlacedOrder,
     revealCards,
@@ -40,6 +41,8 @@ const startRoundBtn = document.getElementById('start-round-btn');
 
 // DOM elements - Discuss phase
 const themeText = document.getElementById('theme-text');
+const themeTextVi = document.getElementById('theme-text-vi');
+const changeThemeBtn = document.getElementById('change-theme-btn');
 const secretNumber = document.getElementById('secret-number');
 const secretNumberValue = document.getElementById('secret-number-value');
 const toggleNumberBtn = document.getElementById('toggle-number-btn');
@@ -160,8 +163,7 @@ function renderDiscuss(game) {
 
     const theme = game.gameState?.theme;
     const hand = game.gameState?.hands?.[localPlayer.id];
-
-    themeText.textContent = theme?.text || '';
+    themeTextVi.textContent = theme?.textVi || '';
 
     // Reset visibility on new round
     numberVisible = true;
@@ -171,7 +173,11 @@ function renderDiscuss(game) {
     const discussHint = document.getElementById('discuss-hint');
     if (isLocalPlayerHost()) {
         readyToPlaceBtn.classList.remove('hidden');
+        changeThemeBtn.classList.remove('hidden');
         discussHint.classList.add('hidden');
+    } else {
+        readyToPlaceBtn.classList.add('hidden');
+        changeThem.classList.add('hidden');
     } else {
         readyToPlaceBtn.classList.add('hidden');
         discussHint.classList.remove('hidden');
@@ -392,6 +398,24 @@ function handleNumberToggle() {
 }
 
 /**
+ * Handle change theme button (host only)
+ */
+async function handleChangeTheme() {
+    try {
+        changeThemeBtn.disabled = true;
+        changeThemeBtn.textContent = '🔄 Changing...';
+        await changeTheme(currentGame.id);
+        console.log('Theme changed');
+    } catch (error) {
+        console.error('Failed to change theme:', error);
+        alert('Failed to change theme: ' + error.message);
+    } finally {
+        changeThemeBtn.disabled = false;
+        changeThemeBtn.textContent = '🔄 Change Theme';
+    }
+}
+
+/**
  * Handle placement controls (place, move, remove)
  */
 async function handlePlacementAction(action, detail) {
@@ -506,6 +530,7 @@ function stopGameListener() {
 function init() {
     // Static button listeners
     startRoundBtn.addEventListener('click', handleStartRound);
+    changeThemeBtn.addEventListener('click', handleChangeTheme);
     readyToPlaceBtn.addEventListener('click', handleReadyToPlace);
     toggleNumberBtn.addEventListener('click', handleNumberToggle);
     revealBtn.addEventListener('click', handleRevealCards);

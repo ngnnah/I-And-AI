@@ -38,6 +38,32 @@ export async function startRound(gameId) {
 }
 
 /**
+ * Host changes the theme during discuss phase
+ */
+export async function changeTheme(gameId) {
+  const gameRef = ref(database, `games/${gameId}`);
+  const snapshot = await get(gameRef);
+  const game = snapshot.val();
+
+  // Only allow in discuss phase
+  if (game.gameState.phase !== 'discuss') {
+    throw new Error('Can only change theme during discuss phase');
+  }
+
+  const usedThemeIds = game.gameState.usedThemeIds || [];
+
+  // Pick a new theme (excluding already used ones)
+  const [theme] = pickThemes(1, usedThemeIds);
+
+  const updates = {
+    'gameState/theme': theme,
+    'gameState/usedThemeIds': [...usedThemeIds, theme.id]
+  };
+
+  await update(gameRef, updates);
+}
+
+/**
  * Host moves to placing phase
  */
 export async function startPlacing(gameId) {

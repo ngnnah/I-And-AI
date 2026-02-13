@@ -71,7 +71,7 @@ function createGameItem(gameId, game) {
     item.innerHTML = `
         <div class="game-info">
             <div class="game-id">${displayName}</div>
-            <div class="game-details">${playerCount} player(s) · ${difficulty}</div>
+            <div class="game-details">${playerCount} player(s) · ${difficulty} · ID: ${gameId}</div>
         </div>
         <button class="join-btn" data-game-id="${gameId}">Join</button>
     `;
@@ -96,6 +96,10 @@ async function handleCreateGame() {
         await joinGame(gameId, localPlayer.name, localPlayer.id);
 
         console.log(`Game created and joined: ${gameId} (${difficulty})`);
+        
+        // Show game ID to host in alert
+        alert(`✅ Game created!\n\nGame ID: ${gameId}\n\nShare this ID with players so they can join.`);
+        
         navigateTo('game-room');
     } catch (error) {
         console.error('Failed to create game:', error);
@@ -131,9 +135,9 @@ async function handleJoinGame(gameId) {
  * Handle join by code button click
  */
 function handleJoinByCode() {
-    const code = gameCodeInput.value.trim();
+    const code = gameCodeInput.value.trim().toUpperCase();
     if (!code) {
-        alert('Please enter a game code');
+        alert('Please enter a Game ID');
         return;
     }
     handleJoinGame(code);
