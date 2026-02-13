@@ -7,6 +7,7 @@ import { listenToGame, leaveGame } from '../game/firebase-config.js';
 import {
     startRound,
     changeTheme,
+    setCustomTheme,
     startPlacing,
     setPlacedOrder,
     revealCards,
@@ -19,6 +20,7 @@ import {
     isLocalPlayerHost,
     clearCurrentGame
 } from '../game/game-state.js';
+import { THEME_PACKS } from '../data/themes.js';
 import { navigateTo } from '../main.js';
 
 // DOM elements - Header
@@ -43,10 +45,21 @@ const startRoundBtn = document.getElementById('start-round-btn');
 const themeText = document.getElementById('theme-text');
 const themeTextVi = document.getElementById('theme-text-vi');
 const changeThemeBtn = document.getElementById('change-theme-btn');
+const chooseThemeBtn = document.getElementById('choose-theme-btn');
 const secretNumber = document.getElementById('secret-number');
 const secretNumberValue = document.getElementById('secret-number-value');
 const toggleNumberBtn = document.getElementById('toggle-number-btn');
 const readyToPlaceBtn = document.getElementById('ready-to-place-btn');
+
+// DOM elements - Theme Selector Modal
+const themeSelectorModal = document.getElementById('theme-selector-modal');
+const closeModalBtn = document.getElementById('close-modal-btn');
+const themeSearchInput = document.getElementById('theme-search-input');
+const categoryBtns = document.querySelectorAll('.category-btn');
+const themeList = document.getElementById('theme-list');
+const customThemeInput = document.getElementById('custom-theme-input');
+const customThemeInputVi = document.getElementById('custom-theme-input-vi');
+const useCustomThemeBtn = document.getElementById('use-custom-theme-btn');
 
 // DOM elements - Placing phase
 const themeReminderText = document.getElementById('theme-reminder-text');
@@ -163,6 +176,8 @@ function renderDiscuss(game) {
 
     const theme = game.gameState?.theme;
     const hand = game.gameState?.hands?.[localPlayer.id];
+    
+    themeText.textContent = theme?.text || '';
     themeTextVi.textContent = theme?.textVi || '';
 
     // Reset visibility on new round
@@ -171,15 +186,15 @@ function renderDiscuss(game) {
     secretNumber.classList.remove('number-hidden');
 
     const discussHint = document.getElementById('discuss-hint');
+    const themeControls = document.querySelector('.theme-controls');
+    
     if (isLocalPlayerHost()) {
         readyToPlaceBtn.classList.remove('hidden');
-        changeThemeBtn.classList.remove('hidden');
+        themeControls.classList.remove('hidden');
         discussHint.classList.add('hidden');
     } else {
         readyToPlaceBtn.classList.add('hidden');
-        changeThem.classList.add('hidden');
-    } else {
-        readyToPlaceBtn.classList.add('hidden');
+        themeControls.classList.add('hidden');
         discussHint.classList.remove('hidden');
     }
 }
@@ -500,6 +515,146 @@ async function handleLeaveGame() {
     }
 }
 
+// --- Theme Selector Modal ---
+
+let currentCategoryFilter = 'all';
+let currentSearchQuery = '';
+
+/**
+ * Open theme selector modal
+ */
+function openThemeSelector() {
+    currentCategoryFilter = 'all';
+    currentSearchQuery = '';
+    themeSearchInput.value = '';
+    customThemeInput.value = '';
+    customThemeInputVi.value = '';
+    
+    // Set active category button
+    categoryBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.category === 'all');
+    });
+    
+    renderThemeList();
+    themeSelectorModal.classList.remove('hidden');
+}
+
+/**
+ * Close theme selector modal
+ */
+function closeThemeSelector() {
+    themeSelectorModal.classList.add('hidden');
+}
+
+/**
+ * Filter and render theme list
+ */
+function renderThemeList() {
+    const allThemes = THEME_PACKS.all;
+    
+    // Filter by category
+    let filtered = currentCategoryFilter === 'all' 
+        ? allThemes 
+        : allThemes.filter(theme => theme.category === currentCategoryFilter);
+    
+    // Filter by search query
+    if (currentSearchQuery) {
+        const query = currentSearchQuery.toLowerCase();
+        filtered = filtered.filter(theme => 
+            theme.text.toLowerCase().includes(query) || 
+            theme.textVi.toLowerCase().includes(query)
+        );
+    }
+    
+    // Render list
+    themeList.innerHTML = '';
+    
+    if (filtered.length === 0) {
+        themeList.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No themes found</div>';
+        return;
+    }
+    
+    filtered.forEach(theme => {
+        const item = document.createElement('div');
+        item.className = 'theme-item';
+        item.dataset.themeId = theme.id;
+        
+        item.innerHTML = `
+            <span class="theme-item-text">${theme.text}</span>
+            <span class="theme-item-text-vi">${theme.textVi}</span>
+            <span class="theme-item-category">${theme.category}</span>
+        `;
+        
+        item.addEventListener('click', () => handleSelectTheme(theme));
+        themeList.appendChild(item);
+    });
+}
+
+/**
+ * Handle category filter click
+ */
+function handleCategoryFilter(category) {
+    currentCategoryFilter = category;
+    categoryBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.category === category);
+    });
+    renderThemeList();
+}
+
+/**
+ * Handle search input
+ */
+function handleSearchInput() {
+    currentSearchQuery = themeSearchInput.value.trim();
+    renderThemeList();
+}
+
+/**
+ * Handle theme selection from list
+ */
+async function handleSelectTheme(theme) {
+    try {
+        await setCustomTheme(currentGame.id, theme);
+        closeThemeSelector();
+        console.log('Theme set to:', theme.text);
+    } catch (error) {
+        console.error('Failed to set theme:', error);
+        alert('Failed to set theme: ' + error.message);
+    }
+}
+
+/**
+ * Handle custom theme submission
+ */
+async function handleUseCustomTheme() {
+    const text = customThemeInput.value.trim();
+    const textVi = customThemeInputVi.value.trim() || text;
+    
+    if (!text) {
+        alert('Please enter a question');
+        return;
+    }
+    
+    const customTheme = {
+        id: `custom_${Date.now()}`,
+        text: text,
+        textVi: textVi,
+        category: 'custom'
+    };
+    
+    try {
+        useCustomThemeBtn.disabled = true;
+        await setCustomTheme(currentGame.id, customTheme);
+        closeThemeSelector();
+        console.log('Custom theme set:', text);
+    } catch (error) {
+        console.error('Failed to set custom theme:', error);
+        alert('Failed to set custom theme: ' + error.message);
+    } finally {
+        useCustomThemeBtn.disabled = false;
+    }
+}
+
 /**
  * Start listening to game updates
  */
@@ -531,18 +686,22 @@ function init() {
     // Static button listeners
     startRoundBtn.addEventListener('click', handleStartRound);
     changeThemeBtn.addEventListener('click', handleChangeTheme);
+    chooseThemeBtn.addEventListener('click', openThemeSelector);
     readyToPlaceBtn.addEventListener('click', handleReadyToPlace);
     toggleNumberBtn.addEventListener('click', handleNumberToggle);
     revealBtn.addEventListener('click', handleRevealCards);
     nextRoundBtn.addEventListener('click', handleNextRound);
     leaveGameBtn.addEventListener('click', handleLeaveGame);
 
-    // Event delegation for placement controls
-    placedList.addEventListener('click', (e) => {
-        const target = e.target;
-        const index = parseInt(target.dataset.index);
-        if (isNaN(index)) return;
-
+    // Theme selector modal listeners
+    closeModalBtn.addEventListener('click', closeThemeSelector);
+    themeSelectorModal.querySelector('.modal-overlay').addEventListener('click', closeThemeSelector);
+    themeSearchInput.addEventListener('input', handleSearchInput);
+    useCustomThemeBtn.addEventListener('click', handleUseCustomTheme);
+    
+    categoryBtns.forEach(btn => {
+        btn.addEventListener('click', () => handleCategoryFilter(btn.dataset.category));
+    });
         if (target.classList.contains('move-up-btn')) {
             handlePlacementAction('move-up', { index });
         } else if (target.classList.contains('move-down-btn')) {

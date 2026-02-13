@@ -110,7 +110,10 @@
                     <span class="theme-label">This round's theme:</span>
                     <h2 id="theme-text" class="theme-text"></h2>
                     <p id="theme-text-vi" class="theme-text-vi"></p>
-                    <button id="change-theme-btn" class="btn-link host-only hidden">🔄 Change Theme</button>
+                    <div class="theme-controls host-only hidden">
+                        <button id="change-theme-btn" class="btn-link">🔄 Random</button>
+                        <button id="choose-theme-btn" class="btn-link">🔍 Choose</button>
+                    </div>
                 </div>
 
                 <div class="secret-number-area">
@@ -190,7 +193,61 @@
         </div>
     </div>
 
+    <!-- Theme Selector Modal -->
+    <div id="theme-selector-modal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Choose a Theme</h2>
+                <button id="close-modal-btn" class="close-btn">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <input
+                    id="theme-search-input"
+                    type="text"
+                    placeholder="Search themes..."
+                    autocomplete="off"
+                >
+
+                <div class="category-filters">
+                    <button class="category-btn active" data-category="all">All</button>
+                    <button class="category-btn" data-category="food">Food</button>
+                    <button class="category-btn" data-category="animals">Animals</button>
+                    <button class="category-btn" data-category="activities">Activities</button>
+                    <button class="category-btn" data-category="feelings">Feelings</button>
+                    <button class="category-btn" data-category="silly">Silly</button>
+                    <button class="category-btn" data-category="personal">Personal</button>
+                </div>
+
+                <div id="theme-list" class="theme-list">
+                    <!-- Theme items will be inserted here -->
+                </div>
+
+                <div class="custom-theme-section">
+                    <h3>Or Create Custom Question</h3>
+                    <input
+                        id="custom-theme-input"
+                        type="text"
+                        placeholder="Enter your question (e.g., How much do you like...)"
+                        maxlength="100"
+                        autocomplete="off"
+                    >
+                    <input
+                        id="custom-theme-input-vi"
+                        type="text"
+                        placeholder="Vietnamese translation (optional)"
+                        maxlength="100"
+                        autocomplete="off"
+                    >
+                    <button id="use-custom-theme-btn" class="btn-secondary">Use Custom Theme</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- App Entry Point (ES6 Module) -->
     <script type="module" src="js/main.js"></script>
+
 </body>
 </html>

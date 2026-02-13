@@ -64,6 +64,31 @@ export async function changeTheme(gameId) {
 }
 
 /**
+ * Host sets a custom/selected theme during discuss phase
+ * @param {string} gameId - Game ID
+ * @param {Object} theme - Theme object with {id, text, textVi, category}
+ */
+export async function setCustomTheme(gameId, theme) {
+  const gameRef = ref(database, `games/${gameId}`);
+  const snapshot = await get(gameRef);
+  const game = snapshot.val();
+
+  // Only allow in discuss phase
+  if (game.gameState.phase !== 'discuss') {
+    throw new Error('Can only change theme during discuss phase');
+  }
+
+  const usedThemeIds = game.gameState.usedThemeIds || [];
+
+  const updates = {
+    'gameState/theme': theme,
+    'gameState/usedThemeIds': [...usedThemeIds, theme.id]
+  };
+
+  await update(gameRef, updates);
+}
+
+/**
  * Host moves to placing phase
  */
 export async function startPlacing(gameId) {
