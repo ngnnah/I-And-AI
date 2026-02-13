@@ -8,11 +8,12 @@ import {
   clearCurrentGame, isLocalPlayerHost, isLocalPlayerSpymaster,
   getLocalPlayerTeam, getLocalPlayerData, isLocalPlayerTurn
 } from '../game/game-state.js';
-import { validateClue, canStartGame } from '../game/game-logic.js';
+import { validateClue, canStartGame, calculateRound, getActionPrompt } from '../game/game-logic.js';
 import { getModeConfig } from '../data/game-modes.js';
 import {
   handleTeamJoin, handleStartGame, handleGiveClue,
-  handleCardReveal, handleEndGuessing, handleNewGame
+  handleCardReveal, handleEndGuessing, handleNewGame,
+  handleRegenerateInspiration, handleCancelGame
 } from '../game/firebase-sync.js';
 import { navigateTo } from '../main.js';
 
@@ -29,17 +30,26 @@ const redOperatives = document.getElementById('red-operatives');
 const blueOperatives = document.getElementById('blue-operatives');
 const setupErrors = document.getElementById('setup-errors');
 const btnStartGame = document.getElementById('btn-start-game');
+const btnCancelGameSetup = document.getElementById('btn-cancel-game-setup');
 
 // Mid-game picker
 const midGamePicker = document.getElementById('mid-game-picker');
 
 // Playing phase
 const phasePlaying = document.getElementById('phase-playing');
+const roundIndicator = document.getElementById('round-indicator');
 const turnIndicator = document.getElementById('turn-indicator');
+const actionPrompt = document.getElementById('action-prompt');
 const redScoreEl = document.getElementById('red-score');
 const redTotalEl = document.getElementById('red-total');
 const blueScoreEl = document.getElementById('blue-score');
 const blueTotalEl = document.getElementById('blue-total');
+const btnCancelGame = document.getElementById('btn-cancel-game');
+const inspirationPanel = document.getElementById('inspiration-panel');
+const inspirationWord1 = document.getElementById('inspiration-word-1');
+const inspirationWord2 = document.getElementById('inspiration-word-2');
+const inspirationWord3 = document.getElementById('inspiration-word-3');
+const btnRegenerateInspiration = document.getElementById('btn-regenerate-inspiration');
 const boardEl = document.getElementById('board');
 const playerRoster = document.getElementById('player-roster');
 const boardLegend = document.getElementById('board-legend');
@@ -142,6 +152,9 @@ function renderSetupPhase(data) {
   btnStartGame.classList.toggle('hidden', !isHost);
   btnStartGame.disabled = !canStart;
 
+  // Cancel button (host only)
+  btnCancelGameSetup.classList.toggle('hidden', !isHost);
+
   if (isHost && !canStart && errors.length > 0) {
     setupErrors.textContent = errors.join('. ');
     setupErrors.classList.remove('hidden');
@@ -217,11 +230,59 @@ btnStartGame.addEventListener('click', async () => {
   }
 });
 
+// Cancel game (setup phase)
+btnCancelGameSetup.addEventListener('click', async () => {
+  if (!confirm('Are you sure you want to cancel this game? This will end the game for all players.')) {
+    return;
+  }
+  const game = getCurrentGame();
+  if (!game.id) return;
+  try {
+    await handleCancelGame(game.id);
+    navigateTo('lobby');
+  } catch (err) {
+    console.error('Cancel game error:', err);
+  }
+});
+
+// Cancel game (playing phase)
+btnCancelGame.addEventListener('click', async () => {
+  if (!confirm('Are you sure you want to cancel this game? This will end the game for all players.')) {
+    return;
+  }
+  const game = getCurrentGame();
+  if (!game.id) return;
+  try {
+    await handleCancelGame(game.id);
+    navigateTo('lobby');
+  } catch (err) {
+    console.error('Cancel game error:', err);
+  }
+});
+
+// Regenerate inspiration words
+btnRegenerateInspiration.addEventListener('click', async () => {
+  const game = getCurrentGame();
+  if (!game.id) return;
+  btnRegenerateInspiration.disabled = true;
+  try {
+    await handleRegenerateInspiration(game.id);
+  } catch (err) {
+    console.error('Regenerate inspiration error:', err);
+  } finally {
+    setTimeout(() => { btnRegenerateInspiration.disabled = false; }, 500);
+  }
+});
+
 // --- Playing Phase ---
 
 function renderPlayingPhase(data) {
   const gs = data.gameState;
   if (!gs) return;
+
+  // Round indicator
+  const currentRound = calculateRound(data.clueLog, data.startingTeam);
+  roundIndicator.textContent = `Round ${currentRound}`;
 
   // Score bar
   const turnTeam = gs.currentTurn;
@@ -235,8 +296,32 @@ function renderPlayingPhase(data) {
   blueScoreEl.textContent = gs.blueRevealed;
   blueTotalEl.textContent = gs.blueTotal;
 
+  // Cancel button (host only)
+  const isHost = isLocalPlayerHost();
+  btnCancelGame.classList.toggle('hidden', !isHost);
+
+  // Action prompt
+  const myTeam = getLocalPlayerTeam();
+  const myRole = getLocalPlayerData()?.role;
+  const promptText = getActionPrompt(gs, myTeam, myRole, data.players);
+  actionPrompt.textContent = promptText;
+  const isMyTurn = gs.currentTurn === myTeam && (
+    (gs.phase === 'clue' && myRole === 'spymaster') ||
+    (gs.phase === 'guess' && myRole === 'operative')
+  );
+  actionPrompt.classList.toggle('my-turn', isMyTurn);
+
+  // Inspiration panel (spymasters only)
+  const isSpy = isLocalPlayerSpymaster();
+  inspirationPanel.classList.toggle('hidden', !isSpy);
+  if (isSpy && data.inspirationWords) {
+    inspirationWord1.textContent = data.inspirationWords[0] || '—';
+    inspirationWord2.textContent = data.inspirationWords[1] || '—';
+    inspirationWord3.textContent = data.inspirationWords[2] || '—';
+  }
+
   // Legend (spymaster only)
-  boardLegend.classList.toggle('hidden', !isLocalPlayerSpymaster());
+  boardLegend.classList.toggle('hidden', !isSpy);
 
   // Player roster
   renderPlayerRoster(data);
@@ -256,35 +341,40 @@ function renderPlayerRoster(data) {
   const gs = data.gameState;
   const localId = getLocalPlayer().id;
   const activeTurn = gs.currentTurn;
+  const activePhase = gs.phase;
 
-  const buildTeamHtml = (team) => {
-    const teamPlayers = Object.entries(players)
-      .filter(([, p]) => p.isActive && p.team === team)
-      .sort((a, b) => {
-        // Spymaster first, then operatives
-        if (a[1].role === 'spymaster') return -1;
-        if (b[1].role === 'spymaster') return 1;
-        return 0;
-      });
+  // Collect all active players
+  const allPlayers = Object.entries(players)
+    .filter(([, p]) => p.isActive && p.team && p.role)
+    .sort((a, b) => {
+      // Sort: Red spymaster, Red ops, Blue spymaster, Blue ops
+      const teamOrder = { red: 0, blue: 1 };
+      const roleOrder = { spymaster: 0, operative: 1 };
+      if (a[1].team !== b[1].team) return teamOrder[a[1].team] - teamOrder[b[1].team];
+      return roleOrder[a[1].role] - roleOrder[b[1].role];
+    });
 
-    if (teamPlayers.length === 0) return '';
+  const badgesHtml = allPlayers.map(([id, p]) => {
+    const isYou = id === localId;
+    const isActivePlayer = p.team === activeTurn && (
+      (activePhase === 'clue' && p.role === 'spymaster') ||
+      (activePhase === 'guess' && p.role === 'operative')
+    );
+    
+    const classes = ['player-badge', p.team];
+    if (isActivePlayer) classes.push('active');
+    
+    const roleIcon = p.role === 'spymaster' ? '👁️' : '🕵️';
+    const roleLabel = p.role === 'spymaster' ? 'SPY' : 'OP';
+    const name = isYou ? `${p.name}⭐` : p.name;
+    const teamLabel = p.team.charAt(0).toUpperCase() + p.team.slice(1);
+    
+    return `<span class="${classes.join(' ')}" title="${p.name} - ${teamLabel} ${roleLabel}">
+      ${name}<span class="role-icon">${roleIcon}</span>
+    </span>`;
+  }).join('');
 
-    const playersHtml = teamPlayers.map(([id, p]) => {
-      const isYou = id === localId;
-      const isActive = team === activeTurn;
-      const classes = ['roster-player'];
-      if (isActive) classes.push('is-active-turn');
-      if (isYou) classes.push('is-you');
-      const roleLabel = p.role === 'spymaster' ? 'SPY' : 'OP';
-      const roleClass = p.role === 'spymaster' ? 'spymaster' : 'operative';
-      const name = isYou ? `${p.name} (you)` : p.name;
-      return `<span class="${classes.join(' ')}"><span class="roster-role ${roleClass}">${roleLabel}</span> ${name}</span>`;
-    }).join('');
-
-    return `<div class="roster-team ${team}">${playersHtml}</div>`;
-  };
-
-  playerRoster.innerHTML = buildTeamHtml('red') + buildTeamHtml('blue');
+  playerRoster.innerHTML = badgesHtml || '<span style="color: var(--text-muted);">No players</span>';
 }
 
 function renderBoard(data, container, isFinished) {

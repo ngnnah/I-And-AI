@@ -10,7 +10,10 @@ import {
   checkWinCondition,
   canStartGame,
   getTeamPlayers,
-  calculateGuessesAllowed
+  calculateGuessesAllowed,
+  generateInspirationWords,
+  calculateRound,
+  getActionPrompt
 } from '../js/game/game-logic.js';
 
 describe('shuffleArray', () => {
@@ -421,3 +424,104 @@ describe('validateClue (picture mode — empty boardWords)', () => {
     assert.equal(validateClue('ANYTHING', 2, []).valid, true);
   });
 });
+
+describe('generateInspirationWords', () => {
+  it('returns exactly 3 words', () => {
+    const boardWords = ['APPLE', 'BANANA', 'CHERRY'];
+    const inspiration = generateInspirationWords(boardWords);
+    assert.equal(inspiration.length, 3);
+  });
+
+  it('excludes words that are on the board', () => {
+    const boardWords = ['AFRICA', 'AGENT', 'AIR', 'ALIEN', 'AMAZON'];
+    const inspiration = generateInspirationWords(boardWords);
+    const boardWordsUpper = boardWords.map(w => w.toUpperCase());
+    for (const word of inspiration) {
+      assert.ok(!boardWordsUpper.includes(word), `${word} should not be in board words`);
+    }
+  });
+
+  it('returns unique words', () => {
+    const inspiration = generateInspirationWords(['APPLE']);
+    assert.equal(new Set(inspiration).size, 3);
+  });
+});
+
+describe('calculateRound', () => {
+  it('returns 1 when clueLog is empty', () => {
+    assert.equal(calculateRound([], 'red'), 1);
+    assert.equal(calculateRound(null, 'red'), 1);
+  });
+
+  it('returns 1 when only one team has given a clue', () => {
+    const clueLog = [{ team: 'red', word: 'FRUIT', number: 2 }];
+    assert.equal(calculateRound(clueLog, 'red'), 1);
+  });
+
+  it('returns 2 when both teams have given one clue each', () => {
+    const clueLog = [
+      { team: 'red', word: 'FRUIT', number: 2 },
+      { team: 'blue', word: 'METAL', number: 3 }
+    ];
+    assert.equal(calculateRound(clueLog, 'red'), 1);
+  });
+
+  it('returns 2 when three clues have been given', () => {
+    const clueLog = [
+      { team: 'red', word: 'FRUIT', number: 2 },
+      { team: 'blue', word: 'METAL', number: 3 },
+      { team: 'red', word: 'ANIMAL', number: 1 }
+    ];
+    assert.equal(calculateRound(clueLog, 'red'), 2);
+  });
+
+  it('handles object-based clueLog (Firebase format)', () => {
+    const clueLog = {
+      0: { team: 'red', word: 'FRUIT', number: 2 },
+      1: { team: 'blue', word: 'METAL', number: 3 }
+    };
+    assert.equal(calculateRound(clueLog, 'red'), 1);
+  });
+});
+
+describe('getActionPrompt', () => {
+  const mockPlayers = {
+    'p1': { name: 'Alice', team: 'red', role: 'spymaster' },
+    'p2': { name: 'Bob', team: 'red', role: 'operative' },
+    'p3': { name: 'Charlie', team: 'blue', role: 'spymaster' },
+    'p4': { name: 'Diana', team: 'blue', role: 'operative' }
+  };
+
+  it('returns waiting message when no team assigned', () => {
+    const gameState = { currentTurn: 'red', phase: 'clue' };
+    const prompt = getActionPrompt(gameState, null, null, mockPlayers);
+    assert.ok(prompt.includes('Waiting'));
+  });
+
+  it('tells spymaster to give clue when it is their turn and clue phase', () => {
+    const gameState = { currentTurn: 'red', phase: 'clue' };
+    const prompt = getActionPrompt(gameState, 'red', 'spymaster', mockPlayers);
+    assert.ok(prompt.includes('YOUR TURN'));
+    assert.ok(prompt.includes('clue'));
+  });
+
+  it('tells operative to guess when it is their turn and guess phase', () => {
+    const gameState = { currentTurn: 'red', phase: 'guess' };
+    const prompt = getActionPrompt(gameState, 'red', 'operative', mockPlayers);
+    assert.ok(prompt.includes('YOUR TURN'));
+    assert.ok(prompt.includes('Guess') || prompt.includes('guess'));
+  });
+
+  it('tells operative to wait for spymaster during clue phase', () => {
+    const gameState = { currentTurn: 'red', phase: 'clue' };
+    const prompt = getActionPrompt(gameState, 'red', 'operative', mockPlayers);
+    assert.ok(prompt.includes('Waiting') || prompt.includes('Alice'));
+  });
+
+  it('tells player to wait when other team is playing', () => {
+    const gameState = { currentTurn: 'blue', phase: 'clue' };
+    const prompt = getActionPrompt(gameState, 'red', 'spymaster', mockPlayers);
+    assert.ok(prompt.includes('Blue team'));
+  });
+});
+

@@ -3,8 +3,8 @@
  * All functions that write to Firebase live here
  */
 
-import { database, ref, get, update, set } from './firebase-config.js';
-import { generateBoard, checkGuessResult, checkWinCondition } from './game-logic.js';
+import { database, ref, get, update, set, remove } from './firebase-config.js';
+import { generateBoard, checkGuessResult, checkWinCondition, generateInspirationWords } from './game-logic.js';
 import { getModeConfig } from '../data/game-modes.js';
 import { getLocalPlayer, getCurrentGame } from './game-state.js';
 
@@ -35,10 +35,16 @@ export async function handleStartGame(gameId) {
   const startingTeam = Math.random() < 0.5 ? 'red' : 'blue';
   const board = generateBoard(startingTeam, gameMode);
 
+  // Generate inspiration words for spymasters
+  const inspirationWords = board.words 
+    ? generateInspirationWords(board.words)
+    : ['CLUE', 'HINT', 'WORD']; // Placeholder for picture modes
+
   const updates = {
     status: 'playing',
     startingTeam,
     startedAt: Date.now(),
+    inspirationWords,
     'board/colorMap': board.colorMap,
     'gameState/currentTurn': startingTeam,
     'gameState/phase': 'clue',
@@ -237,6 +243,34 @@ export async function handleNewGame(gameId) {
     board: null,
     gameState: null,
     clueLog: null,
+    inspirationWords: null,
     ...playerUpdates
   });
+}
+
+/**
+ * Regenerate inspiration words for spymasters
+ * @param {string} gameId
+ */
+export async function handleRegenerateInspiration(gameId) {
+  const snapshot = await get(ref(database, `games/${gameId}`));
+  if (!snapshot.exists()) return;
+  const game = snapshot.val();
+  const boardWords = game.board?.words || [];
+  
+  const newWords = boardWords.length > 0 
+    ? generateInspirationWords(boardWords)
+    : ['CLUE', 'HINT', 'WORD'];
+
+  await update(ref(database, `games/${gameId}`), {
+    inspirationWords: newWords
+  });
+}
+
+/**
+ * Cancel/delete a game (host only)
+ * @param {string} gameId
+ */
+export async function handleCancelGame(gameId) {
+  await remove(ref(database, `games/${gameId}`));
 }

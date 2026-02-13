@@ -121,7 +121,10 @@
           </div>
         </div>
         <div id="setup-errors" class="error-message hidden"></div>
-        <button id="btn-start-game" class="btn btn-primary btn-wide hidden">Start Game</button>
+        <div class="setup-actions">
+          <button id="btn-start-game" class="btn btn-primary btn-wide hidden">Start Game</button>
+          <button id="btn-cancel-game-setup" class="btn btn-danger-sm hidden">Cancel Game</button>
+        </div>
       </div>
 
       <!-- Mid-game team picker overlay -->
@@ -138,17 +141,32 @@
 
       <!-- Phase: Playing -->
       <div id="phase-playing" class="phase hidden">
-        <!-- Turn & Score bar -->
-        <div class="score-bar">
-          <div id="turn-indicator" class="turn-indicator"></div>
-          <div class="scores">
+        <!-- New Game Status Panel -->
+        <div class="game-status-panel">
+          <div class="status-row-1">
+            <span id="round-indicator" class="round-indicator">Round 1</span>
             <span class="score red">Red: <span id="red-score">0</span>/<span id="red-total">9</span></span>
             <span class="score blue">Blue: <span id="blue-score">0</span>/<span id="blue-total">8</span></span>
+            <button id="btn-cancel-game" class="btn btn-danger-sm hidden">Cancel Game</button>
           </div>
+          <div id="turn-indicator" class="turn-indicator"></div>
+          <div id="action-prompt" class="action-prompt">Waiting for game to start...</div>
+          <div id="player-roster" class="player-roster"></div>
         </div>
 
-        <!-- Player Roster -->
-        <div id="player-roster" class="player-roster"></div>
+        <!-- Inspiration Words Panel (Spymaster only) -->
+        <div id="inspiration-panel" class="inspiration-panel hidden">
+          <div class="inspiration-header">
+            <span class="inspiration-icon">💡</span>
+            <span class="inspiration-title">Shared Inspiration (for all spymasters)</span>
+          </div>
+          <div class="inspiration-words">
+            <span class="inspiration-word" id="inspiration-word-1">—</span>
+            <span class="inspiration-word" id="inspiration-word-2">—</span>
+            <span class="inspiration-word" id="inspiration-word-3">—</span>
+          </div>
+          <button id="btn-regenerate-inspiration" class="btn btn-inspiration">🔄 Get New Ideas</button>
+        </div>
 
         <!-- Legend (spymaster only) -->
         <div id="board-legend" class="board-legend hidden">
