@@ -67,6 +67,14 @@
           <p class="empty-message">No games available</p>
         </div>
       </div>
+
+      <div class="lobby-section">
+        <h2>Game History</h2>
+        <div id="history-container" class="history-list">
+          <p class="empty-message">No completed games yet</p>
+        </div>
+        <button id="toggle-history-btn" class="btn btn-link" style="display: none;">Show More</button>
+      </div>
     </div>
   </div>
 
@@ -142,6 +150,9 @@
 
       <!-- Phase: Playing -->
       <div id="phase-playing" class="phase hidden">
+        <!-- Player Roster (at top) -->
+        <div id="player-roster" class="player-roster"></div>
+
         <!-- Game Status Panel -->
         <div class="game-status-panel">
           <div class="status-row-1">
@@ -151,21 +162,9 @@
             <button id="btn-cancel-game" class="btn btn-danger-sm hidden">Cancel Game</button>
           </div>
           <div id="action-prompt" class="action-prompt">Waiting for game to start...</div>
-          <div id="player-roster" class="player-roster"></div>
         </div>
 
-        <!-- Legend (spymaster only) -->
-        <div id="board-legend" class="board-legend hidden">
-          <div class="legend-item"><span class="legend-swatch swatch-red"></span> Red</div>
-          <div class="legend-item"><span class="legend-swatch swatch-blue"></span> Blue</div>
-          <div class="legend-item"><span class="legend-swatch swatch-neutral"></span> Neutral</div>
-          <div class="legend-item"><span class="legend-swatch swatch-assassin"></span> ☠️ Assassin</div>
-        </div>
-
-        <!-- 5x5 Board -->
-        <div id="board" class="board"></div>
-
-        <!-- Clue Area -->
+        <!-- Clue Area (below status, above board) -->
         <div id="clue-area" class="clue-area">
           <!-- Spymaster input (shown only to active spymaster during clue phase) -->
           <div id="clue-input-section" class="clue-input-section hidden">
@@ -198,6 +197,31 @@
           <button id="btn-end-guessing" class="btn btn-secondary hidden">End Guessing</button>
         </div>
 
+        <!-- Legend (spymaster only) -->
+        <div id="board-legend" class="board-legend hidden">
+          <div class="legend-item"><span class="legend-swatch swatch-red"></span> Red</div>
+          <div class="legend-item"><span class="legend-swatch swatch-blue"></span> Blue</div>
+          <div class="legend-item"><span class="legend-swatch swatch-neutral"></span> Neutral</div>
+          <div class="legend-item"><span class="legend-swatch swatch-assassin"></span> ☠️ Assassin</div>
+        </div>
+
+        <!-- Board with indices -->
+        <div class="board-container">
+          <div class="board-indices board-indices-left">
+            <div class="board-index">1</div>
+            <div class="board-index">6</div>
+            <div class="board-index">11</div>
+            <div class="board-index">16</div>
+          </div>
+          <div id="board" class="board"></div>
+          <div class="board-indices board-indices-right">
+            <div class="board-index">5</div>
+            <div class="board-index">10</div>
+            <div class="board-index">15</div>
+            <div class="board-index">20</div>
+          </div>
+        </div>
+
         <!-- Inspiration Words Panel (Spymaster only) -->
         <div id="inspiration-panel" class="inspiration-panel hidden">
           <div class="inspiration-content">
@@ -223,7 +247,21 @@
           <p id="win-reason"></p>
         </div>
         <!-- Board still visible -->
-        <div id="finished-board" class="board board-finished"></div>
+        <div class="board-container">
+          <div class="board-indices board-indices-left">
+            <div class="board-index">1</div>
+            <div class="board-index">6</div>
+            <div class="board-index">11</div>
+            <div class="board-index">16</div>
+          </div>
+          <div id="finished-board" class="board board-finished"></div>
+          <div class="board-indices board-indices-right">
+            <div class="board-index">5</div>
+            <div class="board-index">10</div>
+            <div class="board-index">15</div>
+            <div class="board-index">20</div>
+          </div>
+        </div>
         <div class="clue-log-section">
           <h3>Clue Log</h3>
           <div id="finished-clue-log" class="clue-log"></div>

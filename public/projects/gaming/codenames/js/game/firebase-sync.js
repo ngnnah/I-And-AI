@@ -153,6 +153,11 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     updates['status'] = 'finished';
     updates['finishedAt'] = Date.now();
     await update(ref(database, `games/${gameId}`), updates);
+    
+    // Save to history
+    const { saveGameHistory } = await import('./firebase-config.js');
+    const finalGame = (await get(ref(database, `games/${gameId}`))).val();
+    await saveGameHistory(gameId, finalGame);
     return;
   }
 
@@ -165,6 +170,11 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     updates['status'] = 'finished';
     updates['finishedAt'] = Date.now();
     await update(ref(database, `games/${gameId}`), updates);
+    
+    // Save to history
+    const { saveGameHistory } = await import('./firebase-config.js');
+    const finalGame = (await get(ref(database, `games/${gameId}`))).val();
+    await saveGameHistory(gameId, finalGame);
     return;
   }
 

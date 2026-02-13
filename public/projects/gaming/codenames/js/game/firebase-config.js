@@ -176,3 +176,68 @@ export function listenToAllGames(callback) {
     callback(snapshot.exists() ? snapshot.val() : {});
   });
 }
+
+/**
+ * Save game to history
+ * @param {string} gameId - Game ID
+ * @param {object} gameData - Final game data
+ * @returns {Promise<void>}
+ */
+export async function saveGameHistory(gameId, gameData) {
+  const historyRef = ref(database, `gameHistory/${gameId}`);
+
+  const historyData = {
+    gameId,
+    finishedAt: gameData.finishedAt || Date.now(),
+    duration: (gameData.finishedAt || Date.now()) - gameData.createdAt,
+    displayName: gameData.displayName,
+    gameMode: gameData.gameMode || 'words',
+    winner: gameData.gameState?.winner || null,
+    winReason: gameData.gameState?.winReason || null,
+    createdBy: gameData.createdBy,
+    players: {}
+  };
+
+  // Copy player data
+  for (const [playerId, player] of Object.entries(gameData.players || {})) {
+    historyData.players[playerId] = {
+      name: player.name,
+      team: player.team,
+      role: player.role
+    };
+  }
+
+  await set(historyRef, historyData);
+}
+
+/**
+ * Get game history
+ * @param {number} limit - Number of games to fetch
+ * @returns {Promise<object>} Game history
+ */
+export async function getGameHistory(limit = 10) {
+  const historyRef = ref(database, 'gameHistory');
+  const snapshot = await get(historyRef);
+
+  if (!snapshot.exists()) {
+    return {};
+  }
+
+  const history = snapshot.val();
+
+  // Convert to array and sort by finishedAt
+  const historyArray = Object.entries(history).map(([id, data]) => ({
+    id,
+    ...data
+  }));
+
+  historyArray.sort((a, b) => b.finishedAt - a.finishedAt);
+
+  // Return limited results as object
+  const limitedHistory = {};
+  historyArray.slice(0, limit).forEach(game => {
+    limitedHistory[game.id] = game;
+  });
+
+  return limitedHistory;
+}

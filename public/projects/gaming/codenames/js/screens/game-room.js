@@ -352,6 +352,7 @@ function renderPlayingPhase(data) {
 
   // Board
   renderBoard(data, boardEl, false);
+  updateBoardIndices(data.gameMode || 'words');
 
   // Clue area
   renderClueArea(data);
@@ -399,6 +400,36 @@ function renderPlayerRoster(data) {
   }).join('');
 
   playerRoster.innerHTML = badgesHtml || '<span style="color: var(--text-muted);">No players</span>';
+}
+
+/**
+ * Update board indices based on game mode (5x5 for words, 5x4 for pictures/DIY)
+ */
+function updateBoardIndices(gameMode) {
+  const config = getModeConfig(gameMode);
+  const gridRows = Math.ceil(config.totalCards / config.gridCols);
+  
+  // Generate left indices (1, 6, 11, 16, [21])
+  const leftIndices = [];
+  const rightIndices = [];
+  
+  for (let row = 0; row < gridRows; row++) {
+    leftIndices.push(row * config.gridCols + 1);
+    rightIndices.push((row + 1) * config.gridCols);
+  }
+  
+  // Update all board index containers (both active and finished board)
+  document.querySelectorAll('.board-indices-left').forEach(container => {
+    container.innerHTML = leftIndices.map(num => 
+      `<div class="board-index">${num}</div>`
+    ).join('');
+  });
+  
+  document.querySelectorAll('.board-indices-right').forEach(container => {
+    container.innerHTML = rightIndices.map(num => 
+      `<div class="board-index">${num}</div>`
+    ).join('');
+  });
 }
 
 function renderBoard(data, container, isFinished) {
@@ -649,6 +680,7 @@ function renderFinishedPhase(data) {
 
   // Render board with all cards revealed
   renderBoard(data, finishedBoard, true);
+  updateBoardIndices(data.gameMode || 'words');
 
   // Clue log
   renderClueLog(data.clueLog, finishedClueLog);
