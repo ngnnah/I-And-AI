@@ -236,10 +236,7 @@ function createHistoryItem(game) {
 toggleHistoryBtn.addEventListener('click', () => {
   showAllHistory = !showAllHistory;
   renderGameHistory();
-});     navigateTo('game-room');
-    });
-  });
-}
+});
 
 // Lifecycle
 window.addEventListener('screen-changed', (e) => {
