@@ -29,7 +29,7 @@ export const PICTURE_CLUES = [
   
   // Animals (general categories)
   "BIRD", "FISH", "ANIMAL", "CREATURE", "WING", "FIN", "SCALE", "FUR",
-  "FEATHER", "TAIL", "HORN", "CLAW", "WILD", "DOMESTIC",
+  "FEATHER", "TAIL", "HORN", "CLAW", "DOMESTIC",
   
   // Human Elements
   "FACE", "EYE", "HAND", "HEAD", "BODY", "SMILE", "PORTRAIT", "FIGURE",
@@ -71,7 +71,7 @@ export const PICTURE_CLUES = [
   "MODERN", "FUTURE", "VINTAGE", "OLD", "NEW", "RETRO",
   
   // Art & Style
-  "ARTISTIC", "ABSTRACT", "PATTERN", "DESIGN", "SYMMETRY", "ASYMMETRY",
+  "ARTISTIC", "ABSTRACT", "DESIGN", "ASYMMETRY",
   "MINIMAL", "COMPLEX", "SIMPLE", "ELEGANT", "BOLD", "SUBTLE",
   
   // Food & Organic (general)
@@ -91,8 +91,8 @@ export const PICTURE_CLUES = [
   "STRIPE", "CHECKERED", "GRADIENT",
   
   // Abstract Qualities
-  "SOFT", "LOUD", "QUIET", "GENTLE", "AGGRESSIVE", "DELICATE", "STRONG",
-  "WEAK", "POWERFUL", "FRAGILE", "SOLID", "HOLLOW", "DENSE", "LIGHT",
+  "LOUD", "QUIET", "GENTLE", "AGGRESSIVE", "DELICATE", "STRONG",
+  "WEAK", "POWERFUL", "FRAGILE", "HOLLOW", "DENSE",
   "HEAVY", "EMPTY", "FULL",
   
   // Concepts & Ideas
