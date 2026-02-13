@@ -6,7 +6,9 @@ Interactive web apps built with AI assistance, deployed to GitHub Pages.
 
 ## Apps
 
-### Pokemon Math World
+### Educational Games
+
+#### Pokemon Math World
 
 A progressive math learning game with Pokemon theme. Three difficulty levels take players from simple addition through multiplication, division, and word problems.
 
@@ -24,11 +26,13 @@ A progressive math learning game with Pokemon theme. Three difficulty levels tak
 - Per-question progress saving
 - Sound effects and animations
 
+**Tech:** Vanilla JS, localStorage
+
 ![Pokemon Math World](../resources/screenshots/20260126-015909_pokemon-math-world_world-select.png)
 
 ---
 
-### Iron Academy
+#### Iron Academy
 
 Math learning game for Grade 5-6 students with Tony Stark / Iron Man theme.
 
@@ -40,11 +44,13 @@ Math learning game for Grade 5-6 students with Tony Stark / Iron Man theme.
 - Progress saving with localStorage
 - 6 chapters covering pre-algebra concepts
 
+**Tech:** Vanilla JS, localStorage
+
 ![Iron Academy](../resources/screenshots/20260126-015909_iron-academy_start.png)
 
 ---
 
-### GitHub TODO App
+#### GitHub TODO App
 
 A client-side TODO application that uses GitHub as a backend via the GitHub API.
 
@@ -55,7 +61,59 @@ A client-side TODO application that uses GitHub as a backend via the GitHub API.
 - GitHub OAuth authentication
 - Create, complete, and delete tasks
 
+**Tech:** Vanilla JS, GitHub API, OAuth
+
 ![GitHub TODO App](../resources/screenshots/20260126-015909_github-todo-app_login.png)
+
+---
+
+### Multiplayer Games
+
+#### Nanja Monja 🎴
+
+Multiplayer memory card game where players create funny names for quirky creatures. When the same card appears, race to shout its name!
+
+**Features:**
+
+- Real-time multiplayer via Firebase
+- 6 card sets (Animals, Cats, Creatures, Nature, Summer, Toys)
+- Room-based games with join codes
+- Mobile-friendly for remote play over video call
+- Score tracking and winner celebration
+
+**Tech:** Vanilla JS, Firebase Realtime Database
+
+---
+
+#### Codenames 🕵️
+
+The classic team word-guessing game. Spymasters give one-word clues to help teammates identify their agents while avoiding the assassin.
+
+**Features:**
+
+- Real-time multiplayer with Firebase sync
+- Multiple word lists and game modes
+- DIY custom word cards
+- Spymaster and operative views
+- Team-based gameplay (Red vs Blue)
+
+**Tech:** Vanilla JS, Firebase Realtime Database
+
+---
+
+#### Ito 🎨
+
+Cooperative number game where players describe secret numbers using creative themes. Arrange players from lowest to highest without revealing numbers!
+
+**Features:**
+
+- Real-time cooperative gameplay
+- 55+ built-in themes (food, animals, feelings, personal)
+- Kid-friendly (1-10) and adult (1-100) difficulty modes
+- Host-led player arrangement
+- Track cleared rounds and celebrate success
+
+**Tech:** Vanilla JS, Firebase Realtime Database
 
 ---
 
@@ -66,6 +124,10 @@ projects/           <- Source code (development)
     pokemon-math-world/
     iron-academy/
     github-todo-app/
+    gaming/
+        nanja-monja/
+        codenames/
+        ito/
 
 public/             <- Deployed files (GitHub Pages serves from here)
     index.html      <- Landing page
@@ -73,6 +135,10 @@ public/             <- Deployed files (GitHub Pages serves from here)
         pokemon-math-world/
         iron-academy/
         github-todo-app/
+        gaming/
+            nanja-monja/
+            codenames/
+            ito/
 ```
 
 ### How It Works
@@ -91,12 +157,18 @@ public/             <- Deployed files (GitHub Pages serves from here)
 
 ### Tech Stack
 
-All apps use:
-
-- **Vanilla JavaScript** - No frameworks, just ES modules
+**Educational Games:**
+- **Vanilla JavaScript** - ES modules, no frameworks
 - **CSS3** - Animations, gradients, responsive design
-- **localStorage** - Client-side persistence
-- **GitHub Pages** - Free static hosting
+- **localStorage** - Client-side progress persistence
+
+**Multiplayer Games:**
+- **Vanilla JavaScript** - ES modules, no frameworks
+- **Firebase Realtime Database** - Real-time sync, room-based games
+- **CSS3** - Mobile-first, touch-friendly design
+
+**All Apps:**
+- **GitHub Pages** - Free static hosting, automatic deployment
 
 ## Adding a New Project
 

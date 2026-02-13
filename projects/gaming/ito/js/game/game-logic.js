@@ -8,8 +8,18 @@ import { THEME_PACKS } from '../data/themes.js';
  * @returns {object[]} Array of theme objects
  */
 export function pickThemes(count, usedThemeIds = []) {
+  if (count < 0) {
+    throw new Error('Count must be non-negative');
+  }
+  if (count === 0) return [];
+
   const usedSet = new Set(usedThemeIds);
   const available = THEME_PACKS.all.filter(t => !usedSet.has(t.id));
+
+  if (available.length === 0) {
+    console.warn('No available themes remaining, resetting used themes');
+    return pickThemes(Math.min(count, THEME_PACKS.all.length), []);
+  }
 
   // Shuffle available themes using Fisher-Yates
   const shuffled = [...available];
@@ -18,7 +28,7 @@ export function pickThemes(count, usedThemeIds = []) {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
 
-  return shuffled.slice(0, count);
+  return shuffled.slice(0, Math.min(count, shuffled.length));
 }
 
 /**
@@ -29,6 +39,16 @@ export function pickThemes(count, usedThemeIds = []) {
  * @returns {object} { [playerId]: number }
  */
 export function dealNumbers(playerIds, rangeMax) {
+  if (!Array.isArray(playerIds) || playerIds.length === 0) {
+    throw new Error('playerIds must be a non-empty array');
+  }
+  if (rangeMax < 1) {
+    throw new Error('rangeMax must be at least 1');
+  }
+  if (rangeMax < playerIds.length) {
+    throw new Error(`rangeMax (${rangeMax}) must be >= number of players (${playerIds.length})`);
+  }
+
   // Build pool of all numbers [1, rangeMax]
   const pool = [];
   for (let i = 1; i <= rangeMax; i++) {
@@ -57,8 +77,25 @@ export function dealNumbers(playerIds, rangeMax) {
  * @returns {{ correct: boolean, firstErrorIndex: number|null }}
  */
 export function checkOrder(placedOrder, hands) {
+  if (!Array.isArray(placedOrder)) {
+    throw new Error('placedOrder must be an array');
+  }
+  if (!hands || typeof hands !== 'object') {
+    throw new Error('hands must be an object');
+  }
+  if (placedOrder.length === 0) {
+    return { correct: true, firstErrorIndex: null };
+  }
+
   for (let i = 1; i < placedOrder.length; i++) {
-    if (hands[placedOrder[i]] < hands[placedOrder[i - 1]]) {
+    const currentNum = hands[placedOrder[i]];
+    const prevNum = hands[placedOrder[i - 1]];
+
+    if (currentNum === undefined || prevNum === undefined) {
+      throw new Error(`Missing number for player in hands`);
+    }
+
+    if (currentNum < prevNum) {
       return { correct: false, firstErrorIndex: i };
     }
   }

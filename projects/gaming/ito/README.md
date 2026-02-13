@@ -78,6 +78,28 @@ games/{GAME_ID}/
 - [x] Kids (1–10) and Adults (1–100) difficulty modes
 - [x] Cooperative scoring (rounds cleared, emoji rating)
 - [x] Mobile-first CSS (big buttons, 72px numbers, warm palette)
+- [x] **Comprehensive test suite** (100 tests covering core logic, themes, state, gameplay)
+- [x] **Code optimization** (parameter validation, edge case handling)
+
+## 🧪 Testing
+
+Run tests locally:
+
+```bash
+cd projects/gaming/ito
+npm install
+npm test              # Run all 100 tests
+npm run test:watch    # Watch mode
+npm run test:coverage # Generate coverage report
+```
+
+**Test Coverage:**
+- ✅ 31 tests for game logic (pickThemes, dealNumbers, checkOrder)
+- ✅ 23 tests for theme data integrity
+- ✅ 26 tests for state management and persistence
+- ✅ 20 tests for gameplay scenarios (kids/adults modes, edge cases)
+
+See [tests/README.md](tests/README.md) for detailed test documentation.
 
 ## 🚀 Next Steps
 

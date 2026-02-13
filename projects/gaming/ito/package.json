@@ -1,0 +1,28 @@
+{
+  "name": "ito-game",
+  "version": "1.0.0",
+  "description": "Cooperative number card game - Get to know each other!",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "game",
+    "cooperative",
+    "card-game",
+    "icebreaker"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@vitest/ui": "^1.2.0",
+    "jsdom": "^23.2.0",
+    "vitest": "^1.2.0"
+  },
+  "dependencies": {
+    "firebase": "^10.7.2"
+  }
+}
