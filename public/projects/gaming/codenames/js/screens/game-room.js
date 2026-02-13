@@ -137,7 +137,6 @@ function handleGameUpdate(data) {
   phaseFinished.classList.toggle('hidden', data.status !== 'finished');
 
   // Mid-game picker: show if game is playing but local player has no team
-  const myData = getLocalPlayerData();
   const needsTeamPick = data.status === 'playing' && (!myData || !myData.team);
   midGamePicker.classList.toggle('hidden', !needsTeamPick);
 
