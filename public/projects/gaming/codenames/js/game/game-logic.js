@@ -178,11 +178,15 @@ export function calculateGuessesAllowed(clueNumber) {
  * Generate 3 random inspiration words for spymasters
  * Excludes words that are on the board
  * @param {string[]} boardWords - Words currently on the board
+ * @param {string[]} excludeWords - Additional words to exclude (e.g., current inspiration)
  * @returns {string[]} Array of 3 inspiration words
  */
-export function generateInspirationWords(boardWords) {
+export function generateInspirationWords(boardWords, excludeWords = []) {
   const boardWordsUpper = boardWords.map(w => w.toUpperCase());
-  const availableWords = WORD_LIST.filter(w => !boardWordsUpper.includes(w));
+  const excludeWordsUpper = excludeWords.map(w => w.toUpperCase());
+  const allExcluded = [...new Set([...boardWordsUpper, ...excludeWordsUpper])];
+  
+  const availableWords = WORD_LIST.filter(w => !allExcluded.includes(w));
   
   // Shuffle available words
   const shuffled = [...availableWords];

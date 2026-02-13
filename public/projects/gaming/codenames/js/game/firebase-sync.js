@@ -257,10 +257,15 @@ export async function handleRegenerateInspiration(gameId) {
   if (!snapshot.exists()) return;
   const game = snapshot.val();
   const boardWords = game.board?.words || [];
+  const currentInspiration = game.inspirationWords || [];
   
+  // Generate new words, excluding both board words and current inspiration
+  const excludeWords = [...boardWords, ...currentInspiration];
   const newWords = boardWords.length > 0 
-    ? generateInspirationWords(boardWords)
+    ? generateInspirationWords(boardWords, excludeWords)
     : ['CLUE', 'HINT', 'WORD'];
+
+  console.log('Regenerating inspiration:', { current: currentInspiration, new: newWords });
 
   await update(ref(database, `games/${gameId}`), {
     inspirationWords: newWords
