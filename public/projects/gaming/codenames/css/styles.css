@@ -8,8 +8,9 @@
   --blue-bg: rgba(21, 101, 192, 0.12);
   --neutral: #8d6e63;
   --neutral-light: #d7ccc8;
-  --assassin: #212121;
-  --assassin-light: #616161;
+  --assassin: #0d2b0d;
+  --assassin-light: #2e7d32;
+  --assassin-glow: #76ff03;
   --bg: #1a1a2e;
   --bg-card: #2a2a4a;
   --bg-surface: rgba(255, 255, 255, 0.06);
@@ -394,6 +395,38 @@ input[type="text"]:focus, select:focus { border-color: var(--blue); }
   font-weight: 700;
 }
 
+/* Victory confetti animation */
+.confetti-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #f00;
+  animation: confetti-fall linear forwards;
+  opacity: 0;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
 /* -- Legend (spymaster only) -- */
 .board-legend {
   display: flex;
@@ -417,7 +450,11 @@ input[type="text"]:focus, select:focus { border-color: var(--blue); }
 .legend-swatch.swatch-red { background: rgba(211, 47, 47, 0.5); border-color: var(--red); }
 .legend-swatch.swatch-blue { background: rgba(21, 101, 192, 0.5); border-color: var(--blue); }
 .legend-swatch.swatch-neutral { background: rgba(161, 136, 127, 0.4); border-color: #a1887f; }
-.legend-swatch.swatch-assassin { background: #1a1a1a; border-color: #000; }
+.legend-swatch.swatch-assassin { 
+  background: var(--assassin); 
+  border-color: var(--assassin-glow);
+  box-shadow: 0 0 8px rgba(118, 255, 3, 0.3);
+}
 
 /* -- Board -- */
 .board {
@@ -440,9 +477,10 @@ input[type="text"]:focus, select:focus { border-color: var(--blue); }
   word-break: break-word;
   line-height: 1.2;
   cursor: default;
-  transition: transform 0.1s, box-shadow 0.15s;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s;
   border: 2px solid transparent;
   user-select: none;
+  transform-style: preserve-3d;
 }
 
 /* Unrevealed card */
@@ -460,21 +498,63 @@ input[type="text"]:focus, select:focus { border-color: var(--blue); }
   border-color: var(--text-muted);
 }
 
-/* Revealed cards */
-.card.revealed-red { background: var(--red); color: #fff; border-color: var(--red); }
-.card.revealed-blue { background: var(--blue); color: #fff; border-color: var(--blue); }
-.card.revealed-neutral { background: var(--neutral); color: #fff; border-color: var(--neutral); }
-.card.revealed-assassin { background: var(--assassin); color: #fff; border-color: #444; }
+/* Revealed cards with flip animation */
+.card.revealed-red { 
+  background: var(--red); 
+  color: #fff; 
+  border-color: var(--red);
+  animation: cardFlip 0.6s ease-out;
+}
+.card.revealed-blue { 
+  background: var(--blue); 
+  color: #fff; 
+  border-color: var(--blue);
+  animation: cardFlip 0.6s ease-out;
+}
+.card.revealed-neutral { 
+  background: var(--neutral); 
+  color: #fff; 
+  border-color: var(--neutral);
+  animation: cardFlip 0.6s ease-out;
+}
+.card.revealed-assassin { 
+  background: var(--assassin); 
+  color: var(--assassin-glow); 
+  border-color: var(--assassin-glow);
+  box-shadow: 0 0 20px rgba(118, 255, 3, 0.5), inset 0 0 20px rgba(118, 255, 3, 0.2);
+  animation: cardFlip 0.6s ease-out, toxicPulse 2s ease-in-out infinite;
+}
+
+@keyframes cardFlip {
+  0% {
+    transform: rotateY(0deg) scale(1);
+  }
+  50% {
+    transform: rotateY(90deg) scale(1.05);
+  }
+  100% {
+    transform: rotateY(0deg) scale(1);
+  }
+}
+
+@keyframes toxicPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(118, 255, 3, 0.5), inset 0 0 20px rgba(118, 255, 3, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(118, 255, 3, 0.7), inset 0 0 30px rgba(118, 255, 3, 0.3);
+  }
+}
 
 /* Spymaster overlay — strong colored backgrounds on unrevealed cards */
 .card.spy-red { border-color: var(--red); background: rgba(211, 47, 47, 0.35); color: #ffcdd2; }
 .card.spy-blue { border-color: var(--blue); background: rgba(21, 101, 192, 0.35); color: #bbdefb; }
 .card.spy-neutral { border-color: #a1887f; background: rgba(161, 136, 127, 0.25); color: #d7ccc8; }
 .card.spy-assassin {
-  border-color: #ef5350;
-  background: #1a1a1a;
-  color: #ef5350;
-  box-shadow: inset 0 0 12px rgba(239, 83, 80, 0.25);
+  border-color: var(--assassin-glow);
+  background: var(--assassin);
+  color: var(--assassin-glow);
+  box-shadow: inset 0 0 12px rgba(118, 255, 3, 0.3), 0 0 8px rgba(118, 255, 3, 0.2);
 }
 
 /* Revealed + spymaster dimmed */
@@ -523,11 +603,30 @@ input[type="text"]:focus, select:focus { border-color: var(--blue); }
 .card-picture.revealed-red { border: 4px solid var(--red); background: rgba(211, 47, 47, 0.3); }
 .card-picture.revealed-blue { border: 4px solid var(--blue); background: rgba(21, 101, 192, 0.3); }
 .card-picture.revealed-neutral { border: 4px solid var(--neutral); background: rgba(141, 110, 99, 0.25); }
-.card-picture.revealed-assassin { border: 4px solid #444; background: #212121; }
+.card-picture.revealed-assassin { 
+  border: 4px solid var(--assassin-glow); 
+  background: var(--assassin);
+  box-shadow: 0 0 20px rgba(118, 255, 3, 0.5);
+}
 .card-picture.revealed-red img,
 .card-picture.revealed-blue img,
 .card-picture.revealed-neutral img { opacity: 0.5; border-radius: 4px; }
-.card-picture.revealed-assassin img { opacity: 0.15; border-radius: 4px; }
+.card-picture.revealed-assassin img { opacity: 0.2; border-radius: 4px; }
+
+/* Skull overlay on revealed assassin picture cards */
+.card-picture.revealed-assassin::after {
+  content: '☠️';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3rem;
+  color: var(--assassin-glow);
+  text-shadow: 0 0 20px rgba(118, 255, 3, 0.8), 0 0 40px rgba(118, 255, 3, 0.5);
+  pointer-events: none;
+  z-index: 2;
+  animation: toxicPulse 2s ease-in-out infinite;
+}
 
 /* -- Clue Area -- */
 .clue-area {

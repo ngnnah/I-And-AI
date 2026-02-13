@@ -615,6 +615,38 @@ function renderFinishedPhase(data) {
   const isHost = isLocalPlayerHost();
   btnRematch.classList.toggle('hidden', !isHost);
   btnNewGame.classList.toggle('hidden', !isHost);
+  
+  // Trigger victory confetti
+  launchConfetti(winner);
+}
+
+// Confetti celebration
+function launchConfetti(winner) {
+  const container = document.getElementById('confetti-container');
+  if (!container) return;
+  
+  container.innerHTML = ''; // Clear old confetti
+  
+  const colors = winner === 'red' 
+    ? ['#d32f2f', '#f44336', '#ef5350', '#ffcdd2', '#ff8a80']
+    : ['#1565c0', '#2196f3', '#42a5f5', '#bbdefb', '#82b1ff'];
+  
+  const confettiCount = 150;
+  
+  for (let i = 0; i < confettiCount; i++) {
+    setTimeout(() => {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.style.left = Math.random() * 100 + '%';
+      confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+      confetti.style.animationDelay = '0s';
+      container.appendChild(confetti);
+      
+      // Remove after animation
+      setTimeout(() => confetti.remove(), 5000);
+    }, i * 20);
+  }
 }
 
 btnRematch.addEventListener('click', async () => {
