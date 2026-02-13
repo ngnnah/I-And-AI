@@ -52,6 +52,11 @@ body {
 .btn-link { background: none; color: var(--text-muted); padding: 4px 8px; text-decoration: underline; }
 .btn-sm { font-size: 0.85rem; padding: 6px 12px; }
 .btn-wide { width: 100%; max-width: 360px; }
+.btn-center { 
+  display: flex; 
+  justify-content: center; 
+  margin-bottom: 20px; 
+}
 .btn-outline-red { background: none; border: 1px dashed var(--red); color: var(--red-light); }
 .btn-outline-blue { background: none; border: 1px dashed var(--blue); color: var(--blue-light); }
 
@@ -1081,7 +1086,8 @@ input[type="text"]:focus, select:focus {
   align-items: center;
   gap: 8px;
   justify-content: center;
-  flex-wrap: wrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .inspiration-word {
@@ -1094,6 +1100,8 @@ input[type="text"]:focus, select:focus {
   min-width: 60px;
   text-align: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .btn-inspiration {
@@ -1105,6 +1113,7 @@ input[type="text"]:focus, select:focus {
   font-size: 0.85rem;
   min-width: 90px;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .btn-inspiration:hover {
@@ -1176,17 +1185,25 @@ input[type="text"]:focus, select:focus {
     flex-direction: column;
   }
   
+  .inspiration-panel {
+    padding: 8px 10px;
+  }
+  
+  .inspiration-content {
+    gap: 6px;
+  }
+  
   .inspiration-word {
     font-size: 0.7rem;
-    padding: 5px 10px;
-    min-width: 50px;
+    padding: 4px 8px;
+    min-width: auto;
   }
   
   .btn-inspiration {
-    font-size: 0.75rem;
-    padding: 5px 10px;
-    width: 100%;
-    min-width: 80px;
+    font-size: 0.7rem;
+    padding: 5px 8px;
+    min-width: auto;
+    flex-shrink: 0;
   }
 }
 

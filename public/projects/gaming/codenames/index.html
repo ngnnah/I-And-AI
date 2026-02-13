@@ -50,7 +50,16 @@
           <span class="mode-desc">5×4 · custom images</span>
         </label>
       </div>
-      <button id="btn-create-game" class="btn btn-primary btn-wide">Create New Game</button>
+      <div class="btn-center">
+        <button id="btn-create-game" class="btn btn-primary btn-wide">Create New Game</button>
+      </div>
+
+      <div class="lobby-section">
+        <h2>Available Games</h2>
+        <div id="game-list" class="game-list">
+          <p class="empty-message">No games available</p>
+        </div>
+      </div>
 
       <div class="lobby-section">
         <h2>Join Game</h2>
@@ -59,13 +68,6 @@
           <button id="btn-join-code" class="btn btn-secondary">Join</button>
         </div>
         <div id="join-error" class="error-message hidden"></div>
-      </div>
-
-      <div class="lobby-section">
-        <h2>Available Games</h2>
-        <div id="game-list" class="game-list">
-          <p class="empty-message">No games available</p>
-        </div>
       </div>
 
       <div class="lobby-section">
