@@ -151,7 +151,10 @@ function renderGameList(allGames) {
   gameListEl.querySelectorAll('.btn-resume').forEach(btn => {
     btn.addEventListener('click', () => {
       setCurrentGameId(btn.dataset.gameId);
- 
+      navigateTo('game-room');
+    });
+  });
+}
 
 // Render game history
 async function renderGameHistory() {
@@ -164,7 +167,6 @@ async function renderGameHistory() {
   const historyArray = Object.values(history);
 
   if (historyArray.length === 0) {
-    renderGameHistory();
     historyContainer.innerHTML = '<p class="empty-message">No completed games yet</p>';
     toggleHistoryBtn.style.display = 'none';
     return;

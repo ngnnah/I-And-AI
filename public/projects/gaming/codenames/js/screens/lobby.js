@@ -2,7 +2,7 @@
  * Lobby Screen — create, join, and resume games
  */
 
-import { createGame, joinGame, listenToAllGames } from '../game/firebase-config.js';
+import { createGame, joinGame, listenToAllGames, getGameHistory } from '../game/firebase-config.js';
 import {
   getLocalPlayer, clearStoredPlayer, setCurrentGameId
 } from '../game/game-state.js';
@@ -15,8 +15,11 @@ const joinCodeInput = document.getElementById('join-code-input');
 const btnJoinCode = document.getElementById('btn-join-code');
 const joinError = document.getElementById('join-error');
 const gameListEl = document.getElementById('game-list');
+const historyContainer = document.getElementById('history-container');
+const toggleHistoryBtn = document.getElementById('toggle-history-btn');
 
 let unsubscribeGames = null;
+let showAllHistory = false;
 
 function showJoinError(msg) {
   joinError.textContent = msg;
@@ -149,6 +152,91 @@ function renderGameList(allGames) {
     btn.addEventListener('click', () => {
       setCurrentGameId(btn.dataset.gameId);
       navigateTo('game-room');
+    });
+  });
+}
+
+// Render game history
+async function renderGameHistory() {
+  const limit = showAllHistory ? 20 : 3;
+  const history = await getGameHistory(limit);
+
+  historyContainer.innerHTML = '';
+
+  // Convert to array for rendering
+  const historyArray = Object.values(history);
+
+  if (historyArray.length === 0) {
+    historyContainer.innerHTML = '<p class="empty-message">No completed games yet</p>';
+    toggleHistoryBtn.style.display = 'none';
+    return;
+  }
+
+  historyArray.forEach(game => {
+    const item = createHistoryItem(game);
+    historyContainer.appendChild(item);
+  });
+
+  // Show/hide toggle button based on history count
+  toggleHistoryBtn.style.display = historyArray.length > 3 ? 'block' : 'none';
+  toggleHistoryBtn.textContent = showAllHistory ? 'Show Less' : 'Show More';
+}
+
+// Create a history item element
+function createHistoryItem(game) {
+  const item = document.createElement('div');
+  item.className = 'history-item';
+
+  // Format duration
+  const durationMinutes = Math.floor(game.duration / 60000);
+  const durationSeconds = Math.floor((game.duration % 60000) / 1000);
+  const durationText = `${durationMinutes}m ${durationSeconds}s`;
+
+  // Format date
+  const date = new Date(game.finishedAt);
+  const dateText = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  // Get winner info
+  const winnerTeam = game.winner;
+  const winReason = game.winReason || 'completed';
+  const winReasonText = winReason === 'assassin' ? '☠️ Assassin hit' : winReason === 'all-cards' ? '🎯 All cards found' : '✨ Won';
+  
+  // Game mode tag
+  const modeTag = game.gameMode === 'pictures' ? '📷 Pictures' : game.gameMode === 'diy' ? '✂️ DIY' : '📝 Words';
+
+  // Get all players grouped by team
+  const redPlayers = [];
+  const bluePlayers = [];
+  for (const [playerId, player] of Object.entries(game.players || {})) {
+    const roleIcon = player.role === 'spymaster' ? '🎯' : '🔍';
+    const playerText = `${roleIcon} ${player.name}`;
+    if (player.team === 'red') redPlayers.push(playerText);
+    else if (player.team === 'blue') bluePlayers.push(playerText);
+  }
+
+  item.innerHTML = `
+    <div class="history-header">
+      <span class="history-date">${dateText}</span>
+      <span class="history-duration">${durationText}</span>
+    </div>
+    <div class="history-winner ${winnerTeam}">
+      ${winnerTeam === 'red' ? '🔴' : '🔵'} ${winnerTeam.toUpperCase()} Team won &middot; ${winReasonText}
+    </div>
+    <div class="history-meta">${game.displayName} &middot; ${modeTag}</div>
+    <div class="history-teams">
+      <div class="history-team red">${redPlayers.join(', ') || 'No players'}</div>
+      <div class="history-team blue">${bluePlayers.join(', ') || 'No players'}</div>
+    </div>
+  `;
+
+  return item;
+}
+
+// Toggle history button
+toggleHistoryBtn.addEventListener('click', () => {
+  showAllHistory = !showAllHistory;
+  renderGameHistory();
+});     navigateTo('game-room');
     });
   });
 }

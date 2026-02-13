@@ -229,6 +229,86 @@ input[type="text"]:focus, select:focus {
 
 .empty-message { color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 20px; }
 
+/* -- Game History -- */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-item {
+  padding: 12px 15px;
+  background: var(--bg-surface);
+  border-radius: var(--radius);
+  border-left: 4px solid var(--border);
+  transition: border-color 0.2s;
+}
+
+.history-item:hover {
+  border-left-color: var(--blue);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.history-date {
+  font-weight: 500;
+}
+
+.history-duration {
+  background: var(--bg-card);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.history-winner {
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+}
+
+.history-winner.red {
+  color: var(--red-light);
+}
+
+.history-winner.blue {
+  color: var(--blue-light);
+}
+
+.history-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.history-teams {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.history-team {
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.history-team.red {
+  background: var(--red-bg);
+  color: var(--red-light);
+}
+
+.history-team.blue {
+  background: var(--blue-bg);
+  color: var(--blue-light);
+}
+
 /* ===== Screen: Game Room ===== */
 .game-room-container {
   max-width: 720px;
