@@ -13,7 +13,7 @@ import { getModeConfig } from '../data/game-modes.js';
 import {
   handleTeamJoin, handleStartGame, handleGiveClue,
   handleCardReveal, handleEndGuessing, handleNewGame,
-  handleRegenerateInspiration, handleCancelGame
+  handleRegenerateInspiration, handleCancelGame, handleRematch
 } from '../game/firebase-sync.js';
 import { navigateTo } from '../main.js';
 
@@ -73,6 +73,7 @@ const winnerText = document.getElementById('winner-text');
 const winReason = document.getElementById('win-reason');
 const finishedBoard = document.getElementById('finished-board');
 const finishedClueLog = document.getElementById('finished-clue-log');
+const btnRematch = document.getElementById('btn-rematch');
 const btnNewGame = document.getElementById('btn-new-game');
 const btnBackLobby = document.getElementById('btn-back-lobby');
 
@@ -597,9 +598,24 @@ function renderFinishedPhase(data) {
   // Clue log
   renderClueLog(data.clueLog, finishedClueLog);
 
-  // New game button (host only)
-  btnNewGame.classList.toggle('hidden', !isLocalPlayerHost());
+  // Rematch and New game buttons (host only)
+  const isHost = isLocalPlayerHost();
+  btnRematch.classList.toggle('hidden', !isHost);
+  btnNewGame.classList.toggle('hidden', !isHost);
 }
+
+btnRematch.addEventListener('click', async () => {
+  const game = getCurrentGame();
+  if (!game.id) return;
+  btnRematch.disabled = true;
+  try {
+    await handleRematch(game.id);
+  } catch (err) {
+    console.error('Rematch error:', err);
+  } finally {
+    btnRematch.disabled = false;
+  }
+});
 
 btnNewGame.addEventListener('click', async () => {
   const game = getCurrentGame();
