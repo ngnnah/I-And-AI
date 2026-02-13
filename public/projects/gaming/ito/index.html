@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ito - Cooperative Number Game</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Player Setup Screen -->
+    <div id="screen-player-setup" class="screen">
+        <div class="container">
+            <h1>🎴 Ito</h1>
+            <p class="subtitle">Get to Know Each Other!</p>
+            <input
+                id="player-name-input"
+                type="text"
+                placeholder="Enter your name"
+                maxlength="20"
+                autocomplete="off"
+            >
+            <button id="continue-btn" class="btn-primary">Continue to Lobby</button>
+            <div id="name-error" class="error hidden"></div>
+            <p class="keyboard-hint">⌨️ Press <kbd>Enter</kbd> to continue</p>
+        </div>
+    </div>
+
+    <!-- Lobby Screen -->
+    <div id="screen-lobby" class="screen hidden">
+        <div class="container">
+            <h1>Game Lobby</h1>
+            <div id="lobby-player-info" class="player-info">
+                <span id="lobby-player-name"></span>
+                <button id="change-name-btn" class="btn-link">Change Name</button>
+            </div>
+
+            <div class="difficulty-selector">
+                <h3 class="difficulty-title">Choose Difficulty:</h3>
+                <div class="difficulty-options">
+                    <label class="difficulty-option selected" data-value="kids">
+                        <input type="radio" name="difficulty" value="kids" checked>
+                        <div class="difficulty-content">
+                            <span class="difficulty-icon">🧒</span>
+                            <span class="difficulty-label">Kids</span>
+                            <span class="difficulty-desc">Numbers 1–10 · 8 rounds</span>
+                        </div>
+                    </label>
+                    <label class="difficulty-option" data-value="adults">
+                        <input type="radio" name="difficulty" value="adults">
+                        <div class="difficulty-content">
+                            <span class="difficulty-icon">🧑</span>
+                            <span class="difficulty-label">Adults</span>
+                            <span class="difficulty-desc">Numbers 1–100 · 10 rounds</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <button id="create-game-btn" class="btn-primary">Create New Game</button>
+
+            <div id="join-section" class="join-section">
+                <h3>Join a Game</h3>
+                <div class="join-row">
+                    <input
+                        id="join-code-input"
+                        type="text"
+                        placeholder="Enter game code"
+                        maxlength="6"
+                        autocomplete="off"
+                    >
+                    <button id="join-game-btn" class="btn-secondary">Join</button>
+                </div>
+            </div>
+
+            <div id="games-section">
+                <h2>Available Games</h2>
+                <div id="game-list" class="game-list">
+                    <p class="empty-state">No games available. Create one!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Room Screen -->
+    <div id="screen-game-room" class="screen hidden">
+        <div class="container">
+            <div id="game-header" class="game-header">
+                <div class="header-top">
+                    <span id="player-display-name" class="player-name-badge"></span>
+                    <span id="game-code-display" class="game-code-badge"></span>
+                    <span id="player-count-display" class="player-count-badge"></span>
+                    <button id="leave-game-btn" class="btn-link">← Leave</button>
+                </div>
+                <div id="player-list" class="player-list"></div>
+            </div>
+
+            <!-- Phase: Waiting -->
+            <div id="phase-waiting" class="phase-content">
+                <div class="round-info">
+                    <span id="round-counter" class="round-counter">Round 1 of 8</span>
+                    <span id="success-counter" class="success-counter">✅ 0 rounds cleared</span>
+                </div>
+                <button id="start-round-btn" class="btn-primary host-only hidden">Start Round</button>
+                <p id="waiting-hint" class="status-hint">Waiting for host to start the round…</p>
+            </div>
+
+            <!-- Phase: Discuss -->
+            <div id="phase-discuss" class="phase-content hidden">
+                <div class="theme-display">
+                    <span class="theme-label">This round's theme:</span>
+                    <h2 id="theme-text" class="theme-text"></h2>
+                </div>
+
+                <div class="secret-number-area">
+                    <span class="secret-label">Your Secret Number</span>
+                    <div id="secret-number" class="secret-number">
+                        <span id="secret-number-value"></span>
+                    </div>
+                    <button id="toggle-number-btn" class="btn-link">👁 tap to hide</button>
+                </div>
+
+                <p class="instruction-hint">🤫 Describe your number using the theme.<br>Don't say the number!</p>
+
+                <button id="ready-to-place-btn" class="btn-primary host-only hidden">Ready to Place →</button>
+                <p id="discuss-hint" class="status-hint host-hidden">Discuss with your team, then the host will move on.</p>
+            </div>
+
+            <!-- Phase: Placing -->
+            <div id="phase-placing" class="phase-content hidden">
+                <div class="theme-reminder">
+                    <span class="theme-reminder-label">Theme:</span>
+                    <span id="theme-reminder-text" class="theme-reminder-text"></span>
+                </div>
+
+                <div class="placement-area">
+                    <h3 class="placement-title">Arrange players from LOWEST to HIGHEST</h3>
+
+                    <div id="placed-list" class="placement-list">
+                        <!-- Placed player items inserted here -->
+                    </div>
+
+                    <div id="unplaced-section" class="unplaced-section">
+                        <h4 class="unplaced-label">Tap to place:</h4>
+                        <div id="unplaced-players" class="unplaced-players">
+                            <!-- Unplaced player buttons inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <button id="reveal-btn" class="btn-primary host-only hidden" disabled>Reveal Cards! 🎉</button>
+                <p id="placing-hint" class="status-hint">Place all players before revealing.</p>
+            </div>
+
+            <!-- Phase: Reveal -->
+            <div id="phase-reveal" class="phase-content hidden">
+                <div class="theme-reminder">
+                    <span class="theme-reminder-label">Theme:</span>
+                    <span id="reveal-theme-text" class="theme-reminder-text"></span>
+                </div>
+
+                <div id="reveal-results" class="reveal-results">
+                    <!-- Reveal cards inserted here -->
+                </div>
+
+                <div id="result-banner" class="result-banner"></div>
+
+                <button id="next-round-btn" class="btn-primary host-only hidden">Next Round →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="screen-game-over" class="screen hidden">
+        <div class="container">
+            <h1 class="game-over-title">🎉 Game Complete!</h1>
+            <div id="game-over-summary" class="game-over-summary">
+                <p id="cleared-text" class="cleared-text"></p>
+                <p id="emoji-rating" class="emoji-rating"></p>
+            </div>
+
+            <div id="theme-recap" class="theme-recap">
+                <h3>Themes Played</h3>
+                <ol id="theme-recap-list" class="theme-recap-list"></ol>
+            </div>
+
+            <button id="back-to-lobby-btn" class="btn-primary">Back to Lobby</button>
+            <p class="keyboard-hint">⌨️ Press <kbd>Enter</kbd> to return</p>
+        </div>
+    </div>
+
+    <!-- App Entry Point (ES6 Module) -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
