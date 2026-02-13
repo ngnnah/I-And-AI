@@ -564,50 +564,16 @@ input[type="text"]:focus, select:focus {
 }
 
 /* -- Board -- */
-.board-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  justify-content: center;
-}
-
-.board-indices {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  justify-content: space-around;
-}
-
-.board-indices-left {
-  align-items: flex-end;
-}
-
-.board-indices-right {
-  align-items: flex-start;
-}
-
-.board-index {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  background: var(--bg-surface);
-  padding: 4px 8px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  min-width: 30px;
-  text-align: center;
-  opacity: 0.7;
-}
-
 .board {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 6px;
+  margin-bottom: 12px;
 }
 
 .card {
   aspect-ratio: 1.4;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -623,6 +589,33 @@ input[type="text"]:focus, select:focus {
   border: 2px solid transparent;
   user-select: none;
   transform-style: preserve-3d;
+}
+
+/* Card number (top-left corner) */
+.card-number {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 3px;
+  z-index: 10;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Card text container for word cards */
+.card-text {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  text-align: center;
 }
 
 /* Unrevealed card */
@@ -1150,12 +1143,6 @@ input[type="text"]:focus, select:focus {
   .game-title { font-size: 2rem; letter-spacing: 4px; }
   .teams-container { grid-template-columns: 1fr; }
   .card { font-size: 0.6rem; aspect-ratio: 1.2; }
-  .board-container { gap: 4px; }
-  .board-index { 
-    font-size: 0.7rem; 
-    padding: 2px 4px; 
-    min-width: 24px;
-  }
   .clue-input-row { flex-wrap: wrap; }
   .clue-input-row input { min-width: 0; width: 100%; }
   .clue-number-buttons { width: 100%; justify-content: center; }

@@ -281,7 +281,7 @@ btnCancelGame.addEventListener('click', async () => {
 // Regenerate inspiration words (client-side only)
 btnRegenerateInspiration.addEventListener('click', () => {
   const game = getCurrentGame();
-  const boardWords = game.board?.words || [];
+  const boardWords = game.data?.board?.words || [];
   const gameMode = game.data?.gameMode || 'pictures';
   const newWords = generateInspirationWords(boardWords, [], gameMode);
   
@@ -352,7 +352,6 @@ function renderPlayingPhase(data) {
 
   // Board
   renderBoard(data, boardEl, false);
-  updateBoardIndices(data.gameMode || 'words');
 
   // Clue area
   renderClueArea(data);
@@ -402,36 +401,6 @@ function renderPlayerRoster(data) {
   playerRoster.innerHTML = badgesHtml || '<span style="color: var(--text-muted);">No players</span>';
 }
 
-/**
- * Update board indices based on game mode (5x5 for words, 5x4 for pictures/DIY)
- */
-function updateBoardIndices(gameMode) {
-  const config = getModeConfig(gameMode);
-  const gridRows = Math.ceil(config.totalCards / config.gridCols);
-  
-  // Generate left indices (1, 6, 11, 16, [21])
-  const leftIndices = [];
-  const rightIndices = [];
-  
-  for (let row = 0; row < gridRows; row++) {
-    leftIndices.push(row * config.gridCols + 1);
-    rightIndices.push((row + 1) * config.gridCols);
-  }
-  
-  // Update all board index containers (both active and finished board)
-  document.querySelectorAll('.board-indices-left').forEach(container => {
-    container.innerHTML = leftIndices.map(num => 
-      `<div class="board-index">${num}</div>`
-    ).join('');
-  });
-  
-  document.querySelectorAll('.board-indices-right').forEach(container => {
-    container.innerHTML = rightIndices.map(num => 
-      `<div class="board-index">${num}</div>`
-    ).join('');
-  });
-}
-
 function renderBoard(data, container, isFinished) {
   const gs = data.gameState;
   const colorMap = data.board.colorMap;
@@ -453,6 +422,12 @@ function renderBoard(data, container, isFinished) {
     const card = document.createElement('div');
     card.className = isPicture ? 'card card-picture' : 'card';
 
+    // Add card number
+    const cardNumber = document.createElement('div');
+    cardNumber.className = 'card-number';
+    cardNumber.textContent = i + 1;
+    card.appendChild(cardNumber);
+
     if (isPicture && data.board.cardIds) {
       const img = document.createElement('img');
       const cardId = data.board.cardIds[i];
@@ -463,7 +438,10 @@ function renderBoard(data, container, isFinished) {
       img.draggable = false;
       card.appendChild(img);
     } else {
-      card.textContent = data.board.words ? data.board.words[i] : `Card ${i + 1}`;
+      const cardText = document.createElement('div');
+      cardText.className = 'card-text';
+      cardText.textContent = data.board.words ? data.board.words[i] : `Card ${i + 1}`;
+      card.appendChild(cardText);
     }
 
     const isRevealed = revealed[i] || isFinished;
@@ -680,7 +658,6 @@ function renderFinishedPhase(data) {
 
   // Render board with all cards revealed
   renderBoard(data, finishedBoard, true);
-  updateBoardIndices(data.gameMode || 'words');
 
   // Clue log
   renderClueLog(data.clueLog, finishedClueLog);
