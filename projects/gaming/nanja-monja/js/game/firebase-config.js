@@ -126,13 +126,32 @@ export async function createGame(playerName, playerId, cardSetId = 'creatures', 
   // DEBUG: Log the data being written to Firebase
   console.log('🔍 DEBUG: Creating game with data:', {
     gameId,
+    displayName,
+    hostName: playerName,
     hasGameState: !!gameData.gameState,
     gameStateKeys: gameData.gameState ? Object.keys(gameData.gameState) : null,
     timestamp: new Date().toISOString()
   });
 
-  await set(gameRef, gameData);
-  console.log('✅ DEBUG: Game written to Firebase successfully');
+  try {
+    await set(gameRef, gameData);
+    console.log('✅ DEBUG: Game written to Firebase successfully');
+    
+    // Verify the write by reading back
+    const verifySnapshot = await get(gameRef);
+    if (verifySnapshot.exists()) {
+      console.log('✅ Verification: Game exists in Firebase');
+      console.log('📊 Verification data:', verifySnapshot.val());
+    } else {
+      console.error('❌ Verification failed: Game not found after write!');
+    }
+  } catch (error) {
+    console.error('❌ Firebase write error:', error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
+    throw error;
+  }
+  
   return gameId;
 }
 
@@ -248,11 +267,19 @@ export function listenToGame(gameId, callback) {
 export function listenToAllGames(callback) {
   const gamesRef = ref(database, 'games');
   return onValue(gamesRef, (snapshot) => {
+    console.log('🔥 Firebase onValue triggered');
     if (snapshot.exists()) {
+      console.log('✅ Games exist in Firebase');
       callback(snapshot.val());
     } else {
+      console.log('⚠️ No games in Firebase (empty database)');
       callback({});
     }
+  }, (error) => {
+    console.error('❌ Firebase read error:', error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
+    callback({});
   });
 }
 

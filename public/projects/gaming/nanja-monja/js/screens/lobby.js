@@ -41,10 +41,13 @@ let selectedDuplication = 5;
  * @param {Object} games - Games object from Firebase
  */
 function renderGameList(games) {
+    console.log('🎨 Rendering game list...');
+    
     // Clear existing list
     gameListContainer.innerHTML = '';
 
     if (!games || Object.keys(games).length === 0) {
+        console.log('⚠️ No games found in Firebase');
         gameListContainer.innerHTML = '<p class="empty-state">No games available. Create one!</p>';
         return;
     }
@@ -54,17 +57,31 @@ function renderGameList(games) {
     const availableGames = [];
 
     Object.entries(games).forEach(([gameId, game]) => {
+        console.log(`📊 Processing game ${gameId}:`, {
+            status: game.status,
+            hasPlayers: !!game.players,
+            playerCount: game.players ? Object.keys(game.players).length : 0,
+            isPlayerIn: game.players && game.players[localPlayer.id]
+        });
+
         // Skip finished games
-        if (game.status === 'finished') return;
+        if (game.status === 'finished') {
+            console.log(`⏭️ Skipping finished game ${gameId}`);
+            return;
+        }
 
         const isPlayerIn = game.players && game.players[localPlayer.id];
 
         if (isPlayerIn) {
             // Player is in this game (active or inactive)
+            console.log(`✅ Adding ${gameId} to ongoing games`);
             ongoingGames.push([gameId, game]);
         } else if (game.status === 'waiting') {
             // Available to join
+            console.log(`🎯 Adding ${gameId} to available games`);
             availableGames.push([gameId, game]);
+        } else {
+            console.log(`❌ Game ${gameId} not shown - status: ${game.status}, isPlayerIn: ${isPlayerIn}`);
         }
     });
 
@@ -360,9 +377,13 @@ function handleChangeName() {
  * Start listening to games
  */
 function startGameListener() {
-    console.log('Starting game list listener...');
+    console.log('🎮 Starting game list listener...');
     unsubscribeGames = listenToAllGames((games) => {
-        console.log('Games updated:', games ? Object.keys(games).length : 0);
+        console.log('🔄 Games updated:', games ? Object.keys(games).length : 0);
+        if (games) {
+            console.log('📋 Game IDs:', Object.keys(games));
+            console.log('🔍 Full game data:', games);
+        }
         renderGameList(games);
     });
 }
