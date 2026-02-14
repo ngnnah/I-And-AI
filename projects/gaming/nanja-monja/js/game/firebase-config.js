@@ -11,15 +11,8 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBITeMGytu3goh3mwNNOHA5jjMfZLegRYI",
-  authDomain: "nanja-monja-game.firebaseapp.com",
-  databaseURL: "https://nanja-monja-game-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "nanja-monja-game",
-  storageBucket: "nanja-monja-game.firebasestorage.app",
-  messagingSenderId: "821030866197",
-  appId: "1:821030866197:web:9f0ff877e803c558cdad1c"
+  databaseURL: "https://nanja-monja-game-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 
 // Initialize Firebase
