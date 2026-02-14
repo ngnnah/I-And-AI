@@ -246,6 +246,7 @@ window.addEventListener('screen-changed', (e) => {
     joinCodeInput.value = '';
     clearJoinError();
     unsubscribeGames = listenToAllGames(renderGameList);
+    renderGameHistory(); // Load game history
   } else {
     if (unsubscribeGames) { unsubscribeGames(); unsubscribeGames = null; }
   }
