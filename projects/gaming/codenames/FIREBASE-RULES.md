@@ -46,11 +46,6 @@ To enable game history functionality, update your Firebase Realtime Database rul
 4. Replace the rules with the configuration above
 5. Click **Publish**
 
-## What Changed vs Your Current Rules
-
-**Added:** `gameHistory` path with validation (your rules were missing this)  
-**Kept:** All your existing security (scoped writes, status validation, default deny)
-
 ## Testing
 
 After updating rules:
