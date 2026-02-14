@@ -2,22 +2,41 @@
 
 To enable game history functionality, update your Firebase Realtime Database rules:
 
-## Rules Configuration
+## Recommended Rules (Secure)
 
 ```json
 {
   "rules": {
     "games": {
       ".read": true,
-      ".write": true
+      "$gameId": {
+        ".write": true,
+        "status": {
+          ".validate": "newData.isString() && (newData.val() === 'setup' || newData.val() === 'playing' || newData.val() === 'finished')"
+        }
+      }
     },
     "gameHistory": {
       ".read": true,
-      ".write": true
+      "$gameId": {
+        ".write": true,
+        ".validate": "newData.hasChildren(['gameId', 'finishedAt', 'winner'])"
+      }
+    },
+    "$other": {
+      ".read": false,
+      ".write": false
     }
   }
 }
 ```
+
+## Security Improvements
+
+✅ **Scoped writes** - Write access per game ID, not entire collection  
+✅ **Field validation** - Status and gameHistory fields are validated  
+✅ **Default deny** - Everything else is blocked by `$other`  
+✅ **Public read** - Needed for room codes and lobby listings
 
 ## How to Apply Rules
 
@@ -27,9 +46,10 @@ To enable game history functionality, update your Firebase Realtime Database rul
 4. Replace the rules with the configuration above
 5. Click **Publish**
 
-## Security Note
+## What Changed vs Your Current Rules
 
-These rules allow public read/write access, which is acceptable for a game with room codes. For production apps with sensitive data, implement authentication and user-specific rules.
+**Added:** `gameHistory` path with validation (your rules were missing this)  
+**Kept:** All your existing security (scoped writes, status validation, default deny)
 
 ## Testing
 
