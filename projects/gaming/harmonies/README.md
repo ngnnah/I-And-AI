@@ -4,11 +4,31 @@ A beautiful, turn-based multiplayer spatial puzzle game where players build land
 
 ## Local Testing Instructions
 
-### 1. Open the game
+### 1. Start the local server
 
-Simply open `index.html` in your browser. The Firebase Realtime Database is already configured.
+**Important:** The game uses ES6 modules which require an HTTP server (won't work with `file://` URLs).
 
-### 2. Test multiplayer
+```bash
+# Option 1: Python (recommended)
+python3 -m http.server 8080
+
+# Option 2: npm
+npm run dev
+
+# Option 3: Node.js
+npx http-server -p 8080
+```
+
+Then open http://localhost:8080 in your browser.
+
+### 2. Troubleshooting
+
+If you see errors:
+1. **Clear browser cache** (Cmd+Shift+R on Mac, Ctrl+Shift+R on Windows)
+2. **Check diagnostic page:** http://localhost:8080/diagnostic.html
+3. **View browser console:** F12 or Cmd+Option+I → Console tab
+
+### 3. Test multiplayer
 
 Open the game in **2 browser windows** (or use incognito mode for the second window):
 
@@ -39,7 +59,7 @@ Open the game in **2 browser windows** (or use incognito mode for the second win
 - Now it's Bob's turn!
 - Repeat the same actions
 
-### 3. Game Features to Test
+### 4. Game Features to Test
 
 ✅ **Player persistence**: Refresh browser → auto-login with saved username
 ✅ **Multiplayer sync**: Changes in one window appear in the other

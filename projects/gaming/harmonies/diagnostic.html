@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harmonies - Diagnostic</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #0f0; }
+    .test { margin: 10px 0; padding: 10px; background: #2a2a2a; }
+    .pass { border-left: 4px solid #0f0; }
+    .fail { border-left: 4px solid #f00; color: #f88; }
+    h1 { color: #fff; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Harmonies Diagnostic</h1>
+  <div id="results"></div>
+
+  <script>
+    const results = [];
+    
+    function log(message, passed = true) {
+      results.push({ message, passed });
+      render();
+    }
+
+    function render() {
+      const html = results.map(r => 
+        `<div class="test ${r.passed ? 'pass' : 'fail'}">${r.passed ? '✅' : '❌'} ${r.message}</div>`
+      ).join('');
+      document.getElementById('results').innerHTML = html;
+    }
+
+    // Test 1: Basic JavaScript
+    log('Basic JavaScript running');
+
+    // Test 2: ES6 Module support
+    if ('noModule' in document.createElement('script')) {
+      log('ES6 Module support detected');
+    } else {
+      log('ES6 Module support missing', false);
+    }
+
+    // Test 3: Firebase CDN
+    const firebaseScript = document.createElement('script');
+    firebaseScript.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
+    firebaseScript.onload = () => {
+      log('Firebase App CDN loaded');
+      
+      // Test 4: Firebase Database
+      const dbScript = document.createElement('script');
+      dbScript.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js';
+      dbScript.onload = () => {
+        log('Firebase Database CDN loaded');
+        
+        // Test 5: Firebase object available
+        if (typeof firebase !== 'undefined') {
+          log('Firebase object available globally');
+          
+          // Test 6: Initialize Firebase
+          try {
+            const app = firebase.initializeApp({
+              databaseURL: 'https://harmonies-game-default-rtdb.asia-southeast1.firebasedatabase.app/'
+            });
+            log('Firebase initialized successfully');
+            
+            // Test 7: Database reference
+            const db = firebase.database();
+            log('Firebase database reference created');
+            
+          } catch (err) {
+            log(`Firebase initialization failed: ${err.message}`, false);
+          }
+        } else {
+          log('Firebase object not available', false);
+        }
+      };
+      dbScript.onerror = () => log('Firebase Database CDN failed to load', false);
+      document.head.appendChild(dbScript);
+    };
+    firebaseScript.onerror = () => log('Firebase App CDN failed to load', false);
+    document.head.appendChild(firebaseScript);
+
+    // Test 8: Module loading
+    setTimeout(() => {
+      import('./js/main.js')
+        .then(() => log('Main module loaded successfully'))
+        .catch(err => log(`Module loading failed: ${err.message}`, false));
+    }, 1000);
+  </script>
+</body>
+</html>
