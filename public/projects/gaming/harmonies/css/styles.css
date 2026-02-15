@@ -185,28 +185,28 @@ body {
 
 /* Hex Grid - CSS Grid Layout */
 .hex-grid-container {
-  padding: 20px;
+  padding: 40px;
   background: #f9f9f9;
   overflow: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-x pan-y pinch-zoom;
   flex: 1;
-  min-height: 500px;
+  min-height: 600px;
   display: grid;
-  grid-template-columns: repeat(20, 60px);
-  grid-template-rows: repeat(20, 60px);
-  gap: 8px;
+  grid-template-columns: repeat(20, 80px);
+  grid-template-rows: repeat(20, 80px);
+  gap: 6px;
   justify-content: center;
   align-content: center;
 }
 
 /* CSS Hexagon Cell */
 .hex-cell {
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   background: #fff;
-  border: 2px solid #ddd;
+  border: 3px solid #ddd;
   clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);
   cursor: pointer;
   position: relative;
@@ -214,6 +214,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 12px;
 }
 
 .hex-cell:hover {
@@ -255,12 +256,13 @@ body {
 
 /* Tokens (stacked inside hex) */
 .hex-cell .token {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: 2px solid rgba(0, 0, 0, 0.2);
+  border: 3px solid rgba(0, 0, 0, 0.2);
   position: absolute;
-  bottom: 4px;
+  bottom: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Animal cube */
