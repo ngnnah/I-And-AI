@@ -22,6 +22,8 @@ The current portfolio includes:
 
 ### Multiplayer Games
 
+- **Harmonies** (`projects/gaming/harmonies`)  
+  Turn-based spatial puzzle board game. Build landscapes with stacked tokens on hex grids, create animal habitats, and score points through strategic placement. Official rules-based adaptation.
 - **Ito** (`projects/gaming/ito`)  
   Cooperative number guessing game. Players describe secret numbers using themes without revealing values. Great for family game night over video call.
 - **Nanja Monja** (`projects/gaming/nanja-monja`)  
@@ -45,6 +47,7 @@ The current portfolio includes:
 │   ├── iron-academy/
 │   ├── github-todo-app/
 │   └── gaming/
+│       ├── harmonies/
 │       ├── ito/
 │       ├── nanja-monja/
 │       └── codenames/
@@ -115,6 +118,15 @@ npm install
 npm test
 npm run test:watch
 npm run test:coverage
+```
+
+### Harmonies
+
+```bash
+cd projects/gaming/harmonies
+python3 -m http.server 8080
+# Open http://localhost:8080
+npm test  # Run unit tests
 ```
 
 ## Deployment
