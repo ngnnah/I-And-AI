@@ -10,6 +10,7 @@ import {
   canPlaceToken,
   hasAnimalCube,
   placeTokenOnHex,
+  getValidPlacementHexes,
 } from "../js/game/token-manager.js";
 
 import { TERRAIN_TYPES, STACKING_RULES } from "../js/data/tokens-config.js";
@@ -419,6 +420,87 @@ console.log("\n🎯 TOKEN PLACEMENT TESTS");
 })();
 
 // ============================================================================
+// EXPANSION HEX TESTS (NEW!)
+// ============================================================================
+
+console.log("\n🔷 EXPANSION HEX TESTS");
+
+// Test 37: Valid hexes includes existing hexes
+(() => {
+  const hexGrid = {
+    "0_0": { q: 0, r: 0, stack: [], terrain: "empty" },
+  };
+  const validHexes = getValidPlacementHexes(hexGrid, "blue", []);
+  assert(validHexes.includes("0_0"), "Existing hex 0_0 is valid for blue placement");
+})();
+
+// Test 38: Valid hexes includes expansion hexes (ground-level tokens)
+(() => {
+  const hexGrid = {
+    "0_0": { q: 0, r: 0, stack: [{ color: "blue" }], terrain: "water" },
+  };
+  const validHexes = getValidPlacementHexes(hexGrid, "yellow", []);
+
+  // Yellow is ground-level, so should be valid on expansion hexes
+  // Neighbors of 0,0 are: 1_0, 1_-1, 0_-1, -1_0, -1_1, 0_1
+  const hasExpansionHex = validHexes.some(key =>
+    ["1_0", "1_-1", "0_-1", "-1_0", "-1_1", "0_1"].includes(key)
+  );
+
+  assert(hasExpansionHex, "Expansion hexes included for ground-level token (yellow)");
+  assert(validHexes.length >= 6, "At least 6 expansion hexes available");
+})();
+
+// Test 39: Green can be placed on expansion hexes (ground-level) AND on brown
+(() => {
+  const hexGrid = {
+    "0_0": { q: 0, r: 0, stack: [{ color: "brown" }], terrain: "trunk" },
+  };
+  const validHexes = getValidPlacementHexes(hexGrid, "green", []);
+
+  // Green can stack on brown (0_0) AND be placed on empty expansion hexes
+  assert(validHexes.includes("0_0"), "Green can be placed on existing brown hex");
+  assert(validHexes.length >= 7, "Green can also be placed on expansion hexes (6+1)");
+})();
+
+// Test 40: Multiple existing hexes create multiple expansion zones
+(() => {
+  const hexGrid = {
+    "0_0": { q: 0, r: 0, stack: [{ color: "blue" }], terrain: "water" },
+    "2_0": { q: 2, r: 0, stack: [{ color: "blue" }], terrain: "water" },
+  };
+  const validHexes = getValidPlacementHexes(hexGrid, "yellow", []);
+
+  // Should have expansion hexes around both 0,0 and 2,0
+  // Total = 6 neighbors of 0,0 + 6 neighbors of 2,0 (minus overlaps)
+  assert(validHexes.length >= 10, "Multiple expansion zones created");
+})();
+
+// Test 41: Gray can be placed on expansion hexes (ground-level)
+(() => {
+  const hexGrid = {
+    "0_0": { q: 0, r: 0, stack: [{ color: "gray" }], terrain: "rock" },
+  };
+  const validHexes = getValidPlacementHexes(hexGrid, "gray", []);
+
+  // Gray can stack on gray OR be placed on empty expansion hexes
+  assert(validHexes.includes("0_0"), "Gray can stack on existing gray");
+  assert(validHexes.length >= 7, "Gray can also be placed on expansion hexes (6+1)");
+})();
+
+// Test 42: Red can be placed on expansion hexes (ground-level)
+(() => {
+  const hexGrid = {
+    "0_0": { q: 0, r: 0, stack: [{ color: "red" }], terrain: "building" },
+  };
+  const validHexes = getValidPlacementHexes(hexGrid, "red", []);
+
+  // Red can stack on red OR be placed on empty expansion hexes
+  assert(validHexes.includes("0_0"), "Red can stack on existing red");
+  assert(validHexes.length >= 7, "Red can also be placed on expansion hexes (6+1)");
+})();
+
+// ============================================================================
 // SUMMARY
 // ============================================================================
 
@@ -430,4 +512,5 @@ console.log("✅ RED = Buildings (max 2 height, on gray/brown/red)");
 console.log("✅ Terrain calculation matches official rules");
 console.log("✅ Stacking rules enforced correctly");
 console.log("✅ Animal cube blocking works");
+console.log("✅ Expansion hex placement works correctly");
 console.log("=".repeat(60) + "\n");

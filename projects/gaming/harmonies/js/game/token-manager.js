@@ -5,6 +5,7 @@
  */
 
 import { STACKING_RULES, TERRAIN_TYPES } from "../data/tokens-config.js";
+import { getNeighbors, coordToKey } from "./hex-grid.js";
 
 /**
  * Check if a hex has an Animal cube (blocks further stacking)
@@ -145,12 +146,33 @@ export function canPlaceToken(hex, newColor, placedAnimals = []) {
 export function getValidPlacementHexes(hexGrid, tokenColor, placedAnimals = []) {
   const validHexes = [];
 
+  // Check existing hexes
   for (const hexKey in hexGrid) {
     const hex = hexGrid[hexKey];
     const validation = canPlaceToken(hex, tokenColor, placedAnimals);
     if (validation.valid) {
       validHexes.push(hexKey);
     }
+  }
+
+  // FIXED: Also check expansion hexes (empty neighbors)
+  const expansionHexes = new Set();
+  for (const hexKey in hexGrid) {
+    const [q, r] = hexKey.split("_").map(Number);
+    const neighbors = getNeighbors(q, r);
+
+    neighbors.forEach((n) => {
+      const nKey = coordToKey(n.q, n.r);
+      if (!hexGrid[nKey] && !expansionHexes.has(nKey)) {
+        // Empty neighbor - check if token can be placed on empty hex
+        const emptyHex = { q: n.q, r: n.r, stack: [], terrain: "empty" };
+        const validation = canPlaceToken(emptyHex, tokenColor, placedAnimals);
+        if (validation.valid) {
+          validHexes.push(nKey);
+          expansionHexes.add(nKey);
+        }
+      }
+    });
   }
 
   return validHexes;

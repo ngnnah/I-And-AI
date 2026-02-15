@@ -8,6 +8,7 @@
 import { ref, get, set, update, push, remove } from "./firebase-config.js";
 import { calculateTerrain } from "./token-manager.js";
 import { calculateTotalScore } from "./scoring-engine.js";
+import { ANIMAL_CARDS } from "../data/animal-cards.js";
 
 /**
  * Create a new game
@@ -141,15 +142,16 @@ export async function startGame(gameId) {
     centralSpaces.push(drawTokensFromPouch(game.pouch, 3));
   }
 
-  // TODO: Load animal cards (placeholder for now)
-  const animalCards = [];
+  // FIXED: Load animal cards from data
+  // Shuffle the cards for randomization
+  const shuffledCards = [...ANIMAL_CARDS].sort(() => Math.random() - 0.5);
 
   const updates = {
     status: "playing",
     turnPhase: "selecting",
     "centralBoard/spaces": centralSpaces,
-    "animalCards/available": animalCards.slice(0, 5),
-    "animalCards/deck": animalCards.slice(5),
+    "animalCards/available": shuffledCards.slice(0, 5),
+    "animalCards/deck": shuffledCards.slice(5),
   };
 
   await update(gameRef, updates);
@@ -176,9 +178,11 @@ export async function selectCentralSpace(gameId, username, spaceIndex) {
     throw new Error("Cannot select central space in this phase");
   }
 
-  const tokens = game.centralBoard.spaces[spaceIndex];
+  // FIXED: Ensure spaces is an array and tokens is an array
+  const spaces = Array.isArray(game.centralBoard.spaces) ? game.centralBoard.spaces : [];
+  const tokens = Array.isArray(spaces[spaceIndex]) ? spaces[spaceIndex] : [];
 
-  if (!tokens || tokens.length === 0) {
+  if (tokens.length === 0) {
     throw new Error("Selected space is empty");
   }
 
@@ -237,8 +241,11 @@ export async function placeSingleToken(gameId, username, tokenIndex, hexCoord) {
     hex = { q: hexCoord.q, r: hexCoord.r, stack: [], terrain: "empty" };
   }
 
+  // FIXED: Ensure hex.stack is an array (Firebase sometimes returns objects)
+  const currentStack = Array.isArray(hex.stack) ? hex.stack : [];
+
   // Add token to stack
-  const updatedStack = [...hex.stack, token];
+  const updatedStack = [...currentStack, token];
   const updatedTerrain = calculateTerrain(updatedStack);
 
   // Update hex
@@ -307,9 +314,12 @@ export async function endTurn(gameId, username) {
   const nextPlayer = playerList[nextIndex];
 
   // Refill central board space(s)
-  const centralSpaces = game.centralBoard.spaces;
+  // FIXED: Ensure centralSpaces is an array
+  const centralSpaces = Array.isArray(game.centralBoard.spaces) ? game.centralBoard.spaces : [];
   for (let i = 0; i < centralSpaces.length; i++) {
-    if (centralSpaces[i].length === 0) {
+    // FIXED: Ensure each space is an array
+    const space = Array.isArray(centralSpaces[i]) ? centralSpaces[i] : [];
+    if (space.length === 0) {
       centralSpaces[i] = drawTokensFromPouch(game.pouch, 3);
     }
   }
@@ -374,7 +384,8 @@ export async function takeAnimalCard(gameId, username, cardId) {
     throw new Error("Cannot hold more than 4 animal cards");
   }
 
-  const availableCards = game.animalCards.available;
+  // FIXED: Ensure availableCards is an array
+  const availableCards = Array.isArray(game.animalCards.available) ? game.animalCards.available : [];
   const cardIndex = availableCards.findIndex((c) => c.id === cardId);
 
   if (cardIndex === -1) {

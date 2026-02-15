@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Harmonies Debug</title>
+  <script type="module">
+    // Quick debug script to test hex grid rendering
+    import { renderHexGrid } from './js/ui/board-renderer.js';
+    
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('Debug page loaded');
+      
+      // Create a simple test hex grid
+      const testGrid = {
+        '0_0': { q: 0, r: 0, stack: [{ color: 'blue' }], terrain: 'water' },
+        '1_0': { q: 1, r: 0, stack: [], terrain: 'empty' },
+        '0_1': { q: 0, r: 1, stack: [], terrain: 'empty' },
+      };
+      
+      console.log('Test grid:', testGrid);
+      renderHexGrid(testGrid, []);
+      console.log('Hex grid rendered');
+    });
+  </script>
+</head>
+<body>
+  <h1>Debug: Hex Grid</h1>
+  <svg id="hex-grid-svg" width="800" height="600" style="border: 1px solid black;"></svg>
+</body>
+</html>

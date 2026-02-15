@@ -4,15 +4,9 @@
  * Firebase Realtime Database for multiplayer sync
  */
 
-// Firebase configuration (Harmonies v3.0 - Correct database URL)
+// Minimal Firebase configuration - only database URL needed
 const firebaseConfig = {
-  apiKey: "AIzaSyBEEp5L9Y8vKf0xQJ5X8wQ7jF0y5kV8zY8",
-  authDomain: "board-games-fun.firebaseapp.com",
-  databaseURL: "https://harmonies-game-default-rtdb.asia-southeast1.firebasedatabase.app/",
-  projectId: "board-games-fun",
-  storageBucket: "board-games-fun.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef123456",
+  databaseURL: "https://harmonies-game-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 
 // Initialize Firebase (assumes firebase-app.js is loaded via CDN)

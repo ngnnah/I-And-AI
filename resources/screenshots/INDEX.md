@@ -29,3 +29,5 @@ YYYYMMDD-HHMMSS_topic_slug.ext
 | 2026-01-26 | [`20260126-015909_pokemon-math-world_world-select.png`](20260126-015909_pokemon-math-world_world-select.png)                 | Pokemon Math World world select                   | GitHub Pages             |
 | 2026-01-26 | [`20260126-015909_iron-academy_start.png`](20260126-015909_iron-academy_start.png)                                           | Iron Academy start screen                         | GitHub Pages             |
 | 2026-01-26 | [`20260126-015909_github-todo-app_login.png`](20260126-015909_github-todo-app_login.png)                                     | GitHub TODO App login screen                      | GitHub Pages             |
+| 2026-02-15 | [`20260215-231932_harmonies_game-load-test.png`](20260215-231932_harmonies_game-load-test.png)                               | Harmonies v3.0 login screen (bug fixes verified)  | localhost:8080           |
+| 2026-02-15 | [`20260215-234221_harmonies_expansion-hexes-fixed.png`](20260215-234221_harmonies_expansion-hexes-fixed.png)                 | Harmonies after fixing expansion hex placement    | localhost:8080           |

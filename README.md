@@ -23,7 +23,7 @@ The current portfolio includes:
 ### Multiplayer Games
 
 - **Harmonies** (`projects/gaming/harmonies`)  
-  Turn-based spatial puzzle board game. Build landscapes with stacked tokens on hex grids, create animal habitats, and score points through strategic placement. Official rules-based adaptation.
+  Turn-based spatial puzzle board game. Build landscapes with stacked tokens on hex grids, create animal habitats, and score points through strategic placement.
 - **Ito** (`projects/gaming/ito`)  
   Cooperative number guessing game. Players describe secret numbers using themes without revealing values. Great for family game night over video call.
 - **Nanja Monja** (`projects/gaming/nanja-monja`)  

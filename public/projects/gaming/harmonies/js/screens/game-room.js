@@ -35,23 +35,45 @@ let unsubscribeGame = null;
  * @param {string} username - Current player username
  */
 export function initGameRoom(gameId, username) {
-  currentUsername = username;
+  try {
+    console.log(`[GameRoom] Initializing game room: ${gameId} for user: ${username}`);
+    currentUsername = username;
 
-  // Listen to game updates
-  const gameRef = ref(`games/${gameId}`);
-  unsubscribeGame = onValue(gameRef, (snapshot) => {
-    currentGame = snapshot.val();
-    if (currentGame) {
-      renderGameState();
+    // Listen to game updates
+    const gameRef = ref(`games/${gameId}`);
+
+    if (!gameRef) {
+      throw new Error("Failed to create Firebase reference. Database not initialized.");
     }
-  });
 
-  // Set up event listeners
-  setupEventListeners();
+    unsubscribeGame = onValue(gameRef, (snapshot) => {
+      try {
+        currentGame = snapshot.val();
+        console.log("[GameRoom] Game state updated:", currentGame ? "Game exists" : "Game not found");
 
-  // Initial render
-  if (currentGame) {
-    renderGameState();
+        if (currentGame) {
+          renderGameState();
+        } else {
+          showToast(`Game ${gameId} not found. It may have been deleted.`, "error");
+        }
+      } catch (err) {
+        console.error("[GameRoom] Error handling game state update:", err);
+        showToast("Error updating game state", "error");
+      }
+    });
+
+    // Set up event listeners
+    setupEventListeners();
+
+    console.log("[GameRoom] Game room initialized successfully");
+  } catch (error) {
+    console.error("[GameRoom] Fatal error initializing game room:", error);
+    showToast(`Failed to load game: ${error.message}`, "error");
+
+    // Redirect back to lobby after error
+    setTimeout(() => {
+      window.location.hash = "#lobby";
+    }, 3000);
   }
 }
 
@@ -73,34 +95,54 @@ export function cleanupGameRoom() {
 // ============================================================================
 
 function setupEventListeners() {
-  // Central board spaces (tap to select)
-  document.getElementById("central-spaces").addEventListener("click", handleCentralSpaceClick);
+  try {
+    console.log("[GameRoom] Setting up event listeners");
 
-  // Hex grid (tap to place token)
-  document.getElementById("hex-grid-svg").addEventListener("click", handleHexClick);
-
-  // End turn button
-  document.getElementById("end-turn-btn").addEventListener("click", handleEndTurn);
-
-  // Undo button
-  document.getElementById("undo-btn").addEventListener("click", handleUndo);
-
-  // Score breakdown button
-  document.getElementById("score-breakdown-btn").addEventListener("click", showScoreBreakdown);
-
-  // Menu button
-  document.getElementById("menu-btn").addEventListener("click", showMenu);
-
-  // Animal cards (tap to take or view)
-  document.getElementById("animal-cards-row").addEventListener("click", handleAnimalCardClick);
-
-  // Haptic feedback on touch (iOS/Android)
-  if (navigator.vibrate) {
-    document.addEventListener("touchstart", (e) => {
-      if (e.target.closest(".central-space, .hex, .btn")) {
-        navigator.vibrate(10); // Light tap feedback
+    // Helper to safely add event listener
+    const safeAddListener = (id, event, handler) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener(event, handler);
+        console.log(`[GameRoom] Added ${event} listener to #${id}`);
+      } else {
+        console.warn(`[GameRoom] Element not found: #${id}`);
       }
-    });
+    };
+
+    // Central board spaces (tap to select)
+    safeAddListener("central-spaces", "click", handleCentralSpaceClick);
+
+    // Hex grid (tap to place token)
+    safeAddListener("hex-grid-svg", "click", handleHexClick);
+
+    // End turn button
+    safeAddListener("end-turn-btn", "click", handleEndTurn);
+
+    // Undo button
+    safeAddListener("undo-btn", "click", handleUndo);
+
+    // Score breakdown button
+    safeAddListener("score-breakdown-btn", "click", showScoreBreakdown);
+
+    // Menu button
+    safeAddListener("menu-btn", "click", showMenu);
+
+    // Animal cards (tap to take or view)
+    safeAddListener("animal-cards-row", "click", handleAnimalCardClick);
+
+    // Haptic feedback on touch (iOS/Android)
+    if (navigator.vibrate) {
+      document.addEventListener("touchstart", (e) => {
+        if (e.target.closest(".central-space, .hex, .btn")) {
+          navigator.vibrate(10); // Light tap feedback
+        }
+      });
+      console.log("[GameRoom] Haptic feedback enabled");
+    }
+
+    console.log("[GameRoom] Event listeners setup complete");
+  } catch (error) {
+    console.error("[GameRoom] Error setting up event listeners:", error);
   }
 }
 
@@ -112,14 +154,24 @@ function setupEventListeners() {
  * Main render function - updates entire UI based on game state
  */
 function renderGameState() {
-  if (!currentGame) return;
+  if (!currentGame) {
+    console.warn("[GameRoom] Cannot render - game state is null");
+    return;
+  }
 
-  renderTurnIndicator();
-  renderCentralBoard();
-  renderAnimalCards();
-  renderPlayerBoard();
-  renderBottomBar();
-  renderProgressIndicator();
+  try {
+    console.log("[GameRoom] Rendering game state");
+    renderTurnIndicator();
+    renderCentralBoard();
+    renderAnimalCards();
+    renderPlayerBoard();
+    renderBottomBar();
+    renderProgressIndicator();
+    console.log("[GameRoom] Render complete");
+  } catch (error) {
+    console.error("[GameRoom] Error rendering game state:", error);
+    showToast("Error displaying game. Please refresh.", "error");
+  }
 }
 
 /**
@@ -130,8 +182,10 @@ function renderTurnIndicator() {
   const playerNameEl = document.getElementById("turn-player-name");
   const phaseEl = document.getElementById("turn-phase");
 
+  if (!indicator || !playerNameEl || !phaseEl) return;
+
   const isMyTurn = currentGame.currentTurn === currentUsername;
-  const currentPlayer = currentGame.players[currentGame.currentTurn];
+  const currentPlayer = currentGame.players && currentGame.players[currentGame.currentTurn];
 
   if (isMyTurn) {
     indicator.classList.add("your-turn");
@@ -159,9 +213,11 @@ function renderTurnIndicator() {
  */
 function renderCentralBoard() {
   const container = document.getElementById("central-spaces");
+  if (!container) return;
+
   container.innerHTML = "";
 
-  const spaces = currentGame.centralBoard.spaces || [];
+  const spaces = (currentGame.centralBoard && currentGame.centralBoard.spaces) || [];
   const canSelect = currentGame.currentTurn === currentUsername && currentGame.turnPhase === "selecting";
 
   spaces.forEach((tokens, index) => {
@@ -197,19 +253,35 @@ function renderCentralBoard() {
  */
 function renderAnimalCards() {
   const container = document.getElementById("animal-cards-row");
+  if (!container) return;
+
   container.innerHTML = "";
 
-  const availableCards = currentGame.animalCards.available || [];
+  const availableCards = (currentGame.animalCards && currentGame.animalCards.available) || [];
+
+  // FIXED: Use emoji instead of missing images
+  const animalEmoji = {
+    bear: "🐻",
+    deer: "🦌",
+    rabbit: "🐰",
+    duck: "🦆",
+    fox: "🦊",
+    lynx: "🐈",
+    bird: "🐦",
+    squirrel: "🐿️",
+    hedgehog: "🦔",
+    turtle: "🐢",
+  };
 
   availableCards.forEach((card) => {
     const cardEl = document.createElement("div");
     cardEl.className = "animal-card";
     cardEl.dataset.cardId = card.id;
 
-    // Card image (placeholder)
+    // Card with emoji icon (FIXED: no missing images)
     cardEl.innerHTML = `
       <div class="animal-card-image">
-        <img src="data/harmonies/03_CONTENT/_GRAPHICS/${card.animal || "bird"}.png" alt="${card.name}" />
+        <div style="font-size: 48px;">${animalEmoji[card.animal] || "🦊"}</div>
       </div>
       <div class="animal-card-name">${card.name}</div>
     `;
@@ -230,11 +302,17 @@ function renderAnimalCards() {
  * Render player's hex grid board
  */
 function renderPlayerBoard() {
-  const playerBoard = currentGame.playerBoards[currentUsername];
-  if (!playerBoard) return;
+  const playerBoard = currentGame.playerBoards && currentGame.playerBoards[currentUsername];
+  if (!playerBoard) {
+    console.warn("[GameRoom] Player board not found for:", currentUsername);
+    return;
+  }
 
   // Update score display
-  document.getElementById("current-score").textContent = playerBoard.score?.total || 0;
+  const scoreEl = document.getElementById("current-score");
+  if (scoreEl) {
+    scoreEl.textContent = playerBoard.score?.total || 0;
+  }
 
   // Render hex grid (delegated to board-renderer.js)
   renderHexGrid(playerBoard.hexGrid, playerBoard.placedAnimals);
@@ -261,6 +339,8 @@ function renderPlayerBoard() {
  */
 function renderBottomBar() {
   const endTurnBtn = document.getElementById("end-turn-btn");
+  if (!endTurnBtn) return;
+
   const isMyTurn = currentGame.currentTurn === currentUsername;
   const canEndTurn = isMyTurn && currentGame.turnPhase === "optional";
 
@@ -275,9 +355,17 @@ function renderProgressIndicator() {
   const indicator = document.getElementById("progress-indicator");
   const currentEl = document.getElementById("progress-current");
   const totalEl = document.getElementById("progress-total");
+  if (!indicator || !currentEl || !totalEl) return;  // FIXED: Added null check
 
   if (currentGame.turnPhase === "placing" && currentGame.currentTurn === currentUsername) {
-    const playerBoard = currentGame.playerBoards[currentUsername];
+    // FIXED: Added null check for playerBoards
+    const playerBoard = currentGame.playerBoards && currentGame.playerBoards[currentUsername];
+    if (!playerBoard) {
+      console.warn("[GameRoom] Player board not found for progress indicator:", currentUsername);
+      indicator.classList.add("hidden");
+      return;
+    }
+
     const tokensInHand = playerBoard.tokensInHand || [];
     const placed = 3 - tokensInHand.length;
 
@@ -305,6 +393,13 @@ async function handleCentralSpaceClick(e) {
 
   if (!canSelect) {
     showToast("Not your turn to select tokens", "error");
+    return;
+  }
+
+  // FIXED: Added null check for centralBoard
+  if (!currentGame.centralBoard || !currentGame.centralBoard.spaces) {
+    console.warn("[GameRoom] Central board not loaded");
+    showToast("Board not ready. Please wait...", "error");
     return;
   }
 
@@ -348,7 +443,14 @@ async function handleHexClick(e) {
     return; // Silently ignore if not placing phase
   }
 
-  const playerBoard = currentGame.playerBoards[currentUsername];
+  // FIXED: Added null check for playerBoards
+  const playerBoard = currentGame.playerBoards && currentGame.playerBoards[currentUsername];
+  if (!playerBoard) {
+    console.warn("[GameRoom] Player board not found for hex click:", currentUsername);
+    showToast("Unable to place token - board not loaded", "error");
+    return;
+  }
+
   const tokensInHand = playerBoard.tokensInHand || [];
 
   if (tokensInHand.length === 0) {
@@ -523,8 +625,13 @@ function showConfirmModal(title, message) {
  * Show score breakdown modal
  */
 function showScoreBreakdown() {
-  const playerBoard = currentGame.playerBoards[currentUsername];
-  if (!playerBoard) return;
+  // FIXED: Added null check for playerBoards
+  const playerBoard = currentGame.playerBoards && currentGame.playerBoards[currentUsername];
+  if (!playerBoard) {
+    console.warn("[GameRoom] Player board not found for score breakdown:", currentUsername);
+    showToast("Score data not available", "error");
+    return;
+  }
 
   const breakdown = playerBoard.score?.breakdown || {};
   const total = playerBoard.score?.total || 0;
@@ -660,10 +767,16 @@ function showAnimalCardDetails(cardId) {
   const overlay = document.getElementById("modal-overlay");
   const modal = document.getElementById("modal-content");
 
+  // FIXED: Use emoji instead of missing image
+  const animalEmoji = {
+    bear: "🐻", deer: "🦌", rabbit: "🐰", duck: "🦆", fox: "🦊",
+    lynx: "🐈", bird: "🐦", squirrel: "🐿️", hedgehog: "🦔", turtle: "🐢",
+  };
+
   modal.innerHTML = `
     <h2>${card.name}</h2>
     <div class="animal-card-details">
-      <img src="data/harmonies/03_CONTENT/_CARDS/${card.id}.png" alt="${card.name}" style="max-width: 100%;">
+      <div style="font-size: 64px; text-align: center;">${animalEmoji[card.animal] || "🦊"}</div>
       <p>Pattern: ${card.pattern?.length || 0} hexes</p>
       <p>Points: ${card.pointsPerPlacement?.join(", ") || "N/A"}</p>
     </div>

@@ -50,45 +50,58 @@ function initRouter() {
  * Handle route changes
  */
 function handleRouteChange() {
-  const hash = window.location.hash.slice(1); // Remove '#'
-  const [route, ...params] = hash.split("/");
+  try {
+    const hash = window.location.hash.slice(1); // Remove '#'
+    const [route, ...params] = hash.split("/");
 
-  // Hide all screens
-  document.querySelectorAll(".screen").forEach((screen) => {
-    screen.classList.add("hidden");
-  });
+    console.log(`[Router] Navigating to: ${route || 'setup'}`, params);
 
-  // Clean up previous screen
-  cleanupLobby();
-  cleanupGameRoom();
+    // Hide all screens
+    document.querySelectorAll(".screen").forEach((screen) => {
+      screen.classList.add("hidden");
+    });
 
-  // Route to appropriate screen
-  switch (route) {
-    case "":
-    case "setup":
-      showScreen("screen-player-setup");
-      initPlayerSetup();
-      break;
+    // Clean up previous screen
+    try {
+      cleanupLobby();
+      cleanupGameRoom();
+    } catch (err) {
+      console.warn("[Router] Cleanup error:", err);
+    }
 
-    case "lobby":
-      showScreen("screen-lobby");
-      initLobby();
-      break;
+    // Route to appropriate screen
+    switch (route) {
+      case "":
+      case "setup":
+        showScreen("screen-player-setup");
+        initPlayerSetup();
+        break;
 
-    case "game":
-      if (params.length > 0) {
-        const gameId = params[0];
-        showScreen("screen-game-room");
-        initGameRoomWithId(gameId);
-      } else {
-        // No game ID, redirect to lobby
-        window.location.hash = "#lobby";
-      }
-      break;
+      case "lobby":
+        showScreen("screen-lobby");
+        initLobby();
+        break;
 
-    default:
-      // Unknown route, redirect to setup
-      window.location.hash = "#setup";
+      case "game":
+        if (params.length > 0) {
+          const gameId = params[0];
+          showScreen("screen-game-room");
+          initGameRoomWithId(gameId);
+        } else {
+          // No game ID, redirect to lobby
+          console.warn("[Router] No game ID provided, redirecting to lobby");
+          window.location.hash = "#lobby";
+        }
+        break;
+
+      default:
+        // Unknown route, redirect to setup
+        console.warn(`[Router] Unknown route: ${route}, redirecting to setup`);
+        window.location.hash = "#setup";
+    }
+  } catch (error) {
+    console.error("[Router] Fatal routing error:", error);
+    showToast("Navigation error. Please refresh the page.", "error");
   }
 }
 

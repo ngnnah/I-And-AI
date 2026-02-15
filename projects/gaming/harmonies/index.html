@@ -10,8 +10,8 @@
   <title>Harmonies - Multiplayer Board Game</title>
   <meta name="description" content="Play Harmonies online - A peaceful tile-placement game about creating beautiful natural landscapes">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="data/harmonies/HARMONIES_LOGO.png">
+  <!-- Favicon (using emoji as placeholder) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
 
   <!-- Styles -->
   <link rel="stylesheet" href="css/styles.css">
@@ -27,8 +27,7 @@
     <!-- Screen: Player Setup (Username Login) -->
     <div id="screen-player-setup" class="screen">
       <div class="setup-container">
-        <img src="data/harmonies/HARMONIES_LOGO.png" alt="Harmonies" class="game-logo">
-        <h1>Welcome to Harmonies</h1>
+        <h1 style="font-size: 3em; margin-bottom: 0.2em;">🎮 Harmonies</h1>
         <p class="subtitle">Create beautiful natural landscapes</p>
 
         <form id="username-form" class="form-card">
@@ -150,7 +149,7 @@
               <button id="score-breakdown-btn" class="btn btn-secondary btn-sm">Details</button>
             </div>
           </div>
-          <svg id="hex-grid-svg" class="hex-grid" width="800" height="600" viewBox="0 0 800 600">
+          <svg id="hex-grid-svg" class="hex-grid" viewBox="0 0 800 600">
             <defs>
               <!-- Reusable hex shape for performance -->
               <polygon id="hex-shape" points="50,0 15,25 15,75 50,100 85,75 85,25" />
