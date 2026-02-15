@@ -13,7 +13,7 @@ import {
   placeAnimalCubes,
 } from "../game/firebase-sync.js";
 import { getValidPlacementHexes } from "../game/token-manager.js";
-import { renderHexGrid, highlightValidHexes, clearHighlights } from "../ui/board-renderer.js";
+import { renderHexGrid, highlightValidHexes, clearHighlights, updateScoreDisplay } from "../ui/board-renderer-simple.js";
 
 // ============================================================================
 // STATE
@@ -113,7 +113,7 @@ function setupEventListeners() {
     safeAddListener("central-spaces", "click", handleCentralSpaceClick);
 
     // Hex grid (tap to place token)
-    safeAddListener("hex-grid-svg", "click", handleHexClick);
+    safeAddListener("hex-grid-container", "click", handleHexClick);
 
     // End turn button
     safeAddListener("end-turn-btn", "click", handleEndTurn);

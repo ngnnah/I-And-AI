@@ -141,7 +141,7 @@
         </div>
 
         <!-- Hex Grid Container (Player Board) -->
-        <div class="hex-grid-container">
+        <div class="hex-grid-wrapper">
           <div class="hex-grid-header">
             <h3 id="current-board-label">Your Board</h3>
             <div class="score-display">
@@ -149,13 +149,10 @@
               <button id="score-breakdown-btn" class="btn btn-secondary btn-sm">Details</button>
             </div>
           </div>
-          <svg id="hex-grid-svg" class="hex-grid" viewBox="0 0 800 600">
-            <defs>
-              <!-- Reusable hex shape for performance -->
-              <polygon id="hex-shape" points="50,0 15,25 15,75 50,100 85,75 85,25" />
-            </defs>
-            <!-- Hex grid elements inserted here by JS -->
-          </svg>
+          <!-- CSS Hex Grid (no SVG) -->
+          <div id="hex-grid-container" class="hex-grid-container">
+            <!-- Hex cells inserted here by JS -->
+          </div>
         </div>
 
         <!-- Bottom Bar (Actions) -->

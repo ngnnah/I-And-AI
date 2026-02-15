@@ -8,7 +8,7 @@ import { initializeFirebase } from "./game/firebase-config.js";
 import { initPlayerSetup } from "./screens/player-setup.js";
 import { initLobby, cleanupLobby } from "./screens/lobby.js";
 import { initGameRoom, cleanupGameRoom } from "./screens/game-room.js";
-import { enablePinchZoom } from "./ui/board-renderer.js";
+import { enablePinchZoom } from "./ui/board-renderer-simple.js";
 
 // ============================================================================
 // INITIALIZATION
