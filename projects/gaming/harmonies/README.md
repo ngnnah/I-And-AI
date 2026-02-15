@@ -132,11 +132,6 @@ Want to practice alone?
 - Refresh both browser windows
 - Check your internet connection (Firebase requires online access)
 
-**Still having issues?**
-
-- Try the diagnostic page: **http://localhost:8080/diagnostic.html**
-- Open browser console (F12) and look for error messages
-
 ## Tech Stack
 
 Built with simplicity and speed:
