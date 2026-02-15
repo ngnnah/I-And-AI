@@ -1,13 +1,18 @@
 # Harmonies - AI Agent Development Guide
 
+**⚠️ UPDATED with Official Rules (2026-02-15)** - This guide now reflects the correct rules from the published Harmonies board game. Previous versions had incorrect stacking rules and scoring formulas.
+
+**📖 For Complete Game Rules:** See [game-rules.md](./game-rules.md) - Comprehensive rules document for both AI agents and human players.
+
 This guide is for AI agents (Claude Code, GitHub Copilot, Cursor, etc.) to understand the codebase architecture and continue development efficiently.
 
 ## Quick Context
 
 **What:** Turn-based multiplayer spatial puzzle game (board game adaptation)
+**Game:** Harmonies by Johan Benvenuto, published by Libellud (2024)
 **Built:** ~3 hour MVP implementation (Phase 1 & 2 complete)
 **Stack:** Vanilla JS + SVG + Firebase Realtime Database
-**Status:** Core gameplay complete, ready for Phase 3 polish
+**Status:** Core gameplay complete, **scoring algorithms need correction** (see section 3)
 
 ## Core Philosophy
 
@@ -74,25 +79,39 @@ rotateCoord(q, r, steps) // steps = 0-5 for 0°-300°
 
 ### 2. Token Stacking Rules (token-manager.js)
 
-**Stacking Matrix:**
-| Token Color | Can Stack On | Max Height | Notes |
-|-------------|--------------|------------|-------|
-| Yellow (Field) | Nothing | 1 | Ground level only |
-| Blue (Water) | Nothing | 1 | Ground level only |
-| Brown (Trunk) | Yellow, Blue, Brown | 3 | Foundation for trees |
-| Green (Leaves) | Brown only | 3 | Must have brown underneath |
-| Gray (Mountain) | Gray only | 3 | Self-stacking only |
-| Red (Building) | Yellow, Blue, Brown | 3 | Any ground terrain |
+**Official Token Distribution (120 tokens total):**
+- 23 Blue (Water)
+- 23 Gray (Mountains)  
+- 21 Brown (Tree trunks)
+- 19 Green (Tree leaves)
+- 19 Yellow (Fields)
+- 15 Red (Buildings)
+
+**Stacking Matrix (Official Rules):**
+| Token Color     | Can Stack On     | Max Height | Notes                                         |
+| --------------- | ---------------- | ---------- | --------------------------------------------- |
+| Yellow (Field)  | Nothing          | 1          | Ground level only, cannot be stacked on       |
+| Blue (Water)    | Nothing          | 1          | Ground level only, cannot be stacked on       |
+| Brown (Trunk)   | Brown only       | 2          | Can only stack on brown, max 2 brown in stack |
+| Green (Leaves)  | Brown only       | 3          | Must have 1 or 2 brown underneath (max)       |
+| Gray (Mountain) | Gray only        | 3          | Self-stacking only                            |
+| Red (Building)  | Gray, Brown, Red | 2          | Can only be 2nd token in stack, never 3rd     |
 
 **Terrain Calculation Logic:**
 
 ```javascript
 // Stack composition determines terrain
-[Brown, Green] → TREE (green on brown)
-[Gray, Gray] → MOUNTAIN (2+ gray stacked)
-[Yellow] → FIELD (single yellow)
-[Blue] → WATER (single blue)
-[Brown, Red] → BUILDING (red on ground)
+[Brown] → TRUNK (0 points, not a tree yet)
+[Brown, Brown] → TRUNK (0 points, not a tree yet)
+[Green] → TREE (1 point - single green on ground)
+[Brown, Green] → TREE (3 points - 2-token tree)
+[Brown, Brown, Green] → TREE (5 points - 3-token tree)
+[Gray] → ROCK (single gray, 0 points if isolated)
+[Gray, Gray] → MOUNTAIN (2-high, 3 points if adjacent to mountain)
+[Gray, Gray, Gray] → MOUNTAIN (3-high, 7 points if adjacent to mountain)
+[Yellow] → FIELD (must connect with another for 5pts)
+[Blue] → WATER (part of river or island)
+[Red] or [Brown/Gray, Red] → BUILDING (5pts if 3+ color neighbors)
 ```
 
 ### 3. Scoring Engine (scoring-engine.js)
@@ -106,31 +125,166 @@ function scoreXxxModule(hexGrid, ...otherData) {
 }
 ```
 
-**Scoring Algorithms:**
+**Scoring Algorithms (Official Rules):**
 
-| Module        | Algorithm          | Key Logic                                              |
-| ------------- | ------------------ | ------------------------------------------------------ |
-| **Trees**     | Height-based       | `[0, 1, 3, 6][height]` - progressive points            |
-| **Mountains** | Adjacency          | `height × numAdjacentMountains` - isolated = 0pts      |
-| **Fields**    | Cluster size       | `n(n+1)/2` - flood fill for contiguous yellow          |
-| **Buildings** | Neighbor diversity | `2pts × uniqueAdjacentTerrains` - count distinct types |
-| **Water**     | Longest river      | `n(n+1)/2` - flood fill, take max cluster              |
-| **Animals**   | Card completion    | Sum `pointsPerPlacement[i]` for each placed animal     |
+| Module        | Algorithm          | Key Logic                                                                                           |
+| ------------- | ------------------ | --------------------------------------------------------------------------------------------------- |
+| **Trees**     | Height-based       | 1 brown/2 brown = 0pts, 1 green = 1pt, 1 brown + 1 green = 3pts, 2 brown + 1 green = 5pts           |
+| **Mountains** | Height + Adjacency | 1 token = 1pt, 2 tokens = 3pts, 3 tokens = 7pts. **Must be adjacent to another mountain or = 0pts** |
+| **Fields**    | Flat per cluster   | Each field of 2+ connected yellow tokens = **5 points flat**                                        |
+| **Buildings** | Neighbor diversity | **5 points per building** IF surrounded by 3+ different colors, otherwise 0pts                      |
+| **Water A**   | Longest river      | 1=0, 2=2, 3=5, 4=8, 5=11, 6=15, +4 per token past 6. **Only longest river scores**                  |
+| **Water B**   | Islands            | **5 points per island** created (separated by blue tokens)                                          |
+| **Animals**   | Card completion    | Score shown at top of card based on cubes placed (see card values)                                  |
 
-**Implementation Pattern:**
+**Implementation Pattern (Corrected):**
 
 ```javascript
 export function scoreTreesModule(hexGrid) {
   let score = 0;
   for (const key in hexGrid) {
     const hex = hexGrid[key];
-    if (hex.terrain === TERRAIN_TYPES.TREE) {
-      const height = hex.stack.length;
-      score += [0, 1, 3, 6][height];
+    const stack = hex.stack || [];
+    
+    // Count brown and green tokens
+    const brownCount = stack.filter(t => t.color === 'brown').length;
+    const greenCount = stack.filter(t => t.color === 'green').length;
+    
+    // Scoring: 1-2 brown only = 0, 1 green = 1, 1 brown + 1 green = 3, 2 brown + 1 green = 5
+    if (greenCount === 1 && brownCount === 0) score += 1;
+    else if (greenCount === 1 && brownCount === 1) score += 3;
+    else if (greenCount === 1 && brownCount === 2) score += 5;
+    // 1 or 2 brown with no green = 0 points
+  }
+  return score;
+}
+
+export function scoreMountainsModule(hexGrid) {
+  let score = 0;
+  for (const key in hexGrid) {
+    const hex = hexGrid[key];
+    const stack = hex.stack || [];
+    
+    // Only gray tokens stacked = mountain
+    if (stack.length >= 1 && stack.every(t => t.color === 'gray')) {
+      // Check if adjacent to at least one other mountain
+      const { q, r } = keyToCoord(key);
+      const neighbors = getNeighbors(q, r);
+      const hasAdjacentMountain = neighbors.some(n => {
+        const neighborHex = hexGrid[coordToKey(n.q, n.r)];
+        const neighborStack = neighborHex?.stack || [];
+        return neighborStack.length >= 2 && neighborStack.every(t => t.color === 'gray');
+      });
+      
+      if (hasAdjacentMountain) {
+        // Height-based scoring: 1=1pt, 2=3pts, 3=7pts
+        const height = stack.length;
+        score += [0, 1, 3, 7][height] || 0;
+      }
+      // Isolated mountains = 0 points
     }
   }
   return score;
 }
+
+export function scoreFieldsModule(hexGrid) {
+  // Each field (2+ connected yellow tokens) = 5 points flat
+  const visited = new Set();
+  let score = 0;
+  
+  for (const key in hexGrid) {
+    if (visited.has(key)) continue;
+    
+    const hex = hexGrid[key];
+    if (hex.stack?.[0]?.color === 'yellow') {
+      // Flood fill to find cluster size
+      const cluster = floodFill(hexGrid, key, 'yellow');
+      cluster.forEach(k => visited.add(k));
+      
+      // Each field of 2+ yellow = 5 points
+      if (cluster.length >= 2) {
+        score += 5;
+      }
+    }
+  }
+  return score;
+}
+
+export function scoreBuildingsModule(hexGrid) {
+  let score = 0;
+  for (const key in hexGrid) {
+    const hex = hexGrid[key];
+    const stack = hex.stack || [];
+    
+    // Red token (anywhere in valid stack) = building
+    if (stack.some(t => t.color === 'red')) {
+      // Count unique adjacent top token colors
+      const { q, r } = keyToCoord(key);
+      const neighbors = getNeighbors(q, r);
+      const uniqueColors = new Set();
+      
+      neighbors.forEach(n => {
+        const neighborHex = hexGrid[coordToKey(n.q, n.r)];
+        const topToken = neighborHex?.stack?.[neighborHex.stack.length - 1];
+        if (topToken) uniqueColors.add(topToken.color);
+      });
+      
+      // Need 3+ different colors to score
+      if (uniqueColors.size >= 3) {
+        score += 5;
+      }
+    }
+  }
+  return score;
+}
+
+export function scoreWaterModuleA(hexGrid) {
+  // Side A: Longest river only. Scoring: 1=0, 2=2, 3=5, 4=8, 5=11, 6=15, +4 per token past 6
+  const visited = new Set();
+  let longestRiver = 0;
+  
+  for (const key in hexGrid) {
+    if (visited.has(key)) continue;
+    
+    const hex = hexGrid[key];
+    if (hex.stack?.[0]?.color === 'blue') {
+      const river = floodFill(hexGrid, key, 'blue');
+      river.forEach(k => visited.add(k));
+      longestRiver = Math.max(longestRiver, river.length);
+    }
+  }
+  
+  // Apply scoring formula
+  const scores = [0, 0, 2, 5, 8, 11, 15];
+  if (longestRiver < scores.length) {
+    return scores[longestRiver];
+  } else {
+    return scores[6] + (longestRiver - 6) * 4;
+  }
+}
+
+export function scoreWaterModuleB(hexGrid) {
+  // Side B: 5 points per island (land areas separated by water)
+  // Implementation: Count connected land components
+  const visited = new Set();
+  let islandCount = 0;
+  
+  for (const key in hexGrid) {
+    if (visited.has(key)) continue;
+    
+    const hex = hexGrid[key];
+    // Water hexes don't count
+    if (hex.stack?.[0]?.color === 'blue') continue;
+    
+    // Found an unvisited land hex - new island
+    const island = floodFillLand(hexGrid, key);
+    island.forEach(k => visited.add(k));
+    islandCount++;
+  }
+  
+  return islandCount * 5;
+}
+```
 ```
 
 ### 4. Pattern Matching (pattern-matcher.js)
@@ -213,34 +367,43 @@ function mirrorCoord([dq, dr]) {
   └─ gameHistory: [{ gameId, finishedAt, score, rank }]
 ```
 
-### 6. Turn Flow State Machine
+### 6. Turn Flow (Official Rules)
 
-**Phases:**
+**Turn Actions (Flexible Order):**
 
-```
-MANDATORY → OPTIONAL → [Next Player] MANDATORY → ...
-```
+Players can take actions in ANY order they prefer:
 
-**Mandatory Phase:**
+1. **Take and place tokens (MANDATORY)** - Must be done once per turn
+   - Take all 3 tokens from one space on central board
+   - Place all 3 tokens on personal board (can place between other actions)
+   - Can place tokens between taking animal cards and placing animal cubes
 
-- Player must take exactly 3 tokens from central board
-- Tokens auto-place on adjacent hexes (MVP simplification)
-- After placement: `turnPhase = "optional"`
+2. **Take one animal card (OPTIONAL)** - Max once per turn
+   - Can only have 4 animal cards above board at a time
+   - Take corresponding number of animal cubes shown on card
 
-**Optional Phase:**
+3. **Place animal cube(s) (OPTIONAL)** - Can do multiple times
+   - Match pattern on animal card (any orientation)
+   - Place cube on specified token from the pattern
+   - Same token can be used for multiple animals, but only 1 cube per token
 
-- Player may take 1 animal card (once per turn)
-- Player may place unlimited animals on completed patterns
-- Click "End Turn": Refill central board → Next player → `turnPhase = "mandatory"`
+**End of Turn:**
+- Refill central board space (draw 3 tokens from pouch)
+- Refill animal cards to 5 faceup
+- Next player's turn
 
-**End Game Conditions:**
+**End Game Conditions (Official Rules):**
 
 ```javascript
-// Check after every turn end
-if (pouch.totalTokens === 0 || playerHasLessThan3EmptyHexes()) {
+// Game ends when either condition is met:
+// 1. Pouch doesn't have enough tokens to refill central board (less than 3)
+// 2. Player has 2 or fewer empty spaces on their board
+
+if (pouch.totalTokens < 3 || playerEmptySpaces <= 2) {
+  // All players get equal turns - remaining players take one more turn
   status = "finished";
   calculateFinalScores();
-  declareWinner();
+  // Winner = highest score. Tie-breaker: most animal cubes placed
 }
 ```
 
@@ -306,17 +469,37 @@ node --test tests/core-logic.test.js
 
 **Current Status:** 15/16 tests passing (rotation test has minor expectation issue but function works correctly)
 
-## Known MVP Simplifications
+## Known MVP Simplifications vs Official Rules
 
 These are **intentional shortcuts** for 2-3 hour timeline:
 
 1. **Token Placement:** Auto-places on `-1_0`, `0_0`, `1_0` (no drag-drop yet)
-2. **Hex Grid Expansion:** Shows expansion hexes but clicking doesn't place tokens on them
-3. **Animal Placement:** Can take cards but placement is simplified (no full pattern validation UI)
-4. **No Undo:** Keeps implementation simple, follows game spirit
-5. **No Animations:** Instant state updates (add in Phase 3)
+   - Official: Player places tokens one at a time, can interleave with other actions
+2. **Turn Phase Model:** Currently uses MANDATORY→OPTIONAL phases
+   - Official: Players can take actions in any order (more flexible)
+3. **Hex Grid Expansion:** Shows expansion hexes but clicking doesn't place tokens on them
+4. **Animal Placement:** Can take cards but placement is simplified
+5. **No Undo:** Keeps implementation simple, follows game spirit
+6. **No Animations:** Instant state updates (add in Phase 3)
+7. **Scoring Implementation:** Some scoring formulas need correction (see section 3 above)
+   - Trees: Need brown/green counting logic
+   - Mountains: Missing adjacency requirement check
+   - Fields: Should be flat 5pts per field, not n(n+1)/2
+   - Buildings: Should be 5pts flat if 3+ colors, not 2pts × colors
+   - Water: Need separate A/B side implementations
 
 ## Phase 3 Polish Roadmap
+
+**Critical (Rules Compliance):**
+
+- [ ] Fix scoring algorithms to match official rules:
+  - [ ] Trees: Brown/green counting logic
+  - [ ] Mountains: Adjacency requirement check
+  - [ ] Fields: Flat 5pts per 2+ cluster
+  - [ ] Buildings: Flat 5pts if 3+ neighbor colors
+  - [ ] Water: Implement Side A (rivers) and Side B (islands)
+- [ ] Fix token stacking validation (brown can only stack on brown, red limited to 2nd position)
+- [ ] Implement flexible turn order (actions in any sequence)
 
 **High Priority:**
 
@@ -504,4 +687,10 @@ When modifying core logic, update in this order:
 
 ---
 
-**Last Updated:** 2026-02-15 (Phase 1 & 2 complete, ready for testing)
+**References:**
+- **Complete Game Rules:** [game-rules.md](./game-rules.md) - Comprehensive rules for AI agents and players
+- Official Rules: https://www.geekyhobbies.com/harmonies-rules/
+- BoardGameGeek: https://boardgamegeek.com/boardgame/370591/harmonies
+- Publisher: Libellud (https://libellud.com/)
+
+**Last Updated:** 2026-02-15 (Updated with official rules, scoring algorithms need implementation fixes)

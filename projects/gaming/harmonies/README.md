@@ -2,6 +2,8 @@
 
 A beautiful turn-based multiplayer spatial puzzle game where you build landscapes and create habitats for animals.
 
+**📖 Complete Game Rules:** See [game-rules.md](./game-rules.md) for comprehensive rules and strategy guide.
+
 ## What is Harmonies?
 
 Harmonies is a contemplative board game adaptation for web browsers. Play with friends and family at your own pace - no time pressure, no rushing. Build harmonious landscapes by stacking colorful tokens on a hexagonal grid, create animal habitats, and score points through multiple strategic systems.
