@@ -1,167 +1,186 @@
-# Harmonies - Web Game
+# 🌿 Harmonies
 
-A beautiful, turn-based multiplayer spatial puzzle game where players build landscapes and create habitats for animals.
+A beautiful turn-based multiplayer spatial puzzle game where you build landscapes and create habitats for animals.
 
-## Local Testing Instructions
+## What is Harmonies?
 
-### 1. Start the local server
+Harmonies is a contemplative board game adaptation for web browsers. Play with friends and family at your own pace - no time pressure, no rushing. Build harmonious landscapes by stacking colorful tokens on a hexagonal grid, create animal habitats, and score points through multiple strategic systems.
 
-**Important:** The game uses ES6 modules which require an HTTP server (won't work with `file://` URLs).
+**Perfect for:** Thoughtful gameplay with your partner, family game nights, or strategic puzzle enthusiasts.
+
+## Game Features
+
+✅ **Turn-based async play** - Take your time, play on your schedule
+✅ **Multiplayer sync** - Changes appear instantly in all windows
+✅ **Player profiles** - Track your games, scores, and history
+✅ **Solo mode** - Practice alone and improve your strategy
+✅ **Cross-device support** - Start on your phone, continue on your laptop
+✅ **Beautiful hex grid** - Build 3D stacked landscapes with SVG graphics
+
+## How to Play
+
+### Game Overview
+
+Each turn, you'll:
+
+1. **Take 3 tokens** from the central board
+2. **Place them** on your hex grid (following stacking rules)
+3. **Optionally take 1 animal card** from the market
+4. **Place animals** on completed habitat patterns
+5. **End your turn** and pass to the next player
+
+### Scoring Systems
+
+- 🌲 **Trees** - Stack brown + green tokens high for more points
+- ⛰️ **Mountains** - Gray tokens score when adjacent to other mountains
+- 🌾 **Fields** - Large yellow areas score progressively
+- 🏘️ **Buildings** - Red buildings score by terrain diversity
+- 🌊 **Water** - Blue rivers score for longest connected path
+- 🦌 **Animals** - Complete habitat patterns for big bonuses
+
+**Game ends when:** The token pouch runs empty OR a player fills their board.
+
+## Quick Start
+
+### 1. Start a Local Server
+
+The game requires a web server (ES6 modules don't work with `file://` URLs).
 
 ```bash
 # Option 1: Python (recommended)
 python3 -m http.server 8080
 
-# Option 2: npm
-npm run dev
-
-# Option 3: Node.js
+# Option 2: Node.js
 npx http-server -p 8080
+
+# Option 3: npm (if you have package.json)
+npm run dev
 ```
 
-Then open http://localhost:8080 in your browser.
+Then open **http://localhost:8080** in your browser.
 
-### 2. Troubleshooting
+### 2. Play Multiplayer
 
-If you see errors:
-1. **Clear browser cache** (Cmd+Shift+R on Mac, Ctrl+Shift+R on Windows)
-2. **Check diagnostic page:** http://localhost:8080/diagnostic.html
-3. **View browser console:** F12 or Cmd+Option+I → Console tab
-
-### 3. Test multiplayer
-
-Open the game in **2 browser windows** (or use incognito mode for the second window):
+Open the game in **2 browser windows** (or use incognito for the second):
 
 **Window 1 (Player 1):**
 
-1. Enter username: `alice`
-2. Click "Continue"
-3. Click "+ Create New Game"
-4. Wait for Player 2 to join
+1. Enter your username (e.g., `alice`)
+2. Click **"+ Create New Game"**
+3. Wait for Player 2 to join
+4. Click **"Start Game"**
 
 **Window 2 (Player 2):**
 
-1. Enter username: `bob`
-2. Click "Continue"
-3. Look for Alice's game in "Join a Game" section
-4. Click "Join"
+1. Enter your username (e.g., `bob`)
+2. Find Player 1's game in **"Join a Game"** section
+3. Click **"Join"**
 
-**Back to Window 1:**
+**Take Turns:**
 
-1. Click "Start Game" (host only)
-2. Take your turn:
-   - Click 3 tokens from central board
-   - Click "Confirm Placement" (they'll auto-place for MVP)
-   - Click "End Turn"
+- Click 3 tokens from the central 3×3 grid
+- Click **"Confirm Placement"** (they auto-place for now)
+- Click **"End Turn"**
 
-**Window 2:**
+### 3. Solo Mode
 
-- Now it's Bob's turn!
-- Repeat the same actions
+Want to practice alone?
 
-### 4. Game Features to Test
+1. Click **"🎯 Play Solo"** from the lobby
+2. Game starts immediately with just you
+3. Track your high scores and improve your strategy
 
-✅ **Player persistence**: Refresh browser → auto-login with saved username
-✅ **Multiplayer sync**: Changes in one window appear in the other
-✅ **Turn-based flow**: Only current player can take actions
-✅ **Solo mode**: Click "Play Solo" to practice alone
-✅ **Score tracking**: Scores update automatically as you place tokens
-✅ **Game end**: Game ends when pouch is empty or board is full
+## Current Status (MVP Complete)
 
-### 4. Run Tests
+**Phase 1 & 2 Complete:**
+
+- ✅ Core gameplay (token stacking, turn system)
+- ✅ All 6 scoring modules working
+- ✅ 10 animal cards with pattern matching
+- ✅ Multiplayer real-time sync
+- ✅ Player profiles and game history
+- ✅ Solo mode
+- ✅ Cross-device login/rejoin
+- ✅ 15/16 tests passing
+
+**Coming in Phase 3:**
+
+- 🚧 Drag-and-drop token placement (currently auto-places)
+- 🚧 Click-to-place on expansion hexes
+- 🚧 Full animal card placement with visual pattern highlighting
+- 🚧 Score breakdown modal (see per-category details)
+- 🚧 Smooth animations and visual polish
+
+**Future Enhancements:**
+
+- Game abandonment (if all players agree)
+- Mobile touch gestures
+- Accessibility improvements
+- More animal cards (expand from 10 to 48)
+
+## Troubleshooting
+
+**Game won't load?**
+
+1. Make sure you're using a web server (not opening `index.html` directly)
+2. Clear browser cache: Cmd+Shift+R (Mac) or Ctrl+Shift+R (Windows)
+3. Check browser console (F12) for errors
+
+**Multiplayer not syncing?**
+
+- Verify both players are in the same game (check game name)
+- Refresh both browser windows
+- Check your internet connection (Firebase requires online access)
+
+**Still having issues?**
+
+- Try the diagnostic page: **http://localhost:8080/diagnostic.html**
+- Open browser console (F12) and look for error messages
+
+## Tech Stack
+
+Built with simplicity and speed:
+
+- **Vanilla JavaScript** (ES6 modules) - No framework bloat
+- **SVG** - Beautiful hex grid rendering with 3D stacking effect
+- **Firebase Realtime Database** - Multiplayer sync and persistence
+- **localStorage** - Player identity across sessions
+
+## For Developers
+
+Want to contribute or understand the codebase?
+
+📖 **Read the [AI Agent Development Guide](./AI-AGENT-GUIDE.md)** - Comprehensive technical documentation covering:
+
+- Architecture and design patterns
+- Core algorithms (hex grid, pattern matching, scoring)
+- Firebase data model
+- Testing strategy
+- How to add new features
+
+**Run Tests:**
 
 ```bash
 node --test tests/core-logic.test.js
 ```
 
-Tests cover:
-
-- Hex coordinate math
-- Token stacking rules
-- Terrain calculation
-- All 6 scoring modules
-
-## Architecture Highlights
-
-### Core Logic (Pure Functions)
-
-- `hex-grid.js` - Hex coordinate system (axial)
-- `token-manager.js` - Stacking validation
-- `scoring-engine.js` - 6 modular scoring systems
-- `pattern-matcher.js` - Animal habitat matching with rotation/mirroring
-
-### Firebase Integration
-
-- `firebase-config.js` - Database setup and CRUD
-- `firebase-sync.js` - Multiplayer write operations
-
-### UI
-
-- `board-renderer.js` - SVG hex board with 3D token stacking
-- Screens: player-setup, lobby, game-room
-
-### State Management
-
-- `game-state.js` - Local state + localStorage persistence
-- Real-time Firebase listeners for multiplayer sync
-
-## Known MVP Limitations
-
-⚠️ **Simplified for 2-3 hour implementation:**
-
-1. **Token placement**: Auto-places tokens on adjacent hexes (no drag-drop yet)
-2. **Animal cards**: Can take cards but placement logic is simplified
-3. **Hex grid**: Shows expansion hexes but validation is basic
-4. **UI polish**: Minimal styling, no animations yet
-
-## Next Steps (Phase 3 - Polish)
-
-- [ ] Drag-and-drop token placement
-- [ ] Full animal card placement with pattern validation
-- [ ] Score breakdown modal
-- [ ] Better visual feedback and animations
-- [ ] Mobile-responsive improvements
-- [ ] Game abandonment feature
-
-## Tech Stack
-
-- **Vanilla JavaScript** (ES6 modules)
-- **SVG** for hex grid rendering
-- **Firebase Realtime Database** (Asia Southeast)
-- **No framework** - lightweight and fast!
-
-## File Structure
+**File Structure:**
 
 ```
 harmonies/
-├── index.html
-├── css/styles.css
 ├── js/
-│   ├── main.js (router)
-│   ├── game/
-│   │   ├── hex-grid.js
-│   │   ├── token-manager.js
-│   │   ├── scoring-engine.js
-│   │   ├── pattern-matcher.js
-│   │   ├── game-state.js
-│   │   ├── firebase-config.js
-│   │   └── firebase-sync.js
-│   ├── screens/
-│   │   ├── player-setup.js
-│   │   ├── lobby.js
-│   │   └── game-room.js
-│   ├── ui/
-│   │   └── board-renderer.js
-│   └── data/
-│       ├── tokens-config.js
-│       └── animal-cards.js (10 cards)
-└── tests/
-    └── core-logic.test.js
+│   ├── game/          # Core logic (pure functions)
+│   ├── screens/       # UI screens (player-setup, lobby, game-room)
+│   ├── ui/            # SVG renderers
+│   └── data/          # Game configuration
+├── css/               # Styling
+├── tests/             # Unit tests
+└── index.html         # Main entry point
 ```
 
-## Deploy to GitHub Pages
+## Deployment
 
-When ready to deploy:
+When ready to deploy to GitHub Pages:
 
 ```bash
 # Sync to public/
@@ -173,12 +192,20 @@ git add -f public/projects/gaming/harmonies/js/data/*.js
 
 # Commit and push
 git add public/projects/gaming/harmonies
-git commit -m "feat(harmonies): add turn-based multiplayer spatial puzzle game"
+git commit -m "feat(harmonies): update spatial puzzle game"
 git push origin main
 ```
 
-GitHub Pages will auto-deploy in ~1 minute.
+GitHub Pages auto-deploys in ~1 minute.
+
+## Credits
+
+**Original Game:** [Harmonies by Libellud](https://www.libellud.com/en/our-games/harmonies/)
+**Implementation:** Built with Claude Code in ~3 hours as an MVP
+**Design Philosophy:** Ship fast, iterate smart - prioritize playability over perfection
 
 ---
 
-**Have fun building beautiful landscapes! 🌿**
+**Have fun building beautiful landscapes! 🌿✨**
+
+_Questions or feedback? Open an issue or start a discussion!_
