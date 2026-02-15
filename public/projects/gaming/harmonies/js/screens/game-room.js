@@ -6,12 +6,14 @@
 
 import { ref, onValue } from "../game/firebase-config.js";
 import {
+  startGame,
   selectCentralSpace,
   placeSingleToken,
   endTurn,
   takeAnimalCard,
   placeAnimalCubes,
 } from "../game/firebase-sync.js";
+import { calculateTotalScore } from "../game/scoring-engine.js";
 import { getValidPlacementHexes } from "../game/token-manager.js";
 import { renderHexGrid, highlightValidHexes, clearHighlights, updateScoreDisplay } from "../ui/board-renderer-simple.js";
 
@@ -160,7 +162,21 @@ function renderGameState() {
   }
 
   try {
-    console.log("[GameRoom] Rendering game state");
+    console.log("[GameRoom] Rendering game state, status:", currentGame.status);
+
+    // GAME STATUS: If waiting, show start button
+    if (currentGame.status === "waiting") {
+      renderStartGameButton();
+      return; // Don't render game UI until started
+    }
+
+    // GAME STATUS: If finished, show end game screen
+    if (currentGame.status === "finished") {
+      renderEndGameScreen();
+      return;
+    }
+
+    // Normal gameplay rendering
     renderTurnIndicator();
     renderCentralBoard();
     renderAnimalCards();
@@ -374,6 +390,95 @@ function renderProgressIndicator() {
     indicator.classList.remove("hidden");
   } else {
     indicator.classList.add("hidden");
+  }
+}
+
+/**
+ * Render start game button (when status is "waiting")
+ */
+function renderStartGameButton() {
+  const container = document.getElementById("hex-grid-container");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px;">
+      <h2>Waiting for Players</h2>
+      <p style="margin: 16px 0; color: #666;">
+        Room Code: <strong>${currentGame.id}</strong>
+      </p>
+      <p style="margin-bottom: 24px;">
+        ${Object.keys(currentGame.players || {}).length} player(s) joined
+      </p>
+      <button id="start-game-btn" class="btn btn-primary" style="font-size: 18px; padding: 16px 32px;">
+        🎮 Start Game
+      </button>
+    </div>
+  `;
+
+  // Add click handler
+  const startBtn = document.getElementById("start-game-btn");
+  if (startBtn) {
+    startBtn.addEventListener("click", async () => {
+      try {
+        startBtn.disabled = true;
+        startBtn.textContent = "Starting...";
+        await startGame(currentGame.id);
+        showToast("Game started!", "success");
+      } catch (error) {
+        console.error("Error starting game:", error);
+        showToast(error.message, "error");
+        startBtn.disabled = false;
+        startBtn.textContent = "🎮 Start Game";
+      }
+    });
+  }
+}
+
+/**
+ * Render end game screen (when status is "finished")
+ */
+function renderEndGameScreen() {
+  const container = document.getElementById("hex-grid-container");
+  if (!container) return;
+
+  // Calculate final scores
+  const players = Object.values(currentGame.players || {});
+  const scores = players.map((p) => ({
+    username: p.username,
+    score: currentGame.playerBoards?.[p.username]?.score?.total || 0,
+  }));
+  scores.sort((a, b) => b.score - a.score);
+
+  const winner = scores[0];
+  const isWinner = winner.username === currentUsername;
+
+  container.innerHTML = `
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px; text-align: center;">
+      <h1 style="font-size: 48px; margin-bottom: 16px;">${isWinner ? "🏆" : "🎮"}</h1>
+      <h2>${isWinner ? "You Won!" : "Game Over"}</h2>
+      <h3 style="margin: 24px 0;">Final Scores</h3>
+      <div style="background: #fff; padding: 24px; border-radius: 12px; margin-bottom: 24px; min-width: 300px;">
+        ${scores
+          .map(
+            (s, i) => `
+          <div style="display: flex; justify-content: space-between; padding: 12px; ${i === 0 ? "font-weight: bold; border-bottom: 2px solid #4CAF50;" : ""}">
+            <span>${i + 1}. ${s.username}</span>
+            <span>${s.score} pts</span>
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+      <button id="back-to-lobby-btn" class="btn btn-primary">Back to Lobby</button>
+    </div>
+  `;
+
+  // Add click handler
+  const backBtn = document.getElementById("back-to-lobby-btn");
+  if (backBtn) {
+    backBtn.addEventListener("click", () => {
+      window.location.hash = "#lobby";
+    });
   }
 }
 
