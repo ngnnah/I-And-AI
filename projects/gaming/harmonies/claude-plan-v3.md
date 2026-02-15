@@ -24,7 +24,50 @@ Based on physical game images:
 - ✅ Reuse existing Firebase database
 - ✅ Complete Phase 1 & 2 with tests, then user tests locally before Phase 3
 
-**Timeline:** 2-3 hours total
+**Timeline:** ~3 hours total (includes mobile-first design)
+
+---
+
+## 📱 Mobile-First Strategy (BGA-Inspired)
+
+**Reference:** [BGA Harmonies Demo Video](https://www.youtube.com/watch?v=J6MY422Sw2c)
+
+### Key BGA Observations
+
+1. **Tutorial Overlays** - Modal prompts with clear CTAs ("Click here to place an Animal cube!")
+2. **Large Touch Targets** - Cards (120×180px), hexes (50-60px), tokens (60px tap areas)
+3. **Clean Hierarchy** - Cards at top, central board prominent, hex grids below
+4. **Turn Indicators** - Prominent header showing current player and required action
+5. **Compact Layout** - Efficient space usage, readable at various zoom levels
+
+### Our Mobile-First Approach
+
+**Primary Target:** Mobile phones (iPhone 14: 390×844px, Android: 412×915px)
+
+**Design Principles:**
+
+- **Touch-first**: 44px minimum (iOS HIG), 60px preferred for game elements
+- **Vertical stacking**: Mobile portrait, expands side-by-side on tablet/desktop
+- **Modal overlays**: BGA-style tutorials, iOS-like bottom sheets
+- **Large readable text**: 16px minimum (prevents iOS zoom)
+
+**Responsive Breakpoints:**
+
+```
+Mobile: < 768px → Vertical stack, large tap targets
+Tablet: 768-1024px → Compact 2-column layout
+Desktop: > 1024px → Full BGA-style (side-by-side boards)
+```
+
+**Key UX Features:**
+
+- ✅ Simple tap-to-place (no drag-and-drop)
+- ✅ Tutorial overlay system with step-through
+- ✅ Pinch-zoom and pan for hex grid
+- ✅ Progress indicator (Token 1/3, 2/3, 3/3)
+- ✅ Undo button (floating action button)
+- ✅ Haptic feedback on placement (iOS/Android)
+- ✅ No 300ms tap delay (`touch-action: manipulation`)
 
 ---
 
