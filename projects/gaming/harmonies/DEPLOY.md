@@ -17,6 +17,7 @@ rsync -av --delete \
   --exclude='tests' \
   --exclude='test-results' \
   --exclude='playwright-report' \
+  --exclude='public' \
   --exclude='*.md' \
   projects/gaming/harmonies/ public/projects/gaming/harmonies/
 ```
