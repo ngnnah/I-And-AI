@@ -194,7 +194,7 @@
             <div class="text-xs text-purple-700 font-semibold">Score</div>
             <div class="flex items-center gap-2">
               <div id="total-score" class="text-2xl font-bold text-purple-900">0</div>
-              <div id="sun-display" class="text-xl" title="Suns earned"></div>
+              <div id="sun-display" class="text-xl"></div>
             </div>
           </div>
         </div>
@@ -375,6 +375,7 @@
       pouch: { ...INITIAL_POUCH },
       draggedToken: null,
       gameEnded: false, // Flag to disable gameplay after game over
+      selectedAnimalCard: null, // Currently selected animal card for placement
       animalCards: [], // 3 randomly selected animal cards for solo mode
       placedAnimals: [], // Array of {cardId, hexKey} for animal cube placements
       score: {
@@ -432,15 +433,31 @@
       const container = document.getElementById('animal-cards-container');
       if (!container) return;
       
-      container.innerHTML = gameState.animalCards.map((card, idx) => `
-        <div class="bg-white rounded-lg p-2 shadow border border-slate-300">
-          <div class="text-lg font-bold text-center mb-1">${card.animal}</div>
-          <div class="text-xs text-slate-600 text-center">${card.name}</div>
-          <div class="text-xs text-slate-500 text-center mt-1">
-            ${card.pointsPerPlacement.join('→')} pts
+      container.innerHTML = gameState.animalCards.map((card, idx) => {
+        const placementCount = gameState.placedAnimals.filter(p => p.cardId === card.id).length;
+        const nextPoints = placementCount < card.maxPlacements ? card.pointsPerPlacement[placementCount] : null;
+        
+        return `
+          <div class="animal-card bg-white rounded-lg p-2 shadow border-2 border-slate-300 cursor-pointer hover:border-blue-400 transition" 
+               data-card-id="${card.id}"
+               data-card-idx="${idx}">
+            <div class="text-2xl text-center mb-1">${card.animal === 'bear' ? '🐻' : card.animal === 'deer' ? '🦌' : card.animal === 'rabbit' ? '🐰' : card.animal === 'fox' ? '🦊' : card.animal === 'eagle' ? '🦅' : card.animal === 'beaver' ? '🦫' : card.animal === 'owl' ? '🦉' : card.animal === 'squirrel' ? '🐿️' : card.animal === 'salmon' ? '🐟' : '🦌'}</div>
+            <div class="text-xs font-semibold text-slate-700 text-center">${card.name}</div>
+            <div class="text-xs text-slate-500 text-center mt-1">
+              ${placementCount}/${card.maxPlacements} placed
+            </div>
+            ${nextPoints ? `<div class="text-xs font-bold text-green-600 text-center">Next: +${nextPoints} pts</div>` : '<div class="text-xs text-slate-400 text-center">Complete!</div>'}
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
+      
+      // Add click handlers to animal cards
+      document.querySelectorAll('.animal-card').forEach(cardEl => {
+        cardEl.addEventListener('click', handleAnimalCardClick);
+      });
+      
+      // Highlight selected card
+      updateSelectedAnimalCardUI();
     }
     
     // Reposition all hexes (for window resize)
@@ -500,6 +517,9 @@
       hex.addEventListener('dragover', handleDragOver);
       hex.addEventListener('dragleave', handleDragLeave);
       hex.addEventListener('drop', handleDrop);
+      
+      // Animal cube placement handler
+      hex.addEventListener('click', handleHexClickForAnimal);
       
       return hex;
     }
@@ -730,7 +750,7 @@
       
       if (stack.length === 0) {
         hexEl.className = 'hex empty';
-        hexEl.textContent = '';
+        hexEl.innerHTML = '';
         return;
       }
       
@@ -740,7 +760,23 @@
       
       // Show stack height and emoji
       const emoji = TOKEN_EMOJI[topColor];
-      hexEl.textContent = stack.length > 1 ? `${emoji}×${stack.length}` : emoji;
+      const tokenDisplay = stack.length > 1 ? `${emoji}×${stack.length}` : emoji;
+      
+      // Check if hex has animal cube
+      const hexKey = `${hexData.q}_${hexData.r}`;
+      const hasAnimal = gameState.placedAnimals.some(p => p.hexKey === hexKey);
+      
+      if (hasAnimal) {
+        // Show token + animal cube indicator
+        hexEl.innerHTML = `
+          <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+            <span>${tokenDisplay}</span>
+            <span style="position: absolute; top: 2px; right: 2px; font-size: 0.9em;">🐾</span>
+          </div>
+        `;
+      } else {
+        hexEl.textContent = tokenDisplay;
+      }
     }
     
     // Update score display
@@ -776,7 +812,8 @@
       const sunEmoji = '☀️'.repeat(suns);
       const sunDisplay = document.getElementById('sun-display');
       sunDisplay.textContent = sunEmoji;
-      sunDisplay.title = `${suns} sun${suns !== 1 ? 's' : ''}`;
+      sunDisplay.title = `${suns} sun${suns !== 1 ? 's' : ''} earned`; // Tooltip on hover
+      sunDisplay.style.cursor = 'help'; // Show help cursor on hover
       
       // Update pouch counter
       const tokensLeft = Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0);
@@ -827,6 +864,11 @@
     
     // Handle space click
     function handleSpaceClick(e) {
+      if (gameState.gameEnded) {
+        showMessage('Game is over! Start a new game to play again.', 'error');
+        return;
+      }
+      
       const space = e.currentTarget;
       const spaceId = space.dataset.space;
       
@@ -840,6 +882,142 @@
       gameState.selectedSpace = spaceId;
       
       showMessage(`Space ${parseInt(spaceId) + 1} selected! Drag tokens to your board.`, 'success');
+    }
+    
+    // Handle animal card click
+    function handleAnimalCardClick(e) {
+      if (gameState.gameEnded) {
+        showMessage('Game is over! Start a new game to play again.', 'error');
+        return;
+      }
+      
+      const cardEl = e.currentTarget;
+      const cardId = cardEl.dataset.cardId;
+      const card = gameState.animalCards.find(c => c.id === cardId);
+      
+      if (!card) return;
+      
+      // Check if card is full
+      const placementCount = gameState.placedAnimals.filter(p => p.cardId === cardId).length;
+      if (placementCount >= card.maxPlacements) {
+        showMessage(`${card.name} is complete (${card.maxPlacements}/${card.maxPlacements} placed)!`, 'info');
+        return;
+      }
+      
+      // Toggle selection
+      if (gameState.selectedAnimalCard === cardId) {
+        gameState.selectedAnimalCard = null;
+        showMessage('Animal card deselected.', 'info');
+      } else {
+        gameState.selectedAnimalCard = cardId;
+        const pattern = card.pattern.map(p => p.terrain).join('+');
+        showMessage(`🐾 ${card.name} selected! Click a hex with ${pattern} pattern to place.`, 'success');
+      }
+      
+      updateSelectedAnimalCardUI();
+    }
+    
+    // Update UI to show selected animal card
+    function updateSelectedAnimalCardUI() {
+      document.querySelectorAll('.animal-card').forEach(cardEl => {
+        const cardId = cardEl.dataset.cardId;
+        if (cardId === gameState.selectedAnimalCard) {
+          cardEl.classList.add('ring-4', 'ring-blue-500');
+          cardEl.classList.remove('border-slate-300');
+        } else {
+          cardEl.classList.remove('ring-4', 'ring-blue-500');
+          cardEl.classList.add('border-slate-300');
+        }
+      });
+    }
+    
+    // Handle hex click for animal cube placement
+    function handleHexClickForAnimal(e) {
+      if (gameState.gameEnded) return;
+      if (!gameState.selectedAnimalCard) return;
+      
+      // Don't place animal during token dragging
+      if (gameState.draggedToken) return;
+      
+      const hexEl = e.currentTarget;
+      const q = parseInt(hexEl.dataset.q);
+      const r = parseInt(hexEl.dataset.r);
+      const hexKey = `${q}_${r}`;
+      const hexData = gameState.hexBoard[hexKey];
+      
+      // Check if hex already has an animal
+      const existingAnimalIndex = gameState.placedAnimals.findIndex(p => p.hexKey === hexKey);
+      
+      if (existingAnimalIndex !== -1) {
+        // Remove animal cube
+        gameState.placedAnimals.splice(existingAnimalIndex, 1);
+        updateHexDisplay(hexEl, hexData);
+        updateScore();
+        displayAnimalCards(); // Refresh to update placement counts
+        showMessage('🐾 Animal cube removed!', 'info');
+        return;
+      }
+      
+      // Check if hex has tokens (can't place on empty hex)
+      if (!hexData.stack || hexData.stack.length === 0) {
+        showMessage('❌ Cannot place animal on empty hex!', 'error');
+        return;
+      }
+      
+      // Get selected animal card
+      const card = gameState.animalCards.find(c => c.id === gameState.selectedAnimalCard);
+      if (!card) return;
+      
+      // Check if pattern matches
+      const patternMatch = checkAnimalPattern(hexKey, card.pattern);
+      
+      if (!patternMatch.valid) {
+        showMessage(`❌ Pattern doesn't match! Need: ${card.pattern.map(p => p.terrain).join('+')}`, 'error');
+        return;
+      }
+      
+      // Check if card is full
+      const placementCount = gameState.placedAnimals.filter(p => p.cardId === card.id).length;
+      if (placementCount >= card.maxPlacements) {
+        showMessage(`❌ ${card.name} is complete (${card.maxPlacements}/${card.maxPlacements})!`, 'error');
+        return;
+      }
+      
+      // Place animal cube
+      gameState.placedAnimals.push({
+        cardId: card.id,
+        hexKey: hexKey
+      });
+      
+      updateHexDisplay(hexEl, hexData);
+      updateScore();
+      displayAnimalCards(); // Refresh to update placement counts
+      
+      const newCount = placementCount + 1;
+      const points = card.pointsPerPlacement[newCount - 1];
+      showMessage(`🐾 ${card.name} placed! Score: ${points} pts (${newCount}/${card.maxPlacements})`, 'success');
+    }
+    
+    // Check if hex and neighbors match animal card pattern
+    function checkAnimalPattern(hexKey, pattern) {
+      const hexData = gameState.hexBoard[hexKey];
+      if (!hexData || !hexData.terrain) {
+        return { valid: false, reason: 'No terrain' };
+      }
+      
+      // For MVP: Simple pattern check - just verify hex has required terrain
+      // Full implementation would check relative coordinates
+      const requiredTerrains = pattern.map(p => p.terrain);
+      const hexTerrain = hexData.terrain;
+      
+      // Check if this hex matches any terrain in pattern
+      if (!requiredTerrains.includes(hexTerrain)) {
+        return { valid: false, reason: `Need ${requiredTerrains.join(' or ')} terrain` };
+      }
+      
+      // For now, accept any matching terrain (simplified)
+      // TODO: Full pattern matching with relative coordinates
+      return { valid: true };
     }
     
     // Handle end turn
