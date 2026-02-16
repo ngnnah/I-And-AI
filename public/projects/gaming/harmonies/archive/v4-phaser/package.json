@@ -1,0 +1,24 @@
+{
+  "name": "harmonies-game",
+  "version": "4.0.0",
+  "description": "Harmonies board game - Solo mode implementation with Phaser.js",
+  "type": "module",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "test": "echo \"No unit tests yet\"",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0"
+  },
+  "keywords": [
+    "board-game",
+    "harmonies",
+    "phaser",
+    "solo-game"
+  ],
+  "author": "",
+  "license": "MIT"
+}

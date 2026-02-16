@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harmonies v4.0 - Phaser Hex Test (POC)</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      margin: 0 0 10px 0;
+      font-size: 24px;
+    }
+
+    .info {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .info h2 {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+      color: #2c3e50;
+    }
+
+    .info p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .success {
+      color: #27ae60;
+      font-weight: bold;
+    }
+
+    .error {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+
+    #game-container {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 Harmonies v4.0 - Phase 0: Proof of Concept</h1>
+
+  <div class="info">
+    <h2>Test Objectives</h2>
+    <p><strong>Goal:</strong> Verify Phaser.js can render hexagons correctly (fix v3.0 CSS Grid bug)</p>
+    <p><strong>Expected:</strong></p>
+    <ul>
+      <li>7 hexagons visible (1 center + 6 neighbors)</li>
+      <li>Hexagons centered on screen</li>
+      <li>Clear, crisp rendering (no tiny/badly positioned hexes)</li>
+      <li>Hover interaction works</li>
+    </ul>
+    <p id="status">⏳ Loading Phaser.js...</p>
+  </div>
+
+  <div id="game-container"></div>
+
+  <!-- Phaser 3 from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+
+  <script type="module">
+    // Update status
+    document.getElementById('status').innerHTML = '✅ Phaser loaded! Initializing test...';
+
+    // Simple hex grid test WITHOUT Honeycomb (use basic math first)
+    class HexTestScene extends Phaser.Scene {
+      constructor() {
+        super({ key: 'HexTestScene' });
+      }
+
+      preload() {
+        console.log('[Phase 0] Preloading assets...');
+      }
+
+      create() {
+        console.log('[Phase 0] Creating hex grid test...');
+
+        // Center point
+        const centerX = this.cameras.main.width / 2;
+        const centerY = this.cameras.main.height / 2;
+
+        // Hex parameters
+        const hexSize = 50; // Radius in pixels
+        const hexWidth = hexSize * 2;
+        const hexHeight = Math.sqrt(3) * hexSize;
+
+        // Create center hex (0, 0)
+        this.createHex(centerX, centerY, 0, 0, 0x4A90E2, 'Center\n0,0');
+
+        // Create 6 neighbor hexes (axial coordinates)
+        const neighbors = [
+          { q: 1, r: 0, label: '1,0' },
+          { q: 1, r: -1, label: '1,-1' },
+          { q: 0, r: -1, label: '0,-1' },
+          { q: -1, r: 0, label: '-1,0' },
+          { q: -1, r: 1, label: '-1,1' },
+          { q: 0, r: 1, label: '0,1' }
+        ];
+
+        neighbors.forEach(({ q, r, label }) => {
+          // Convert axial (q, r) to pixel coordinates
+          const x = centerX + hexSize * (3/2 * q);
+          const y = centerY + hexSize * (Math.sqrt(3) * (r + q/2));
+
+          this.createHex(x, y, q, r, 0xCCCCCC, label);
+        });
+
+        // Instructions text
+        this.add.text(10, 10, 'Phase 0 POC: Phaser Hex Grid', {
+          fontSize: '16px',
+          fill: '#2c3e50',
+          backgroundColor: '#fff',
+          padding: { x: 10, y: 5 }
+        });
+
+        this.add.text(10, 40, 'Hover over hexes to test interaction', {
+          fontSize: '14px',
+          fill: '#555',
+          backgroundColor: '#fff',
+          padding: { x: 10, y: 5 }
+        });
+
+        // Update status
+        document.getElementById('status').innerHTML = '<span class="success">✅ SUCCESS! Hex grid rendered correctly</span>';
+
+        console.log('[Phase 0] ✅ Test complete! 7 hexagons created.');
+      }
+
+      createHex(x, y, q, r, color, label) {
+        const hexSize = 50;
+
+        // Create hexagon using Graphics
+        const hex = this.add.graphics();
+        hex.lineStyle(3, 0x333333, 1);
+        hex.fillStyle(color, 0.8);
+
+        // Draw flat-topped hexagon
+        const angle = Math.PI / 3; // 60 degrees
+        hex.beginPath();
+        hex.moveTo(x + hexSize * Math.cos(0), y + hexSize * Math.sin(0));
+
+        for (let i = 1; i <= 6; i++) {
+          const theta = angle * i;
+          hex.lineTo(
+            x + hexSize * Math.cos(theta),
+            y + hexSize * Math.sin(theta)
+          );
+        }
+
+        hex.closePath();
+        hex.fillPath();
+        hex.strokePath();
+
+        // Add label
+        const text = this.add.text(x, y, label, {
+          fontSize: '12px',
+          fill: '#333',
+          align: 'center'
+        });
+        text.setOrigin(0.5);
+
+        // Make interactive
+        const hitArea = new Phaser.Geom.Circle(x, y, hexSize);
+        hex.setInteractive(hitArea, Phaser.Geom.Circle.Contains);
+
+        hex.on('pointerover', () => {
+          hex.clear();
+          hex.lineStyle(4, 0x27ae60, 1);
+          hex.fillStyle(0x27ae60, 0.3);
+          hex.beginPath();
+          hex.moveTo(x + hexSize * Math.cos(0), y + hexSize * Math.sin(0));
+          for (let i = 1; i <= 6; i++) {
+            const theta = (Math.PI / 3) * i;
+            hex.lineTo(x + hexSize * Math.cos(theta), y + hexSize * Math.sin(theta));
+          }
+          hex.closePath();
+          hex.fillPath();
+          hex.strokePath();
+
+          console.log(`[Phase 0] Hex hovered: q=${q}, r=${r}`);
+        });
+
+        hex.on('pointerout', () => {
+          hex.clear();
+          hex.lineStyle(3, 0x333333, 1);
+          hex.fillStyle(color, 0.8);
+          hex.beginPath();
+          hex.moveTo(x + hexSize * Math.cos(0), y + hexSize * Math.sin(0));
+          for (let i = 1; i <= 6; i++) {
+            const theta = (Math.PI / 3) * i;
+            hex.lineTo(x + hexSize * Math.cos(theta), y + hexSize * Math.sin(theta));
+          }
+          hex.closePath();
+          hex.fillPath();
+          hex.strokePath();
+        });
+
+        return hex;
+      }
+    }
+
+    // Phaser configuration
+    const config = {
+      type: Phaser.AUTO,
+      width: 1200,
+      height: 800,
+      parent: 'game-container',
+      backgroundColor: '#ffffff',
+      scene: [HexTestScene],
+      scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+      }
+    };
+
+    // Create game instance
+    const game = new Phaser.Game(config);
+
+    console.log('[Phase 0] Phaser game initialized');
+  </script>
+</body>
+</html>
