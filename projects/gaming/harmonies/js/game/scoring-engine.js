@@ -176,8 +176,9 @@ export function scoreFieldsModule(hexGrid) {
 
 /**
  * 4. BUILDINGS SCORING (CORRECTED)
- * - 5 points if surrounded by 3+ different colors
- * - 0 points otherwise (binary scoring)
+ * - Buildings MUST be height 2+ (stacked) to score
+ * - Single red token (height 1) = 0 points
+ * - Height 2+ building with 3+ different adjacent colors = 5 points
  * - Only count top token color of adjacent stacks
  */
 export function scoreBuildingsModule(hexGrid) {
@@ -186,6 +187,10 @@ export function scoreBuildingsModule(hexGrid) {
   for (const key in hexGrid) {
     const hex = hexGrid[key];
     if (hex.terrain !== TERRAIN_TYPES.BUILDING) continue;
+
+    // CRITICAL: Buildings must have height 2+ to score
+    const stack = hex.stack || [];
+    if (stack.length < 2) continue; // Single red token = 0 points
 
     const { q, r } = keyToCoord(key);
     const neighbors = getNeighbors(q, r);
