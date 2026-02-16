@@ -696,7 +696,7 @@
       const filledHexes = Object.values(gameState.hexBoard).filter(hex => hex.stack.length > 0).length;
       const emptyHexes = 23 - filledHexes;
       if (emptyHexes <= 2) {
-        showMessage(`🏁 Board almost full! Place remaining tokens then game will end.`, 'info');
+        showMessage(`⚠️ Only ${emptyHexes} empty space${emptyHexes !== 1 ? 's' : ''} left! Finish placing your tokens - game will end (can't place 3 tokens next turn).`, 'info');
         // Don't end immediately - let player finish placing their 3 tokens
       }
       
@@ -851,7 +851,7 @@
       console.log(`🎲 Filled hexes: ${filledHexes}, Empty: ${emptyHexes}`);
       
       if (emptyHexes <= 2) {
-        console.log('🏁 Game ending - board almost full');
+        console.log(`🏁 Game ending - only ${emptyHexes} empty spaces (cannot place 3 tokens next turn)`);
         endGame();
         return;
       }
@@ -904,8 +904,17 @@
       setTimeout(() => {
         const tokensLeft = Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0);
         const filledHexes = Object.values(gameState.hexBoard).filter(hex => hex.stack.length > 0).length;
+        const emptyHexes = 23 - filledHexes;
+        
+        let endReason = '';
+        if (tokensLeft < 9) {
+          endReason = `Pouch exhausted (${tokensLeft} tokens left, need 9 to refill)`;
+        } else if (emptyHexes <= 2) {
+          endReason = `Only ${emptyHexes} empty space${emptyHexes !== 1 ? 's' : ''} left (can't place 3 tokens next turn)`;
+        }
+        
         showMessage(
-          `${sunEmoji} ${suns} suns earned! (Tokens left: ${tokensLeft}, Filled hexes: ${filledHexes}/23) Using Side A would add +1 sun!`,
+          `${sunEmoji} ${suns} suns! ${endReason}. Using Side A would add +1 sun!`,
           'info'
         );
       }, 2000);
