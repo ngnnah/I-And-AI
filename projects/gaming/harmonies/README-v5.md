@@ -119,14 +119,14 @@ gameState = {
 
 ### Token Stacking Rules (All 6 Types)
 
-| Token | Can Place On | Max Height | Notes |
-|-------|--------------|------------|-------|
-| Yellow 🌾 | Ground only | 1 | Fields - no stacking |
-| Blue 💧 | Ground only | 1 | Water - no stacking |
-| Brown 🪵 | Brown only | 2 | Tree trunks - stack on each other |
-| Green 🌲 | 1-2 Brown | 3 | Tree leaves - need trunk underneath |
-| Gray ⛰️ | Gray only | 3 | Mountains - stack on each other |
-| Red 🏠 | Gray/Brown/Red or alone | 2 | Buildings - flexible placement |
+| Token    | Can Place On            | Max Height | Notes                               |
+| -------- | ----------------------- | ---------- | ----------------------------------- |
+| Yellow 🌾 | Ground only             | 1          | Fields - no stacking                |
+| Blue 💧   | Ground only             | 1          | Water - no stacking                 |
+| Brown 🪵  | Brown only              | 2          | Tree trunks - stack on each other   |
+| Green 🌲  | 1-2 Brown               | 3          | Tree leaves - need trunk underneath |
+| Gray ⛰️   | Gray only               | 3          | Mountains - stack on each other     |
+| Red 🏠    | Gray/Brown/Red or alone | 2          | Buildings - flexible placement      |
 
 ### Scoring Categories (All Working)
 
@@ -139,12 +139,12 @@ gameState = {
 
 ### Sun Scoring System
 
-| Points | Suns | Points | Suns |
-|--------|------|--------|------|
-| 40-69 | ☀️ 1 | 130-139 | ☀️☀️☀️☀️☀️ 5 |
-| 70-89 | ☀️☀️ 2 | 140-149 | ☀️☀️☀️☀️☀️☀️ 6 |
-| 90-109 | ☀️☀️☀️ 3 | 150-159 | ☀️☀️☀️☀️☀️☀️☀️ 7 |
-| 110-129 | ☀️☀️☀️☀️ 4 | 160+ | ☀️☀️☀️☀️☀️☀️☀️☀️ 8 |
+| Points  | Suns   | Points  | Suns       |
+| ------- | ------ | ------- | ---------- |
+| 40-69   | ☀️ 1    | 130-139 | ☀️☀️☀️☀️☀️ 5    |
+| 70-89   | ☀️☀️ 2   | 140-149 | ☀️☀️☀️☀️☀️☀️ 6   |
+| 90-109  | ☀️☀️☀️ 3  | 150-159 | ☀️☀️☀️☀️☀️☀️☀️ 7  |
+| 110-129 | ☀️☀️☀️☀️ 4 | 160+    | ☀️☀️☀️☀️☀️☀️☀️☀️ 8 |
 
 **Bonus:** +1 sun for using Side A (land/water board) instead of Side B (islands)
 
