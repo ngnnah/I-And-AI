@@ -338,55 +338,49 @@
 
       /* Hex grid sizing - tighter for mobile */
       .hex-grid {
-        height: 280px !important;
+        height: 240px !important;
         max-width: 100% !important;
         margin-bottom: 0.5rem;
         overflow: visible !important;
-        padding: 1rem !important;
+        padding: 0.5rem !important;
       }
 
       .hex {
-        width: 32px !important;
-        height: 28px !important;
-        font-size: 14px !important;
-        border-width: 1px !important;
+        width: 34px !important;
+        height: 29px !important;
+        font-size: 16px !important;
+        border-width: 1.5px !important;
       }
 
-      /* Token supply: horizontal 3-column, tight layout */
-      .token-supply-row {
+      /* Token grid: 3×3 layout for easy selection */
+      .token-grid-3x3 {
         display: grid !important;
         grid-template-columns: repeat(3, 1fr);
-        gap: 0.25rem;
-        margin-bottom: 0.5rem;
-        padding: 0 !important;
-      }
-
-      .token-space {
-        width: auto !important;
-        padding: 0.25rem !important;
-        border-width: 3px !important;
-        border-radius: 0.25rem !important;
-      }
-
-      .token-space h3 {
-        display: none !important; /* Hide "Space 1/2/3" labels on mobile */
-      }
-
-      .token-space .flex {
-        display: grid !important;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 2px !important;
-        justify-items: center;
+        gap: 0.5rem;
+        max-width: 100%;
+        margin: 0 auto;
       }
 
       .token {
         width: 100% !important;
-        max-width: 38px !important;
-        height: 38px !important;
-        font-size: 20px !important;
-        border-radius: 4px !important;
-        border-width: 2px !important;
+        aspect-ratio: 1 !important;
+        max-width: 70px !important;
+        height: auto !important;
+        font-size: 32px !important;
+        border-radius: 8px !important;
+        border-width: 3px !important;
         margin: 0 !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+
+      .token.selected {
+        border-color: #fbbf24 !important;
+        border-width: 4px !important;
+        transform: scale(1.05) !important;
+        box-shadow: 0 0 12px rgba(251, 191, 36, 0.6) !important;
       }
 
       /* Animal cards: horizontal scroll */
@@ -640,25 +634,10 @@
 
     </div>
 
-    <!-- Mobile-only: Token Supply (horizontal row) -->
-    <div class="md:hidden token-supply-row bg-white rounded-lg shadow-lg p-2">
-      <div class="token-space bg-slate-100 rounded border-4 border-slate-300 p-3" data-space="0">
-        <h3 class="text-center font-bold mb-2">Space 1</h3>
-        <div class="flex justify-around gap-1">
-          <!-- Tokens will be rendered here -->
-        </div>
-      </div>
-      <div class="token-space bg-slate-100 rounded border-4 border-slate-300 p-3" data-space="1">
-        <h3 class="text-center font-bold mb-2">Space 2</h3>
-        <div class="flex justify-around gap-1">
-          <!-- Tokens will be rendered here -->
-        </div>
-      </div>
-      <div class="token-space bg-slate-100 rounded border-4 border-slate-300 p-3" data-space="2">
-        <h3 class="text-center font-bold mb-2">Space 3</h3>
-        <div class="flex justify-around gap-1">
-          <!-- Tokens will be rendered here -->
-        </div>
+    <!-- Mobile-only: Token Grid (3×3) -->
+    <div class="md:hidden bg-white rounded-lg shadow-lg p-3 mt-2">
+      <div id="mobile-token-grid" class="token-grid-3x3">
+        <!-- 9 tokens will be rendered here in 3×3 grid -->
       </div>
     </div>
 
@@ -1061,19 +1040,19 @@
       const isPortraitMobile = containerWidth < 400;
       const isMobile = containerWidth < 500;
 
-      // Hex dimensions - tighter spacing for portrait mobile
-      const hexWidth = isPortraitMobile ? 38 : (isMobile ? 60 : 80);
-      const hexHeight = isPortraitMobile ? 33 : (isMobile ? 52 : 69);
-      
+      // Hex dimensions - MUST match CSS hex sizes!
+      const hexWidth = isPortraitMobile ? 34 : (isMobile ? 60 : 80);
+      const hexHeight = isPortraitMobile ? 29 : (isMobile ? 52 : 69);
+
       // Flat-topped hex positioning (standard axial coordinate formulas)
       // Horizontal: Each column shifts right by 3/4 of width
       // Vertical: Each row shifts down by full height, plus half-height per column
       const x = q * hexWidth * 0.75;
       const y = r * hexHeight + q * hexHeight * 0.5;
-      
+
       // Center in container
       const centerX = containerWidth / 2;
-      const centerY = isMobile ? 205 : 295;
+      const centerY = isPortraitMobile ? 110 : (isMobile ? 205 : 295);
       
       return {
         x: x + centerX,
@@ -1109,6 +1088,95 @@
       for (let i = 0; i < 3; i++) {
         gameState.tokenSupply[i] = drawTokens(3);
         updateTokenSpaceUI(i);
+      }
+
+      // Also update mobile 3×3 grid
+      updateMobileTokenGrid();
+    }
+
+    // Update mobile 3×3 token grid
+    function updateMobileTokenGrid() {
+      const grid = document.getElementById('mobile-token-grid');
+      if (!grid) return;
+
+      grid.innerHTML = '';
+
+      // Flatten all tokens from 3 spaces into single array
+      const allTokens = [];
+      for (let space = 0; space < 3; space++) {
+        gameState.tokenSupply[space].forEach((color, idx) => {
+          allTokens.push({ color, space, index: idx });
+        });
+      }
+
+      // Render 9 tokens in 3×3 grid
+      allTokens.forEach((tokenData) => {
+        const token = document.createElement('div');
+        token.className = `token ${tokenData.color}`;
+        token.dataset.color = tokenData.color;
+        token.dataset.space = tokenData.space;
+        token.dataset.index = tokenData.index;
+        token.textContent = TOKEN_EMOJI[tokenData.color];
+
+        // Single tap handler for mobile
+        token.addEventListener('click', handleTokenClickMobile);
+
+        grid.appendChild(token);
+      });
+    }
+
+    // Handle mobile token click (single tap, no space selection needed)
+    function handleTokenClickMobile(e) {
+      if (gameState.gameEnded) {
+        showMessage('Game is over! Start a new game to play again.', 'error');
+        return;
+      }
+
+      const token = e.currentTarget;
+      const spaceIndex = parseInt(token.dataset.space);
+      const tokenData = {
+        color: token.dataset.color,
+        space: spaceIndex,
+        index: parseInt(token.dataset.index),
+        element: token
+      };
+
+      // If same token clicked, deselect
+      if (gameState.selectedToken &&
+          gameState.selectedToken.space === tokenData.space &&
+          gameState.selectedToken.index === tokenData.index) {
+        gameState.selectedToken = null;
+        updateMobileTokenSelection();
+        showMessage('Token deselected. Tap a token to select it.', 'info');
+        return;
+      }
+
+      // Select new token
+      gameState.selectedToken = tokenData;
+      updateMobileTokenSelection();
+      showMessage(`${COLOR_NAMES[tokenData.color]} selected! Tap a hex to place it.`, 'success');
+    }
+
+    // Update mobile token selection visual
+    function updateMobileTokenSelection() {
+      const grid = document.getElementById('mobile-token-grid');
+      if (!grid) return;
+
+      // Remove all selection styles
+      grid.querySelectorAll('.token').forEach(t => {
+        t.classList.remove('selected');
+      });
+
+      // Add selection to current token
+      if (gameState.selectedToken) {
+        grid.querySelectorAll('.token').forEach(t => {
+          const matches =
+            parseInt(t.dataset.space) === gameState.selectedToken.space &&
+            parseInt(t.dataset.index) === gameState.selectedToken.index;
+          if (matches) {
+            t.classList.add('selected');
+          }
+        });
       }
     }
     
@@ -1971,6 +2039,7 @@
       // Clear selection
       gameState.selectedToken = null;
       updateTokenSelection();
+      updateMobileTokenSelection();
 
       // Update counters
       gameState.tokensPlaced++;
@@ -1984,6 +2053,9 @@
           }
         }
       }
+
+      // Update mobile grid
+      updateMobileTokenGrid();
 
       // Update score
       updateScore();
@@ -2004,7 +2076,7 @@
       }
     }
 
-    // Handle hex click for token placement or animal cube placement (double-tap on mobile)
+    // Handle hex click for token placement or animal cube placement (single tap)
     function handleHexClickForAnimal(e) {
       if (gameState.gameEnded) return;
 
@@ -2012,20 +2084,6 @@
       if (gameState.draggedToken) return;
 
       const hexEl = e.currentTarget;
-
-      // Check for double-tap on mobile
-      const isMobile = window.innerWidth < 768;
-      if (isMobile && !isDoubleTap(hexEl)) {
-        // First tap - just highlight
-        hexEl.style.borderColor = '#10b981';
-        hexEl.style.borderWidth = '3px';
-        setTimeout(() => {
-          hexEl.style.borderColor = '';
-          hexEl.style.borderWidth = '';
-        }, DOUBLE_TAP_DELAY);
-        return;
-      }
-
       const q = parseInt(hexEl.dataset.q);
       const r = parseInt(hexEl.dataset.r);
       const hexKey = `${q}_${r}`;
