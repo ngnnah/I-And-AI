@@ -1,16 +1,17 @@
 # Harmonies v5.0 - HTML/CSS Implementation Progress
 
 **Date Started**: February 16, 2026  
-**Status**: ✅ MVP COMPLETE! Fully Playable!  
+**Status**: ✅ MVP COMPLETE & PLAYABLE!  
 **Approach**: Vanilla HTML/CSS/JS + Tailwind CSS
 
 ---
 
 ## 🎉 Success Summary
 
-**MVP is DONE!** The game is fully playable with all core features:
+**MVP is FULLY PLAYABLE!** All core game features working:
 
-- ✅ **23-Hex Board**: Complete Side A board layout (5-4-5-4-5 pattern)
+- ✅ **23-Hex Side A Board**: Complete 5-4-5-4-5 layout with flat-topped hexagons
+- ✅ **Proper Hex Grid**: Hexagons touch correctly with visible borders (80×69px)
 - ✅ **Drag & Drop**: HTML5 drag & drop with visual feedback
 - ✅ **Stacking Validation**: All 6 token types follow correct rules
 - ✅ **Real-time Scoring**: All 6 categories calculate correctly
@@ -22,7 +23,7 @@
 
 **Play now**: http://localhost:8001/v5.html
 
-**Total Development Time**: ~3.5 hours
+**Total Development Time**: ~4 hours (vs 8 hour estimate!)
 
 ---
 
@@ -44,18 +45,32 @@
 
 ---
 
-### Phase 2: Hex Grid Rendering ⏳ In Progress
+### Phase 2: Hex Grid Rendering ✅ Complete
 **Goal**: Display clickable hexagons using CSS
 
 **Tasks**:
-- [x] CSS hexagon styles with clip-path
-- [x] Hex positioning logic (hexToPixel)
+- [x] CSS hexagon styles with clip-path (flat-topped orientation)
+- [x] Hex positioning logic (hexToPixel with axial coordinates)
 - [x] Create hex DOM elements
-- [x] Display 7 starting hexes from game logic
-- [ ] Hover states and click handlers (basic done, needs enhancement)
+- [x] Expand from 7 to 23 hexes (Side A board: 5-4-5-4-5 pattern)
+- [x] Fix hex dimensions: 80×69px (desktop), 60×52px (mobile)
+- [x] Use exact height = width × √3/2 for perfect hexagon geometry
+- [x] Proper spacing: x = q × width × 0.75, y = r × height + q × height × 0.5
+- [x] Add visible borders (3px/2px at 50% opacity)
+- [x] Center grid dynamically based on viewport
+- [x] Hover states and drop zone handlers
+- [x] Handle window resize events
 
-**Duration**: 2 hours  
-**Status**: Mostly complete - hexes render and position correctly
+**Duration**: 3.5 hours actual (7 iterations to get hex geometry right)  
+**Status**: ✅ Complete - 23 hexes render correctly, touch properly, responsive
+
+**Git Commits**:
+- `5a992c1`: Expand to 23-hex Side A board
+- `8e86b22`: Fix positioning and centering
+- `cf37c9d`: Revert to flat-top orientation
+- `4b6731b`: Correct flat-top clip-path polygon
+- `3c31105`: Fix spacing, add borders
+- `dc1462e`: Perfect √3/2 hexagon geometry
 
 ---
 
@@ -104,31 +119,37 @@
 
 ---
 
-### Phase 6: Polish & Mobile ⏸️ Not Started
-**Goal**: Responsive design, animations, UX improvements
+### Phase 6: Polish & Mobile ⏸️ Optional
+**Goal**: Enhanced UX, animations, visual refinements
 
 **Tasks**:
-- [ ] Mobile touch events
-- [ ] Responsive layout breakpoints
-- [ ] Smooth animations
-- [ ] Error messages styling
-- [ ] Loading states
-- [ ] Celebrations
+- [ ] **Hex borders**: Make borders fully visible (currently at 50% opacity, slightly cut off)
+- [ ] Mobile touch events (tap-to-select alternative to drag-drop)
+- [ ] Smooth animations (token placement, score updates)
+- [ ] Enhanced error messages styling (toast notifications)
+- [ ] Loading states and transitions
+- [ ] Win celebrations / confetti
+- [ ] Sound effects (optional)
+- [ ] Tutorial mode / onboarding
+- [ ] Undo last move feature
+- [ ] Save/load game state to localStorage
 
-**Duration**: 1 hour
+**Priority**: LOW - Game is fully playable without these
+**Duration**: 2-4 hours depending on scope
 
 ---
 
 ## 📊 Current Status
 
-**Phase**: 5/6 - MVP COMPLETE! 🎉
-**Completion**: 90%  
-**Estimated Remaining**: 1 hour (polish only)
+**Phase**: 5/5 - MVP COMPLETE! 🎉 (Phase 6 optional)
+**Completion**: 100% of core features  
+**Remaining**: Phase 6 polish tasks (optional enhancements)
 
 **Achievements**:
 - ✅ Full HTML page with Tailwind styling
 - ✅ Responsive layout (mobile-ready)
-- ✅ 7 hexagons rendering with correct positioning
+- ✅ **23 hexagons rendering with perfect geometry** (5-4-5-4-5 Side A board)
+- ✅ **Hexagons touch correctly with 80×69px dimensions** (√3/2 ratio)
 - ✅ Random token generation from pouch
 - ✅ Drag & drop with full validation
 - ✅ Real-time scoring (all 6 categories)
@@ -136,17 +157,33 @@
 - ✅ End game detection
 - ✅ Game message system
 - ✅ Token stacking validation
-- ✅ Hex display updates
+- ✅ Hex display updates with multi-token stacks
 
 ---
 
-## 🎯 Next Immediate Steps
+## 🎯 Next Steps for New Coding Session
 
-1. ✅ Test v5.html - verify drag & drop works
-2. ✅ Verify stacking validation (try invalid moves)
-3. ✅ Play a complete 15-turn game
-4. Phase 6: Polish & mobile optimization (optional)
-5. Deploy to public/ directory
+### Immediate Next Actions:
+
+1. **Deploy to public/** - Sync v5.html to public/projects/gaming/harmonies/
+   ```bash
+   rsync -av --delete --exclude='.git' --exclude='node_modules' \
+     projects/gaming/harmonies/ public/projects/gaming/harmonies/
+   ```
+
+2. **Update public/index.html** - Add Harmonies to project list if not there
+
+3. **Test deployment** - Verify game works at https://ngnnah.github.io/I-And-AI/projects/gaming/harmonies/v5.html
+
+4. **Optional Phase 6 tasks** (if desired):
+   - Make hex borders fully visible (adjust opacity or border-box sizing)
+   - Add mobile touch events for better mobile UX
+   - Add animations and polish
+
+### Ready to Deploy!
+**Current file**: `projects/gaming/harmonies/v5.html`  
+**Status**: Fully playable MVP, all core features working  
+**Test at**: http://localhost:8001/v5.html
 
 ### Phase 3-5 Implementation (Just Completed)
 
@@ -202,20 +239,30 @@
 - Mobile-responsive design with breakpoints
 - Emoji icons for tokens (💧 🌾 🪵 🌿 🏠 ⛰️)
 
-### Phase 2 Status (Mostly Complete)
-Since hex positioning is working, Phase 2 is mostly done. Remaining work:
-- Full integration with hex-grid.js for game logic
-- Dynamic hex expansion as game progresses
+### Phase 2 Status (Complete)
+Phase 2 took multiple iterations but is now complete with perfect hexagon geometry:
 
-**Fixes Applied**: 
-1. **Positioning** - Corrected hex positioning to work on all screen sizes
-2. **Rotation & Spacing** - Made hexes touch properly with correct grid alignment:
-   - Changed clip-path to flat-topped hexagons (flat edges top/bottom)
-   - Matched JS dimensions to CSS exactly (70×60px desktop, 50×43px mobile)
-   - Fixed vertical spacing: `y = r × height + (q × height × 0.5)`
-   - Horizontal spacing: `x = q × width × 0.75` (hexes overlap by 1/4)
-   - Added visible dark borders (3px) to clearly see hex boundaries
-   - Hexes now touch without overlapping in official Harmonies grid pattern
+**Hex Grid Specifications**:
+- **Board Layout**: 23 hexes in Side A pattern (5-4-5-4-5 rows)
+- **Hex Dimensions**: 80×69px (desktop), 60×52px (mobile)
+- **Geometry**: Exact height = width × √3/2 for flat-topped hexagons
+- **Spacing**: 
+  - `x = q × width × 0.75` (horizontal, hexes overlap by 25%)
+  - `y = r × height + q × height × 0.5` (vertical offset)
+- **Borders**: 3px/2px at 50% opacity (slightly cut off, can improve in Phase 6)
+- **Orientation**: Flat-top (flat edges on top/bottom)
+- **Clip-path**: `polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)`
+
+**Fixes Applied** (7 iterations): 
+1. Expanded from 7 to 23 hexes
+2. Fixed positioning and centering on all screen sizes
+3. Corrected orientation to flat-top
+4. Fixed clip-path polygon points
+5. Adjusted spacing to prevent overlap
+6. Added visible borders for clarity
+7. Applied exact √3/2 ratio for perfect geometry
+
+**Status**: ✅ Hexagons now touch correctly, responsive, ready for gameplay!
 
 ### Working Modules (Don't Touch)
 - `js/game/hex-grid.js` - Coordinate system ✅
@@ -275,9 +322,14 @@ python3 -m http.server 8001
 
 ---
 
-**Last Updated**: Phases 1-5 complete - MVP fully playable! 🎉  
-**Latest**: Fixed hex overlap with proper spacing and visible borders (commit 3c31105)  
-**View at**: http://localhost:8001/v5.html
+**Last Updated**: February 16, 2026 - Phases 1-5 complete, ready to deploy! 🎉  
+**Latest Changes**: 
+- Phase 2 complete with perfect 23-hex grid (commit dc1462e)
+- Hexagons use exact √3/2 geometry, touch properly at 80×69px
+- All core gameplay features working and tested
+- Next step: Deploy to public/ or work on optional Phase 6 polish
+
+**View game at**: http://localhost:8001/v5.html
 
 ---
 
