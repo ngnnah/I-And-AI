@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Harmonies v5.0 - Board Game</title>
   <link rel="icon" type="image/png" href="assets/favicon.jpg">
   
@@ -144,28 +144,117 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
     
+    /* Mobile touch feedback */
+    .token.touched {
+      transform: scale(1.15);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    .hex.touch-highlight {
+      border-color: #10b981;
+      border-width: 4px;
+      transform: scale(1.08);
+      z-index: 5;
+    }
+
+    /* Prevent text selection on mobile */
+    body {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .hex-grid {
-        height: 420px;
+        height: 450px;
+        max-width: 95vw;
       }
-      
+
       .hex {
-        width: 60px;
-        height: 52px; /* 60 × sqrt(3)/2 = 51.96 */
-        font-size: 10px;
+        width: 56px;
+        height: 48px; /* 56 × sqrt(3)/2 */
+        font-size: 9px;
         border: 2px solid rgba(0, 0, 0, 0.5);
       }
-      
+
       .token {
-        width: 36px;
-        height: 36px;
-        font-size: 18px;
+        width: 44px; /* Larger touch target (min 44px recommended) */
+        height: 44px;
+        font-size: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.6);
       }
-      
+
+      .token-space {
+        padding: 8px;
+      }
+
       .animal-card {
         width: 100%;
         margin-bottom: 8px;
+      }
+
+      /* Stack layout for mobile */
+      .container.mx-auto {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hex {
+        width: 48px;
+        height: 42px;
+        font-size: 8px;
+      }
+
+      .hex-grid {
+        height: 380px;
+      }
+
+      /* Compact header on small mobile */
+      header {
+        padding: 8px !important;
+      }
+
+      header h1 {
+        font-size: 20px !important;
+      }
+
+      header p {
+        font-size: 11px !important;
+      }
+
+      /* Smaller buttons */
+      button {
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+      }
+
+      /* Compact stats */
+      .bg-blue-100, .bg-purple-100 {
+        padding: 6px 10px !important;
+      }
+
+      .bg-blue-100 .text-2xl, .bg-purple-100 .text-2xl {
+        font-size: 18px !important;
+      }
+
+      /* Stack sections vertically on very small screens */
+      .grid.grid-cols-1.lg\\:grid-cols-4 {
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Scrollable token supply on mobile */
+      #token-supply-container {
+        max-height: 300px;
+        overflow-y: auto;
       }
     }
   </style>
@@ -374,6 +463,17 @@
       green: '🌿',
       red: '🏠',
       gray: '⛰️'
+    };
+
+    // Touch state for mobile drag-and-drop
+    const touchState = {
+      active: false,
+      startX: 0,
+      startY: 0,
+      currentX: 0,
+      currentY: 0,
+      token: null,
+      ghostElement: null
     };
     
     // Color names for display
@@ -732,7 +832,12 @@
         // Drag handlers
         token.addEventListener('dragstart', handleDragStart);
         token.addEventListener('dragend', handleDragEnd);
-        
+
+        // Touch handlers for mobile
+        token.addEventListener('touchstart', handleTouchStart, { passive: false });
+        token.addEventListener('touchmove', handleTouchMove, { passive: false });
+        token.addEventListener('touchend', handleTouchEnd, { passive: false });
+
         tokensContainer.appendChild(token);
       });
     }
@@ -777,11 +882,194 @@
     // Drag end handler
     function handleDragEnd(e) {
       e.target.style.opacity = '1';
-      
+
       // Clear all drop zone highlights
       document.querySelectorAll('.hex').forEach(hex => {
         hex.classList.remove('dropzone-active', 'dropzone-invalid');
       });
+    }
+
+    // Touch start handler (mobile)
+    function handleTouchStart(e) {
+      e.preventDefault(); // Prevent scrolling while dragging
+
+      // Prevent touching after game over
+      if (gameState.gameEnded) {
+        showMessage('Game is over! Start a new game to play again.', 'error');
+        return;
+      }
+
+      const token = e.target;
+      const spaceIndex = parseInt(token.dataset.space);
+
+      // Check if space is selected
+      if (gameState.selectedSpace === null) {
+        showMessage('Select a token space first!', 'error');
+        return;
+      }
+
+      if (parseInt(gameState.selectedSpace) !== spaceIndex) {
+        showMessage('Drag tokens from the selected space only!', 'error');
+        return;
+      }
+
+      const touch = e.touches[0];
+      touchState.active = true;
+      touchState.startX = touch.clientX;
+      touchState.startY = touch.clientY;
+      touchState.currentX = touch.clientX;
+      touchState.currentY = touch.clientY;
+      touchState.token = {
+        color: token.dataset.color,
+        space: spaceIndex,
+        index: parseInt(token.dataset.index),
+        element: token
+      };
+
+      // Visual feedback
+      token.classList.add('touched');
+
+      // Create ghost element for dragging
+      const ghost = token.cloneNode(true);
+      ghost.id = 'touch-ghost';
+      ghost.style.position = 'fixed';
+      ghost.style.pointerEvents = 'none';
+      ghost.style.zIndex = '10000';
+      ghost.style.left = touch.clientX - 24 + 'px'; // 24 = half of 48px token
+      ghost.style.top = touch.clientY - 24 + 'px';
+      ghost.style.opacity = '0.8';
+      document.body.appendChild(ghost);
+      touchState.ghostElement = ghost;
+    }
+
+    // Touch move handler (mobile)
+    function handleTouchMove(e) {
+      if (!touchState.active) return;
+      e.preventDefault();
+
+      const touch = e.touches[0];
+      touchState.currentX = touch.clientX;
+      touchState.currentY = touch.clientY;
+
+      // Move ghost element
+      if (touchState.ghostElement) {
+        touchState.ghostElement.style.left = touch.clientX - 24 + 'px';
+        touchState.ghostElement.style.top = touch.clientY - 24 + 'px';
+      }
+
+      // Find hex under touch
+      const hexUnder = findHexAtPosition(touch.clientX, touch.clientY);
+
+      // Clear previous highlights
+      document.querySelectorAll('.hex').forEach(hex => {
+        hex.classList.remove('touch-highlight', 'dropzone-invalid');
+      });
+
+      // Highlight hex under touch
+      if (hexUnder) {
+        const hexData = gameState.hexBoard[hexUnder.key];
+        const validation = canPlaceToken(hexData, touchState.token.color);
+
+        if (validation.valid) {
+          hexUnder.element.classList.add('touch-highlight');
+        } else {
+          hexUnder.element.classList.add('dropzone-invalid');
+        }
+      }
+    }
+
+    // Touch end handler (mobile)
+    function handleTouchEnd(e) {
+      if (!touchState.active) return;
+      e.preventDefault();
+
+      touchState.active = false;
+
+      // Remove visual feedback
+      if (touchState.token && touchState.token.element) {
+        touchState.token.element.classList.remove('touched');
+      }
+
+      // Remove ghost element
+      if (touchState.ghostElement) {
+        touchState.ghostElement.remove();
+        touchState.ghostElement = null;
+      }
+
+      // Find hex where touch ended
+      const touch = e.changedTouches[0];
+      const hexUnder = findHexAtPosition(touch.clientX, touch.clientY);
+
+      // Clear highlights
+      document.querySelectorAll('.hex').forEach(hex => {
+        hex.classList.remove('touch-highlight', 'dropzone-invalid');
+      });
+
+      if (!hexUnder) {
+        showMessage('Drag token onto a hex!', 'info');
+        return;
+      }
+
+      // Attempt to place token
+      const hexData = gameState.hexBoard[hexUnder.key];
+      const validation = canPlaceToken(hexData, touchState.token.color);
+
+      if (!validation.valid) {
+        showMessage(`❌ ${validation.reason}`, 'error');
+        return;
+      }
+
+      // Place token
+      const color = touchState.token.color;
+      hexData.stack.push({ color });
+      hexData.terrain = calculateTerrain(hexData.stack);
+
+      // Update hex display
+      updateHexDisplay(hexUnder.element, hexData);
+
+      // Remove token from supply
+      const { space, index } = touchState.token;
+      gameState.tokenSupply[space].splice(index, 1);
+      updateTokenSpaceUI(space);
+
+      // Update counters
+      gameState.tokensPlaced++;
+
+      // Update score
+      updateScore();
+
+      // Check board fullness
+      const filledHexes = Object.values(gameState.hexBoard).filter(hex => hex.stack.length > 0).length;
+      const emptyHexes = 23 - filledHexes;
+      if (emptyHexes <= 2) {
+        showMessage(`⚠️ Only ${emptyHexes} empty space${emptyHexes !== 1 ? 's' : ''} left! Finish placing your tokens - game will end.`, 'info');
+      }
+
+      // Check if all tokens placed
+      if (gameState.tokensPlaced >= gameState.tokensToPlace) {
+        showMessage(`✓ All tokens placed! Click "End Turn" to continue.`, 'success');
+      } else {
+        const remaining = gameState.tokensToPlace - gameState.tokensPlaced;
+        showMessage(`✓ Token placed! ${remaining} more to place.`, 'success');
+      }
+
+      // Clear touch state
+      touchState.token = null;
+    }
+
+    // Helper: Find hex element at screen position
+    function findHexAtPosition(clientX, clientY) {
+      const elements = document.elementsFromPoint(clientX, clientY);
+      const hexEl = elements.find(el => el.classList && el.classList.contains('hex'));
+
+      if (hexEl) {
+        const q = parseInt(hexEl.dataset.q);
+        const r = parseInt(hexEl.dataset.r);
+        const hexKey = `${q}_${r}`;
+        return { element: hexEl, q, r, key: hexKey };
+      }
+
+      return null;
     }
     
     // Drag over handler (allow drop)
