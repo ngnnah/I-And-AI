@@ -880,9 +880,37 @@
     
     // End game
     function endGame() {
-      showMessage(`🎉 Game Over! Final Score: ${gameState.score.total} points!`, 'success');
+      const suns = calculateSuns(gameState.score.total);
+      const sunEmoji = '☀️'.repeat(suns);
+      
+      showMessage(
+        `🎉 Game Over! Final Score: ${gameState.score.total} points = ${sunEmoji} ${suns} sun${suns !== 1 ? 's' : ''}!`,
+        'success'
+      );
+      
       document.getElementById('end-turn-btn').disabled = true;
       document.getElementById('end-turn-btn').textContent = '🏁 Game Complete';
+      
+      // Show detailed sun breakdown
+      setTimeout(() => {
+        showMessage(
+          `${sunEmoji} ${suns} suns earned! (Using Side A would add +1 sun)`,
+          'info'
+        );
+      }, 2000);
+    }
+    
+    // Calculate suns based on score (official Harmonies solo mode)
+    function calculateSuns(score) {
+      if (score >= 160) return 8;
+      if (score >= 150) return 7;
+      if (score >= 140) return 6;
+      if (score >= 130) return 5;
+      if (score >= 110) return 4;
+      if (score >= 90) return 3;
+      if (score >= 70) return 2;
+      if (score >= 40) return 1;
+      return 0;
     }
     
     // Start the game!
