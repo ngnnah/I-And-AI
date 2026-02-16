@@ -834,14 +834,18 @@
       
       // Check if hex has animal cube
       const hexKey = `${hexData.q}_${hexData.r}`;
-      const hasAnimal = gameState.placedAnimals.some(p => p.hexKey === hexKey);
+      const animalPlacement = gameState.placedAnimals.find(p => p.hexKey === hexKey);
       
-      if (hasAnimal) {
-        // Show token + animal cube indicator
+      if (animalPlacement) {
+        // Find the animal card to get the animal type
+        const animalCard = gameState.playerAnimalCards.find(c => c.id === animalPlacement.cardId);
+        const animalEmoji = animalCard ? getAnimalEmoji(animalCard.animal) : '🐾';
+        
+        // Show token + specific animal cube
         hexEl.innerHTML = `
           <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
             <span>${tokenDisplay}</span>
-            <span style="position: absolute; top: 2px; right: 2px; font-size: 0.9em;">🐾</span>
+            <span style="position: absolute; top: 2px; right: 2px; font-size: 0.9em;" title="${animalCard ? animalCard.name : 'Animal'}">${animalEmoji}</span>
           </div>
         `;
       } else {
