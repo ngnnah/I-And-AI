@@ -577,14 +577,14 @@ When playing solo mode, your goal is to earn as many suns ☀️ as possible, re
 
 **Suns from Score:**
 
-| Points | Suns |
-|--------|------|
-| 40-69 | ☀️ 1 sun |
-| 70-99 | ☀️☀️ 2 suns |
-| 100-129 | ☀️☀️☀️ 3 suns |
-| 130-159 | ☀️☀️☀️☀️ 4 suns |
-| 160-189 | ☀️☀️☀️☀️☀️ 5 suns |
-| 190+ | ☀️☀️☀️☀️☀️☀️ 6+ suns |
+| Points  | Suns           |
+| ------- | -------------- |
+| 40-69   | ☀️ 1 sun        |
+| 70-99   | ☀️☀️ 2 suns      |
+| 100-129 | ☀️☀️☀️ 3 suns     |
+| 130-159 | ☀️☀️☀️☀️ 4 suns    |
+| 160-189 | ☀️☀️☀️☀️☀️ 5 suns   |
+| 190+    | ☀️☀️☀️☀️☀️☀️ 6+ suns |
 
 **Bonus Suns:**
 
