@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harmonies v5.0 - Board Game</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    /* Custom hex styles */
+    .hex {
+      width: 60px;
+      height: 69px; /* 60 * 1.1547 for flat-topped hex */
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .hex:hover {
+      transform: scale(1.05);
+      border-color: rgba(255, 255, 255, 0.8);
+      z-index: 10;
+    }
+    
+    .hex.dropzone-active {
+      border-color: #10b981;
+      border-width: 3px;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    
+    .hex.dropzone-invalid {
+      border-color: #ef4444;
+      border-width: 3px;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    /* Terrain colors */
+    .hex.empty {
+      background: #d5dbdb;
+      color: #2c3e50;
+    }
+    
+    .hex.blue {
+      background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+    }
+    
+    .hex.yellow {
+      background: linear-gradient(135deg, #F5A623 0%, #E09000 100%);
+    }
+    
+    .hex.brown {
+      background: linear-gradient(135deg, #8B4513 0%, #654321 100%);
+    }
+    
+    .hex.green {
+      background: linear-gradient(135deg, #7ED321 0%, #5FA518 100%);
+    }
+    
+    .hex.red {
+      background: linear-gradient(135deg, #D0021B 0%, #A00116 100%);
+    }
+    
+    .hex.gray {
+      background: linear-gradient(135deg, #7F8C8D 0%, #5D6D6E 100%);
+    }
+    
+    /* Token styles */
+    .token {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: grab;
+      transition: all 0.2s ease;
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .token:active {
+      cursor: grabbing;
+      transform: scale(0.95);
+    }
+    
+    .token.blue { background: #4A90E2; }
+    .token.yellow { background: #F5A623; }
+    .token.brown { background: #8B4513; }
+    .token.green { background: #7ED321; }
+    .token.red { background: #D0021B; }
+    .token.gray { background: #7F8C8D; }
+    
+    /* Token space styles */
+    .token-space {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .token-space:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    .token-space.selected {
+      border-color: #10b981;
+      border-width: 4px;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+    }
+    
+    /* Hex grid container */
+    .hex-grid {
+      position: relative;
+      width: 600px;
+      height: 500px;
+      margin: 0 auto;
+    }
+    
+    /* Animal card styles */
+    .animal-card {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      width: 180px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .hex-grid {
+        width: 100%;
+        height: 400px;
+      }
+      
+      .hex {
+        width: 40px;
+        height: 46px;
+      }
+      
+      .token {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+      }
+      
+      .animal-card {
+        width: 100%;
+        margin-bottom: 8px;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-800 to-slate-900 min-h-screen">
+  
+  <!-- Game Container -->
+  <div class="container mx-auto px-4 py-6 max-w-7xl">
+    
+    <!-- Header -->
+    <header class="bg-white rounded-lg shadow-lg p-4 mb-6">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <!-- Title -->
+        <div>
+          <h1 class="text-3xl font-bold text-slate-800">🎮 Harmonies v5.0</h1>
+          <p class="text-sm text-slate-600">Build landscapes, attract animals, score points!</p>
+        </div>
+        
+        <!-- Game Stats -->
+        <div class="flex gap-4 items-center">
+          <div class="bg-blue-100 px-4 py-2 rounded-lg">
+            <div class="text-xs text-blue-700 font-semibold">Turn</div>
+            <div id="turn-counter" class="text-2xl font-bold text-blue-900">1 / 15</div>
+          </div>
+          
+          <div class="bg-purple-100 px-4 py-2 rounded-lg">
+            <div class="text-xs text-purple-700 font-semibold">Score</div>
+            <div id="total-score" class="text-2xl font-bold text-purple-900">0</div>
+          </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="flex gap-2">
+          <button id="new-game-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+            🎲 New Game
+          </button>
+          <button id="help-btn" class="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition">
+            ❓ Help
+          </button>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Main Game Area -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      
+      <!-- Left Sidebar: Animal Cards -->
+      <aside class="lg:col-span-1 space-y-4">
+        <div class="bg-white rounded-lg shadow-lg p-4">
+          <h2 class="text-lg font-bold text-slate-800 mb-3">🐾 Animal Cards</h2>
+          <div id="animal-cards-container" class="space-y-3">
+            <!-- Animal cards will be inserted here -->
+            <div class="animal-card">
+              <div class="text-center font-bold text-slate-700 mb-2">🦊 Fox</div>
+              <div class="text-xs text-slate-600">Coming soon...</div>
+            </div>
+            <div class="animal-card">
+              <div class="text-center font-bold text-slate-700 mb-2">🦌 Deer</div>
+              <div class="text-xs text-slate-600">Coming soon...</div>
+            </div>
+            <div class="animal-card">
+              <div class="text-center font-bold text-slate-700 mb-2">🦅 Eagle</div>
+              <div class="text-xs text-slate-600">Coming soon...</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Score Breakdown -->
+        <div class="bg-white rounded-lg shadow-lg p-4">
+          <h2 class="text-lg font-bold text-slate-800 mb-3">📊 Score Breakdown</h2>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-slate-600">🌲 Trees:</span>
+              <span id="score-trees" class="font-bold text-green-700">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-600">⛰️ Mountains:</span>
+              <span id="score-mountains" class="font-bold text-gray-700">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-600">🌾 Fields:</span>
+              <span id="score-fields" class="font-bold text-yellow-700">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-600">🏠 Buildings:</span>
+              <span id="score-buildings" class="font-bold text-red-700">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-600">💧 Rivers:</span>
+              <span id="score-rivers" class="font-bold text-blue-700">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-600">🐾 Animals:</span>
+              <span id="score-animals" class="font-bold text-purple-700">0</span>
+            </div>
+            <div class="border-t border-slate-300 pt-2 mt-2 flex justify-between">
+              <span class="text-slate-800 font-bold">Total:</span>
+              <span id="score-total-sidebar" class="font-bold text-purple-900 text-lg">0</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+      
+      <!-- Center: Hex Grid -->
+      <main class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h2 class="text-lg font-bold text-slate-800 mb-4 text-center">🗺️ Your Landscape</h2>
+          
+          <!-- Hex Grid Container -->
+          <div id="hex-grid-container" class="hex-grid bg-gradient-to-br from-green-50 to-blue-50 rounded-lg border-4 border-slate-300">
+            <!-- Hexes will be inserted here -->
+          </div>
+          
+          <!-- Game Messages -->
+          <div id="game-message" class="mt-4 p-3 rounded-lg text-center font-semibold hidden">
+            <!-- Messages appear here -->
+          </div>
+        </div>
+      </main>
+      
+      <!-- Right Sidebar: Token Supply -->
+      <aside class="lg:col-span-1">
+        <div class="bg-white rounded-lg shadow-lg p-4">
+          <h2 class="text-lg font-bold text-slate-800 mb-3">🎨 Token Supply</h2>
+          <p class="text-sm text-slate-600 mb-4">Click a space to select, then drag tokens to your board</p>
+          
+          <!-- Token Spaces -->
+          <div id="token-supply-container" class="space-y-3">
+            
+            <!-- Space 1 -->
+            <div class="token-space border-4 border-slate-300 rounded-lg p-3 bg-slate-50" data-space="0">
+              <div class="text-xs text-slate-600 font-semibold mb-2">Space 1</div>
+              <div class="flex justify-around items-center">
+                <div class="token blue" draggable="true" data-color="blue">💧</div>
+                <div class="token yellow" draggable="true" data-color="yellow">🌾</div>
+                <div class="token brown" draggable="true" data-color="brown">🪵</div>
+              </div>
+            </div>
+            
+            <!-- Space 2 -->
+            <div class="token-space border-4 border-slate-300 rounded-lg p-3 bg-slate-50" data-space="1">
+              <div class="text-xs text-slate-600 font-semibold mb-2">Space 2</div>
+              <div class="flex justify-around items-center">
+                <div class="token green" draggable="true" data-color="green">🌿</div>
+                <div class="token red" draggable="true" data-color="red">🏠</div>
+                <div class="token gray" draggable="true" data-color="gray">⛰️</div>
+              </div>
+            </div>
+            
+            <!-- Space 3 -->
+            <div class="token-space border-4 border-slate-300 rounded-lg p-3 bg-slate-50" data-space="2">
+              <div class="text-xs text-slate-600 font-semibold mb-2">Space 3</div>
+              <div class="flex justify-around items-center">
+                <div class="token brown" draggable="true" data-color="brown">🪵</div>
+                <div class="token green" draggable="true" data-color="green">🌿</div>
+                <div class="token gray" draggable="true" data-color="gray">⛰️</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Turn Actions -->
+          <div class="mt-4 space-y-2">
+            <button id="end-turn-btn" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold disabled:bg-slate-400 disabled:cursor-not-allowed">
+              ✓ End Turn
+            </button>
+            <div class="text-xs text-slate-600 text-center">
+              Place all 3 tokens before ending turn
+            </div>
+          </div>
+        </div>
+      </aside>
+      
+    </div>
+    
+    <!-- Footer Info -->
+    <footer class="mt-6 bg-white rounded-lg shadow-lg p-4 text-center">
+      <p class="text-sm text-slate-600">
+        <strong>How to play:</strong> Select a token space → Drag tokens to hexagons → Complete your turn → Score points!
+      </p>
+      <p class="text-xs text-slate-500 mt-2">
+        v5.0 HTML/CSS Implementation • <a href="https://github.com/ngnnah/I-And-AI" class="text-blue-600 hover:underline">GitHub</a>
+      </p>
+    </footer>
+    
+  </div>
+  
+  <!-- Game Logic Scripts (ES6 Modules) -->
+  <script type="module">
+    // Import existing game logic
+    // import { initializePersonalBoard, hexToPixel } from './js/game/hex-grid.js';
+    // import { canPlaceToken } from './js/game/token-manager.js';
+    // import { calculateTotalScore } from './js/game/scoring-engine.js';
+    
+    // Game state
+    const gameState = {
+      turn: 1,
+      maxTurns: 15,
+      selectedSpace: null,
+      tokensPlaced: 0,
+      tokensToPlace: 3,
+      hexBoard: {},
+      score: {
+        trees: 0,
+        mountains: 0,
+        fields: 0,
+        buildings: 0,
+        rivers: 0,
+        animals: 0,
+        total: 0
+      }
+    };
+    
+    // Initialize game
+    function initGame() {
+      console.log('🎮 Harmonies v5.0 Initializing...');
+      
+      // Phase 1: Just show static UI for now
+      showMessage('Game initialized! Phase 1 complete - UI structure ready.', 'success');
+      
+      // Create initial hex grid (7 hexes)
+      createInitialHexGrid();
+      
+      // Setup event listeners
+      setupEventListeners();
+      
+      console.log('✅ Game ready!');
+    }
+    
+    // Create 7 starting hexagons
+    function createInitialHexGrid() {
+      const container = document.getElementById('hex-grid-container');
+      
+      // Center hex and 6 neighbors (axial coordinates)
+      const hexes = [
+        { q: 0, r: 0, label: '0,0' },
+        { q: 1, r: 0, label: '1,0' },
+        { q: 1, r: -1, label: '1,-1' },
+        { q: 0, r: -1, label: '0,-1' },
+        { q: -1, r: 0, label: '-1,0' },
+        { q: -1, r: 1, label: '-1,1' },
+        { q: 0, r: 1, label: '0,1' }
+      ];
+      
+      hexes.forEach(({ q, r, label }) => {
+        const hexEl = createHexElement(q, r, label);
+        container.appendChild(hexEl);
+      });
+    }
+    
+    // Create a hex element
+    function createHexElement(q, r, label) {
+      const hex = document.createElement('div');
+      hex.className = 'hex empty';
+      hex.dataset.q = q;
+      hex.dataset.r = r;
+      hex.textContent = label;
+      
+      // Calculate pixel position
+      const pos = hexToPixel(q, r);
+      hex.style.left = pos.x + 'px';
+      hex.style.top = pos.y + 'px';
+      
+      // Store in game state
+      gameState.hexBoard[`${q}_${r}`] = {
+        q, r,
+        terrain: null,
+        stack: []
+      };
+      
+      return hex;
+    }
+    
+    // Convert axial coordinates to pixel position
+    function hexToPixel(q, r, hexSize = 35) {
+      const x = hexSize * (3/2 * q);
+      const y = hexSize * Math.sqrt(3) * (r + q/2);
+      
+      // Center in container (600x500)
+      return {
+        x: x + 270, // Offset to center
+        y: y + 220
+      };
+    }
+    
+    // Show game message
+    function showMessage(text, type = 'info') {
+      const msgEl = document.getElementById('game-message');
+      msgEl.textContent = text;
+      msgEl.className = `mt-4 p-3 rounded-lg text-center font-semibold ${
+        type === 'success' ? 'bg-green-100 text-green-800' :
+        type === 'error' ? 'bg-red-100 text-red-800' :
+        'bg-blue-100 text-blue-800'
+      }`;
+      msgEl.classList.remove('hidden');
+      
+      // Auto-hide after 3 seconds
+      setTimeout(() => {
+        msgEl.classList.add('hidden');
+      }, 3000);
+    }
+    
+    // Setup event listeners
+    function setupEventListeners() {
+      // New game button
+      document.getElementById('new-game-btn').addEventListener('click', () => {
+        if (confirm('Start a new game? Current progress will be lost.')) {
+          location.reload();
+        }
+      });
+      
+      // Help button
+      document.getElementById('help-btn').addEventListener('click', () => {
+        showMessage('Select a token space, drag tokens to hexes, then end your turn!', 'info');
+      });
+      
+      // End turn button
+      document.getElementById('end-turn-btn').addEventListener('click', handleEndTurn);
+      
+      // Token space selection
+      document.querySelectorAll('.token-space').forEach(space => {
+        space.addEventListener('click', handleSpaceClick);
+      });
+      
+      console.log('✅ Event listeners attached');
+    }
+    
+    // Handle space click
+    function handleSpaceClick(e) {
+      const space = e.currentTarget;
+      const spaceId = space.dataset.space;
+      
+      // Deselect all spaces
+      document.querySelectorAll('.token-space').forEach(s => {
+        s.classList.remove('selected');
+      });
+      
+      // Select this space
+      space.classList.add('selected');
+      gameState.selectedSpace = spaceId;
+      
+      showMessage(`Space ${parseInt(spaceId) + 1} selected! Now drag tokens to your board.`, 'success');
+    }
+    
+    // Handle end turn
+    function handleEndTurn() {
+      if (gameState.tokensPlaced < gameState.tokensToPlace) {
+        showMessage(`Place all ${gameState.tokensToPlace} tokens before ending turn!`, 'error');
+        return;
+      }
+      
+      // Advance turn
+      gameState.turn++;
+      gameState.tokensPlaced = 0;
+      
+      // Update UI
+      document.getElementById('turn-counter').textContent = `${gameState.turn} / ${gameState.maxTurns}`;
+      
+      // Check for game end
+      if (gameState.turn > gameState.maxTurns) {
+        endGame();
+        return;
+      }
+      
+      // Refresh token supply (Phase 3)
+      showMessage(`Turn ${gameState.turn} started!`, 'success');
+      
+      // Deselect space
+      document.querySelectorAll('.token-space').forEach(s => {
+        s.classList.remove('selected');
+      });
+      gameState.selectedSpace = null;
+    }
+    
+    // End game
+    function endGame() {
+      showMessage(`🎉 Game Over! Final Score: ${gameState.score.total}`, 'success');
+      document.getElementById('end-turn-btn').disabled = true;
+    }
+    
+    // Start the game!
+    initGame();
+  </script>
+  
+</body>
+</html>
