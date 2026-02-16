@@ -1,8 +1,83 @@
 # Harmonies - Implementation Progress
 
-**Last Updated:** 2026-02-16  
-**Current Version:** v5.0  
-**Status:** ✅ MVP COMPLETE - Solo Mode Fully Playable
+**Last Updated:** 2026-02-17  
+**Current Version:** v5.0.1  
+**Status:** ✅ FULLY PLAYABLE - POLISHED UI - READY FOR PHASE 6
+
+---
+
+## 🎯 HANDOFF TO NEXT AI SESSION
+
+### Quick Start Summary
+
+**File:** `/Users/nhat/repo-fun/I-And-AI/projects/gaming/harmonies/index.html` (1846 lines)
+
+**Current State:** v5.0.1 - Solo mode complete with polished UI, all core mechanics working, ready for enhanced animal system
+
+**Tech Stack:**
+- Pure HTML/CSS/JavaScript (no frameworks)
+- Tailwind CSS CDN for styling  
+- Vanilla ES6 for game logic
+- Click-to-place interaction (drag & drop removed)
+- Responsive design: Desktop sidebar + mobile vertical stack
+
+**What Works (Fully Tested):**
+- ✅ Token placement with stacking (all 6 types)
+- ✅ Hexagonal grid (23 hexes, Side A board)
+- ✅ Complete scoring system (6 categories + sun achievements)
+- ✅ Animal system (10 cards, simplified patterns)
+- ✅ Discard & replace mechanics
+- ✅ Game flow and end detection
+- ✅ Unified stats display (desktop sidebar + mobile grid)
+- ✅ Responsive hex sizing (36px desktop → 24px tablet → 20px mobile)
+- ✅ Stack count overlays (18px desktop → 14px tablet → 11px mobile)
+- ✅ Emoji system with browser compatibility (🪙💧🌼🪵🌿🏠⛰️☀️)
+
+**Recent Changes (v5.0.1 - Feb 17):**
+- Removed all drag & drop code (311 lines deleted)
+- Pure click-to-place interaction for better mobile UX
+- Unified stats: Single display system for desktop + mobile
+- Stack count overlay: Positioned on emoji instead of inline
+- Responsive sizing: Desktop hexes larger (36px), mobile smaller (20px)
+- Emoji updates: 🪙 tokens left, 🌼 fields (browser compatibility)
+- Sun count inline with total score
+- Single End Turn button (removed duplicates)
+- File optimization: 2156 → 1846 lines
+
+**Next Priority: Phase 6 - Enhanced Animal System**
+
+**What Needs Work:**
+1. Expand from 10 to 48 animal cards (see Phase 6 section below)
+2. Implement complex habitat pattern validation (relative coordinate matching)
+3. Visual pattern preview when card selected
+4. Animal card draw pile mechanics
+5. Scoring validation for complex patterns
+
+**Key Files:**
+- Main game: `index.html`
+- Test suite: `tests/*.test.js` (64 tests passing)
+- Data: Animal patterns in inline JS (need extraction to `js/data/`)
+- Documentation: This file + README.md + game-rules.md
+
+**Architecture Notes:**
+- Game state managed in global `gameState` object
+- Scoring engine uses axial coordinates (q, r)
+- updateHexDisplay() renders hex contents with stack count overlay
+- updateScore() calculates all 6 categories + sun achievements
+- Pattern matching logic ready for enhancement (currently simplified)
+
+**Deployment:**
+```bash
+rsync -av --delete --exclude='.git' --exclude='node_modules' \
+  projects/gaming/harmonies/index.html public/projects/gaming/harmonies/
+git add public/ && git commit -m "deploy: Harmonies v5.0.1" && git push
+```
+
+**Testing:**
+```bash
+cd projects/gaming/harmonies
+npm test  # Run Vitest tests (if configured)
+```
 
 ---
 
@@ -368,7 +443,24 @@
 
 ## 📈 Version History
 
-### v5.0 (2026-02-16) - Current
+### v5.0.1 (2026-02-17) - UI/UX Polish - Current
+
+- ✅ Removed drag & drop system (311 lines deleted)
+- ✅ Pure click-to-place interaction (mobile-optimized)
+- ✅ Unified stats display (desktop sidebar + mobile grid, identical layouts)
+- ✅ Sun count inline with total score
+- ✅ Tokens left on same line as total (🪙 120 | Total: 45 ☀️☀️)
+- ✅ Single End Turn button (removed duplicates)
+- ✅ Stack count overlay system (positioned on emoji, not inline)
+- ✅ Responsive sizing fixes:
+  - Desktop hexes: 36px emoji, 18px stack count
+  - Tablet: 24px emoji, 14px stack count  
+  - Mobile: 20px emoji, 11px stack count
+- ✅ Emoji updates: 🪙 for tokens left, 🌼 for fields (Chrome compatibility)
+- ✅ File optimization: 2156 → 1846 lines
+- ✅ Comprehensive documentation updates
+
+### v5.0 (2026-02-16) - MVP Complete
 
 - ✅ Complete solo mode implementation
 - ✅ All token stacking rules

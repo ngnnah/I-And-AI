@@ -1,8 +1,9 @@
 # Harmonies - Solo Board Game Implementation
 
-**Version:** 5.0 (HTML/CSS/JS)  
-**Status:** ✅ FULLY PLAYABLE  
-**Live:** https://ngnnah.github.io/I-And-AI/projects/gaming/harmonies/
+**Version:** v5.0.1 (HTML/CSS/JS)  
+**Status:** ✅ FULLY PLAYABLE - POLISHED UI - READY FOR PHASE 6  
+**Live:** https://ngnnah.github.io/I-And-AI/projects/gaming/harmonies/  
+**Last Updated:** 2026-02-17
 
 ---
 
@@ -22,32 +23,44 @@ python3 -m http.server 8001
 
 ## ✅ Features
 
-### Core Gameplay
-- **Token Placement** - Drag & drop with full stacking validation (all 6 token types)
+### Core Gameplay (v5.0 - Polished)
+- **Click-to-Place Interaction** - Simple, intuitive token placement (drag & drop REMOVED for better mobile UX)
+  - Click any token to select it
+  - Click a hex to place it
+  - Invalid placements flash red with error message
 - **Real-time Scoring** - All 6 categories update live: trees, mountains, fields, buildings, water, animals
-- **Sun Achievements** - Real-time sun count (1-8 ☀️) with hover tooltip showing score breakdown
+- **Unified Stats Display** 
+  - Desktop: Sidebar score breakdown (🌲⛰️🌼🏠💧🐾 | 🪙 Tokens | Total + ☀️)
+  - Mobile: Horizontal score grid with same layout
+  - Sun count (1-8 ☀️) shown inline with total score
+  - Tokens left (🪙) on same line as total
 - **Animal System** 
-  - 2 sections: Available Cards (3 face-up) + Your Animal Cards (max 4 in hand)
-  - Click "Take Card" to move card from available pool to your hand
-  - Select card from your hand, click hex to place animal cube (specific emoji per animal)
-  - Discard & Replace mechanic: Yellow button activates, click card to discard and draw replacement
-  - Shows placement progress (e.g., "2/4 placed") and next points value
+  - Available Cards section (3 face-up cards to take)
+  - Your Cards section (max 4 in hand)
+  - Click to take card (1 per turn)
+  - Select from hand → Click hex to place cube with specific animal emoji
+  - Discard & Replace: Yellow button → Click card to discard → Auto-draw replacement
+  - Progress tracking: "2/4 placed" with next points value
 
 ### Game Flow
-- **Turn Management** - Select token space → Drag 3 tokens to hexes → End Turn
-- **Token Economy** - 9 tokens drawn per turn, 3 placed, 6 discarded (proper solo mode rule)
+- **Turn Management** - Click token → Click hex (3 times) → End Turn
+- **Token Economy** - 9 tokens drawn per turn (3 spaces × 3 tokens), 3 placed, 6 discarded
 - **End Game Detection** 
-  - Ends when pouch <9 tokens (can't refill all 3 spaces)
-  - OR when ≤2 empty hexes remain (can't place 3 tokens next turn)
-  - Clear messaging explains why game ended
-- **Game Over Protection** - No dragging, clicking, or space selection after game ends
+  - Ends when pouch <9 tokens (can't refill)
+  - OR when ≤2 empty hexes (can't place 3 next turn)
+  - Clear messaging explains end condition
+- **Game Over Protection** - All interactions disabled after game ends
 
-### Visual Design
-- **Modern UI** - Tailwind CSS with gradient backgrounds
-- **Token Emojis** - 🌲 🪵 ⛰️ 🏠 🌾 💧 (trees, trunks, mountains, buildings, fields, water)
-- **Animal Emojis** - 🐻 🦌 🐰 🦊 🦅 🦫 🦉 🐿️ 🐟 🐺 (specific to each animal card)
-- **Responsive Layout** - Sidebar + main board + controls
-- **Interactive States** - Green borders (available), yellow borders (discard mode), hover effects
+### Visual Design (2026-02-17 Polish Update)
+- **Modern UI** - Tailwind CSS with gradient backgrounds, clean layout
+- **Token Emojis** - 💧 🌼 🪵 🌿 🏠 ⛰️ (water, fields, trunks, leaves, buildings, mountains)
+- **Stack Display** - Overlay count (×2, ×3) positioned on emoji with subtle text shadow
+- **Animal Emojis** - 🐻 🦌 🐰 🦊 🦅 🦫 🦉 🐿️ 🐟 🐺 (specific to each card)
+- **Responsive Layout** 
+  - Desktop: Sidebar (cards + score) + Center (board + tokens) + End Turn
+  - Mobile: Vertical stack with horizontal card rows + score grid
+- **Interactive States** - Green available, yellow discard mode, red invalid, hover effects
+- **Single End Turn Button** - Below board, works on all devices
 
 ---
 
@@ -73,31 +86,32 @@ python3 -m http.server 8001
 
 ## 🏗️ Architecture
 
-### Current: v5.0 - HTML/CSS/JS
+### Current: v5.0.1 - HTML/CSS/JS (Polished - 2026-02-17)
 
 **Why it works:**
-- Single-file HTML (`index.html`) - no build step complexity
-- Tailwind CSS CDN - rapid UI development
-- ES6 modules for game logic - clean separation of concerns
+- Single-file HTML (`index.html`) - 1846 lines, no build step
+- Tailwind CSS CDN - rapid UI prototyping
+- Vanilla JavaScript - clean, performant, no framework overhead
+- Click-only interaction - removed drag & drop for simpler code and better mobile UX
 
 **Key Files:**
-- `index.html` - Main game (1381 lines, self-contained with inline JS)
-- `js/game/scoring-engine.js` - Scoring logic for all 6 categories
-- `js/game/token-manager.js` - Token placement & stacking validation
-- `js/data/tokens-config.js` - Initial pouch config (120 tokens total)
+- `index.html` - Complete game (1845 lines, self-contained with inline JS)
+- `js/game/scoring-engine.js` - All 6 scoring categories
+- `js/game/token-manager.js` - Placement validation & stacking rules
+- `js/data/tokens-config.js` - Initial pouch (120 tokens)
 - `js/data/animal-cards.js` - 10 animal cards with habitat patterns
 
 **Game State:**
 ```javascript
 gameState = {
-  hexBoard: {},                    // 23 hexes (q,r coords, stack arrays, terrain)
+  selectedToken: null,            // {color, space, index} for click-to-place
+  hexBoard: {},                   // 23 hexes (axial coords, stacks, terrain)
   tokenSupply: [[],[],[]],        // 3 spaces × 3 tokens each
   pouch: {...},                   // Token counts by color
-  selectedSpace: null,            // Currently selected space (0-2)
   selectedAnimalCard: null,       // Selected card for cube placement
   availableAnimalCards: [],       // 3 face-up cards (draw pool)
   playerAnimalCards: [],          // Cards in hand (max 4)
-  placedAnimals: [],              // {cardId, hexKey} placements
+  placedAnimals: [],              // [{cardId, hexKey}] placements
   tokensPlaced: 0,                // Count for current turn (must = 3)
   takenCardThisTurn: false,       // Prevent multiple card takes per turn
   discardMode: false,             // Discard & replace mode active
@@ -114,10 +128,10 @@ gameState = {
 
 | Token    | Can Place On            | Max Height | Notes                               |
 | -------- | ----------------------- | ---------- | ----------------------------------- |
-| Yellow 🌾 | Ground only             | 1          | Fields - no stacking                |
+| Yellow � | Ground only             | 1          | Fields - no stacking                |
 | Blue 💧   | Ground only             | 1          | Water - no stacking                 |
 | Brown 🪵  | Brown only              | 2          | Tree trunks - stack on each other   |
-| Green 🌲  | 1-2 Brown               | 3          | Tree leaves - need trunk underneath |
+| Green 🌿  | 1-2 Brown               | 3          | Tree leaves - need trunk underneath |
 | Gray ⛰️   | Gray only               | 3          | Mountains - stack on each other     |
 | Red 🏠    | Gray/Brown/Red or alone | 2          | Buildings - flexible placement      |
 
@@ -146,16 +160,24 @@ gameState = {
 ## 🎮 How to Play (Quick Start)
 
 1. **Open** the game (online or local server)
-2. **Select a token space** - Click one of 3 spaces at the top
-3. **Drag tokens** - Drag tokens from selected space to hexes on board
-4. **Take animal cards** (optional) - Click "Take Card" on available cards (max 1 per turn, max 4 in hand)
-5. **Place animal cubes** (optional) - Select card from your hand → Click matching hex → Cube placed with emoji
-6. **Discard & Replace** (optional) - Click yellow "Discard & Replace" button → Click card to discard
-7. **End turn** - Click "End Turn" button when all 3 tokens placed
-8. **Repeat** until game ends (pouch <9 tokens OR ≤2 empty hexes)
-9. **Check score** - See final sun achievement (1-8 range)!
+2. **Click a token** - Click any token in one of the 3 spaces (auto-selects space)
+3. **Click a hex** - Click a hex on the board to place the token
+   - Valid placements: Token appears on hex with visual feedback
+   - Invalid placements: Hex flashes red with error message
+4. **Repeat** - Click 2 more tokens and hexes (3 tokens total per turn)
+5. **Take animal cards** (optional) - Click green-bordered cards in "Available Cards" (max 1/turn, max 4 in hand)
+6. **Place animal cubes** (optional) - Click card in "Your Cards" → Click matching hex → Cube placed
+7. **Discard & Replace** (optional) - Click "⟳ Discard" button → Click card to remove → Auto-draw replacement
+8. **End turn** - Click "✓ End Turn" button when 3 tokens placed
+9. **Repeat** until game ends (pouch <9 tokens OR ≤2 empty hexes)
+10. **Check score** - Final sun achievement shown (1-8 ☀️ range, 160+ = 8 suns)
 
-**Goal:** Earn as many suns ☀️ as possible (160+ points = 8 suns)
+**Goal:** Maximize score through strategic token stacking and animal habitat creation
+
+**Interaction Model:**
+- Click-to-select → Click-to-place (no dragging required)
+- Works seamlessly on both desktop and mobile
+- Visual feedback for all actions (selections, validations, errors)
 
 ---
 
@@ -174,7 +196,27 @@ npm run test:e2e
 
 ## 📋 Version History
 
-### v5.0 (2026-02-16) - Current ✅
+### v5.0.1 (2026-02-17) - UI/UX Polish ✨
+**Major Improvements:**
+- ✅ Removed ALL drag & drop - pure click-to-place interaction (311 lines deleted)
+- ✅ Unified stats display (sidebar + mobile grid with identical layouts)
+- ✅ Sun count (☀️) integrated inline with total score
+- ✅ Tokens left (🪙) on same line as total
+- ✅ Single "End Turn" button (works on all devices)
+- ✅ Stack count (×2, ×3) overlaid on emoji with responsive sizing
+  - Desktop: 36px emoji, 18px count
+  - Tablet: 24px emoji, 14px count
+  - Mobile: 20px emoji, 11px count
+- ✅ Updated emojis: 🌼 fields (better browser support), 🪙 tokens left
+- ✅ Reduced file size: 2156 → 1846 lines
+- ✅ Cleaner, more responsive mobile layout with proper touch targets
+
+**Performance:**
+- Faster rendering (no drag event listeners)
+- Better touch interaction on mobile
+- Simpler codebase for future maintenance
+
+### v5.0 (2026-02-16) - Initial Release ✅
 - Complete solo mode implementation
 - All token stacking rules working
 - Real-time scoring (all 6 categories)
@@ -185,7 +227,6 @@ npm run test:e2e
 - Game end detection and protection
 - Clean Tailwind CSS UI
 - Deployed to GitHub Pages
-
 
 See **[PROGRESS.md](./PROGRESS.md)** for detailed roadmap and tracking.
 

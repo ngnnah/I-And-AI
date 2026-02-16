@@ -21,7 +21,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 36px;
       font-weight: bold;
       color: white;
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
@@ -70,6 +70,18 @@
     
     .hex.gray {
       background: linear-gradient(135deg, #7F8C8D 0%, #5D6D6E 100%);
+    }
+    
+    /* Stack count overlay - responsive sizing */
+    .stack-count {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      font-size: 18px;
+      font-weight: bold;
+      line-height: 1;
+      text-shadow: 0 0 3px rgba(0,0,0,0.8);
+      pointer-events: none;
     }
     
     /* Token styles */
@@ -217,8 +229,12 @@
       .hex {
         width: 56px;
         height: 48px; /* 56 × sqrt(3)/2 */
-        font-size: 16px;
+        font-size: 24px;
         border: 2px solid rgba(0, 0, 0, 0.5);
+      }
+      
+      .stack-count {
+        font-size: 14px;
       }
 
       .token {
@@ -249,6 +265,10 @@
         width: 48px;
         height: 42px;
         font-size: 20px;
+      }
+      
+      .stack-count {
+        font-size: 11px;
       }
 
       .hex-grid {
@@ -1254,7 +1274,7 @@
         hexEl.innerHTML = `
           <div style="position: relative; display: inline-block;">
             <span style="line-height: 1;">${emoji}</span>
-            ${stackCount > 1 ? `<span style="position: absolute; bottom: 0; right: 0; font-size: 11px; font-weight: bold; line-height: 1; text-shadow: 0 0 3px rgba(0,0,0,0.8);">×${stackCount}</span>` : ''}
+            ${stackCount > 1 ? `<span class="stack-count">×${stackCount}</span>` : ''}
           </div>
         `;
       }

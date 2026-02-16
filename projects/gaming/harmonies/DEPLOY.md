@@ -1,8 +1,11 @@
 # Harmonies Deployment Guide
 
+**Current Version:** v5.0.1  
+**Last Updated:** 2026-02-17
+
 ## File Structure
 
-- **Main game**: `index.html` (v5.0 - fully functional solo mode)
+- **Main game**: `index.html` (v5.0.1 - 1846 lines, fully polished solo mode)
 - **Public URL**: https://ngnnah.github.io/I-And-AI/projects/gaming/harmonies/
 - **Backup**: `index-v4-backup.html` (old Phaser version)
 
