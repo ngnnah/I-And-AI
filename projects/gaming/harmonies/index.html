@@ -611,12 +611,12 @@
       <!-- Center: Hex Grid + Token Supply -->
       <main class="lg:col-span-2">
         <div class="bg-white rounded-lg shadow-lg p-4 md:p-6">
-          <!-- Game Messages / Status Banner -->
-          <div id="game-message" class="mb-3 p-2 md:p-3 rounded-lg text-center font-semibold text-sm md:text-base hidden">
-            <!-- Messages appear here -->
-          </div>
+          <h2 class="text-lg font-bold text-slate-800 mb-3 text-center landscape-heading">🗺️ Your Landscape</h2>
 
-          <h2 class="text-lg font-bold text-slate-800 mb-4 text-center landscape-heading">🗺️ Your Landscape</h2>
+          <!-- Game Messages / Status Banner -->
+          <div id="game-message" class="mb-4 p-2 md:p-3 rounded-lg text-center font-semibold text-sm md:text-base bg-blue-100 text-blue-800">
+            Welcome! Select a token space to begin.
+          </div>
 
           <!-- Hex Grid Container -->
           <div id="hex-grid-container" class="hex-grid bg-gradient-to-br from-green-50 to-blue-50 rounded-lg border-4 border-slate-300 mb-4">
@@ -819,7 +819,7 @@
       // Select 3 random animal cards for solo mode
       selectAnimalCards();
       
-      showMessage('Game ready! Side A board (23 hexes). Select a token space, then drag tokens.', 'success');
+      showMessage('🎮 Game ready! Select a token space to start placing tokens.', 'success');
       console.log('✅ Game ready! 23-hex board initialized with 3 available animal cards.');
     }
     
@@ -1067,14 +1067,10 @@
       const x = q * hexWidth * 0.75;
       const y = r * hexHeight + q * hexHeight * 0.5;
 
-      // Calculate grid bounds for proper centering
-      // For Harmonies board: q ranges from -3 to 3, r ranges from -2 to 2
-      const gridWidth = 6 * hexWidth * 0.75 + hexWidth; // 6 column shifts + 1 hex width
-      const gridHeight = 4 * hexHeight; // Approximate height span
-
-      // Center the entire grid in container
-      const centerX = (containerWidth - gridWidth) / 2 + hexWidth / 2;
-      const centerY = (containerHeight - gridHeight) / 2 + hexHeight / 2;
+      // Center the grid in container
+      // Account for hex dimensions since they're positioned by top-left corner
+      const centerX = containerWidth / 2 - hexWidth / 2;
+      const centerY = containerHeight / 2 - hexHeight / 2;
 
       return {
         x: x + centerX,
@@ -1286,7 +1282,8 @@
       }
 
       spaces.forEach(space => {
-        const tokensContainer = space.querySelector('.flex');
+        // Find token container - could be .token-row-tokens (new) or .flex (legacy)
+        const tokensContainer = space.querySelector('.token-row-tokens') || space.querySelector('.flex');
         if (!tokensContainer) return;
 
         tokensContainer.innerHTML = '';
@@ -1759,17 +1756,12 @@
     function showMessage(text, type = 'info') {
       const msgEl = document.getElementById('game-message');
       msgEl.textContent = text;
-      msgEl.className = `mt-4 p-3 rounded-lg text-center font-semibold ${
+      msgEl.className = `mb-4 p-2 md:p-3 rounded-lg text-center font-semibold text-sm md:text-base ${
         type === 'success' ? 'bg-green-100 text-green-800' :
         type === 'error' ? 'bg-red-100 text-red-800' :
         'bg-blue-100 text-blue-800'
       }`;
-      msgEl.classList.remove('hidden');
-      
-      // Auto-hide after 4 seconds
-      setTimeout(() => {
-        msgEl.classList.add('hidden');
-      }, 4000);
+      // Message stays visible (no auto-hide)
     }
     
     // Setup event listeners
