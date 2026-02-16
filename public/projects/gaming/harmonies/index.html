@@ -107,7 +107,21 @@
     .token.green { background: #7ED321; }
     .token.red { background: #D0021B; }
     .token.gray { background: #7F8C8D; }
-    
+
+    /* Token selection (click-to-place mode) */
+    .token.selected {
+      border-color: #fbbf24;
+      border-width: 4px;
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(251, 191, 36, 0.8);
+      z-index: 100;
+    }
+
+    .token:hover {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+    }
+
     /* Token space styles */
     .token-space {
       transition: all 0.3s ease;
@@ -489,6 +503,7 @@
     // Game state
     const gameState = {
       selectedSpace: null,
+      selectedToken: null, // NEW: {color, space, index} for click-to-place
       tokensPlaced: 0,
       tokensToPlace: 3,
       hexBoard: {},
@@ -814,11 +829,94 @@
       }
     }
     
+    // Handle token click (click-to-place mode)
+    function handleTokenClick(e) {
+      e.stopPropagation(); // Prevent triggering space click
+
+      if (gameState.gameEnded) {
+        showMessage('Game is over! Start a new game to play again.', 'error');
+        return;
+      }
+
+      const token = e.currentTarget;
+      const spaceIndex = parseInt(token.dataset.space);
+
+      // Check if space is selected
+      if (gameState.selectedSpace === null) {
+        showMessage('Select a token space first (click the space background)!', 'error');
+        return;
+      }
+
+      if (parseInt(gameState.selectedSpace) !== spaceIndex) {
+        showMessage('Select tokens from the selected space only!', 'error');
+        return;
+      }
+
+      // Toggle token selection
+      const tokenData = {
+        color: token.dataset.color,
+        space: spaceIndex,
+        index: parseInt(token.dataset.index),
+        element: token
+      };
+
+      // If same token clicked, deselect
+      if (gameState.selectedToken &&
+          gameState.selectedToken.space === tokenData.space &&
+          gameState.selectedToken.index === tokenData.index) {
+        gameState.selectedToken = null;
+        updateTokenSelection();
+        showMessage('Token deselected. Click a token to select it.', 'info');
+        return;
+      }
+
+      // Select new token
+      gameState.selectedToken = tokenData;
+      updateTokenSelection();
+      showMessage(`${COLOR_NAMES[tokenData.color]} token selected! Click a hex to place it.`, 'success');
+    }
+
+    // Update visual selection state of tokens
+    function updateTokenSelection() {
+      document.querySelectorAll('.token').forEach(t => {
+        t.classList.remove('selected');
+      });
+
+      // Clear hex highlights
+      document.querySelectorAll('.hex').forEach(hex => {
+        hex.classList.remove('dropzone-active');
+      });
+
+      if (gameState.selectedToken && gameState.selectedToken.element) {
+        gameState.selectedToken.element.classList.add('selected');
+
+        // Highlight valid hexes for placement
+        document.querySelectorAll('.hex').forEach(hexEl => {
+          const q = parseInt(hexEl.dataset.q);
+          const r = parseInt(hexEl.dataset.r);
+          const hexKey = `${q}_${r}`;
+          const hexData = gameState.hexBoard[hexKey];
+
+          if (hexData) {
+            const validation = canPlaceToken(hexData, gameState.selectedToken.color);
+            if (validation.valid) {
+              hexEl.classList.add('dropzone-active');
+            }
+          }
+        });
+      }
+    }
+
     // Update token space UI
     function updateTokenSpaceUI(spaceIndex) {
       const space = document.querySelector(`[data-space="${spaceIndex}"]`);
       const tokensContainer = space.querySelector('.flex');
       tokensContainer.innerHTML = '';
+
+      // Clear selection if token from this space was selected
+      if (gameState.selectedToken && gameState.selectedToken.space === spaceIndex) {
+        gameState.selectedToken = null;
+      }
       
       gameState.tokenSupply[spaceIndex].forEach((color, idx) => {
         const token = document.createElement('div');
@@ -829,7 +927,10 @@
         token.dataset.index = idx;
         token.textContent = TOKEN_EMOJI[color];
         
-        // Drag handlers
+        // Click handler for click-to-place (primary interaction)
+        token.addEventListener('click', handleTokenClick);
+
+        // Drag handlers (secondary, for those who prefer dragging)
         token.addEventListener('dragstart', handleDragStart);
         token.addEventListener('dragend', handleDragEnd);
 
@@ -1310,20 +1411,24 @@
         showMessage('Game is over! Start a new game to play again.', 'error');
         return;
       }
-      
+
       const space = e.currentTarget;
       const spaceId = space.dataset.space;
-      
+
       // Deselect all spaces
       document.querySelectorAll('.token-space').forEach(s => {
         s.classList.remove('selected');
       });
-      
+
       // Select this space
       space.classList.add('selected');
       gameState.selectedSpace = spaceId;
-      
-      showMessage(`Space ${parseInt(spaceId) + 1} selected! Drag tokens to your board.`, 'success');
+
+      // Clear token selection when changing spaces
+      gameState.selectedToken = null;
+      updateTokenSelection();
+
+      showMessage(`Space ${parseInt(spaceId) + 1} selected! Click a token, then click a hex to place it.`, 'success');
     }
     
     // Handle taking an animal card from available pool
@@ -1456,13 +1561,79 @@
       });
     }
     
-    // Handle hex click for animal cube placement
+    // Handle token placement via click
+    function handleTokenPlacementClick(hexEl, hexData, q, r, hexKey) {
+      // Validate placement
+      const validation = canPlaceToken(hexData, gameState.selectedToken.color);
+
+      if (!validation.valid) {
+        showMessage(`❌ ${validation.reason}`, 'error');
+        // Flash hex red
+        hexEl.classList.add('dropzone-invalid');
+        setTimeout(() => hexEl.classList.remove('dropzone-invalid'), 500);
+        return;
+      }
+
+      // Place token
+      const color = gameState.selectedToken.color;
+      hexData.stack.push({ color });
+      hexData.terrain = calculateTerrain(hexData.stack);
+
+      // Update hex display
+      updateHexDisplay(hexEl, hexData);
+
+      // Remove token from supply
+      const { space, index } = gameState.selectedToken;
+      gameState.tokenSupply[space].splice(index, 1);
+      updateTokenSpaceUI(space);
+
+      // Clear selection
+      gameState.selectedToken = null;
+      updateTokenSelection();
+
+      // Update counters
+      gameState.tokensPlaced++;
+
+      // Update score
+      updateScore();
+
+      // Check board fullness
+      const filledHexes = Object.values(gameState.hexBoard).filter(hex => hex.stack.length > 0).length;
+      const emptyHexes = 23 - filledHexes;
+      if (emptyHexes <= 2) {
+        showMessage(`⚠️ Only ${emptyHexes} empty space${emptyHexes !== 1 ? 's' : ''} left! Finish placing your tokens.`, 'info');
+      }
+
+      // Check if all tokens placed
+      if (gameState.tokensPlaced >= gameState.tokensToPlace) {
+        showMessage(`✓ All tokens placed! Click "End Turn" to continue.`, 'success');
+      } else {
+        const remaining = gameState.tokensToPlace - gameState.tokensPlaced;
+        showMessage(`✓ Token placed! ${remaining} more to place. Click another token, then click a hex.`, 'success');
+      }
+    }
+
+    // Handle hex click for token placement or animal cube placement
     function handleHexClickForAnimal(e) {
       if (gameState.gameEnded) return;
-      if (!gameState.selectedAnimalCard) return;
-      
-      // Don't place animal during token dragging
+
+      // Don't place during token dragging
       if (gameState.draggedToken) return;
+
+      const hexEl = e.currentTarget;
+      const q = parseInt(hexEl.dataset.q);
+      const r = parseInt(hexEl.dataset.r);
+      const hexKey = `${q}_${r}`;
+      const hexData = gameState.hexBoard[hexKey];
+
+      // PRIORITY 1: Token placement (click-to-place mode)
+      if (gameState.selectedToken) {
+        handleTokenPlacementClick(hexEl, hexData, q, r, hexKey);
+        return;
+      }
+
+      // PRIORITY 2: Animal cube placement
+      if (!gameState.selectedAnimalCard) return;
       
       const hexEl = e.currentTarget;
       const q = parseInt(hexEl.dataset.q);
