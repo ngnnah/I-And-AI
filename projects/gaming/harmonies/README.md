@@ -58,6 +58,12 @@ python3 -m http.server 8001
   - Solo mode special rules (3 token spaces, discard & replace, max 4 cards in hand)
   - Sun scoring table (40-160+ points = 1-8 suns)
   - Strategy insights: token economy, timing, card management
+
+- **[PROGRESS.md](./PROGRESS.md)** - Implementation roadmap and progress tracking
+  - ✅ Completed phases (v5.0 MVP)
+  - 🔄 Next priorities (Enhanced Animal System)
+  - 🎯 Future enhancements (Polish, Multiplayer)
+  - Living document updated as features are implemented
   
 - **[DEPLOY.md](./DEPLOY.md)** - How to deploy to GitHub Pages
 
@@ -180,24 +186,19 @@ npm run test:e2e
 - Clean Tailwind CSS UI
 - Deployed to GitHub Pages
 
-### Previous Versions
-See [archive/](./archive/) for v4 (Phaser.js) and v3 (HTML/CSS) attempts.
 
----
+See **[PROGRESS.md](./PROGRESS.md)** for detailed roadmap and tracking.
 
-## 🚀 Future Enhancements (Optional)
+### Next Priority: Enhanced Animal System (Phase 6)
+- Full 48 animal cards (currently 10)
+- Complex habitat patterns with proper validation
+- Visual pattern preview system
+- Animal card draw pile mechanics
 
-### Polish
-- [ ] Animations for token placement and scoring
-- [ ] Sound effects (token drop, scoring, game end)
-- [ ] Mobile touch optimization
-- [ ] Save/load game state (localStorage)
-- [ ] Undo last placement
-
-### Gameplay
-- [ ] Full 48 animal cards (currently 10)
-- [ ] Complex animal patterns (currently simplified)
-- [ ] Side B board (islands variant)
+### Future Phases
+- **Polish** - Animations, sound effects, mobile optimization
+- **Additional Modes** - Side B board, difficulty levels
+- **Multiplayer** - Pass-and-play, online play, leaderboard
 - [ ] Difficulty modes
 
 ### Multiplayer (Distant Future)
