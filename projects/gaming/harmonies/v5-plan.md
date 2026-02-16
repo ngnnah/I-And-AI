@@ -207,6 +207,12 @@ Since hex positioning is working, Phase 2 is mostly done. Remaining work:
 - Full integration with hex-grid.js for game logic
 - Dynamic hex expansion as game progresses
 
+**Fix Applied**: Corrected hex positioning to work on all screen sizes by:
+- Using flexible container width (`max-width: 800px`)
+- Calculating center based on actual `clientWidth`
+- Responsive hex sizing (27px mobile, 35px desktop)
+- Window resize handler for dynamic repositioning
+
 ### Working Modules (Don't Touch)
 - `js/game/hex-grid.js` - Coordinate system ✅
 - `js/game/token-manager.js` - Stacking validation ✅
@@ -266,6 +272,7 @@ python3 -m http.server 8001
 ---
 
 **Last Updated**: Phases 1-5 complete - MVP fully playable! 🎉  
+**Latest**: Fixed hex positioning for all screen sizes (commit 8e86b22)  
 **View at**: http://localhost:8001/v5.html
 
 ---
