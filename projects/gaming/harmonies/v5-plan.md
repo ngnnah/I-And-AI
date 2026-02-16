@@ -15,7 +15,9 @@
 - ✅ **Drag & Drop**: HTML5 drag & drop with visual feedback
 - ✅ **Stacking Validation**: All 6 token types follow correct rules
 - ✅ **Real-time Scoring**: All 6 categories calculate correctly
-- ✅ **Turn Management**: 15-turn game cycle with token refresh
+- ✅ **Animal Cards**: 3 random cards per game with integrated scoring
+- ✅ **Solo Mode Rules**: Correct end conditions (pouch empty OR ≤2 empty spaces)
+- ✅ **Token Tracking**: Visual counter shows remaining tokens in pouch
 - ✅ **Game End**: Detects completion and shows final score
 - ✅ **Random Tokens**: Draws from pouch with proper tracking
 - ✅ **Visual Polish**: Gradients, animations, responsive layout
@@ -23,7 +25,7 @@
 
 **Play now**: http://localhost:8001/v5.html
 
-**Total Development Time**: ~4 hours (vs 8 hour estimate!)
+**Total Development Time**: ~5 hours (including solo mode rule corrections!)
 
 ---
 
@@ -322,12 +324,18 @@ python3 -m http.server 8001
 
 ---
 
-**Last Updated**: February 16, 2026 - Phases 1-5 complete, ready to deploy! 🎉  
+**Last Updated**: February 16, 2026 - Correct solo mode rules implemented! 🎉  
 **Latest Changes**: 
-- Phase 2 complete with perfect 23-hex grid (commit dc1462e)
-- Hexagons use exact √3/2 geometry, touch properly at 80×69px
-- All core gameplay features working and tested
-- Next step: Deploy to public/ or work on optional Phase 6 polish
+- ✅ Removed incorrect 15-turn limit
+- ✅ Implemented correct end conditions: pouch empty OR ≤2 empty spaces
+- ✅ Added 3 random animal cards per game with scoring integration
+- ✅ Changed UI from turn counter to tokens-left counter
+- Game is now fully playable with official Harmonies solo mode rules!
+
+**Next Steps**: 
+- Optional: Add animal cube placement mechanics (click hexes to place cubes)
+- Optional: Phase 6 polish (animations, better borders, etc.)
+- Deploy to public/ directory
 
 **View game at**: http://localhost:8001/v5.html
 
