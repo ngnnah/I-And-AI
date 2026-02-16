@@ -183,6 +183,51 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    /* Token Supply Rows (Desktop & Mobile) */
+    .token-supply-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .token-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      border: 3px solid #cbd5e1;
+    }
+
+    .token-row[data-space="0"] {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border-color: #f59e0b;
+    }
+
+    .token-row[data-space="1"] {
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      border-color: #3b82f6;
+    }
+
+    .token-row[data-space="2"] {
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      border-color: #10b981;
+    }
+
+    .token-row-label {
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: #475569;
+      min-width: 65px;
+    }
+
+    .token-row-tokens {
+      display: flex;
+      gap: 0.75rem;
+      flex: 1;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .hex-grid {
@@ -350,54 +395,25 @@
       }
 
       .hex {
-        width: 34px !important;
-        height: 29px !important;
-        font-size: 16px !important;
-        border-width: 1.5px !important;
+        width: 42px !important;
+        height: 36px !important;
+        font-size: 18px !important;
+        border-width: 2px !important;
       }
 
-      /* Token rows: 3 horizontal rows with distinct backgrounds */
-      .token-supply-rows {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-
+      /* Mobile token row adjustments */
       .token-row {
-        display: flex;
-        align-items: center;
         gap: 0.75rem;
         padding: 0.75rem;
-        border-radius: 0.5rem;
-        border: 3px solid #cbd5e1;
-      }
-
-      .token-row[data-space="0"] {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        border-color: #f59e0b;
-      }
-
-      .token-row[data-space="1"] {
-        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        border-color: #3b82f6;
-      }
-
-      .token-row[data-space="2"] {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-        border-color: #10b981;
       }
 
       .token-row-label {
-        font-weight: 700;
         font-size: 0.75rem;
-        color: #475569;
         min-width: 55px;
       }
 
       .token-row-tokens {
-        display: flex;
         gap: 0.5rem;
-        flex: 1;
       }
 
       .token {
@@ -408,16 +424,9 @@
         font-size: 32px !important;
         border-radius: 8px !important;
         border-width: 3px !important;
-        margin: 0 !important;
-        cursor: pointer !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        background: white !important;
       }
 
       .token.selected {
-        border-color: #fbbf24 !important;
         border-width: 4px !important;
         transform: scale(1.05) !important;
         box-shadow: 0 0 16px rgba(251, 191, 36, 0.8) !important;
@@ -615,7 +624,7 @@
 
           <!-- Game Messages / Status Banner -->
           <div id="game-message" class="mb-4 p-2 md:p-3 rounded-lg text-center font-semibold text-sm md:text-base bg-blue-100 text-blue-800">
-            Welcome! Select a token space to begin.
+            🎮 Click any token below, then click a hex to place it!
           </div>
 
           <!-- Hex Grid Container -->
@@ -691,7 +700,7 @@
     <!-- Footer Info -->
     <footer class="mt-6 bg-white rounded-lg shadow-lg p-4 text-center">
       <p class="text-sm text-slate-600">
-        <strong>How to play:</strong> Select a token space → Drag tokens to hexagons → Complete your turn → Score points!
+        <strong>How to play:</strong> Click a token → Click a hex to place it → End turn when all 3 placed → Score points!
       </p>
       <p class="text-xs text-slate-500 mt-2">
         v5.0 HTML/CSS Implementation • <a href="https://github.com/ngnnah/I-And-AI" class="text-blue-600 hover:underline">GitHub</a>
@@ -819,7 +828,7 @@
       // Select 3 random animal cards for solo mode
       selectAnimalCards();
       
-      showMessage('🎮 Game ready! Select a token space to start placing tokens.', 'success');
+      showMessage('🎮 Game ready! Click any token below, then click a hex to place it.', 'success');
       console.log('✅ Game ready! 23-hex board initialized with 3 available animal cards.');
     }
     
@@ -1058,8 +1067,8 @@
       const isMobile = containerWidth < 500;
 
       // Hex dimensions - MUST match CSS hex sizes!
-      const hexWidth = isPortraitMobile ? 34 : (isMobile ? 60 : 80);
-      const hexHeight = isPortraitMobile ? 29 : (isMobile ? 52 : 69);
+      const hexWidth = isPortraitMobile ? 42 : (isMobile ? 60 : 80);
+      const hexHeight = isPortraitMobile ? 36 : (isMobile ? 52 : 69);
 
       // Flat-topped hex positioning (standard axial coordinate formulas)
       // Horizontal: Each column shifts right by 3/4 of width
@@ -1205,16 +1214,8 @@
       const token = e.currentTarget;
       const spaceIndex = parseInt(token.dataset.space);
 
-      // Check if space is selected
-      if (gameState.selectedSpace === null) {
-        showMessage('Select a token space first (click the space background)!', 'error');
-        return;
-      }
-
-      if (parseInt(gameState.selectedSpace) !== spaceIndex) {
-        showMessage('Select tokens from the selected space only!', 'error');
-        return;
-      }
+      // Auto-select the space when clicking a token (no need for separate space selection)
+      gameState.selectedSpace = spaceIndex;
 
       // Toggle token selection
       const tokenData = {
@@ -1230,7 +1231,7 @@
           gameState.selectedToken.index === tokenData.index) {
         gameState.selectedToken = null;
         updateTokenSelection();
-        showMessage('Token deselected. Click a token to select it.', 'info');
+        showMessage('Token deselected. Click another token to select it.', 'info');
         return;
       }
 
@@ -1326,18 +1327,8 @@
       const token = e.target;
       const spaceIndex = parseInt(token.dataset.space);
       
-      // Check if space is selected
-      if (gameState.selectedSpace === null) {
-        e.preventDefault();
-        showMessage('Select a token space first!', 'error');
-        return;
-      }
-      
-      if (parseInt(gameState.selectedSpace) !== spaceIndex) {
-        e.preventDefault();
-        showMessage('Drag tokens from the selected space only!', 'error');
-        return;
-      }
+      // Auto-select the space when dragging starts
+      gameState.selectedSpace = spaceIndex;
       
       gameState.draggedToken = {
         color: token.dataset.color,
@@ -1374,16 +1365,8 @@
       const token = e.target;
       const spaceIndex = parseInt(token.dataset.space);
 
-      // Check if space is selected
-      if (gameState.selectedSpace === null) {
-        showMessage('Select a token space first!', 'error');
-        return;
-      }
-
-      if (parseInt(gameState.selectedSpace) !== spaceIndex) {
-        showMessage('Drag tokens from the selected space only!', 'error');
-        return;
-      }
+      // Auto-select the space when touch starts
+      gameState.selectedSpace = spaceIndex;
 
       const touch = e.touches[0];
       touchState.active = true;
