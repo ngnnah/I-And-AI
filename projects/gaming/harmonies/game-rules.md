@@ -8,13 +8,18 @@
 **Duration:** 30-45 minutes  
 **Type:** Abstract, Tile Placement, Set Collection, Strategy
 
-**Official Rules Reference:** https://www.geekyhobbies.com/harmonies-rules/
+**Official Rules Reference:** https://www.geekyhobbies.com/harmonies-rules/  
+**Solo Review Reference:** https://meeplesandmischief.com/harmonies-a-solo-journey-through-natures-wonders/
 
 ---
 
 ## Game Overview
 
 Harmonies is a spatial puzzle game where players build beautiful landscapes by placing colored tokens on a hexagonal grid. Players create trees, mountains, fields, rivers, and buildings while attracting animals to their habitats. The player with the highest score wins.
+
+**What Makes Harmonies Special:**
+
+Harmonies offers a unique blend of strategic depth and serene gameplay. Despite its intricate moving parts and complex scoring systems, the beautiful artwork by Maëva Da Silva and charming animal theme create a light, relaxing atmosphere. Each game presents fresh challenges through randomized token draws and varied animal card combinations, ensuring high replayability. The solo mode is particularly well-designed, requiring no extra overhead while maintaining the full strategic experience of multiplayer.
 
 ### Objective
 
@@ -558,11 +563,13 @@ At the end of each turn:
    - Draw tokens from the Pouch
    - Place **3 tokens on each of the 3 spaces** (9 new tokens)
 
-3. **Refill Animal Cards (Modified Rule)**
-   - If you did NOT take an Animal card on this turn, you may:
-     - Discard 1 Animal card from the center of the table
-     - Replace it with the top card from the draw pile
-   - Otherwise, refill to maintain 3 face-up cards
+3. **Refill Animal Cards (Special Solo Rule)**
+   - If you **did NOT** take an Animal card on this turn, you **may**:
+     - Choose 1 Animal card from the 3 face-up cards
+     - Discard it face-down
+     - Draw and reveal a new card from the draw pile to replace it
+   - This gives you control over available animal options
+   - If you DID take an animal card, you cannot refresh the display
 
 ### Game End
 
@@ -630,6 +637,60 @@ The number of suns obtained depends primarily on your score, but is also influen
 
 ---
 
+## Strategy Tips & Designer Insights
+
+### Key Strategic Considerations
+
+1. **Token Economy Matters:**
+   - In solo mode, 6 tokens are permanently discarded each turn
+   - From initial pouch of 120 tokens, you'll draw ~9-12 turns worth
+   - Plan ahead: which colors do you need for future animal patterns?
+
+2. **Animal Card Timing:**
+   - Take cards early if they fit your emerging landscape
+   - Use the refresh option (when not taking a card) to cycle out unusable patterns
+   - Max 4 cards at once - don't hoard, commit to patterns
+
+3. **Stacking Strategy:**
+   - Trees (brown + green) are most flexible for scoring (0/0/1/3/5 points)
+   - Mountains need clustering but score highly (7 pts per cluster)
+   - Buildings are risky but rewarding (5 pts if surrounded by 3+ colors)
+
+4. **Board Awareness:**
+   - Game ends at ≤2 empty hexes (need 3 spaces to place tokens)
+   - Don't fill your board too quickly - maximize scoring first
+   - Water scoring differs by Side A vs B - plan accordingly
+
+### Replayability Factors
+
+- **Randomized Setup:** Token draws and animal cards change every game
+- **Board Sides:** Side A (land/water) vs Side B (islands) offer different challenges  
+- **Nature's Spirit Cards:** Optional variant adds unique bonuses (advanced play)
+- **Self-Improvement:** Solo mode encourages beating your own high scores
+
+### Solo Mode Experience
+
+**What Works Well:**
+- Nearly identical to multiplayer (no rulebook overhead)
+- Challenging strategic decisions each turn
+- Beautiful components and relaxing theme create enjoyable experience
+- Sun scoring provides clear achievement tiers
+
+**Minor Consideration:**
+- Sun conversion (1-10 range) can feel less rewarding than raw scores
+- Suggested approach: Track both suns AND total points for satisfaction
+- Example: "7 suns (148 points)" feels more accomplishing than just "7 suns"
+
+### Component Notes
+
+- **Tokens:** Wooden, durable, satisfying to handle
+- **Cards:** High-quality card stock with beautiful wildlife illustrations
+- **Boards:** Good thickness, vibrant colors, clear iconography
+- **Animal Cubes:** Small but precise, easy to place accurately
+- **Artwork:** Maëva Da Silva's serene nature scenes enhance immersion
+
+---
+
 ## Glossary
 
 **Adjacent:** Directly touching (one of 6 neighboring hexes)  
@@ -638,6 +699,7 @@ The number of suns obtained depends primarily on your score, but is also influen
 **Ground Level:** Hex with no tokens underneath  
 **Hex:** Hexagonal space on Personal Board  
 **Pattern:** Specific arrangement of terrains on animal card  
+**Token Economy:** Total tokens available vs. tokens discarded per turn  
 **Personal Board:** Player's individual hex grid  
 **Stack:** Vertical pile of tokens on a single hex  
 **Terrain:** The landscape type determined by token composition  
