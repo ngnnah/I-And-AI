@@ -10,6 +10,7 @@
 
 **MVP is DONE!** The game is fully playable with all core features:
 
+- ✅ **23-Hex Board**: Complete Side A board layout (5-4-5-4-5 pattern)
 - ✅ **Drag & Drop**: HTML5 drag & drop with visual feedback
 - ✅ **Stacking Validation**: All 6 token types follow correct rules
 - ✅ **Real-time Scoring**: All 6 categories calculate correctly
@@ -17,10 +18,11 @@
 - ✅ **Game End**: Detects completion and shows final score
 - ✅ **Random Tokens**: Draws from pouch with proper tracking
 - ✅ **Visual Polish**: Gradients, animations, responsive layout
+- ✅ **Mobile Support**: Responsive hex sizing for mobile devices
 
 **Play now**: http://localhost:8001/v5.html
 
-**Total Development Time**: ~3 hours (much faster than estimated 8 hours!)
+**Total Development Time**: ~3.5 hours
 
 ---
 

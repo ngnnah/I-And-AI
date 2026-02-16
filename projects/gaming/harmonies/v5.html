@@ -126,8 +126,8 @@
     /* Hex grid container */
     .hex-grid {
       position: relative;
-      width: 600px;
-      height: 500px;
+      width: 800px;
+      height: 600px;
       margin: 0 auto;
     }
     
@@ -144,12 +144,14 @@
     @media (max-width: 768px) {
       .hex-grid {
         width: 100%;
-        height: 400px;
+        max-width: 480px;
+        height: 360px;
       }
       
       .hex {
-        width: 40px;
-        height: 46px;
+        width: 30px;
+        height: 35px;
+        font-size: 9px;
       }
       
       .token {
@@ -394,7 +396,7 @@
     function initGame() {
       console.log('🎮 Harmonies v5.0 Initializing...');
       
-      // Create initial hex grid (7 hexes)
+      // Create initial hex grid (23 hexes - Side A board)
       createInitialHexGrid();
       
       // Generate initial token supply
@@ -406,29 +408,31 @@
       // Initial score
       updateScore();
       
-      showMessage('Game ready! Select a token space, then drag tokens to hexes.', 'success');
-      console.log('✅ Game ready!');
+      showMessage('Game ready! Side A board (23 hexes). Select a token space, then drag tokens.', 'success');
+      console.log('✅ Game ready! 23-hex board initialized.');
     }
     
-    // Create 7 starting hexagons
+    // Create 23 starting hexagons (Side A board layout)
     function createInitialHexGrid() {
       const container = document.getElementById('hex-grid-container');
       
-      // Center hex and 6 neighbors (axial coordinates)
-      const hexes = [
-        { q: 0, r: 0 },
-        { q: 1, r: 0 },
-        { q: 1, r: -1 },
-        { q: 0, r: -1 },
-        { q: -1, r: 0 },
-        { q: -1, r: 1 },
-        { q: 0, r: 1 }
-      ];
+      // Harmonies Side A board: 5-4-5-4-5 = 23 hexes
+      // Flat-topped hex axial coordinates, centered on (0,0)
+      const boardLayout = {
+        '-2': [-1, 0, 1, 2, 3],   // 5 hexes
+        '-1': [-1, 0, 1, 2],      // 4 hexes
+         '0': [-2, -1, 0, 1, 2],  // 5 hexes (center)
+         '1': [-2, -1, 0, 1],     // 4 hexes
+         '2': [-3, -2, -1, 0, 1], // 5 hexes
+      };
       
-      hexes.forEach(({ q, r }) => {
-        const hexEl = createHexElement(q, r);
-        container.appendChild(hexEl);
-      });
+      for (const [qStr, rValues] of Object.entries(boardLayout)) {
+        const q = parseInt(qStr, 10);
+        for (const r of rValues) {
+          const hexEl = createHexElement(q, r);
+          container.appendChild(hexEl);
+        }
+      }
     }
     
     // Create a hex element
@@ -459,14 +463,22 @@
     }
     
     // Convert axial coordinates to pixel position
-    function hexToPixel(q, r, hexSize = 35) {
+    function hexToPixel(q, r, hexSize = null) {
+      // Auto-detect hex size based on screen width
+      if (hexSize === null) {
+        hexSize = window.innerWidth < 768 ? 25 : 35;
+      }
+      
       const x = hexSize * (3/2 * q);
       const y = hexSize * Math.sqrt(3) * (r + q/2);
       
-      // Center in container (600x500)
+      // Center in container - adjusted for 23-hex board
+      const centerX = window.innerWidth < 768 ? 240 : 380;
+      const centerY = window.innerWidth < 768 ? 180 : 280;
+      
       return {
-        x: x + 270,
-        y: y + 220
+        x: x + centerX,
+        y: y + centerY
       };
     }
     
