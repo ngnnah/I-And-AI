@@ -60,14 +60,14 @@
 
 ### Stacking Rules (enforced!)
 
-| Token     | Can Stack On           | Max Height | Notes                              |
-|-----------|------------------------|------------|------------------------------------|
-| Yellow    | Ground only            | 1          | Cannot stack anything on yellow    |
-| Blue      | Ground only            | 1          | Cannot stack anything on blue      |
-| Brown     | Brown only             | 2          | Max 2 brown in tree trunk          |
-| Green     | Brown(s) or ground     | 3          | Must have brown under (or alone)   |
-| Gray      | Gray only              | 3          | Mountain stacking                  |
-| Red       | Gray/Brown/Red/Ground  | 2          | Building - never 3rd token         |
+| Token  | Can Stack On          | Max Height | Notes                            |
+| ------ | --------------------- | ---------- | -------------------------------- |
+| Yellow | Ground only           | 1          | Cannot stack anything on yellow  |
+| Blue   | Ground only           | 1          | Cannot stack anything on blue    |
+| Brown  | Brown only            | 2          | Max 2 brown in tree trunk        |
+| Green  | Brown(s) or ground    | 3          | Must have brown under (or alone) |
+| Gray   | Gray only             | 3          | Mountain stacking                |
+| Red    | Gray/Brown/Red/Ground | 2          | Building - never 3rd token       |
 
 ### Examples of Invalid Placements (you'll see errors)
 

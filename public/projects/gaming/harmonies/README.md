@@ -46,8 +46,8 @@ python3 -m http.server 8001
 
 ### v3.0 (FAILED) → v4.0 (FIXED)
 
-| Issue          | v3.0                          | v4.0                               |
-| -------------- | ----------------------------- | ---------------------------------- |
+| Issue          | v3.0                          | v4.0                              |
+| -------------- | ----------------------------- | --------------------------------- |
 | Hex rendering  | CSS Grid (broken positioning) | Phaser Canvas (precise control) ✅ |
 | Hex visibility | Tiny, bottom-right corner     | Centered, clearly visible ✅       |
 | Touch input    | Custom event handlers         | Phaser input system ✅             |
