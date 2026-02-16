@@ -305,17 +305,6 @@
         font-size: 0.75rem !important;
       }
 
-      /* Stats bar inline */
-      .game-stats {
-        display: flex;
-        justify-content: space-between;
-        background: white;
-        padding: 0.5rem;
-        border-radius: 0.5rem;
-        margin-bottom: 0.5rem;
-        font-size: 0.875rem;
-      }
-
       /* Score breakdown: 3-column grid */
       .score-breakdown-grid {
         display: grid !important;
@@ -437,18 +426,18 @@
           <p class="text-sm text-slate-600">Build landscapes, attract animals, score points!</p>
         </div>
         
-        <!-- Game Stats (hidden on portrait mobile) -->
-        <div class="hidden md:flex gap-4 items-center">
-          <div class="bg-blue-100 px-4 py-2 rounded-lg">
+        <!-- Game Stats -->
+        <div class="flex gap-2 md:gap-4 items-center">
+          <div class="bg-blue-100 px-2 py-1 md:px-4 md:py-2 rounded-lg">
             <div class="text-xs text-blue-700 font-semibold">Tokens Left</div>
-            <div id="pouch-counter" class="text-2xl font-bold text-blue-900">120</div>
+            <div id="pouch-counter" class="text-lg md:text-2xl font-bold text-blue-900">120</div>
           </div>
 
-          <div class="bg-purple-100 px-4 py-2 rounded-lg">
+          <div class="bg-purple-100 px-2 py-1 md:px-4 md:py-2 rounded-lg">
             <div class="text-xs text-purple-700 font-semibold">Score</div>
-            <div class="flex items-center gap-2">
-              <div id="total-score" class="text-2xl font-bold text-purple-900">0</div>
-              <div id="sun-display" class="text-xl"></div>
+            <div class="flex items-center gap-1 md:gap-2">
+              <div id="total-score" class="text-lg md:text-2xl font-bold text-purple-900">0</div>
+              <div id="sun-display" class="text-base md:text-xl"></div>
             </div>
           </div>
         </div>
@@ -464,12 +453,6 @@
         </div>
       </div>
     </header>
-
-    <!-- Mobile-only stats bar (portrait) -->
-    <div class="md:hidden game-stats">
-      <span>🎲 <span id="pouch-counter-mobile">23</span> left</span>
-      <span>🏆 <span id="total-score-mobile">0</span> <span id="sun-display-mobile"></span></span>
-    </div>
 
     <!-- Mobile-only score breakdown grid (portrait) -->
     <div class="md:hidden score-breakdown-grid">
@@ -1603,7 +1586,7 @@
         total: result.total
       };
       
-      // Update desktop UI
+      // Update UI
       document.getElementById('score-trees').textContent = gameState.score.trees;
       document.getElementById('score-mountains').textContent = gameState.score.mountains;
       document.getElementById('score-fields').textContent = gameState.score.fields;
@@ -1613,17 +1596,23 @@
       document.getElementById('score-total-sidebar').textContent = gameState.score.total;
       document.getElementById('total-score').textContent = gameState.score.total;
 
-      // Update mobile UI
-      document.getElementById('score-trees-mobile').textContent = gameState.score.trees;
-      document.getElementById('score-mountains-mobile').textContent = gameState.score.mountains;
-      document.getElementById('score-fields-mobile').textContent = gameState.score.fields;
-      document.getElementById('score-buildings-mobile').textContent = gameState.score.buildings;
-      document.getElementById('score-rivers-mobile').textContent = gameState.score.water;
-      document.getElementById('score-animals-mobile').textContent = gameState.score.animals;
-      document.getElementById('score-total-mobile').textContent = gameState.score.total;
-      document.getElementById('total-score-mobile').textContent = gameState.score.total;
+      // Update mobile score breakdown
+      const mobileTreesEl = document.getElementById('score-trees-mobile');
+      if (mobileTreesEl) mobileTreesEl.textContent = gameState.score.trees;
+      const mobileMountainsEl = document.getElementById('score-mountains-mobile');
+      if (mobileMountainsEl) mobileMountainsEl.textContent = gameState.score.mountains;
+      const mobileFieldsEl = document.getElementById('score-fields-mobile');
+      if (mobileFieldsEl) mobileFieldsEl.textContent = gameState.score.fields;
+      const mobileBuildingsEl = document.getElementById('score-buildings-mobile');
+      if (mobileBuildingsEl) mobileBuildingsEl.textContent = gameState.score.buildings;
+      const mobileRiversEl = document.getElementById('score-rivers-mobile');
+      if (mobileRiversEl) mobileRiversEl.textContent = gameState.score.water;
+      const mobileAnimalsEl = document.getElementById('score-animals-mobile');
+      if (mobileAnimalsEl) mobileAnimalsEl.textContent = gameState.score.animals;
+      const mobileTotalEl = document.getElementById('score-total-mobile');
+      if (mobileTotalEl) mobileTotalEl.textContent = gameState.score.total;
 
-      // Update real-time sun display (both desktop and mobile)
+      // Update sun display
       const suns = calculateSuns(gameState.score.total);
       const sunEmoji = '☀️'.repeat(suns);
       const sunDisplay = document.getElementById('sun-display');
@@ -1631,13 +1620,9 @@
       sunDisplay.title = `${suns} sun${suns !== 1 ? 's' : ''} earned`;
       sunDisplay.style.cursor = 'help';
 
-      const sunDisplayMobile = document.getElementById('sun-display-mobile');
-      sunDisplayMobile.textContent = sunEmoji;
-
-      // Update pouch counter (both desktop and mobile)
+      // Update pouch counter
       const tokensLeft = Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0);
       document.getElementById('pouch-counter').textContent = tokensLeft;
-      document.getElementById('pouch-counter-mobile').textContent = tokensLeft;
     }
     
     // Show game message
