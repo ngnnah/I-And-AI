@@ -126,9 +126,11 @@
     /* Hex grid container */
     .hex-grid {
       position: relative;
-      width: 800px;
+      width: 100%;
+      max-width: 800px;
       height: 600px;
       margin: 0 auto;
+      overflow: hidden;
     }
     
     /* Animal card styles */
@@ -143,14 +145,12 @@
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .hex-grid {
-        width: 100%;
-        max-width: 480px;
-        height: 360px;
+        height: 450px;
       }
       
       .hex {
-        width: 30px;
-        height: 35px;
+        width: 32px;
+        height: 37px;
         font-size: 9px;
       }
       
@@ -408,8 +408,28 @@
       // Initial score
       updateScore();
       
+      // Handle window resize for responsive hex positioning
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          repositionAllHexes();
+        }, 250);
+      });
+      
       showMessage('Game ready! Side A board (23 hexes). Select a token space, then drag tokens.', 'success');
       console.log('✅ Game ready! 23-hex board initialized.');
+    }
+    
+    // Reposition all hexes (for window resize)
+    function repositionAllHexes() {
+      document.querySelectorAll('.hex').forEach(hexEl => {
+        const q = parseInt(hexEl.dataset.q);
+        const r = parseInt(hexEl.dataset.r);
+        const pos = hexToPixel(q, r);
+        hexEl.style.left = pos.x + 'px';
+        hexEl.style.top = pos.y + 'px';
+      });
     }
     
     // Create 23 starting hexagons (Side A board layout)
@@ -463,18 +483,19 @@
     }
     
     // Convert axial coordinates to pixel position
-    function hexToPixel(q, r, hexSize = null) {
-      // Auto-detect hex size based on screen width
-      if (hexSize === null) {
-        hexSize = window.innerWidth < 768 ? 25 : 35;
-      }
+    function hexToPixel(q, r) {
+      // Detect hex size based on container width
+      const container = document.getElementById('hex-grid-container');
+      const containerWidth = container ? container.clientWidth : 800;
+      const hexSize = containerWidth < 500 ? 27 : 35;
       
+      // Calculate position using flat-topped hex formulas
       const x = hexSize * (3/2 * q);
       const y = hexSize * Math.sqrt(3) * (r + q/2);
       
-      // Center in container - adjusted for 23-hex board
-      const centerX = window.innerWidth < 768 ? 240 : 380;
-      const centerY = window.innerWidth < 768 ? 180 : 280;
+      // Center in container
+      const centerX = containerWidth / 2;
+      const centerY = containerWidth < 500 ? 215 : 280;
       
       return {
         x: x + centerX,
