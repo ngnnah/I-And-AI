@@ -232,6 +232,15 @@
           <div id="available-animal-cards" class="space-y-2">
             <!-- Available cards to take -->
           </div>
+          <div id="discard-button-container" class="mt-3 hidden">
+            <button id="discard-mode-btn" class="w-full px-3 py-2 bg-yellow-500 text-white text-sm rounded-lg hover:bg-yellow-600 transition font-semibold">
+              🗑️ Discard & Replace Mode
+            </button>
+            <button id="cancel-discard-btn" class="w-full px-3 py-2 bg-slate-400 text-white text-sm rounded-lg hover:bg-slate-500 transition font-semibold hidden mt-2">
+              ✖️ Cancel Discard
+            </button>
+            <p id="discard-instruction" class="text-xs text-slate-500 mt-1 text-center hidden">Click a card below to discard it</p>
+          </div>
         </div>
         
         <!-- Score Breakdown -->
@@ -390,6 +399,7 @@
       availableAnimalCards: [], // 3 face-up cards available to take
       playerAnimalCards: [], // Cards player has taken (max 4)
       takenCardThisTurn: false, // Flag to prevent taking multiple cards per turn
+      discardMode: false, // Flag for discard & replace mode
       placedAnimals: [], // Array of {cardId, hexKey} for animal cube placements
       score: {
         trees: 0,
@@ -445,34 +455,85 @@
     // Display available animal cards (to take)
     function displayAvailableAnimalCards() {
       const container = document.getElementById('available-animal-cards');
+      const discardBtnContainer = document.getElementById('discard-button-container');
       if (!container) return;
       
       if (gameState.availableAnimalCards.length === 0) {
         container.innerHTML = '<div class="text-xs text-slate-400 text-center py-4">No cards available</div>';
+        if (discardBtnContainer) discardBtnContainer.classList.add('hidden');
         return;
       }
       
+      const canTake = !gameState.takenCardThisTurn && gameState.playerAnimalCards.length < 4;
+      const canDiscard = !gameState.takenCardThisTurn; // Can discard if didn't take a card
+      
+      // Show/hide discard buttons based on mode and availability
+      if (discardBtnContainer) {
+        const discardModeBtn = document.getElementById('discard-mode-btn');
+        const cancelDiscardBtn = document.getElementById('cancel-discard-btn');
+        const discardInstruction = document.getElementById('discard-instruction');
+        
+        if (canDiscard) {
+          discardBtnContainer.classList.remove('hidden');
+          
+          if (gameState.discardMode) {
+            // In discard mode - show cancel button and instruction
+            if (discardModeBtn) discardModeBtn.classList.add('hidden');
+            if (cancelDiscardBtn) cancelDiscardBtn.classList.remove('hidden');
+            if (discardInstruction) discardInstruction.classList.remove('hidden');
+          } else {
+            // Not in discard mode - show activate button
+            if (discardModeBtn) discardModeBtn.classList.remove('hidden');
+            if (cancelDiscardBtn) cancelDiscardBtn.classList.add('hidden');
+            if (discardInstruction) discardInstruction.classList.add('hidden');
+          }
+        } else {
+          discardBtnContainer.classList.add('hidden');
+        }
+      }
+      
       container.innerHTML = gameState.availableAnimalCards.map((card, idx) => {
-        const canTake = !gameState.takenCardThisTurn && gameState.playerAnimalCards.length < 4;
-        const cursorClass = canTake ? 'cursor-pointer hover:border-green-400' : 'cursor-not-allowed opacity-50';
+        let borderClass, cursorClass, actionText;
+        
+        if (gameState.discardMode) {
+          // In discard mode - show cards as discardable
+          borderClass = 'border-yellow-400 hover:border-red-500';
+          cursorClass = 'cursor-pointer';
+          actionText = '<div class="text-xs text-red-600 text-center font-semibold">Click to discard</div>';
+        } else if (canTake) {
+          // Available to take - green border
+          borderClass = 'border-green-400 hover:border-green-500';
+          cursorClass = 'cursor-pointer';
+          actionText = '<div class="text-xs text-green-600 text-center font-semibold">Click to take</div>';
+        } else {
+          // Not available - grayed out
+          borderClass = 'border-slate-300';
+          cursorClass = 'cursor-not-allowed opacity-50';
+          actionText = '';
+        }
         
         return `
-          <div class="available-card bg-white rounded-lg p-2 shadow border-2 border-slate-300 transition ${cursorClass}" 
+          <div class="available-card bg-white rounded-lg p-2 shadow border-2 transition ${borderClass} ${cursorClass}" 
                data-card-id="${card.id}"
-               data-card-idx="${idx}">
+               data-card-idx="${idx}"
+               data-discard-mode="${gameState.discardMode}">
             <div class="text-2xl text-center mb-1">${getAnimalEmoji(card.animal)}</div>
             <div class="text-xs font-semibold text-slate-700 text-center">${card.name}</div>
             <div class="text-xs text-slate-500 text-center mt-1">
               ${card.pointsPerPlacement.join('→')} pts
             </div>
-            ${canTake ? '<div class="text-xs text-green-600 text-center font-semibold">Click to take</div>' : ''}
+            ${actionText}
           </div>
         `;
       }).join('');
       
       // Add click handlers
       document.querySelectorAll('.available-card').forEach(cardEl => {
-        cardEl.addEventListener('click', handleTakeAnimalCard);
+        if (gameState.discardMode) {
+          cardEl.addEventListener('click', handleDiscardAnimalCard);
+        } else {
+          cardEl.addEventListener('click', handleTakeAnimalCard);
+        }
       });
     }
     
@@ -928,6 +989,24 @@
       // End turn button
       document.getElementById('end-turn-btn').addEventListener('click', handleEndTurn);
       
+      // Discard mode button
+      document.getElementById('discard-mode-btn').addEventListener('click', () => {
+        if (gameState.takenCardThisTurn) {
+          showMessage('❌ Cannot discard - you already took a card this turn!', 'error');
+          return;
+        }
+        gameState.discardMode = true;
+        displayAvailableAnimalCards();
+        showMessage('🗑️ Discard mode: Click a card to discard and replace it.', 'info');
+      });
+      
+      // Cancel discard mode button
+      document.getElementById('cancel-discard-btn').addEventListener('click', () => {
+        gameState.discardMode = false;
+        displayAvailableAnimalCards();
+        showMessage('✖️ Discard mode cancelled.', 'info');
+      });
+      
       // Token space selection
       document.querySelectorAll('.token-space').forEach(space => {
         space.addEventListener('click', handleSpaceClick);
@@ -1002,6 +1081,43 @@
       displayPlayerAnimalCards();
       
       showMessage(`🎯 ${card.name} taken! Click it to place animal cubes.`, 'success');
+    }
+    
+    // Handle discarding an animal card from available pool
+    function handleDiscardAnimalCard(e) {
+      if (gameState.gameEnded) {
+        showMessage('Game is over! Start a new game to play again.', 'error');
+        return;
+      }
+      
+      const cardEl = e.currentTarget;
+      const cardId = cardEl.dataset.cardId;
+      const card = gameState.availableAnimalCards.find(c => c.id === cardId);
+      
+      if (!card) return;
+      
+      // Remove discarded card
+      const cardIndex = gameState.availableAnimalCards.findIndex(c => c.id === cardId);
+      gameState.availableAnimalCards.splice(cardIndex, 1);
+      
+      // Draw replacement card from remaining deck
+      const usedCardIds = [
+        ...gameState.availableAnimalCards.map(c => c.id),
+        ...gameState.playerAnimalCards.map(c => c.id)
+      ];
+      const remainingCards = ANIMAL_CARDS.filter(c => !usedCardIds.includes(c.id));
+      
+      if (remainingCards.length > 0) {
+        const newCard = remainingCards[Math.floor(Math.random() * remainingCards.length)];
+        gameState.availableAnimalCards.push(newCard);
+      }
+      
+      // Exit discard mode
+      gameState.discardMode = false;
+      
+      displayAvailableAnimalCards();
+      
+      showMessage(`🗑️ ${card.name} discarded and replaced!`, 'success');
     }
     
     // Handle selecting a player's animal card for placement
@@ -1150,6 +1266,10 @@
       // Reset tokens placed counter
       gameState.tokensPlaced = 0;
       gameState.takenCardThisTurn = false; // Reset card taking flag
+      gameState.discardMode = false; // Reset discard mode
+      
+      // Refresh available cards display to show green borders again
+      displayAvailableAnimalCards();
       
       // Check for game end BEFORE attempting to refresh
       // Must have at least 9 tokens to refill all 3 spaces (3 spaces × 3 tokens)
