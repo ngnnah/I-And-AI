@@ -11,8 +11,8 @@
   <style>
     /* Custom hex styles */
     .hex {
-      width: 70px;
-      height: 60px;
+      width: 80px;
+      height: 69px; /* 80 × sqrt(3)/2 = 69.28 */
       clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
       transition: all 0.2s ease;
       cursor: pointer;
@@ -20,11 +20,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: bold;
       color: white;
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-      border: 3px solid rgba(0, 0, 0, 0.4);
+      border: 3px solid rgba(0, 0, 0, 0.5);
+      box-sizing: border-box;
     }
     
     .hex:hover {
@@ -145,14 +146,14 @@
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .hex-grid {
-        height: 400px;
+        height: 420px;
       }
       
       .hex {
-        width: 50px;
-        height: 43px;
-        font-size: 9px;
-        border: 2px solid rgba(0, 0, 0, 0.4);
+        width: 60px;
+        height: 52px; /* 60 × sqrt(3)/2 = 51.96 */
+        font-size: 10px;
+        border: 2px solid rgba(0, 0, 0, 0.5);
       }
       
       .token {
@@ -490,19 +491,19 @@
       const containerWidth = container ? container.clientWidth : 800;
       const isMobile = containerWidth < 500;
       
-      // Hex dimensions MUST match CSS exactly
-      const hexWidth = isMobile ? 50 : 70;
-      const hexHeight = isMobile ? 43 : 60;
+      // Hex dimensions - use exact sqrt(3)/2 ratio for proper hexagons
+      const hexWidth = isMobile ? 60 : 80;
+      const hexHeight = isMobile ? 52 : 69;
       
-      // Flat-topped hex positioning
-      // Horizontal: offset by 3/4 of width for each column (hexes overlap by 1/4)
-      // Vertical: offset by full height for each row, plus half-height shift per column
-      const x = q * (hexWidth * 0.75);
-      const y = r * hexHeight + (q * hexHeight * 0.5);
+      // Flat-topped hex positioning (standard axial coordinate formulas)
+      // Horizontal: Each column shifts right by 3/4 of width
+      // Vertical: Each row shifts down by full height, plus half-height per column
+      const x = q * hexWidth * 0.75;
+      const y = r * hexHeight + q * hexHeight * 0.5;
       
       // Center in container
       const centerX = containerWidth / 2;
-      const centerY = isMobile ? 195 : 295;
+      const centerY = isMobile ? 205 : 295;
       
       return {
         x: x + centerX,
