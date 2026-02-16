@@ -1,8 +1,26 @@
 # Harmonies v5.0 - HTML/CSS Implementation Progress
 
 **Date Started**: February 16, 2026  
-**Status**: 🚧 In Progress  
+**Status**: ✅ MVP COMPLETE! Fully Playable!  
 **Approach**: Vanilla HTML/CSS/JS + Tailwind CSS
+
+---
+
+## 🎉 Success Summary
+
+**MVP is DONE!** The game is fully playable with all core features:
+
+- ✅ **Drag & Drop**: HTML5 drag & drop with visual feedback
+- ✅ **Stacking Validation**: All 6 token types follow correct rules
+- ✅ **Real-time Scoring**: All 6 categories calculate correctly
+- ✅ **Turn Management**: 15-turn game cycle with token refresh
+- ✅ **Game End**: Detects completion and shows final score
+- ✅ **Random Tokens**: Draws from pouch with proper tracking
+- ✅ **Visual Polish**: Gradients, animations, responsive layout
+
+**Play now**: http://localhost:8001/v5.html
+
+**Total Development Time**: ~3 hours (much faster than estimated 8 hours!)
 
 ---
 
@@ -39,45 +57,48 @@
 
 ---
 
-### Phase 3: Token Supply ⏸️ Not Started
+### Phase 3: Token Supply ✅ Complete
 **Goal**: Display 3 token spaces with draggable tokens
 
 **Tasks**:
-- [ ] Token space HTML structure
-- [ ] Populate with random tokens
-- [ ] Space selection logic
-- [ ] Visual feedback for selected space
+- [x] Token space HTML structure
+- [x] Populate with random tokens
+- [x] Space selection logic
+- [x] Visual feedback for selected space
 
 **Duration**: 1 hour
+**Status**: ✅ Done - Random tokens from pouch, space selection working
 
 ---
 
-### Phase 4: Drag & Drop ⏸️ Not Started
+### Phase 4: Drag & Drop ✅ Complete
 **Goal**: Drag tokens to hex grid with validation
 
 **Tasks**:
-- [ ] HTML5 drag & drop setup
-- [ ] Drop zone handlers on hexes
-- [ ] Token stacking validation
-- [ ] Error message display
-- [ ] Visual feedback (valid/invalid drops)
+- [x] HTML5 drag & drop setup
+- [x] Drop zone handlers on hexes
+- [x] Token stacking validation
+- [x] Error message display
+- [x] Visual feedback (valid/invalid drops)
 
 **Duration**: 2 hours
+**Status**: ✅ Done - Full drag & drop with validation using canPlaceToken()
 
 ---
 
-### Phase 5: Game Flow ⏸️ Not Started
+### Phase 5: Game Flow ✅ Complete
 **Goal**: Turn management, score updates, end game
 
 **Tasks**:
-- [ ] Turn cycle logic
-- [ ] Token supply refresh after turn
-- [ ] Real-time score calculation
-- [ ] Game state management
-- [ ] End game detection (15 turns)
-- [ ] Final score screen
+- [x] Turn cycle logic
+- [x] Token supply refresh after turn
+- [x] Real-time score calculation
+- [x] Game state management
+- [x] End game detection (15 turns)
+- [x] Final score screen
 
 **Duration**: 1 hour
+**Status**: ✅ Done - Full game loop working with scoring
 
 ---
 
@@ -98,27 +119,61 @@
 
 ## 📊 Current Status
 
-**Phase**: 2/6  
-**Completion**: 30%  
-**Estimated Remaining**: 5.5 hours  
+**Phase**: 5/6 - MVP COMPLETE! 🎉
+**Completion**: 90%  
+**Estimated Remaining**: 1 hour (polish only)
 
 **Achievements**:
 - ✅ Full HTML page with Tailwind styling
 - ✅ Responsive layout (mobile-ready)
 - ✅ 7 hexagons rendering with correct positioning
-- ✅ Token supply UI with visual tokens
-- ✅ Score breakdown sidebar
+- ✅ Random token generation from pouch
+- ✅ Drag & drop with full validation
+- ✅ Real-time scoring (all 6 categories)
+- ✅ Turn management (15 turns)
+- ✅ End game detection
 - ✅ Game message system
+- ✅ Token stacking validation
+- ✅ Hex display updates
 
 ---
 
 ## 🎯 Next Immediate Steps
 
-1. ✅ Test v5.html in browser - verify all elements visible
-2. Test drag & drop functionality (Phase 4)
-3. Integrate real game logic from js/game/ modules
-4. Implement token placement validation
-5. Add score calculation updates
+1. ✅ Test v5.html - verify drag & drop works
+2. ✅ Verify stacking validation (try invalid moves)
+3. ✅ Play a complete 15-turn game
+4. Phase 6: Polish & mobile optimization (optional)
+5. Deploy to public/ directory
+
+### Phase 3-5 Implementation (Just Completed)
+
+**Drag & Drop System**:
+- ✅ HTML5 drag events on tokens
+- ✅ Visual feedback (dropzone-active/dropzone-invalid classes)
+- ✅ Token selection from selected space only
+- ✅ Data transfer with color information
+
+**Game Logic Integration**:
+- ✅ `canPlaceToken()` from token-manager.js - validates stacking rules
+- ✅ `calculateTerrain()` - determines hex terrain type
+- ✅ `calculateTotalScore()` from scoring-engine.js - all 6 categories
+- ✅ Token pouch tracking with `INITIAL_POUCH` data
+
+**Real-time Updates**:
+- ✅ Hex display shows token emoji and stack height (💧×2)
+- ✅ Hex colors change based on top token
+- ✅ Score updates immediately after each placement
+- ✅ Turn counter advances correctly
+- ✅ Token supply refreshes each turn
+
+**Validation Working**:
+- ❌ Blue/Yellow cannot stack on anything
+- ❌ Brown can only stack on brown (max 2)
+- ❌ Green requires brown underneath
+- ❌ Gray can only stack on gray
+- ❌ Red can only be 2nd token on gray/brown/red
+- ✅ Clear error messages for invalid placements
 
 ---
 
@@ -194,17 +249,69 @@ python3 -m http.server 8001
 
 ## ✅ Success Criteria
 
-- [ ] Game loads without errors
-- [ ] Can select token space and see tokens
-- [ ] Can drag tokens to hex grid
-- [ ] Invalid placements rejected with feedback
-- [ ] Score updates correctly after each placement
-- [ ] Can play full 15-turn game
-- [ ] End game shows final score
-- [ ] Responsive on mobile devices
-- [ ] All 64 unit tests still pass
+- [x] Game loads without errors
+- [x] Can select token space and see tokens
+- [x] Can drag tokens to hex grid
+- [x] Invalid placements rejected with feedback
+- [x] Score updates correctly after each placement
+- [x] Can play full 15-turn game
+- [x] End game shows final score
+- [x] Responsive on mobile devices
+- [ ] All 64 unit tests still pass (need to run test suite)
+
+**Status**: 8/9 complete - MVP is fully playable!
 
 ---
 
-**Last Updated**: Phase 1 & 2 complete - UI structure and hex rendering working! 🎉  
+**Last Updated**: Phases 1-5 complete - MVP fully playable! 🎉  
 **View at**: http://localhost:8001/v5.html
+
+---
+
+## 🧪 How to Test the Game
+
+### Basic Gameplay Test
+1. **Open**: http://localhost:8001/v5.html
+2. **Select Space**: Click on Space 1, 2, or 3 (should highlight green)
+3. **Drag Token**: Drag a token from selected space to center hex
+4. **Verify Placement**: Token should appear on hex with emoji
+5. **Check Score**: Score sidebar should update automatically
+6. **Place 3 Tokens**: Place all 3 tokens from selected space
+7. **End Turn**: Click "End Turn" button
+8. **New Turn**: Token supply should refresh with new random tokens
+9. **Repeat**: Play all 15 turns
+10. **Game End**: Should show final score
+
+### Validation Tests
+Try these invalid moves to see error messages:
+
+1. **Blue on Blue**: ❌ "blue cannot stack on blue"
+2. **Yellow on Yellow**: ❌ "yellow cannot stack on yellow"
+3. **Green alone**: ✅ Should work (green can be placed on ground)
+4. **Green on Yellow**: ❌ "green cannot stack on yellow"
+5. **Brown → Brown → Brown**: ❌ "Max height 2 reached"
+6. **Red as 3rd token**: ❌ "Max height 2 reached for red tokens"
+7. **Gray → Gray → Gray**: ✅ Should work (infinite stacking)
+
+### Score Verification
+- Place **1 Green** alone → Trees score: **1 point**
+- Place **Brown + Green** → Trees score: **3 points**
+- Place **2 adjacent Gray** → Mountains score: **1 point** (1-high) + **3 points** (2-high) = **4 total**
+- Place **2 connected Yellow** → Fields score: **5 points**
+
+### Known Working Features
+- ✅ Random token generation
+- ✅ Drag & drop with validation
+- ✅ Real-time scoring
+- ✅ Turn management
+- ✅ Game end detection
+- ✅ Hex stacking visualization
+- ✅ Error messages
+- ✅ Space selection
+
+### Console Logs
+Open browser DevTools (F12) to see:
+- "🎮 Harmonies v5.0 Initializing..."
+- "✅ Game ready!"
+- Token placement logs
+- Score calculation logs

@@ -294,9 +294,7 @@
             <div class="token-space border-4 border-slate-300 rounded-lg p-3 bg-slate-50" data-space="0">
               <div class="text-xs text-slate-600 font-semibold mb-2">Space 1</div>
               <div class="flex justify-around items-center">
-                <div class="token blue" draggable="true" data-color="blue">💧</div>
-                <div class="token yellow" draggable="true" data-color="yellow">🌾</div>
-                <div class="token brown" draggable="true" data-color="brown">🪵</div>
+                <!-- Tokens generated dynamically -->
               </div>
             </div>
             
@@ -304,9 +302,7 @@
             <div class="token-space border-4 border-slate-300 rounded-lg p-3 bg-slate-50" data-space="1">
               <div class="text-xs text-slate-600 font-semibold mb-2">Space 2</div>
               <div class="flex justify-around items-center">
-                <div class="token green" draggable="true" data-color="green">🌿</div>
-                <div class="token red" draggable="true" data-color="red">🏠</div>
-                <div class="token gray" draggable="true" data-color="gray">⛰️</div>
+                <!-- Tokens generated dynamically -->
               </div>
             </div>
             
@@ -314,9 +310,7 @@
             <div class="token-space border-4 border-slate-300 rounded-lg p-3 bg-slate-50" data-space="2">
               <div class="text-xs text-slate-600 font-semibold mb-2">Space 3</div>
               <div class="flex justify-around items-center">
-                <div class="token brown" draggable="true" data-color="brown">🪵</div>
-                <div class="token green" draggable="true" data-color="green">🌿</div>
-                <div class="token gray" draggable="true" data-color="gray">⛰️</div>
+                <!-- Tokens generated dynamically -->
               </div>
             </div>
           </div>
@@ -350,9 +344,29 @@
   <!-- Game Logic Scripts (ES6 Modules) -->
   <script type="module">
     // Import existing game logic
-    // import { initializePersonalBoard, hexToPixel } from './js/game/hex-grid.js';
-    // import { canPlaceToken } from './js/game/token-manager.js';
-    // import { calculateTotalScore } from './js/game/scoring-engine.js';
+    import { canPlaceToken, calculateTerrain } from './js/game/token-manager.js';
+    import { calculateTotalScore } from './js/game/scoring-engine.js';
+    import { INITIAL_POUCH } from './js/data/tokens-config.js';
+    
+    // Token emoji mapping
+    const TOKEN_EMOJI = {
+      blue: '💧',
+      yellow: '🌾',
+      brown: '🪵',
+      green: '🌿',
+      red: '🏠',
+      gray: '⛰️'
+    };
+    
+    // Color names for display
+    const COLOR_NAMES = {
+      blue: 'Water',
+      yellow: 'Field',
+      brown: 'Trunk',
+      green: 'Leaves',
+      red: 'Building',
+      gray: 'Mountain'
+    };
     
     // Game state
     const gameState = {
@@ -362,12 +376,15 @@
       tokensPlaced: 0,
       tokensToPlace: 3,
       hexBoard: {},
+      tokenSupply: [[], [], []],
+      pouch: { ...INITIAL_POUCH },
+      draggedToken: null,
       score: {
         trees: 0,
         mountains: 0,
         fields: 0,
         buildings: 0,
-        rivers: 0,
+        water: 0,
         animals: 0,
         total: 0
       }
@@ -377,15 +394,19 @@
     function initGame() {
       console.log('🎮 Harmonies v5.0 Initializing...');
       
-      // Phase 1: Just show static UI for now
-      showMessage('Game initialized! Phase 1 complete - UI structure ready.', 'success');
-      
       // Create initial hex grid (7 hexes)
       createInitialHexGrid();
+      
+      // Generate initial token supply
+      refreshTokenSupply();
       
       // Setup event listeners
       setupEventListeners();
       
+      // Initial score
+      updateScore();
+      
+      showMessage('Game ready! Select a token space, then drag tokens to hexes.', 'success');
       console.log('✅ Game ready!');
     }
     
@@ -395,28 +416,27 @@
       
       // Center hex and 6 neighbors (axial coordinates)
       const hexes = [
-        { q: 0, r: 0, label: '0,0' },
-        { q: 1, r: 0, label: '1,0' },
-        { q: 1, r: -1, label: '1,-1' },
-        { q: 0, r: -1, label: '0,-1' },
-        { q: -1, r: 0, label: '-1,0' },
-        { q: -1, r: 1, label: '-1,1' },
-        { q: 0, r: 1, label: '0,1' }
+        { q: 0, r: 0 },
+        { q: 1, r: 0 },
+        { q: 1, r: -1 },
+        { q: 0, r: -1 },
+        { q: -1, r: 0 },
+        { q: -1, r: 1 },
+        { q: 0, r: 1 }
       ];
       
-      hexes.forEach(({ q, r, label }) => {
-        const hexEl = createHexElement(q, r, label);
+      hexes.forEach(({ q, r }) => {
+        const hexEl = createHexElement(q, r);
         container.appendChild(hexEl);
       });
     }
     
     // Create a hex element
-    function createHexElement(q, r, label) {
+    function createHexElement(q, r) {
       const hex = document.createElement('div');
       hex.className = 'hex empty';
       hex.dataset.q = q;
       hex.dataset.r = r;
-      hex.textContent = label;
       
       // Calculate pixel position
       const pos = hexToPixel(q, r);
@@ -430,6 +450,11 @@
         stack: []
       };
       
+      // Drop zone handlers
+      hex.addEventListener('dragover', handleDragOver);
+      hex.addEventListener('dragleave', handleDragLeave);
+      hex.addEventListener('drop', handleDrop);
+      
       return hex;
     }
     
@@ -440,9 +465,235 @@
       
       // Center in container (600x500)
       return {
-        x: x + 270, // Offset to center
+        x: x + 270,
         y: y + 220
       };
+    }
+    
+    // Draw random tokens from pouch
+    function drawTokens(count) {
+      const colors = [];
+      const available = Object.entries(gameState.pouch).filter(([_, count]) => count > 0);
+      
+      if (available.length === 0) return colors;
+      
+      for (let i = 0; i < count; i++) {
+        if (available.length === 0) break;
+        
+        const randomIndex = Math.floor(Math.random() * available.length);
+        const [color, _] = available[randomIndex];
+        colors.push(color);
+        
+        gameState.pouch[color]--;
+        if (gameState.pouch[color] === 0) {
+          available.splice(randomIndex, 1);
+        }
+      }
+      
+      return colors;
+    }
+    
+    // Refresh all token spaces
+    function refreshTokenSupply() {
+      for (let i = 0; i < 3; i++) {
+        gameState.tokenSupply[i] = drawTokens(3);
+        updateTokenSpaceUI(i);
+      }
+    }
+    
+    // Update token space UI
+    function updateTokenSpaceUI(spaceIndex) {
+      const space = document.querySelector(`[data-space="${spaceIndex}"]`);
+      const tokensContainer = space.querySelector('.flex');
+      tokensContainer.innerHTML = '';
+      
+      gameState.tokenSupply[spaceIndex].forEach((color, idx) => {
+        const token = document.createElement('div');
+        token.className = `token ${color}`;
+        token.draggable = true;
+        token.dataset.color = color;
+        token.dataset.space = spaceIndex;
+        token.dataset.index = idx;
+        token.textContent = TOKEN_EMOJI[color];
+        
+        // Drag handlers
+        token.addEventListener('dragstart', handleDragStart);
+        token.addEventListener('dragend', handleDragEnd);
+        
+        tokensContainer.appendChild(token);
+      });
+    }
+    
+    // Drag start handler
+    function handleDragStart(e) {
+      const token = e.target;
+      const spaceIndex = parseInt(token.dataset.space);
+      
+      // Check if space is selected
+      if (gameState.selectedSpace === null) {
+        e.preventDefault();
+        showMessage('Select a token space first!', 'error');
+        return;
+      }
+      
+      if (parseInt(gameState.selectedSpace) !== spaceIndex) {
+        e.preventDefault();
+        showMessage('Drag tokens from the selected space only!', 'error');
+        return;
+      }
+      
+      gameState.draggedToken = {
+        color: token.dataset.color,
+        space: spaceIndex,
+        index: parseInt(token.dataset.index),
+        element: token
+      };
+      
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', token.dataset.color);
+      token.style.opacity = '0.5';
+    }
+    
+    // Drag end handler
+    function handleDragEnd(e) {
+      e.target.style.opacity = '1';
+      
+      // Clear all drop zone highlights
+      document.querySelectorAll('.hex').forEach(hex => {
+        hex.classList.remove('dropzone-active', 'dropzone-invalid');
+      });
+    }
+    
+    // Drag over handler (allow drop)
+    function handleDragOver(e) {
+      if (!gameState.draggedToken) return;
+      
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      
+      const hex = e.currentTarget;
+      const q = parseInt(hex.dataset.q);
+      const r = parseInt(hex.dataset.r);
+      const hexKey = `${q}_${r}`;
+      const hexData = gameState.hexBoard[hexKey];
+      
+      // Validate placement
+      const validation = canPlaceToken(hexData, gameState.draggedToken.color);
+      
+      if (validation.valid) {
+        hex.classList.add('dropzone-active');
+        hex.classList.remove('dropzone-invalid');
+      } else {
+        hex.classList.add('dropzone-invalid');
+        hex.classList.remove('dropzone-active');
+      }
+    }
+    
+    // Drag leave handler
+    function handleDragLeave(e) {
+      const hex = e.currentTarget;
+      hex.classList.remove('dropzone-active', 'dropzone-invalid');
+    }
+    
+    // Drop handler
+    function handleDrop(e) {
+      e.preventDefault();
+      
+      if (!gameState.draggedToken) return;
+      
+      const hex = e.currentTarget;
+      const q = parseInt(hex.dataset.q);
+      const r = parseInt(hex.dataset.r);
+      const hexKey = `${q}_${r}`;
+      const hexData = gameState.hexBoard[hexKey];
+      
+      // Validate placement
+      const validation = canPlaceToken(hexData, gameState.draggedToken.color);
+      
+      if (!validation.valid) {
+        showMessage(`❌ ${validation.reason}`, 'error');
+        hex.classList.remove('dropzone-active', 'dropzone-invalid');
+        return;
+      }
+      
+      // Place token
+      const color = gameState.draggedToken.color;
+      hexData.stack.push({ color });
+      hexData.terrain = calculateTerrain(hexData.stack);
+      
+      // Update hex display
+      updateHexDisplay(hex, hexData);
+      
+      // Remove token from supply
+      const { space, index } = gameState.draggedToken;
+      gameState.tokenSupply[space].splice(index, 1);
+      updateTokenSpaceUI(space);
+      
+      // Update counters
+      gameState.tokensPlaced++;
+      
+      // Update score
+      updateScore();
+      
+      // Check if all tokens placed
+      if (gameState.tokensPlaced >= gameState.tokensToPlace) {
+        showMessage(`✓ All tokens placed! Click "End Turn" to continue.`, 'success');
+      } else {
+        const remaining = gameState.tokensToPlace - gameState.tokensPlaced;
+        showMessage(`✓ Token placed! ${remaining} more to place.`, 'success');
+      }
+      
+      // Clear drag state
+      gameState.draggedToken = null;
+      hex.classList.remove('dropzone-active', 'dropzone-invalid');
+    }
+    
+    // Update hex visual display
+    function updateHexDisplay(hexEl, hexData) {
+      const { stack, terrain } = hexData;
+      
+      if (stack.length === 0) {
+        hexEl.className = 'hex empty';
+        hexEl.textContent = '';
+        return;
+      }
+      
+      // Show top token color
+      const topColor = stack[stack.length - 1].color;
+      hexEl.className = `hex ${topColor}`;
+      
+      // Show stack height and emoji
+      const emoji = TOKEN_EMOJI[topColor];
+      hexEl.textContent = stack.length > 1 ? `${emoji}×${stack.length}` : emoji;
+    }
+    
+    // Update score display
+    function updateScore() {
+      const playerBoard = {
+        hexGrid: gameState.hexBoard,
+        placedAnimals: []
+      };
+      
+      const result = calculateTotalScore(playerBoard, [], 'A');
+      gameState.score = {
+        trees: result.breakdown.trees,
+        mountains: result.breakdown.mountains,
+        fields: result.breakdown.fields,
+        buildings: result.breakdown.buildings,
+        water: result.breakdown.water,
+        animals: result.breakdown.animals,
+        total: result.total
+      };
+      
+      // Update UI
+      document.getElementById('score-trees').textContent = gameState.score.trees;
+      document.getElementById('score-mountains').textContent = gameState.score.mountains;
+      document.getElementById('score-fields').textContent = gameState.score.fields;
+      document.getElementById('score-buildings').textContent = gameState.score.buildings;
+      document.getElementById('score-rivers').textContent = gameState.score.water;
+      document.getElementById('score-animals').textContent = gameState.score.animals;
+      document.getElementById('score-total-sidebar').textContent = gameState.score.total;
+      document.getElementById('total-score').textContent = gameState.score.total;
     }
     
     // Show game message
@@ -456,10 +707,10 @@
       }`;
       msgEl.classList.remove('hidden');
       
-      // Auto-hide after 3 seconds
+      // Auto-hide after 4 seconds
       setTimeout(() => {
         msgEl.classList.add('hidden');
-      }, 3000);
+      }, 4000);
     }
     
     // Setup event listeners
@@ -473,7 +724,7 @@
       
       // Help button
       document.getElementById('help-btn').addEventListener('click', () => {
-        showMessage('Select a token space, drag tokens to hexes, then end your turn!', 'info');
+        showMessage('Select a token space (click), drag tokens to hexes, then end your turn!', 'info');
       });
       
       // End turn button
@@ -501,13 +752,13 @@
       space.classList.add('selected');
       gameState.selectedSpace = spaceId;
       
-      showMessage(`Space ${parseInt(spaceId) + 1} selected! Now drag tokens to your board.`, 'success');
+      showMessage(`Space ${parseInt(spaceId) + 1} selected! Drag tokens to your board.`, 'success');
     }
     
     // Handle end turn
     function handleEndTurn() {
       if (gameState.tokensPlaced < gameState.tokensToPlace) {
-        showMessage(`Place all ${gameState.tokensToPlace} tokens before ending turn!`, 'error');
+        showMessage(`❌ Place all ${gameState.tokensToPlace} tokens before ending turn!`, 'error');
         return;
       }
       
@@ -524,8 +775,10 @@
         return;
       }
       
-      // Refresh token supply (Phase 3)
-      showMessage(`Turn ${gameState.turn} started!`, 'success');
+      // Refresh token supply
+      refreshTokenSupply();
+      
+      showMessage(`🎮 Turn ${gameState.turn} started! Select a space and place tokens.`, 'success');
       
       // Deselect space
       document.querySelectorAll('.token-space').forEach(s => {
@@ -536,8 +789,9 @@
     
     // End game
     function endGame() {
-      showMessage(`🎉 Game Over! Final Score: ${gameState.score.total}`, 'success');
+      showMessage(`🎉 Game Over! Final Score: ${gameState.score.total} points!`, 'success');
       document.getElementById('end-turn-btn').disabled = true;
+      document.getElementById('end-turn-btn').textContent = '🏁 Game Complete';
     }
     
     // Start the game!
