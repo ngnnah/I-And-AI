@@ -14,7 +14,6 @@
       width: 70px;
       height: 81px; /* 70 * 1.1547 for flat-topped hex */
       clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-      transform: rotate(30deg); /* Rotate for pointy-top orientation */
       transition: all 0.2s ease;
       cursor: pointer;
       position: absolute;
@@ -26,10 +25,6 @@
       color: white;
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
       border: 2px solid rgba(255, 255, 255, 0.3);
-    }
-    
-    .hex > * {
-      transform: rotate(-30deg); /* Counter-rotate content */
     }
     
     .hex:hover {
@@ -154,8 +149,8 @@
       }
       
       .hex {
-        width: 50px;
-        height: 58px;
+        width: 54px;
+        height: 62px;
         font-size: 9px;
       }
       
@@ -493,11 +488,18 @@
       const container = document.getElementById('hex-grid-container');
       const containerWidth = container ? container.clientWidth : 800;
       const isMobile = containerWidth < 500;
-      const hexSize = isMobile ? 29 : 40; // Increased from 27/35 for better fit
       
-      // Calculate position using pointy-topped hex formulas (after 30deg rotation)
-      const x = hexSize * Math.sqrt(3) * (q + r/2);
-      const y = hexSize * (3/2) * r;
+      // Hex size should match visual size for proper touching
+      // Visual: 70px wide, so horizontal spacing = 70 * 0.75 = 52.5
+      // Visual: 81px tall, so vertical spacing = 81 * 0.75 = 60.75
+      const hexWidth = isMobile ? 54 : 70;
+      const hexHeight = isMobile ? 62 : 81;
+      
+      // Flat-topped hex positioning
+      // Horizontal spacing: width * 0.75
+      // Vertical spacing: height
+      const x = q * hexWidth * 0.75;
+      const y = r * hexHeight + (q * hexHeight * 0.5);
       
       // Center in container
       const centerX = containerWidth / 2;
@@ -693,7 +695,7 @@
       
       if (stack.length === 0) {
         hexEl.className = 'hex empty';
-        hexEl.innerHTML = '';
+        hexEl.textContent = '';
         return;
       }
       
@@ -701,10 +703,9 @@
       const topColor = stack[stack.length - 1].color;
       hexEl.className = `hex ${topColor}`;
       
-      // Show stack height and emoji (wrapped in span for counter-rotation)
+      // Show stack height and emoji
       const emoji = TOKEN_EMOJI[topColor];
-      const content = stack.length > 1 ? `${emoji}×${stack.length}` : emoji;
-      hexEl.innerHTML = `<span>${content}</span>`;
+      hexEl.textContent = stack.length > 1 ? `${emoji}×${stack.length}` : emoji;
     }
     
     // Update score display
