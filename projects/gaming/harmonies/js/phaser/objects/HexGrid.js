@@ -57,12 +57,16 @@ export default class HexGrid extends Phaser.GameObjects.Container {
     // Draw hexagon
     this.drawHex(hex, pos.x, pos.y, terrain, isExpansion);
 
-    // Make interactive
-    const hitArea = new Phaser.Geom.Circle(pos.x, pos.y, this.hexSize);
-    hex.setInteractive(hitArea, Phaser.Geom.Circle.Contains);
+    // Create invisible zone for drop target (Graphics can't be drop zones)
+    const dropZone = this.scene.add.zone(pos.x, pos.y, this.hexSize * 2, this.hexSize * 2);
+    dropZone.setRectangleDropZone(this.hexSize * 2, this.hexSize * 2);
+    dropZone.setData('coord', { q, r });
+    dropZone.setData('terrain', terrain);
+    dropZone.setData('isExpansion', isExpansion);
 
     // Add to container
     this.add(hex);
+    this.add(dropZone);
     this.hexSprites.set(key, hex);
 
     // Add coordinate label (for debugging)
@@ -143,8 +147,9 @@ export default class HexGrid extends Phaser.GameObjects.Container {
   /**
    * Update hex grid from game state
    * @param {Object} hexGrid - { "q_r": { q, r, stack: [...], terrain: "..." }, ... }
+   * @param {boolean} showExpansion - If true, show expansion hexes around placed hexes (default: false)
    */
-  updateFromState(hexGrid) {
+  updateFromState(hexGrid, showExpansion = false) {
     console.log('[HexGrid] Updating from state:', Object.keys(hexGrid).length, 'hexes');
 
     // Clear existing hexes and tokens
@@ -163,22 +168,25 @@ export default class HexGrid extends Phaser.GameObjects.Container {
       }
     }
 
-    // Add expansion hexes (neighbors of existing hexes)
-    const expansionHexes = new Set();
-    for (const key in hexGrid) {
-      const [q, r] = key.split('_').map(Number);
-      const neighbors = getNeighbors(q, r);
+    // Optionally add expansion hexes (neighbors of existing hexes)
+    if (showExpansion) {
+      const expansionHexes = new Set();
+      for (const key in hexGrid) {
+        const [q, r] = key.split('_').map(Number);
+        const neighbors = getNeighbors(q, r);
 
-      neighbors.forEach(n => {
-        const nKey = coordToKey(n.q, n.r);
-        if (!hexGrid[nKey] && !expansionHexes.has(nKey)) {
-          this.addHex(n.q, n.r, 'empty', true);
-          expansionHexes.add(nKey);
-        }
-      });
+        neighbors.forEach(n => {
+          const nKey = coordToKey(n.q, n.r);
+          if (!hexGrid[nKey] && !expansionHexes.has(nKey)) {
+            this.addHex(n.q, n.r, 'empty', true);
+            expansionHexes.add(nKey);
+          }
+        });
+      }
+      console.log('[HexGrid] Updated:', this.hexSprites.size, 'total hexes (including', expansionHexes.size, 'expansion)');
+    } else {
+      console.log('[HexGrid] Updated:', this.hexSprites.size, 'hexes (no expansion)');
     }
-
-    console.log('[HexGrid] Updated:', this.hexSprites.size, 'total hexes (including', expansionHexes.size, 'expansion)');
   }
 
   /**

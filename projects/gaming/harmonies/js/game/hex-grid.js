@@ -168,8 +168,22 @@ export function createHex(q, r) {
 export function initializePersonalBoard() {
   const hexGrid = {};
 
-  // Start with center hex (0, 0)
-  hexGrid[coordToKey(0, 0)] = createHex(0, 0);
+  // Harmonies player board: 5 columns, 5-4-5-4-5 = 23 hexes
+  // Flat-topped hex axial coordinates, centered on (0,0)
+  const boardLayout = {
+    '-2': [-1, 0, 1, 2, 3],   // 5 hexes
+    '-1': [-1, 0, 1, 2],      // 4 hexes
+     '0': [-2, -1, 0, 1, 2],  // 5 hexes (center)
+     '1': [-2, -1, 0, 1],     // 4 hexes
+     '2': [-3, -2, -1, 0, 1], // 5 hexes
+  };
+
+  for (const [qStr, rValues] of Object.entries(boardLayout)) {
+    const q = parseInt(qStr, 10);
+    for (const r of rValues) {
+      hexGrid[coordToKey(q, r)] = createHex(q, r);
+    }
+  }
 
   return hexGrid;
 }

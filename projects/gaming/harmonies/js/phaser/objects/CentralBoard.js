@@ -53,9 +53,17 @@ export default class CentralBoard extends Phaser.GameObjects.Container {
       { x: x + 30, y: y }
     ];
 
-    tokenPositions.forEach(pos => {
+    tokenPositions.forEach((pos, tokenIndex) => {
       const token = this.scene.add.circle(pos.x, pos.y, 15, 0xCCCCCC, 0.8);
       token.setStrokeStyle(2, 0x333333);
+      token.setData('spaceIndex', index);
+      token.setData('tokenIndex', tokenIndex);
+      token.setData('color', null); // Will be set when updated
+
+      // Make draggable
+      token.setInteractive({ useHandCursor: true, draggable: true });
+      this.scene.input.setDraggable(token);
+
       this.add(token);
       tokens.push(token);
     });
@@ -87,10 +95,11 @@ export default class CentralBoard extends Phaser.GameObjects.Container {
 
     const space = this.spaces[spaceIndex];
 
-    // Update token colors
+    // Update token colors and data
     tokens.forEach((token, i) => {
       if (i < 3 && space.tokens[i]) {
         space.tokens[i].setFillStyle(this.getTokenColor(token.color), 0.9);
+        space.tokens[i].setData('color', token.color);
       }
     });
 

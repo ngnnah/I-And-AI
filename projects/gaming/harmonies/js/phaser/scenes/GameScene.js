@@ -6,12 +6,14 @@
 
 import HexGrid from '../objects/HexGrid.js';
 import CentralBoard from '../objects/CentralBoard.js';
+import { initializePersonalBoard } from '../../game/hex-grid.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
     super({ key: 'GameScene' });
     this.hexGrid = null;
     this.centralBoard = null;
+    this.gameState = null; // Track full game state
   }
 
   init(data) {
@@ -48,6 +50,9 @@ export default class GameScene extends Phaser.Scene {
 
     // Test token supply
     this.testCentralBoard();
+
+    // Setup drag and drop
+    this.setupDragAndDrop();
 
     // Back to lobby button (for testing)
     const backButton = this.add.text(20, 20, '← Back to Lobby', {
@@ -131,27 +136,13 @@ export default class GameScene extends Phaser.Scene {
   }
 
   loadInitialState() {
-    // Create initial game state (1 starting hex with empty terrain)
-    const initialState = {
-      "0_0": {
-        q: 0,
-        r: 0,
-        stack: [],
-        terrain: "empty"
-      }
-    };
+    // Harmonies player board: 5 columns, 5-4-5-4-5 = 23 hexes
+    this.gameState = initializePersonalBoard();
 
-    console.log('[GameScene] Loading initial hex grid state');
-    this.hexGrid.updateFromState(initialState);
+    console.log('[GameScene] Loading player board:', Object.keys(this.gameState).length, 'hexes');
+    this.hexGrid.updateFromState(this.gameState, false);
 
-    // Test: Add some tokens to the center hex
-    this.hexGrid.updateTokens(0, 0, [
-      { color: 'brown' },
-      { color: 'brown' },
-      { color: 'green' }
-    ]);
-
-    console.log('[GameScene] ✅ Initial state loaded: 1 hex + 6 expansion hexes, 3-token tree');
+    console.log('[GameScene] ✅ Initial state loaded:', Object.keys(this.gameState).length, 'hexes');
   }
 
   testCentralBoard() {
@@ -199,6 +190,181 @@ export default class GameScene extends Phaser.Scene {
     score.setScrollFactor(0);
 
     console.log('[GameScene] UI layer created');
+  }
+
+  setupDragAndDrop() {
+    // Drag start
+    this.input.on('dragstart', (pointer, gameObject) => {
+      gameObject.setScale(1.3);
+      gameObject.setAlpha(0.8);
+      gameObject.setDepth(1000); // Bring to front
+      console.log('[GameScene] Drag started:', gameObject.getData('color'));
+    });
+
+    // Dragging
+    this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+      gameObject.x = dragX;
+      gameObject.y = dragY;
+    });
+
+    // Drag over hex (highlight)
+    this.input.on('dragenter', (pointer, gameObject, dropZone) => {
+      if (dropZone.getData) {
+        const coord = dropZone.getData('coord');
+        if (coord) {
+          this.hexGrid.highlightHex(coord.q, coord.r, 0x27ae60); // Green for valid
+          console.log('[GameScene] Drag over hex:', coord.q, coord.r);
+        }
+      }
+    });
+
+    // Drag leave hex (unhighlight)
+    this.input.on('dragleave', (pointer, gameObject, dropZone) => {
+      this.hexGrid.clearHighlights();
+    });
+
+    // Drop on hex
+    this.input.on('drop', (pointer, gameObject, dropZone) => {
+      const coord = dropZone.getData('coord');
+      const tokenColor = gameObject.getData('color');
+
+      if (!coord || !tokenColor) {
+        console.warn('[GameScene] Invalid drop - missing coord or color');
+        this.returnTokenToOriginal(gameObject);
+        return;
+      }
+
+      console.log('[GameScene] Token dropped:', tokenColor, 'on hex', coord.q, coord.r);
+
+      // Validate placement using token-manager
+      const canPlace = this.validateTokenPlacement(coord.q, coord.r, tokenColor);
+
+      if (canPlace) {
+        // Place token on hex
+        this.placeTokenOnHex(gameObject, coord.q, coord.r, tokenColor);
+        console.log('[GameScene] ✅ Token placed successfully!');
+      } else {
+        // Invalid placement
+        console.log('[GameScene] ❌ Invalid placement - returning token');
+        this.returnTokenToOriginal(gameObject);
+
+        // Show error feedback
+        this.hexGrid.highlightHex(coord.q, coord.r, 0xe74c3c); // Red for invalid
+        this.time.delayedCall(500, () => {
+          this.hexGrid.clearHighlights();
+        });
+      }
+    });
+
+    // Drag end (no drop)
+    this.input.on('dragend', (pointer, gameObject, dropped) => {
+      if (!dropped) {
+        console.log('[GameScene] Drag cancelled - returning token');
+        this.returnTokenToOriginal(gameObject);
+      }
+
+      this.hexGrid.clearHighlights();
+      gameObject.setScale(1);
+      gameObject.setAlpha(1);
+      gameObject.setDepth(0);
+    });
+
+    console.log('[GameScene] ✅ Drag and drop system initialized');
+  }
+
+  validateTokenPlacement(q, r, tokenColor) {
+    // Get current hex state
+    const hexKey = `${q}_${r}`;
+    const hex = this.hexGrid.getHex(q, r);
+
+    if (!hex) {
+      console.warn('[GameScene] Hex not found:', hexKey);
+      return false;
+    }
+
+    // Get current stack from game state
+    const hexState = this.gameState[hexKey];
+    if (!hexState) {
+      console.warn('[GameScene] Hex state not found:', hexKey);
+      return false;
+    }
+
+    const stack = hexState.stack || [];
+
+    // Simple validation: max 3 tokens per hex
+    // (Phase 4 will add full stacking rules from token-manager)
+    if (stack.length >= 3) {
+      console.log('[GameScene] Cannot place: hex is full (3 tokens max)');
+      return false;
+    }
+
+    return true;
+  }
+
+  placeTokenOnHex(tokenSprite, q, r, color) {
+    // Get hex position
+    const pos = this.hexGrid.hexToPixel(q, r);
+
+    // Animate token to hex center
+    this.tweens.add({
+      targets: tokenSprite,
+      x: pos.x,
+      y: pos.y,
+      scale: 1,
+      alpha: 1,
+      duration: 300,
+      ease: 'Power2',
+      onComplete: () => {
+        // Remove draggable token sprite
+        tokenSprite.destroy();
+
+        const hexKey = `${q}_${r}`;
+
+        // Add token to existing stack (don't replace)
+        if (this.gameState[hexKey]) {
+          this.gameState[hexKey].stack.push({ color });
+        } else {
+          // Fallback: create new hex if somehow missing
+          this.gameState[hexKey] = {
+            q, r,
+            stack: [{ color }],
+            terrain: 'empty'
+          };
+        }
+
+        // Rebuild hex grid from full state (no expansion)
+        this.hexGrid.updateFromState(this.gameState, false);
+
+        console.log('[GameScene] Token placed on', hexKey, '- stack height:', this.gameState[hexKey].stack.length);
+      }
+    });
+  }
+
+  returnTokenToOriginal(tokenSprite) {
+    // Return to original position (stored in data)
+    const spaceIndex = tokenSprite.getData('spaceIndex');
+    const tokenIndex = tokenSprite.getData('tokenIndex');
+
+    // Calculate original position
+    const spaceX = -300 + spaceIndex * 140;
+    const spaceY = -400;
+    const positions = [
+      { x: spaceX - 30, y: spaceY },
+      { x: spaceX, y: spaceY },
+      { x: spaceX + 30, y: spaceY }
+    ];
+
+    const originalPos = positions[tokenIndex];
+
+    this.tweens.add({
+      targets: tokenSprite,
+      x: originalPos.x,
+      y: originalPos.y,
+      scale: 1,
+      alpha: 1,
+      duration: 200,
+      ease: 'Power2'
+    });
   }
 
   update() {
