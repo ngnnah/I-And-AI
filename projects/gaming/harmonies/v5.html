@@ -12,7 +12,7 @@
     /* Custom hex styles */
     .hex {
       width: 70px;
-      height: 81px; /* 70 * 1.1547 for flat-topped hex */
+      height: 60px;
       clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
       transition: all 0.2s ease;
       cursor: pointer;
@@ -24,7 +24,7 @@
       font-weight: bold;
       color: white;
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-      border: 2px solid rgba(255, 255, 255, 0.3);
+      border: 3px solid rgba(0, 0, 0, 0.4);
     }
     
     .hex:hover {
@@ -145,13 +145,14 @@
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .hex-grid {
-        height: 480px;
+        height: 400px;
       }
       
       .hex {
-        width: 54px;
-        height: 62px;
+        width: 50px;
+        height: 43px;
         font-size: 9px;
+        border: 2px solid rgba(0, 0, 0, 0.4);
       }
       
       .token {
@@ -489,21 +490,19 @@
       const containerWidth = container ? container.clientWidth : 800;
       const isMobile = containerWidth < 500;
       
-      // Hex size should match visual size for proper touching
-      // Visual: 70px wide, so horizontal spacing = 70 * 0.75 = 52.5
-      // Visual: 81px tall, so vertical spacing = 81 * 0.75 = 60.75
-      const hexWidth = isMobile ? 54 : 70;
-      const hexHeight = isMobile ? 62 : 81;
+      // Hex dimensions MUST match CSS exactly
+      const hexWidth = isMobile ? 50 : 70;
+      const hexHeight = isMobile ? 43 : 60;
       
       // Flat-topped hex positioning
-      // Horizontal spacing: width * 0.75
-      // Vertical spacing: height
-      const x = q * hexWidth * 0.75;
+      // Horizontal: offset by 3/4 of width for each column (hexes overlap by 1/4)
+      // Vertical: offset by full height for each row, plus half-height shift per column
+      const x = q * (hexWidth * 0.75);
       const y = r * hexHeight + (q * hexHeight * 0.5);
       
       // Center in container
       const centerX = containerWidth / 2;
-      const centerY = isMobile ? 230 : 290;
+      const centerY = isMobile ? 195 : 295;
       
       return {
         x: x + centerX,
