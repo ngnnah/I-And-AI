@@ -16,16 +16,17 @@
 - ✅ **Stacking Validation**: All 6 token types follow correct rules
 - ✅ **Real-time Scoring**: All 6 categories calculate correctly
 - ✅ **Animal Cards**: 3 random cards per game with integrated scoring
-- ✅ **Solo Mode Rules**: Correct end conditions (pouch empty OR ≤2 empty spaces)
+- ✅ **Solo Mode Rules**: Correct end conditions (pouch <9 tokens OR ≤2 empty spaces)
+- ✅ **Sun Scoring**: Displays achievement level (1-8 suns) based on final score
 - ✅ **Token Tracking**: Visual counter shows remaining tokens in pouch
-- ✅ **Game End**: Detects completion and shows final score
+- ✅ **Game End**: Detects completion and shows final score + suns earned
 - ✅ **Random Tokens**: Draws from pouch with proper tracking
 - ✅ **Visual Polish**: Gradients, animations, responsive layout
 - ✅ **Mobile Support**: Responsive hex sizing for mobile devices
 
 **Play now**: http://localhost:8001/v5.html
 
-**Total Development Time**: ~5 hours (including solo mode rule corrections!)
+**Total Development Time**: ~5.5 hours (including solo mode rule corrections and sun scoring!)
 
 ---
 
@@ -324,13 +325,13 @@ python3 -m http.server 8001
 
 ---
 
-**Last Updated**: February 16, 2026 - Correct solo mode rules implemented! 🎉  
+**Last Updated**: February 16, 2026 - Sun scoring implemented! ☀️  
 **Latest Changes**: 
-- ✅ Removed incorrect 15-turn limit
-- ✅ Implemented correct end conditions: pouch empty OR ≤2 empty spaces
-- ✅ Added 3 random animal cards per game with scoring integration
-- ✅ Changed UI from turn counter to tokens-left counter
-- Game is now fully playable with official Harmonies solo mode rules!
+- ✅ Fixed game end detection (check for <9 tokens, not 0)
+- ✅ Added sun scoring calculation and display (1-8 suns based on score)
+- ✅ Sun thresholds: 40-69=1☀️, 70-89=2☀️, 90-109=3☀️, 110-129=4☀️, 130-139=5☀️, etc.
+- ✅ Shows bonus sun reminder for Side A at game end
+- Game fully implements official Harmonies solo mode rules with achievement tracking!
 
 **Next Steps**: 
 - Optional: Add animal cube placement mechanics (click hexes to place cubes)
