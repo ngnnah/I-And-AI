@@ -344,9 +344,10 @@
 
       /* Hex grid sizing */
       .hex-grid {
-        height: 280px !important;
+        height: 320px !important;
         max-width: 100% !important;
         margin-bottom: 0.5rem;
+        overflow: visible !important;
       }
 
       .hex {
@@ -369,8 +370,7 @@
       }
 
       .token-space h3 {
-        font-size: 0.625rem !important;
-        margin-bottom: 0.25rem;
+        display: none !important; /* Hide "Space 1/2/3" labels on mobile */
       }
 
       .token {
@@ -437,13 +437,13 @@
           <p class="text-sm text-slate-600">Build landscapes, attract animals, score points!</p>
         </div>
         
-        <!-- Game Stats -->
-        <div class="flex gap-4 items-center">
+        <!-- Game Stats (hidden on portrait mobile) -->
+        <div class="hidden md:flex gap-4 items-center">
           <div class="bg-blue-100 px-4 py-2 rounded-lg">
             <div class="text-xs text-blue-700 font-semibold">Tokens Left</div>
             <div id="pouch-counter" class="text-2xl font-bold text-blue-900">120</div>
           </div>
-          
+
           <div class="bg-purple-100 px-4 py-2 rounded-lg">
             <div class="text-xs text-purple-700 font-semibold">Score</div>
             <div class="flex items-center gap-2">
@@ -755,6 +755,7 @@
       availableAnimalCards: [], // 3 face-up cards available to take
       playerAnimalCards: [], // Cards player has taken (max 4)
       takenCardThisTurn: false, // Flag to prevent taking multiple cards per turn
+      discardedCardThisTurn: false, // Flag to prevent taking card after discarding
       discardMode: false, // Flag for discard & replace mode
       placedAnimals: [], // Array of {cardId, hexKey} for animal cube placements
       score: {
@@ -823,8 +824,8 @@
         return;
       }
       
-      const canTake = !gameState.takenCardThisTurn && gameState.playerAnimalCards.length < 4;
-      const canDiscard = !gameState.takenCardThisTurn; // Can discard if didn't take a card
+      const canTake = !gameState.takenCardThisTurn && !gameState.discardedCardThisTurn && gameState.playerAnimalCards.length < 4;
+      const canDiscard = !gameState.takenCardThisTurn && !gameState.discardedCardThisTurn; // Can discard if didn't take or discard
       
       // Show/hide discard buttons based on mode and availability
       if (discardBtnContainer) {
@@ -1161,39 +1162,45 @@
       }
     }
 
-    // Update token space UI
+    // Update token space UI (both desktop and mobile)
     function updateTokenSpaceUI(spaceIndex) {
-      const space = document.querySelector(`[data-space="${spaceIndex}"]`);
-      const tokensContainer = space.querySelector('.flex');
-      tokensContainer.innerHTML = '';
+      // Update ALL token spaces with this index (desktop and mobile)
+      const spaces = document.querySelectorAll(`[data-space="${spaceIndex}"]`);
 
       // Clear selection if token from this space was selected
       if (gameState.selectedToken && gameState.selectedToken.space === spaceIndex) {
         gameState.selectedToken = null;
       }
-      
-      gameState.tokenSupply[spaceIndex].forEach((color, idx) => {
-        const token = document.createElement('div');
-        token.className = `token ${color}`;
-        token.draggable = true;
-        token.dataset.color = color;
-        token.dataset.space = spaceIndex;
-        token.dataset.index = idx;
-        token.textContent = TOKEN_EMOJI[color];
-        
-        // Click handler for click-to-place (primary interaction)
-        token.addEventListener('click', handleTokenClick);
 
-        // Drag handlers (secondary, for those who prefer dragging)
-        token.addEventListener('dragstart', handleDragStart);
-        token.addEventListener('dragend', handleDragEnd);
+      spaces.forEach(space => {
+        const tokensContainer = space.querySelector('.flex');
+        if (!tokensContainer) return;
 
-        // Touch handlers for mobile
-        token.addEventListener('touchstart', handleTouchStart, { passive: false });
-        token.addEventListener('touchmove', handleTouchMove, { passive: false });
-        token.addEventListener('touchend', handleTouchEnd, { passive: false });
+        tokensContainer.innerHTML = '';
 
-        tokensContainer.appendChild(token);
+        gameState.tokenSupply[spaceIndex].forEach((color, idx) => {
+          const token = document.createElement('div');
+          token.className = `token ${color}`;
+          token.draggable = true;
+          token.dataset.color = color;
+          token.dataset.space = spaceIndex;
+          token.dataset.index = idx;
+          token.textContent = TOKEN_EMOJI[color];
+
+          // Click handler for click-to-place (primary interaction)
+          token.addEventListener('click', handleTokenClick);
+
+          // Drag handlers (secondary, for those who prefer dragging)
+          token.addEventListener('dragstart', handleDragStart);
+          token.addEventListener('dragend', handleDragEnd);
+
+          // Touch handlers for mobile
+          token.addEventListener('touchstart', handleTouchStart, { passive: false });
+          token.addEventListener('touchmove', handleTouchMove, { passive: false });
+          token.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+          tokensContainer.appendChild(token);
+        });
       });
     }
     
@@ -1745,12 +1752,17 @@
         showMessage('Game is over! Start a new game to play again.', 'error');
         return;
       }
-      
+
       if (gameState.takenCardThisTurn) {
         showMessage('❌ Already taken a card this turn!', 'error');
         return;
       }
-      
+
+      if (gameState.discardedCardThisTurn) {
+        showMessage('❌ Cannot take a card after discarding this turn!', 'error');
+        return;
+      }
+
       if (gameState.playerAnimalCards.length >= 4) {
         showMessage('❌ Maximum 4 animal cards! Complete some animals first.', 'error');
         return;
@@ -1814,11 +1826,12 @@
         gameState.availableAnimalCards.push(newCard);
       }
       
-      // Exit discard mode
+      // Exit discard mode and mark discard action for this turn
       gameState.discardMode = false;
-      
+      gameState.discardedCardThisTurn = true;
+
       displayAvailableAnimalCards();
-      
+
       showMessage(`🗑️ ${card.name} discarded and replaced!`, 'success');
     }
     
@@ -2038,8 +2051,9 @@
       // Reset tokens placed counter
       gameState.tokensPlaced = 0;
       gameState.takenCardThisTurn = false; // Reset card taking flag
+      gameState.discardedCardThisTurn = false; // Reset card discard flag
       gameState.discardMode = false; // Reset discard mode
-      
+
       // Refresh available cards display to show green borders again
       displayAvailableAnimalCards();
       
