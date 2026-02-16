@@ -336,13 +336,17 @@
         margin-top: 0.25rem;
       }
 
-      /* Hex grid sizing - tighter for mobile */
+      /* Hex grid sizing - tighter for mobile, properly centered */
       .hex-grid {
-        height: 240px !important;
+        height: 260px !important;
         max-width: 100% !important;
         margin-bottom: 0.5rem;
         overflow: visible !important;
         padding: 0.5rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: relative !important;
       }
 
       .hex {
@@ -352,21 +356,38 @@
         border-width: 1.5px !important;
       }
 
-      /* Token grid: 3×3 layout for easy selection */
-      .token-grid-3x3 {
-        display: grid !important;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
-        max-width: 100%;
-        margin: 0 auto;
+      /* Token spaces: 3 columns with distinct backgrounds */
+      .mobile-token-space {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.375rem;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        border: 3px solid #cbd5e1;
+        min-height: 180px;
+      }
+
+      .mobile-token-space[data-space="0"] {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-color: #f59e0b;
+      }
+
+      .mobile-token-space[data-space="1"] {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        border-color: #3b82f6;
+      }
+
+      .mobile-token-space[data-space="2"] {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        border-color: #10b981;
       }
 
       .token {
         width: 100% !important;
         aspect-ratio: 1 !important;
-        max-width: 70px !important;
         height: auto !important;
-        font-size: 32px !important;
+        font-size: 28px !important;
         border-radius: 8px !important;
         border-width: 3px !important;
         margin: 0 !important;
@@ -374,13 +395,14 @@
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
+        background: white !important;
       }
 
       .token.selected {
         border-color: #fbbf24 !important;
         border-width: 4px !important;
         transform: scale(1.05) !important;
-        box-shadow: 0 0 12px rgba(251, 191, 36, 0.6) !important;
+        box-shadow: 0 0 16px rgba(251, 191, 36, 0.8) !important;
       }
 
       /* Animal cards: horizontal scroll */
@@ -634,10 +656,18 @@
 
     </div>
 
-    <!-- Mobile-only: Token Grid (3×3) -->
-    <div class="md:hidden bg-white rounded-lg shadow-lg p-3 mt-2">
-      <div id="mobile-token-grid" class="token-grid-3x3">
-        <!-- 9 tokens will be rendered here in 3×3 grid -->
+    <!-- Mobile-only: Token Spaces (3 columns, clearly separated) -->
+    <div class="md:hidden bg-white rounded-lg shadow-lg p-2 mt-2">
+      <div class="flex gap-2">
+        <div id="mobile-space-0" class="mobile-token-space" data-space="0">
+          <!-- Space 1: 3 tokens stacked vertically -->
+        </div>
+        <div id="mobile-space-1" class="mobile-token-space" data-space="1">
+          <!-- Space 2: 3 tokens stacked vertically -->
+        </div>
+        <div id="mobile-space-2" class="mobile-token-space" data-space="2">
+          <!-- Space 3: 3 tokens stacked vertically -->
+        </div>
       </div>
     </div>
 
@@ -1037,6 +1067,7 @@
       // Detect hex size based on container width
       const container = document.getElementById('hex-grid-container');
       const containerWidth = container ? container.clientWidth : 800;
+      const containerHeight = container ? container.clientHeight : 600;
       const isPortraitMobile = containerWidth < 400;
       const isMobile = containerWidth < 500;
 
@@ -1050,10 +1081,15 @@
       const x = q * hexWidth * 0.75;
       const y = r * hexHeight + q * hexHeight * 0.5;
 
-      // Center in container
-      const centerX = containerWidth / 2;
-      const centerY = isPortraitMobile ? 110 : (isMobile ? 205 : 295);
-      
+      // Calculate grid bounds for proper centering
+      // For Harmonies board: q ranges from -3 to 3, r ranges from -2 to 2
+      const gridWidth = 6 * hexWidth * 0.75 + hexWidth; // 6 column shifts + 1 hex width
+      const gridHeight = 4 * hexHeight; // Approximate height span
+
+      // Center the entire grid in container
+      const centerX = (containerWidth - gridWidth) / 2 + hexWidth / 2;
+      const centerY = (containerHeight - gridHeight) / 2 + hexHeight / 2;
+
       return {
         x: x + centerX,
         y: y + centerY
@@ -1094,35 +1130,30 @@
       updateMobileTokenGrid();
     }
 
-    // Update mobile 3×3 token grid
+    // Update mobile token spaces (3 columns with 3 tokens each)
     function updateMobileTokenGrid() {
-      const grid = document.getElementById('mobile-token-grid');
-      if (!grid) return;
+      // Update each of the 3 spaces
+      for (let spaceIndex = 0; spaceIndex < 3; spaceIndex++) {
+        const spaceEl = document.getElementById(`mobile-space-${spaceIndex}`);
+        if (!spaceEl) continue;
 
-      grid.innerHTML = '';
+        spaceEl.innerHTML = '';
 
-      // Flatten all tokens from 3 spaces into single array
-      const allTokens = [];
-      for (let space = 0; space < 3; space++) {
-        gameState.tokenSupply[space].forEach((color, idx) => {
-          allTokens.push({ color, space, index: idx });
+        // Render tokens for this space
+        gameState.tokenSupply[spaceIndex].forEach((color, idx) => {
+          const token = document.createElement('div');
+          token.className = `token ${color}`;
+          token.dataset.color = color;
+          token.dataset.space = spaceIndex;
+          token.dataset.index = idx;
+          token.textContent = TOKEN_EMOJI[color];
+
+          // Single tap handler for mobile
+          token.addEventListener('click', handleTokenClickMobile);
+
+          spaceEl.appendChild(token);
         });
       }
-
-      // Render 9 tokens in 3×3 grid
-      allTokens.forEach((tokenData) => {
-        const token = document.createElement('div');
-        token.className = `token ${tokenData.color}`;
-        token.dataset.color = tokenData.color;
-        token.dataset.space = tokenData.space;
-        token.dataset.index = tokenData.index;
-        token.textContent = TOKEN_EMOJI[tokenData.color];
-
-        // Single tap handler for mobile
-        token.addEventListener('click', handleTokenClickMobile);
-
-        grid.appendChild(token);
-      });
     }
 
     // Handle mobile token click (single tap, no space selection needed)
@@ -1159,28 +1190,28 @@
 
     // Update mobile token selection visual
     function updateMobileTokenSelection() {
-      const grid = document.getElementById('mobile-token-grid');
-      if (!grid) return;
+      // Remove all selection styles from all mobile spaces
+      for (let i = 0; i < 3; i++) {
+        const spaceEl = document.getElementById(`mobile-space-${i}`);
+        if (!spaceEl) continue;
 
-      // Remove all selection styles
-      grid.querySelectorAll('.token').forEach(t => {
-        t.classList.remove('selected');
-      });
-
-      // Add selection to current token
-      if (gameState.selectedToken) {
-        grid.querySelectorAll('.token').forEach(t => {
-          const matches =
-            parseInt(t.dataset.space) === gameState.selectedToken.space &&
-            parseInt(t.dataset.index) === gameState.selectedToken.index;
-          if (matches) {
-            t.classList.add('selected');
-          }
+        spaceEl.querySelectorAll('.token').forEach(t => {
+          t.classList.remove('selected');
         });
+
+        // Add selection to current token
+        if (gameState.selectedToken && gameState.selectedToken.space === i) {
+          spaceEl.querySelectorAll('.token').forEach(t => {
+            const matches = parseInt(t.dataset.index) === gameState.selectedToken.index;
+            if (matches) {
+              t.classList.add('selected');
+            }
+          });
+        }
       }
     }
     
-    // Handle token click (double-tap on mobile, click on desktop)
+    // Handle token click (desktop only - mobile uses handleTokenClickMobile)
     function handleTokenClick(e) {
       e.stopPropagation(); // Prevent triggering space click
 
@@ -1192,24 +1223,9 @@
       const token = e.currentTarget;
       const spaceIndex = parseInt(token.dataset.space);
 
-      // Check for double-tap on mobile
-      const isMobile = window.innerWidth < 768;
-      if (isMobile && !isDoubleTap(token)) {
-        // First tap - just highlight
-        token.style.transform = 'scale(1.1)';
-        token.style.boxShadow = '0 0 8px #fbbf24';
-        setTimeout(() => {
-          if (!gameState.selectedToken || gameState.selectedToken.element !== token) {
-            token.style.transform = '';
-            token.style.boxShadow = '';
-          }
-        }, DOUBLE_TAP_DELAY);
-        return;
-      }
-
       // Check if space is selected
       if (gameState.selectedSpace === null) {
-        showMessage(`Select a token space first (${isMobile ? 'double-tap' : 'click'} the space background)!`, 'error');
+        showMessage('Select a token space first (click the space background)!', 'error');
         return;
       }
 
@@ -1232,7 +1248,7 @@
           gameState.selectedToken.index === tokenData.index) {
         gameState.selectedToken = null;
         updateTokenSelection();
-        showMessage(`Token deselected. ${isMobile ? 'Double-tap' : 'Click'} a token to select it.`, 'info');
+        showMessage('Token deselected. Click a token to select it.', 'info');
         return;
       }
 
@@ -1833,7 +1849,7 @@
       console.log('✅ Event listeners attached');
     }
     
-    // Handle space click (double-tap on mobile)
+    // Handle space click (desktop only - mobile uses 3x3 grid)
     function handleSpaceClick(e) {
       if (gameState.gameEnded) {
         showMessage('Game is over! Start a new game to play again.', 'error');
@@ -1841,20 +1857,6 @@
       }
 
       const space = e.currentTarget;
-
-      // Check for double-tap on mobile
-      const isMobile = window.innerWidth < 768;
-      if (isMobile && !isDoubleTap(space)) {
-        // First tap - just highlight
-        space.style.borderColor = '#fbbf24';
-        setTimeout(() => {
-          if (gameState.selectedSpace !== space.dataset.space) {
-            space.style.borderColor = '';
-          }
-        }, DOUBLE_TAP_DELAY);
-        return;
-      }
-
       const spaceId = space.dataset.space;
 
       // Deselect all spaces
@@ -1871,7 +1873,7 @@
       gameState.selectedToken = null;
       updateTokenSelection();
 
-      showMessage(`Space ${parseInt(spaceId) + 1} selected! ${isMobile ? 'Double-tap' : 'Click'} a token, then ${isMobile ? 'double-tap' : 'click'} a hex to place it.`, 'success');
+      showMessage(`Space ${parseInt(spaceId) + 1} selected! Click a token, then click a hex to place it.`, 'success');
     }
     
     // Handle taking an animal card from available pool
