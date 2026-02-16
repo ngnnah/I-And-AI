@@ -216,10 +216,21 @@
       
       <!-- Left Sidebar: Animal Cards -->
       <aside class="lg:col-span-1 space-y-4">
+        <!-- Your Animal Cards (Cards you've taken) -->
         <div class="bg-white rounded-lg shadow-lg p-4">
-          <h2 class="text-lg font-bold text-slate-800 mb-3">🐾 Animal Cards</h2>
-          <div id="animal-cards-container" class="space-y-3">
-            <!-- Animal cards will be dynamically inserted -->
+          <h2 class="text-lg font-bold text-slate-800 mb-2">🎯 Your Animal Cards</h2>
+          <p class="text-xs text-slate-500 mb-3">Max 4 cards - Click to select for placement</p>
+          <div id="player-animal-cards" class="space-y-2 min-h-[100px]">
+            <!-- Your taken animal cards appear here -->
+          </div>
+        </div>
+        
+        <!-- Available Animal Cards (Cards to take) -->
+        <div class="bg-white rounded-lg shadow-lg p-4">
+          <h2 class="text-lg font-bold text-slate-800 mb-2">🃏 Available Cards</h2>
+          <p class="text-xs text-slate-500 mb-3">Click to take a card (once per turn)</p>
+          <div id="available-animal-cards" class="space-y-2">
+            <!-- Available cards to take -->
           </div>
         </div>
         
@@ -376,7 +387,9 @@
       draggedToken: null,
       gameEnded: false, // Flag to disable gameplay after game over
       selectedAnimalCard: null, // Currently selected animal card for placement
-      animalCards: [], // 3 randomly selected animal cards for solo mode
+      availableAnimalCards: [], // 3 face-up cards available to take
+      playerAnimalCards: [], // Cards player has taken (max 4)
+      takenCardThisTurn: false, // Flag to prevent taking multiple cards per turn
       placedAnimals: [], // Array of {cardId, hexKey} for animal cube placements
       score: {
         trees: 0,
@@ -418,30 +431,70 @@
       selectAnimalCards();
       
       showMessage('Game ready! Side A board (23 hexes). Select a token space, then drag tokens.', 'success');
-      console.log('✅ Game ready! 23-hex board initialized with 3 animal cards.');
+      console.log('✅ Game ready! 23-hex board initialized with 3 available animal cards.');
     }
     
-    // Select 3 random animal cards for solo mode
+    // Select 3 random animal cards for available pool
     function selectAnimalCards() {
       const shuffled = [...ANIMAL_CARDS].sort(() => Math.random() - 0.5);
-      gameState.animalCards = shuffled.slice(0, 3);
-      displayAnimalCards();
+      gameState.availableAnimalCards = shuffled.slice(0, 3);
+      displayAvailableAnimalCards();
+      displayPlayerAnimalCards();
     }
     
-    // Display animal cards in UI
-    function displayAnimalCards() {
-      const container = document.getElementById('animal-cards-container');
+    // Display available animal cards (to take)
+    function displayAvailableAnimalCards() {
+      const container = document.getElementById('available-animal-cards');
       if (!container) return;
       
-      container.innerHTML = gameState.animalCards.map((card, idx) => {
+      if (gameState.availableAnimalCards.length === 0) {
+        container.innerHTML = '<div class="text-xs text-slate-400 text-center py-4">No cards available</div>';
+        return;
+      }
+      
+      container.innerHTML = gameState.availableAnimalCards.map((card, idx) => {
+        const canTake = !gameState.takenCardThisTurn && gameState.playerAnimalCards.length < 4;
+        const cursorClass = canTake ? 'cursor-pointer hover:border-green-400' : 'cursor-not-allowed opacity-50';
+        
+        return `
+          <div class="available-card bg-white rounded-lg p-2 shadow border-2 border-slate-300 transition ${cursorClass}" 
+               data-card-id="${card.id}"
+               data-card-idx="${idx}">
+            <div class="text-2xl text-center mb-1">${getAnimalEmoji(card.animal)}</div>
+            <div class="text-xs font-semibold text-slate-700 text-center">${card.name}</div>
+            <div class="text-xs text-slate-500 text-center mt-1">
+              ${card.pointsPerPlacement.join('→')} pts
+            </div>
+            ${canTake ? '<div class="text-xs text-green-600 text-center font-semibold">Click to take</div>' : ''}
+          </div>
+        `;
+      }).join('');
+      
+      // Add click handlers
+      document.querySelectorAll('.available-card').forEach(cardEl => {
+        cardEl.addEventListener('click', handleTakeAnimalCard);
+      });
+    }
+    
+    // Display player's animal cards (cards they've taken)
+    function displayPlayerAnimalCards() {
+      const container = document.getElementById('player-animal-cards');
+      if (!container) return;
+      
+      if (gameState.playerAnimalCards.length === 0) {
+        container.innerHTML = '<div class="text-xs text-slate-400 text-center py-4">Take a card from below!</div>';
+        return;
+      }
+      
+      container.innerHTML = gameState.playerAnimalCards.map((card, idx) => {
         const placementCount = gameState.placedAnimals.filter(p => p.cardId === card.id).length;
         const nextPoints = placementCount < card.maxPlacements ? card.pointsPerPlacement[placementCount] : null;
         
         return `
-          <div class="animal-card bg-white rounded-lg p-2 shadow border-2 border-slate-300 cursor-pointer hover:border-blue-400 transition" 
+          <div class="player-card bg-white rounded-lg p-2 shadow border-2 border-slate-300 cursor-pointer hover:border-blue-400 transition" 
                data-card-id="${card.id}"
                data-card-idx="${idx}">
-            <div class="text-2xl text-center mb-1">${card.animal === 'bear' ? '🐻' : card.animal === 'deer' ? '🦌' : card.animal === 'rabbit' ? '🐰' : card.animal === 'fox' ? '🦊' : card.animal === 'eagle' ? '🦅' : card.animal === 'beaver' ? '🦫' : card.animal === 'owl' ? '🦉' : card.animal === 'squirrel' ? '🐿️' : card.animal === 'salmon' ? '🐟' : '🦌'}</div>
+            <div class="text-2xl text-center mb-1">${getAnimalEmoji(card.animal)}</div>
             <div class="text-xs font-semibold text-slate-700 text-center">${card.name}</div>
             <div class="text-xs text-slate-500 text-center mt-1">
               ${placementCount}/${card.maxPlacements} placed
@@ -451,13 +504,30 @@
         `;
       }).join('');
       
-      // Add click handlers to animal cards
-      document.querySelectorAll('.animal-card').forEach(cardEl => {
-        cardEl.addEventListener('click', handleAnimalCardClick);
+      // Add click handlers
+      document.querySelectorAll('.player-card').forEach(cardEl => {
+        cardEl.addEventListener('click', handleSelectPlayerCard);
       });
       
       // Highlight selected card
       updateSelectedAnimalCardUI();
+    }
+    
+    // Helper to get animal emoji
+    function getAnimalEmoji(animal) {
+      const emojiMap = {
+        'bear': '🐻',
+        'deer': '🦌',
+        'rabbit': '🐰',
+        'fox': '🦊',
+        'eagle': '🦅',
+        'beaver': '🦫',
+        'owl': '🦉',
+        'squirrel': '🐿️',
+        'salmon': '🐟',
+        'wolf': '🐺'
+      };
+      return emojiMap[animal] || '🦌';
     }
     
     // Reposition all hexes (for window resize)
@@ -786,7 +856,7 @@
         placedAnimals: gameState.placedAnimals
       };
       
-      const result = calculateTotalScore(playerBoard, gameState.animalCards, 'A');
+      const result = calculateTotalScore(playerBoard, gameState.playerAnimalCards, 'A');
       gameState.score = {
         trees: result.breakdown.trees,
         mountains: result.breakdown.mountains,
@@ -884,8 +954,54 @@
       showMessage(`Space ${parseInt(spaceId) + 1} selected! Drag tokens to your board.`, 'success');
     }
     
-    // Handle animal card click
-    function handleAnimalCardClick(e) {
+    // Handle taking an animal card from available pool
+    function handleTakeAnimalCard(e) {
+      if (gameState.gameEnded) {
+        showMessage('Game is over! Start a new game to play again.', 'error');
+        return;
+      }
+      
+      if (gameState.takenCardThisTurn) {
+        showMessage('❌ Already taken a card this turn!', 'error');
+        return;
+      }
+      
+      if (gameState.playerAnimalCards.length >= 4) {
+        showMessage('❌ Maximum 4 animal cards! Complete some animals first.', 'error');
+        return;
+      }
+      
+      const cardEl = e.currentTarget;
+      const cardId = cardEl.dataset.cardId;
+      const card = gameState.availableAnimalCards.find(c => c.id === cardId);
+      
+      if (!card) return;
+      
+      // Move card from available to player's hand
+      const cardIndex = gameState.availableAnimalCards.findIndex(c => c.id === cardId);
+      gameState.availableAnimalCards.splice(cardIndex, 1);
+      gameState.playerAnimalCards.push(card);
+      gameState.takenCardThisTurn = true;
+      
+      // Draw replacement card if available
+      const remainingCards = ANIMAL_CARDS.filter(c => 
+        !gameState.availableAnimalCards.some(ac => ac.id === c.id) &&
+        !gameState.playerAnimalCards.some(pc => pc.id === c.id)
+      );
+      
+      if (remainingCards.length > 0) {
+        const newCard = remainingCards[Math.floor(Math.random() * remainingCards.length)];
+        gameState.availableAnimalCards.push(newCard);
+      }
+      
+      displayAvailableAnimalCards();
+      displayPlayerAnimalCards();
+      
+      showMessage(`🎯 ${card.name} taken! Click it to place animal cubes.`, 'success');
+    }
+    
+    // Handle selecting a player's animal card for placement
+    function handleSelectPlayerCard(e) {
       if (gameState.gameEnded) {
         showMessage('Game is over! Start a new game to play again.', 'error');
         return;
@@ -893,7 +1009,7 @@
       
       const cardEl = e.currentTarget;
       const cardId = cardEl.dataset.cardId;
-      const card = gameState.animalCards.find(c => c.id === cardId);
+      const card = gameState.playerAnimalCards.find(c => c.id === cardId);
       
       if (!card) return;
       
@@ -919,7 +1035,7 @@
     
     // Update UI to show selected animal card
     function updateSelectedAnimalCardUI() {
-      document.querySelectorAll('.animal-card').forEach(cardEl => {
+      document.querySelectorAll('.player-card').forEach(cardEl => {
         const cardId = cardEl.dataset.cardId;
         if (cardId === gameState.selectedAnimalCard) {
           cardEl.classList.add('ring-4', 'ring-blue-500');
@@ -953,7 +1069,7 @@
         gameState.placedAnimals.splice(existingAnimalIndex, 1);
         updateHexDisplay(hexEl, hexData);
         updateScore();
-        displayAnimalCards(); // Refresh to update placement counts
+        displayPlayerAnimalCards(); // Refresh to update placement counts
         showMessage('🐾 Animal cube removed!', 'info');
         return;
       }
@@ -965,7 +1081,7 @@
       }
       
       // Get selected animal card
-      const card = gameState.animalCards.find(c => c.id === gameState.selectedAnimalCard);
+      const card = gameState.playerAnimalCards.find(c => c.id === gameState.selectedAnimalCard);
       if (!card) return;
       
       // Check if pattern matches
@@ -991,7 +1107,7 @@
       
       updateHexDisplay(hexEl, hexData);
       updateScore();
-      displayAnimalCards(); // Refresh to update placement counts
+      displayPlayerAnimalCards(); // Refresh to update placement counts
       
       const newCount = placementCount + 1;
       const points = card.pointsPerPlacement[newCount - 1];
@@ -1029,6 +1145,7 @@
       
       // Reset tokens placed counter
       gameState.tokensPlaced = 0;
+      gameState.takenCardThisTurn = false; // Reset card taking flag
       
       // Check for game end BEFORE attempting to refresh
       // Must have at least 9 tokens to refill all 3 spaces (3 spaces × 3 tokens)
