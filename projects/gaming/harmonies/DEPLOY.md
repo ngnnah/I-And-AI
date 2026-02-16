@@ -1,8 +1,14 @@
 # Harmonies Deployment Guide
 
+## File Structure
+
+- **Main game**: `index.html` (v5.0 - fully functional solo mode)
+- **Public URL**: https://ngnnah.github.io/I-And-AI/projects/gaming/harmonies/
+- **Backup**: `index-v4-backup.html` (old Phaser version)
+
 ## Sync to Public Directory
 
-Use this command to sync game files to public while excluding documentation:
+Run from repository root:
 
 ```bash
 rsync -av --delete \
