@@ -1136,6 +1136,16 @@
       // Update counters
       gameState.tokensPlaced++;
 
+      // After placing first token, discard tokens from other spaces
+      if (gameState.tokensPlaced === 1) {
+        for (let i = 0; i < 3; i++) {
+          if (i !== space) {
+            gameState.tokenSupply[i] = [];
+            updateTokenSpaceUI(i);
+          }
+        }
+      }
+
       // Update score
       updateScore();
 
@@ -1237,13 +1247,23 @@
       const { space, index } = gameState.draggedToken;
       gameState.tokenSupply[space].splice(index, 1);
       updateTokenSpaceUI(space);
-      
+
       // Update counters
       gameState.tokensPlaced++;
-      
+
+      // After placing first token, discard tokens from other spaces
+      if (gameState.tokensPlaced === 1) {
+        for (let i = 0; i < 3; i++) {
+          if (i !== space) {
+            gameState.tokenSupply[i] = [];
+            updateTokenSpaceUI(i);
+          }
+        }
+      }
+
       // Update score
       updateScore();
-      
+
       // Check if board is almost full (only check this during placement, not pouch)
       const filledHexes = Object.values(gameState.hexBoard).filter(hex => hex.stack.length > 0).length;
       const emptyHexes = 23 - filledHexes;
@@ -1593,6 +1613,16 @@
 
       // Update counters
       gameState.tokensPlaced++;
+
+      // After placing first token, discard tokens from other spaces
+      if (gameState.tokensPlaced === 1) {
+        for (let i = 0; i < 3; i++) {
+          if (i !== space) {
+            gameState.tokenSupply[i] = [];
+            updateTokenSpaceUI(i);
+          }
+        }
+      }
 
       // Update score
       updateScore();
