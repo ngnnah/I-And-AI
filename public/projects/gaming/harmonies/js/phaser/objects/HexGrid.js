@@ -53,6 +53,7 @@ export default class HexGrid extends Phaser.GameObjects.Container {
     hex.setData('coord', { q, r });
     hex.setData('terrain', terrain);
     hex.setData('isExpansion', isExpansion);
+    hex.setScrollFactor(0); // Fix to screen
 
     // Draw hexagon
     this.drawHex(hex, pos.x, pos.y, terrain, isExpansion);
@@ -63,6 +64,7 @@ export default class HexGrid extends Phaser.GameObjects.Container {
     dropZone.setData('coord', { q, r });
     dropZone.setData('terrain', terrain);
     dropZone.setData('isExpansion', isExpansion);
+    dropZone.setScrollFactor(0); // Fix to screen
 
     // Add to container
     this.add(hex);
@@ -77,8 +79,11 @@ export default class HexGrid extends Phaser.GameObjects.Container {
         align: 'center'
       });
       label.setOrigin(0.5);
+      label.setScrollFactor(0); // Fix to screen
       this.add(label);
     }
+
+    console.log('[HexGrid] Added hex at', q, r, '| screen pos:', pos.x, pos.y, '| terrain:', terrain);
 
     return hex;
   }
@@ -217,6 +222,7 @@ export default class HexGrid extends Phaser.GameObjects.Container {
 
       tokenSprite.setStrokeStyle(2, 0x333333);
       tokenSprite.setDepth(index + 1); // Stack depth
+      tokenSprite.setScrollFactor(0); // Fix to screen
 
       this.add(tokenSprite);
       tokenSprites.push(tokenSprite);

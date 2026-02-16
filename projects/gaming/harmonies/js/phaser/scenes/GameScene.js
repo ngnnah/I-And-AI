@@ -47,113 +47,65 @@ export default class GameScene extends Phaser.Scene {
   create() {
     console.log('[GameScene] Game scene created');
 
-    const width = this.cameras.main.width;
-    const height = this.cameras.main.height;
+    const width = this.cameras.main.width;  // 1920
+    const height = this.cameras.main.height; // 1080
 
-    // Background
-    this.add.rectangle(0, 0, width, height, 0xffffff).setOrigin(0);
+    // Background (fixed to camera viewport)
+    const bg = this.add.rectangle(0, 0, width, height, 0xecf0f1).setOrigin(0);
+    bg.setScrollFactor(0);
 
-    // Camera setup (for pan/zoom)
+    // === LAYOUT STRUCTURE ===
+    // Top: Header bar + Central Board (120px height)
+    // Left: Animal Cards sidebar (250px width)
+    // Right: Score panel sidebar (250px width)
+    // Center: Hex grid (playable area) - SCREEN-FIXED
+    // Bottom: Turn UI panel (150px height)
+
+    // Camera setup (disabled - everything is screen-fixed now)
     this.setupCamera();
 
-    // Create HexGrid (Phase 2: proper hex rendering)
-    this.hexGrid = new HexGrid(this, 0, 0);
+    // Create hex grid in center playable area (screen coordinates)
+    // Playable area: x: 250 to 1670, y: 120 to 930
+    // Center: x = 960 (250 + 1420/2), y = 525 (120 + 810/2)
+    const gridCenterX = 250 + (1420 / 2); // 960
+    const gridCenterY = 120 + (810 / 2);  // 525
+    console.log('[GameScene] Creating hex grid at screen position:', gridCenterX, gridCenterY);
+    this.hexGrid = new HexGrid(this, gridCenterX, gridCenterY);
+    this.hexGrid.setScrollFactor(0); // CRITICAL: Fix to screen, not world
 
-    // Create Central Board (token supply) - 3 spaces for solo, 5 for multiplayer
-    this.centralBoard = new CentralBoard(this, -300, -400, this.isSolo);
-    this.centralBoard.setScrollFactor(0); // Fixed to camera
+    // Create UI layers (all fixed to camera, not scrollable)
+    this.createHeaderBar();
+    this.createCentralBoard();
+    this.createLeftSidebar();
+    this.createRightSidebar();
+    this.createBottomPanel();
 
     // Load initial game state
     this.loadInitialState();
-
-    // UI Layer
-    this.createUI();
-    
-    // Turn management UI
-    this.createTurnUI();
-    
-    // Listen for central board space selection
-    this.events.on('centralSpaceSelected', this.onSpaceSelected, this);
 
     // Test token supply
     this.testCentralBoard();
 
     // Setup drag and drop
     this.setupDragAndDrop();
+    
+    // Listen for central board space selection
+    this.events.on('centralSpaceSelected', this.onSpaceSelected, this);
 
-    // Back to lobby button (for testing)
-    const backButton = this.add.text(20, 20, '← Back to Lobby', {
-      fontSize: '18px',
-      fill: '#3498db'
-    });
-    backButton.setInteractive({ useHandCursor: true });
-    backButton.setScrollFactor(0);
-    backButton.on('pointerdown', () => {
-      console.log('[GameScene] Returning to lobby...');
-      this.scene.start('LobbyScene');
-    });
-
-    // End game button (for testing)
-    const endButton = this.add.text(20, 50, '🏆 End Game', {
-      fontSize: '18px',
-      fill: '#f39c12'
-    });
-    endButton.setInteractive({ useHandCursor: true });
-    endButton.setScrollFactor(0);
-    endButton.on('pointerdown', () => {
-      console.log('[GameScene] Ending game...');
-      this.triggerEndGame();
-    });
-
-    // Controls hint
-    const controlsHint = this.add.text(20, height - 30, 'Controls: Arrows=Pan | Wheel=Zoom | SPACE=Recenter', {
-      fontSize: '14px',
-      fill: '#7f8c8d',
-      backgroundColor: 'rgba(255,255,255,0.8)',
-      padding: { x: 8, y: 4 }
-    });
-    controlsHint.setScrollFactor(0);
-
-    console.log('[GameScene] ✅ GameScene ready! Camera, hex grid placeholder, and UI initialized.');
+    console.log('[GameScene] ✅ GameScene ready with organized layout!');
   }
 
   setupCamera() {
-    // Set camera bounds (large enough for expanding hex grid)
-    this.cameras.main.setBounds(-2000, -2000, 4000, 4000);
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+    
+    // Camera is now static - everything is screen-fixed
+    // No bounds or scrolling needed since hex grid is fixed to screen
+    // Keep camera at default position (looking at top-left of world)
+    console.log('[GameScene] Camera setup complete (static mode - all elements screen-fixed)');
 
-    // Center camera on world origin (0, 0) where hexes will be placed
-    this.cameras.main.centerOn(0, 0);
-
-    // Enable camera controls (for testing)
-    this.cursors = this.input.keyboard.createCursorKeys();
-
-    // Mouse wheel zoom with smooth centering
-    this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
-      const oldZoom = this.cameras.main.zoom;
-
-      if (deltaY > 0) {
-        this.cameras.main.zoom *= 0.9; // Zoom out
-      } else {
-        this.cameras.main.zoom *= 1.1; // Zoom in
-      }
-
-      this.cameras.main.zoom = Phaser.Math.Clamp(this.cameras.main.zoom, 0.3, 2);
-
-      // Zoom toward mouse pointer position
-      const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-      const zoomRatio = this.cameras.main.zoom / oldZoom;
-
-      this.cameras.main.scrollX += (worldPoint.x - this.cameras.main.scrollX) * (1 - zoomRatio);
-      this.cameras.main.scrollY += (worldPoint.y - this.cameras.main.scrollY) * (1 - zoomRatio);
-    });
-
-    // Middle mouse button or Space to recenter camera
-    this.input.keyboard.on('keydown-SPACE', () => {
-      this.cameras.main.centerOn(0, 0);
-      console.log('[GameScene] Camera recentered to (0, 0)');
-    });
-
-    console.log('[GameScene] Camera setup complete (pan with arrows, zoom with wheel, recenter with SPACE)');
+    // Camera controls disabled - everything is screen-fixed now
+    // (No panning, no zooming - static layout)
   }
 
   loadInitialState() {
@@ -188,7 +140,259 @@ export default class GameScene extends Phaser.Scene {
     console.log('[GameScene] ✅ Central board populated with test tokens (', numSpaces, 'spaces)');
   }
 
-  createUI() {
+  createHeaderBar() {
+    const width = this.cameras.main.width;
+    
+    // Header background (dark blue)
+    const headerBg = this.add.rectangle(0, 0, width, 80, 0x2c3e50).setOrigin(0);
+    headerBg.setScrollFactor(0);
+    
+    // Game title
+    this.add.text(width / 2, 40, 'HARMONIES - Solo Mode', {
+      fontSize: '32px',
+      fill: '#ecf0f1',
+      fontStyle: 'bold'
+    }).setOrigin(0.5).setScrollFactor(0);
+    
+    // Turn display (top right)
+    this.turnText = this.add.text(width - 20, 40, `Turn ${this.currentTurn}/15`, {
+      fontSize: '24px',
+      fill: '#f39c12',
+      fontStyle: 'bold'
+    }).setOrigin(1, 0.5).setScrollFactor(0);
+    
+    // Back button (top left)
+    const backBtn = this.add.text(20, 40, '← Lobby', {
+      fontSize: '18px',
+      fill: '#3498db'
+    }).setOrigin(0, 0.5).setScrollFactor(0);
+    backBtn.setInteractive({ useHandCursor: true });
+    backBtn.on('pointerdown', () => this.scene.start('LobbyScene'));
+    
+    // End game button
+    const endBtn = this.add.text(120, 40, '🏆 End', {
+      fontSize: '18px',
+      fill: '#e74c3c'
+    }).setOrigin(0, 0.5).setScrollFactor(0);
+    endBtn.setInteractive({ useHandCursor: true });
+    endBtn.on('pointerdown', () => this.triggerEndGame());
+    
+    console.log('[GameScene] Header bar created');
+  }
+
+  createCentralBoard() {
+    const width = this.cameras.main.width;
+    
+    // Central board positioned at top center, below header
+    // Position: (750, 100) for container origin, spaces will be relative to this
+    const boardX = width / 2 - 210;
+    const boardY = 180; // Move down to make room for label
+    
+    console.log('[GameScene] Creating central board at:', boardX, boardY);
+    this.centralBoard = new CentralBoard(this, boardX, boardY, this.isSolo);
+    
+    // CRITICAL: Set scroll factor on container AND all its children
+    this.centralBoard.setScrollFactor(0);
+    this.centralBoard.each((child) => {
+      if (child.setScrollFactor) {
+        child.setScrollFactor(0);
+      }
+    });
+    
+    // Label above central board
+    this.add.text(width / 2, 150, 'TOKEN SUPPLY', {
+      fontSize: '16px',
+      fill: '#2c3e50',
+      fontStyle: 'bold'
+    }).setOrigin(0.5).setScrollFactor(0);
+    
+    console.log('[GameScene] Central board created. Board bounds:', 
+      'X:', boardX, 'to', boardX + (140 * 3), 
+      'Y:', boardY - 60, 'to', boardY + 60);
+  }
+
+  createLeftSidebar() {
+    const height = this.cameras.main.height;
+    
+    // Sidebar background
+    const sidebarBg = this.add.rectangle(0, 80, 250, height - 80, 0x34495e, 0.95).setOrigin(0);
+    sidebarBg.setScrollFactor(0);
+    
+    // Title
+    this.add.text(125, 100, 'ANIMAL CARDS', {
+      fontSize: '18px',
+      fill: '#ecf0f1',
+      fontStyle: 'bold'
+    }).setOrigin(0.5).setScrollFactor(0);
+    
+    // Select 3 random animal cards for solo mode
+    const numCards = this.isSolo ? 3 : 5;
+    const shuffled = [...ANIMAL_CARDS].sort(() => Math.random() - 0.5);
+    this.animalCards = shuffled.slice(0, numCards);
+    
+    // Display cards vertically
+    this.animalCards.forEach((card, i) => {
+      const y = 140 + i * 120;
+      
+      // Card background
+      const bg = this.add.rectangle(125, y, 220, 100, 0x8e44ad, 0.9);
+      bg.setScrollFactor(0);
+      bg.setStrokeStyle(2, 0x6c3483);
+      
+      // Card name
+      const name = this.add.text(125, y - 30, card.name, {
+        fontSize: '14px',
+        fill: '#ffffff',
+        fontStyle: 'bold',
+        wordWrap: { width: 200 }
+      });
+      name.setOrigin(0.5).setScrollFactor(0);
+      
+      // Pattern info (simplified)
+      const patternInfo = card.pattern.map(p => p.terrain).join('+');
+      const pattern = this.add.text(125, y, patternInfo, {
+        fontSize: '11px',
+        fill: '#ecf0f1',
+        wordWrap: { width: 200 }
+      });
+      pattern.setOrigin(0.5).setScrollFactor(0);
+      
+      // Max points
+      const maxPoints = card.pointsPerPlacement[card.pointsPerPlacement.length - 1];
+      const points = this.add.text(125, y + 25, `Max: ${maxPoints}pts`, {
+        fontSize: '13px',
+        fill: '#f39c12',
+        fontStyle: 'bold'
+      });
+      points.setOrigin(0.5).setScrollFactor(0);
+    });
+    
+    console.log('[GameScene] Left sidebar created with', this.animalCards.length, 'cards');
+  }
+
+  createRightSidebar() {
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+    
+    // Sidebar background
+    const sidebarBg = this.add.rectangle(width - 250, 80, 250, height - 80, 0x2c3e50, 0.95).setOrigin(0);
+    sidebarBg.setScrollFactor(0);
+    
+    // Title
+    this.add.text(width - 125, 100, 'SCORE', {
+      fontSize: '20px',
+      fill: '#f39c12',
+      fontStyle: 'bold'
+    }).setOrigin(0.5).setScrollFactor(0);
+    
+    // Total score (large)
+    this.totalScoreText = this.add.text(width - 125, 140, '0', {
+      fontSize: '48px',
+      fill: '#2ecc71',
+      fontStyle: 'bold'
+    });
+    this.totalScoreText.setOrigin(0.5).setScrollFactor(0);
+    
+    // Category scores
+    const categories = [
+      { label: 'Trees', key: 'trees', icon: '🌳' },
+      { label: 'Mountains', key: 'mountains', icon: '⛰️' },
+      { label: 'Fields', key: 'fields', icon: '🌾' },
+      { label: 'Buildings', key: 'buildings', icon: '🏘️' },
+      { label: 'Water', key: 'water', icon: '💧' },
+      { label: 'Animals', key: 'animals', icon: '🦊' }
+    ];
+    
+    this.categoryTexts = {};
+    const startY = 200;
+    
+    categories.forEach((cat, i) => {
+      const y = startY + (i * 45);
+      
+      // Icon + Label
+      const label = this.add.text(width - 220, y, `${cat.icon} ${cat.label}`, {
+        fontSize: '14px',
+        fill: '#bdc3c7'
+      });
+      label.setOrigin(0, 0.5).setScrollFactor(0);
+      
+      // Value
+      const value = this.add.text(width - 30, y, '0', {
+        fontSize: '18px',
+        fill: '#ecf0f1',
+        fontStyle: 'bold'
+      });
+      value.setOrigin(1, 0.5).setScrollFactor(0);
+      
+      this.categoryTexts[cat.key] = value;
+    });
+    
+    console.log('[GameScene] Right sidebar created with score panel');
+  }
+
+  createBottomPanel() {
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+    
+    // Panel background
+    const panelBg = this.add.rectangle(0, height - 150, width, 150, 0x34495e, 0.95).setOrigin(0);
+    panelBg.setScrollFactor(0);
+    panelBg.setStrokeStyle(3, 0x2c3e50);
+    
+    // Instruction text (large, centered)
+    this.instructionText = this.add.text(width / 2, height - 110, 
+      'Select a token space from the central board', {
+      fontSize: '22px',
+      fill: '#ecf0f1',
+      align: 'center',
+      fontStyle: 'bold'
+    });
+    this.instructionText.setOrigin(0.5).setScrollFactor(0);
+    
+    // Token counter
+    this.tokenCounterText = this.add.text(width / 2, height - 70, 
+      'Tokens to place: 3', {
+      fontSize: '18px',
+      fill: '#95a5a6',
+      align: 'center'
+    });
+    this.tokenCounterText.setOrigin(0.5).setScrollFactor(0);
+    
+    // End Turn button (centered, initially hidden)
+    this.endTurnButton = this.add.text(width / 2, height - 30, '[ END TURN ]', {
+      fontSize: '24px',
+      fill: '#27ae60',
+      fontStyle: 'bold',
+      backgroundColor: '#1a1a1a',
+      padding: { x: 20, y: 10 }
+    });
+    this.endTurnButton.setOrigin(0.5).setScrollFactor(0);
+    this.endTurnButton.setInteractive({ useHandCursor: true });
+    this.endTurnButton.setVisible(false);
+
+    this.endTurnButton.on('pointerover', () => {
+      this.endTurnButton.setStyle({ fill: '#2ecc71' });
+    });
+
+    this.endTurnButton.on('pointerout', () => {
+      this.endTurnButton.setStyle({ fill: '#27ae60' });
+    });
+
+    this.endTurnButton.on('pointerdown', () => {
+      this.endTurn();
+    });
+    
+    // Controls hint (bottom left)
+    this.add.text(20, height - 20, 'Drag tokens to hex grid | Click spaces to select tokens', {
+      fontSize: '12px',
+      fill: '#7f8c8d'
+    }).setOrigin(0, 1).setScrollFactor(0);
+    
+    console.log('[GameScene] Bottom panel created');
+  }
+
+  // OLD METHODS BELOW - DEPRECATED - TODO: Remove after testing
+  createUI_OLD() {
     const width = this.cameras.main.width;
 
     // Top UI bar
@@ -204,15 +408,15 @@ export default class GameScene extends Phaser.Scene {
     gameInfo.setScrollFactor(0);
 
     // Score panel (right side)
-    this.createScorePanel();
+    this.createScorePanel_OLD();
     
     // Animal cards (left side)
-    this.createAnimalCards();
+    this.createAnimalCards_OLD();
 
-    console.log('[GameScene] UI layer created');
+    console.log('[GameScene] UI layer created (OLD)');
   }
 
-  createAnimalCards() {
+  createAnimalCards_OLD() {
     // Select 3 random animal cards for solo mode
     const numCards = this.isSolo ? 3 : 5;
     const shuffled = [...ANIMAL_CARDS].sort(() => Math.random() - 0.5);
@@ -262,10 +466,10 @@ export default class GameScene extends Phaser.Scene {
       points.setScrollFactor(0);
     });
     
-    console.log('[GameScene] Animal cards displayed:', this.animalCards.length);
+    console.log('[GameScene] Animal cards displayed (OLD):', this.animalCards.length);
   }
 
-  createScorePanel() {
+  createScorePanel_OLD() {
     const width = this.cameras.main.width;
     
     // Score panel background
@@ -354,7 +558,7 @@ export default class GameScene extends Phaser.Scene {
     console.log('[GameScene] Score updated:', total, scores);
   }
 
-  createTurnUI() {
+  createTurnUI_OLD() {
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
 
@@ -420,17 +624,17 @@ export default class GameScene extends Phaser.Scene {
 
   onSpaceSelected(spaceIndex) {
     if (this.turnPhase !== 'SELECT_SPACE') {
-      console.log('[GameScene] Cannot select space - already selected');
+      console.log('[GameScene] ⚠️  Cannot select space - current phase:', this.turnPhase);
       return;
     }
 
-    console.log('[GameScene] Space', spaceIndex, 'selected');
+    console.log('[GameScene] ✅ Space', spaceIndex, 'selected');
     this.selectedSpace = spaceIndex;
 
     // Get tokens from central board (from current state)
     const numSpaces = this.isSolo ? 3 : 5;
     if (!this.centralBoardState || spaceIndex >= numSpaces) {
-      console.error('[GameScene] Invalid space selection');
+      console.error('[GameScene] ❌ Invalid space selection');
       return;
     }
 
@@ -438,28 +642,46 @@ export default class GameScene extends Phaser.Scene {
     this.tokensPlaced = 0;
     this.turnPhase = 'PLACE_TOKEN_1';
 
+    console.log('[GameScene] ✅ Tokens to place:', this.tokensToPlace);
+    console.log('[GameScene] ✅ First token:', this.tokensToPlace[0]);
+    
     this.updateTurnUI();
-
-    console.log('[GameScene] Tokens to place:', this.tokensToPlace);
   }
 
   updateTurnUI() {
     const instructions = {
       'SELECT_SPACE': 'Select a token space from the central board',
-      'PLACE_TOKEN_1': `Place token 1/3 (${this.tokensToPlace[0]?.color || 'unknown'})`,
-      'PLACE_TOKEN_2': `Place token 2/3 (${this.tokensToPlace[1]?.color || 'unknown'})`,
-      'PLACE_TOKEN_3': `Place token 3/3 (${this.tokensToPlace[2]?.color || 'unknown'})`,
+      'PLACE_TOKEN_1': `Place token 1/3 (${this.tokensToPlace[0]?.color || 'unknown'}) - drag to hex`,
+      'PLACE_TOKEN_2': `Place token 2/3 (${this.tokensToPlace[1]?.color || 'unknown'}) - drag to hex`,
+      'PLACE_TOKEN_3': `Place token 3/3 (${this.tokensToPlace[2]?.color || 'unknown'}) - drag to hex`,
       'TURN_END': 'All tokens placed! End your turn.'
     };
 
-    this.instructionText.setText(instructions[this.turnPhase] || 'Unknown phase');
-    this.tokenCounterText.setText(`Tokens placed: ${this.tokensPlaced}/3`);
+    const newInstruction = instructions[this.turnPhase] || 'Unknown phase';
+    console.log('[GameScene] 🔄 Updating UI - Phase:', this.turnPhase, '| Text:', newInstruction);
+    
+    if (this.instructionText) {
+      this.instructionText.setText(newInstruction);
+      console.log('[GameScene] ✅ Instruction text updated');
+    } else {
+      console.error('[GameScene] ❌ instructionText is undefined!');
+    }
+    
+    if (this.tokenCounterText) {
+      this.tokenCounterText.setText(`Tokens placed: ${this.tokensPlaced}/3`);
+      console.log('[GameScene] ✅ Token counter updated');
+    } else {
+      console.error('[GameScene] ❌ tokenCounterText is undefined!');
+    }
 
     // Show end turn button when all tokens placed
-    if (this.turnPhase === 'TURN_END') {
-      this.endTurnButton.setVisible(true);
-    } else {
-      this.endTurnButton.setVisible(false);
+    if (this.endTurnButton) {
+      if (this.turnPhase === 'TURN_END') {
+        this.endTurnButton.setVisible(true);
+        console.log('[GameScene] ✅ End turn button shown');
+      } else {
+        this.endTurnButton.setVisible(false);
+      }
     }
   }
 
@@ -774,19 +996,6 @@ export default class GameScene extends Phaser.Scene {
   }
 
   update() {
-    // Camera pan with arrow keys
-    const speed = 5 / this.cameras.main.zoom;
-    if (this.cursors.left.isDown) {
-      this.cameras.main.scrollX -= speed;
-    }
-    if (this.cursors.right.isDown) {
-      this.cameras.main.scrollX += speed;
-    }
-    if (this.cursors.up.isDown) {
-      this.cameras.main.scrollY -= speed;
-    }
-    if (this.cursors.down.isDown) {
-      this.cameras.main.scrollY += speed;
-    }
+    // No camera updates needed - static layout
   }
 }

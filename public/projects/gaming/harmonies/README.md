@@ -1,119 +1,44 @@
 # Harmonies v4.0 - Phaser.js Implementation
 
-**Status:** Phase 0 (Proof of Concept)
+**Status:** ✅ PLAYABLE - Solo Mode Complete!
 **Date Started:** 2026-02-16
+**Date Completed:** 2026-02-16
 
 ---
 
-## Phase 0: Proof of Concept ✅ COMPLETE
+## 🎮 PLAY NOW!
 
-**Goal:** Verify Phaser.js can render hexagons correctly
+**Server must be running on port 8001:**
 
-**Test File:** [phaser-hex-test.html](./phaser-hex-test.html)
+```bash
+cd /Users/nhat/repo-fun/I-And-AI/projects/gaming/harmonies
+python3 -m http.server 8001
+```
 
-**Result:** ✅ SUCCESS - 7 hexagons render correctly (centered, visible, interactive)
+**Then open:** http://localhost:8001/index.html
 
----
-
-## Phase 1: Game Structure ✅ COMPLETE
-
-**Goal:** Create Phaser scenes, config, and basic architecture
-
-**Main File:** [index.html](./index.html)
-
-**Running:** http://localhost:8081/index.html
-
-### What Should You See?
-
-✅ **7 hexagons** rendered on white background:
-
-- 1 blue center hex labeled "Center 0,0"
-- 6 gray neighbor hexes with coordinates (1,0), (1,-1), (0,-1), (-1,0), (-1,1), (0,1)
-
-✅ **Centered on screen** - no tiny hexes at bottom-right corner (v3.0 bug fixed!)
-
-✅ **Interactive** - hover over hexes → they turn green
-
-✅ **Console logs** - open DevTools to see "[Phase 0]" messages
-
-### Success Criteria
-
-- [x] Hexes are clearly visible (not tiny)
-- [x] Hexes are centered (not at bottom-right)
-- [x] Hover interaction works (hexes turn green)
-- [x] No console errors
-- [x] Ready to proceed to Phase 1
+**See:** [PLAYING-GUIDE.md](./PLAYING-GUIDE.md) for complete instructions!
 
 ---
 
-### What's Working in Phase 1:
+## ✅ WHAT'S WORKING
 
-✅ **Phaser Scenes:**
+### All Core Gameplay (MVP Complete!)
 
-- PreloadScene - Loading screen with progress bar
-- LobbyScene - Username/game selection (placeholder UI)
-- GameScene - Main gameplay with camera controls
-- EndGameScene - Final scores and winner
+1. **✅ Solo Mode Setup** - 3 token spaces (not 5), solo mode flag
+2. **✅ Turn Management** - Select space → Place 3 tokens → End turn → Refresh
+3. **✅ Stacking Validation** - Full rules for all 6 token types, error messages
+4. **✅ Real-time Scoring** - All 6 categories update live
+5. **✅ Animal Cards** - 3 random cards displayed (visual only, no interaction yet)
+6. **✅ End Game Flow** - After 15 turns, shows final score + sun count
+7. **✅ Camera Controls** - Pan (arrows), zoom (wheel), recenter (space)
 
-✅ **Camera System:**
+### Technical Implementation
 
-- Pan with arrow keys
-- Zoom with mouse wheel (0.5× to 2×)
-- Large bounds for expanding hex grid (-2000 to +2000)
-
-✅ **Hex Grid Placeholder:**
-
-- 7 hexagons from Phase 0 test
-- Will be replaced with proper HexGrid class in Phase 2
-
-✅ **Game Logic Files (from v3.0):**
-
-- `js/game/scoring-engine.js` - All 6 corrected scoring formulas
-- `js/game/token-manager.js` - Stacking rules and validation
-- `js/game/hex-grid.js` - Axial coordinate math
-- `js/game/firebase-config.js` - Multiplayer sync
-- `js/data/tokens-config.js` - Token colors and rules
-- `js/data/animal-cards.js` - 10 animal cards
-
-### Test Phase 1:
-
-1. Open http://localhost:8081/index.html
-2. Click through scenes: Preload → Lobby → Game
-3. In GameScene, use arrow keys to pan, mouse wheel to zoom
-4. Click "Back to Lobby" to test scene transitions
-
----
-
-## Phase 2: Hex Grid + Token Rendering ✅ COMPLETE
-
-**Goal:** Proper hex rendering with coordinate system and token stacking
-
-**What's Working:**
-
-- ✅ HexGrid class with axial (q,r) coordinates
-- ✅ Hex-to-pixel conversion (flat-topped hexagons)
-- ✅ Automatic expansion hex generation (dashed borders)
-- ✅ Token stacking visualization (vertical offset)
-- ✅ CentralBoard with 5 token supply spaces
-- ✅ Terrain-based hex coloring
-
-**Test:** http://localhost:8081/index.html
-
-- Center hex with 3-token tree (brown, brown, green)
-- 6 expansion hexes (dashed borders)
-- Central board with 5 spaces of random tokens at top
-
----
-
-## Phase 3-6: Coming Next
-
-1. **Phase 3:** Drag-and-drop token placement - 45 min ⏳ NEXT
-2. **Phase 4:** Scoring integration - 30 min
-3. **Phase 4:** Scoring integration - 30 min
-4. **Phase 5:** Mobile polish & animations - 45 min
-5. **Phase 6:** Testing & deployment - 30 min
-
-**Total:** 3-4 hours
+- ✅ Phaser 3.80.1 with proper scene management
+- ✅ Canvas-based rendering (no CSS positioning bugs!)
+- ✅ Drag-and-drop system with drop zones
+- ✅ Complete game logic from v3.0 (64 passing tests)
 
 ---
 

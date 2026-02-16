@@ -36,6 +36,7 @@ export default class CentralBoard extends Phaser.GameObjects.Container {
     const bg = this.scene.add.rectangle(x, y, this.spaceSize, this.spaceSize, 0xECF0F1, 0.9);
     bg.setStrokeStyle(3, 0x2c3e50);
     bg.setInteractive({ useHandCursor: true });
+    bg.setScrollFactor(0); // Fix to screen
     this.add(bg);
 
     // Space label
@@ -45,6 +46,7 @@ export default class CentralBoard extends Phaser.GameObjects.Container {
       fontStyle: 'bold'
     });
     label.setOrigin(0.5);
+    label.setScrollFactor(0); // Fix to screen
     this.add(label);
 
     // Token containers (3 tokens per space)
@@ -64,6 +66,7 @@ export default class CentralBoard extends Phaser.GameObjects.Container {
 
       // Make draggable
       token.setInteractive({ useHandCursor: true, draggable: true });
+      token.setScrollFactor(0); // Fix to screen
       this.scene.input.setDraggable(token);
 
       this.add(token);
@@ -72,6 +75,7 @@ export default class CentralBoard extends Phaser.GameObjects.Container {
 
     // Hover effect
     bg.on('pointerover', () => {
+      console.log('[CentralBoard] Hover over space', index);
       bg.setFillStyle(0xBDC3C7, 1);
     });
 
@@ -80,9 +84,12 @@ export default class CentralBoard extends Phaser.GameObjects.Container {
     });
 
     bg.on('pointerdown', () => {
-      console.log('[CentralBoard] Space', index, 'selected');
+      console.log('[CentralBoard] 🖱️  Space', index, 'clicked! Position:', bg.x, bg.y);
+      console.log('[CentralBoard] 📢 Emitting centralSpaceSelected event with index:', index);
       this.scene.events.emit('centralSpaceSelected', index);
     });
+
+    console.log('[CentralBoard] Created space', index, 'at position:', x, y, 'with bg at:', bg.x, bg.y);
 
     return { bg, tokens, index };
   }
