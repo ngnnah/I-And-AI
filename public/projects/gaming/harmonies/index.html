@@ -305,6 +305,11 @@
         font-size: 0.75rem !important;
       }
 
+      /* Hide landscape heading on mobile - use status banner instead */
+      .landscape-heading {
+        display: none !important;
+      }
+
       /* Score breakdown: 3-column grid */
       .score-breakdown-grid {
         display: grid !important;
@@ -331,41 +336,57 @@
         margin-top: 0.25rem;
       }
 
-      /* Hex grid sizing */
+      /* Hex grid sizing - tighter for mobile */
       .hex-grid {
-        height: 320px !important;
+        height: 280px !important;
         max-width: 100% !important;
         margin-bottom: 0.5rem;
         overflow: visible !important;
+        padding: 1rem !important;
       }
 
       .hex {
-        width: 40px !important;
-        height: 35px !important;
+        width: 32px !important;
+        height: 28px !important;
+        font-size: 14px !important;
+        border-width: 1px !important;
       }
 
-      /* Token supply: horizontal 3-column */
+      /* Token supply: horizontal 3-column, tight layout */
       .token-supply-row {
         display: grid !important;
         grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
+        gap: 0.25rem;
         margin-bottom: 0.5rem;
+        padding: 0 !important;
       }
 
       .token-space {
         width: auto !important;
-        padding: 0.5rem !important;
-        border-width: 2px !important;
+        padding: 0.25rem !important;
+        border-width: 3px !important;
+        border-radius: 0.25rem !important;
       }
 
       .token-space h3 {
         display: none !important; /* Hide "Space 1/2/3" labels on mobile */
       }
 
+      .token-space .flex {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2px !important;
+        justify-items: center;
+      }
+
       .token {
-        width: 36px !important;
-        height: 36px !important;
-        font-size: 18px !important;
+        width: 100% !important;
+        max-width: 38px !important;
+        height: 38px !important;
+        font-size: 20px !important;
+        border-radius: 4px !important;
+        border-width: 2px !important;
+        margin: 0 !important;
       }
 
       /* Animal cards: horizontal scroll */
@@ -556,16 +577,16 @@
       <!-- Center: Hex Grid -->
       <main class="lg:col-span-2">
         <div class="bg-white rounded-lg shadow-lg p-6">
-          <h2 class="text-lg font-bold text-slate-800 mb-4 text-center">🗺️ Your Landscape</h2>
-          
+          <!-- Game Messages / Status Banner -->
+          <div id="game-message" class="mb-3 p-2 md:p-3 rounded-lg text-center font-semibold text-sm md:text-base hidden">
+            <!-- Messages appear here -->
+          </div>
+
+          <h2 class="text-lg font-bold text-slate-800 mb-4 text-center landscape-heading">🗺️ Your Landscape</h2>
+
           <!-- Hex Grid Container -->
           <div id="hex-grid-container" class="hex-grid bg-gradient-to-br from-green-50 to-blue-50 rounded-lg border-4 border-slate-300">
             <!-- Hexes will be inserted here -->
-          </div>
-          
-          <!-- Game Messages -->
-          <div id="game-message" class="mt-4 p-3 rounded-lg text-center font-semibold hidden">
-            <!-- Messages appear here -->
           </div>
         </div>
       </main>
@@ -712,7 +733,30 @@
       token: null,
       ghostElement: null
     };
-    
+
+    // Double-tap detection for mobile
+    let lastTapTime = 0;
+    let lastTapTarget = null;
+    const DOUBLE_TAP_DELAY = 300; // ms
+
+    function isDoubleTap(target) {
+      const now = Date.now();
+      const timeSinceLastTap = now - lastTapTime;
+      const isSameTarget = target === lastTapTarget;
+
+      if (timeSinceLastTap < DOUBLE_TAP_DELAY && isSameTarget) {
+        // Double tap detected
+        lastTapTime = 0;
+        lastTapTarget = null;
+        return true;
+      }
+
+      // Single tap - record for potential double tap
+      lastTapTime = now;
+      lastTapTarget = target;
+      return false;
+    }
+
     // Color names for display
     const COLOR_NAMES = {
       blue: 'Water',
@@ -1014,11 +1058,12 @@
       // Detect hex size based on container width
       const container = document.getElementById('hex-grid-container');
       const containerWidth = container ? container.clientWidth : 800;
+      const isPortraitMobile = containerWidth < 400;
       const isMobile = containerWidth < 500;
-      
-      // Hex dimensions - use exact sqrt(3)/2 ratio for proper hexagons
-      const hexWidth = isMobile ? 60 : 80;
-      const hexHeight = isMobile ? 52 : 69;
+
+      // Hex dimensions - tighter spacing for portrait mobile
+      const hexWidth = isPortraitMobile ? 38 : (isMobile ? 60 : 80);
+      const hexHeight = isPortraitMobile ? 33 : (isMobile ? 52 : 69);
       
       // Flat-topped hex positioning (standard axial coordinate formulas)
       // Horizontal: Each column shifts right by 3/4 of width
@@ -1067,7 +1112,7 @@
       }
     }
     
-    // Handle token click (click-to-place mode)
+    // Handle token click (double-tap on mobile, click on desktop)
     function handleTokenClick(e) {
       e.stopPropagation(); // Prevent triggering space click
 
@@ -1079,9 +1124,24 @@
       const token = e.currentTarget;
       const spaceIndex = parseInt(token.dataset.space);
 
+      // Check for double-tap on mobile
+      const isMobile = window.innerWidth < 768;
+      if (isMobile && !isDoubleTap(token)) {
+        // First tap - just highlight
+        token.style.transform = 'scale(1.1)';
+        token.style.boxShadow = '0 0 8px #fbbf24';
+        setTimeout(() => {
+          if (!gameState.selectedToken || gameState.selectedToken.element !== token) {
+            token.style.transform = '';
+            token.style.boxShadow = '';
+          }
+        }, DOUBLE_TAP_DELAY);
+        return;
+      }
+
       // Check if space is selected
       if (gameState.selectedSpace === null) {
-        showMessage('Select a token space first (click the space background)!', 'error');
+        showMessage(`Select a token space first (${isMobile ? 'double-tap' : 'click'} the space background)!`, 'error');
         return;
       }
 
@@ -1104,7 +1164,7 @@
           gameState.selectedToken.index === tokenData.index) {
         gameState.selectedToken = null;
         updateTokenSelection();
-        showMessage('Token deselected. Click a token to select it.', 'info');
+        showMessage(`Token deselected. ${isMobile ? 'Double-tap' : 'Click'} a token to select it.`, 'info');
         return;
       }
 
@@ -1705,7 +1765,7 @@
       console.log('✅ Event listeners attached');
     }
     
-    // Handle space click
+    // Handle space click (double-tap on mobile)
     function handleSpaceClick(e) {
       if (gameState.gameEnded) {
         showMessage('Game is over! Start a new game to play again.', 'error');
@@ -1713,11 +1773,26 @@
       }
 
       const space = e.currentTarget;
+
+      // Check for double-tap on mobile
+      const isMobile = window.innerWidth < 768;
+      if (isMobile && !isDoubleTap(space)) {
+        // First tap - just highlight
+        space.style.borderColor = '#fbbf24';
+        setTimeout(() => {
+          if (gameState.selectedSpace !== space.dataset.space) {
+            space.style.borderColor = '';
+          }
+        }, DOUBLE_TAP_DELAY);
+        return;
+      }
+
       const spaceId = space.dataset.space;
 
       // Deselect all spaces
       document.querySelectorAll('.token-space').forEach(s => {
         s.classList.remove('selected');
+        s.style.borderColor = '';
       });
 
       // Select this space
@@ -1728,7 +1803,7 @@
       gameState.selectedToken = null;
       updateTokenSelection();
 
-      showMessage(`Space ${parseInt(spaceId) + 1} selected! Click a token, then click a hex to place it.`, 'success');
+      showMessage(`Space ${parseInt(spaceId) + 1} selected! ${isMobile ? 'Double-tap' : 'Click'} a token, then ${isMobile ? 'double-tap' : 'click'} a hex to place it.`, 'success');
     }
     
     // Handle taking an animal card from available pool
@@ -1929,7 +2004,7 @@
       }
     }
 
-    // Handle hex click for token placement or animal cube placement
+    // Handle hex click for token placement or animal cube placement (double-tap on mobile)
     function handleHexClickForAnimal(e) {
       if (gameState.gameEnded) return;
 
@@ -1937,6 +2012,20 @@
       if (gameState.draggedToken) return;
 
       const hexEl = e.currentTarget;
+
+      // Check for double-tap on mobile
+      const isMobile = window.innerWidth < 768;
+      if (isMobile && !isDoubleTap(hexEl)) {
+        // First tap - just highlight
+        hexEl.style.borderColor = '#10b981';
+        hexEl.style.borderWidth = '3px';
+        setTimeout(() => {
+          hexEl.style.borderColor = '';
+          hexEl.style.borderWidth = '';
+        }, DOUBLE_TAP_DELAY);
+        return;
+      }
+
       const q = parseInt(hexEl.dataset.q);
       const r = parseInt(hexEl.dataset.r);
       const hexKey = `${q}_${r}`;
