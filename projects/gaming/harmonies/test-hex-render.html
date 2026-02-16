@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hex Render Test</title>
+  <style>
+    body {
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+
+    .hex-grid-container {
+      padding: 40px;
+      background: #f9f9f9;
+      overflow: auto;
+      min-height: 600px;
+      display: grid;
+      grid-template-columns: repeat(20, 80px);
+      grid-template-rows: repeat(20, 80px);
+      gap: 6px;
+      justify-content: center;
+      align-content: center;
+      border: 2px solid #333;
+    }
+
+    .hex-cell {
+      width: 80px;
+      height: 80px;
+      background: #fff;
+      border: 3px solid #ddd;
+      clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .hex-cell.expansion {
+      background: transparent;
+      border: 2px dashed #ccc;
+      opacity: 0.6;
+    }
+
+    .hex-cell.terrain-water { background: #E3F2FD; }
+  </style>
+</head>
+<body>
+  <h1>Hex Rendering Test</h1>
+  <p>Testing if CSS hexagons render properly</p>
+
+  <div id="hex-grid-container" class="hex-grid-container">
+    <!-- Hexes will be added here -->
+  </div>
+
+  <script type="module">
+    // Simulate the hex grid
+    const hexGrid = {
+      "0_0": { q: 0, r: 0, stack: [], terrain: "empty" }
+    };
+
+    const container = document.getElementById("hex-grid-container");
+
+    // Create test hex
+    const hex = hexGrid["0_0"];
+    const hexEl = document.createElement("div");
+    hexEl.className = "hex-cell";
+    hexEl.dataset.hexKey = "0_0";
+
+    const { q, r } = hex;
+    const col = q;
+    const row = r + Math.floor(q / 2);
+
+    hexEl.style.gridColumn = col + 10; // Should be 10
+    hexEl.style.gridRow = row + 10; // Should be 10
+    hexEl.textContent = "0,0";
+
+    container.appendChild(hexEl);
+
+    // Add expansion hexes
+    const expansionCoords = [
+      {q: 1, r: 0},
+      {q: 1, r: -1},
+      {q: 0, r: -1},
+      {q: -1, r: 0},
+      {q: -1, r: 1},
+      {q: 0, r: 1}
+    ];
+
+    expansionCoords.forEach(coord => {
+      const hexEl = document.createElement("div");
+      hexEl.className = "hex-cell expansion";
+      const col = coord.q;
+      const row = coord.r + Math.floor(coord.q / 2);
+      hexEl.style.gridColumn = col + 10;
+      hexEl.style.gridRow = row + 10;
+      hexEl.textContent = `${coord.q},${coord.r}`;
+      container.appendChild(hexEl);
+    });
+
+    console.log("Test hex created at grid position:", {
+      gridColumn: 10,
+      gridRow: 10
+    });
+  </script>
+</body>
+</html>

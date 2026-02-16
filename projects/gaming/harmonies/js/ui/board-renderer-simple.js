@@ -14,7 +14,16 @@ import { COLOR_HEX } from "../data/tokens-config.js";
  */
 export function renderHexGrid(hexGrid, placedAnimals = []) {
   const container = document.getElementById("hex-grid-container");
-  if (!container) return;
+  if (!container) {
+    console.error("[BoardRenderer] ❌ hex-grid-container element not found!");
+    return;
+  }
+
+  console.log("[BoardRenderer] 🔷 Rendering hex grid:", {
+    hexCount: Object.keys(hexGrid).length,
+    hexKeys: Object.keys(hexGrid),
+    hexGrid: hexGrid
+  });
 
   // Clear existing
   container.innerHTML = "";
@@ -48,10 +57,14 @@ export function renderHexGrid(hexGrid, placedAnimals = []) {
   }
 
   // Render all hexes
+  console.log("[BoardRenderer] 🔷 Total hexes to render:", allHexes.size);
+
   allHexes.forEach((hex, key) => {
     const hexEl = createHexElement(hex, key, placedAnimals);
     container.appendChild(hexEl);
   });
+
+  console.log("[BoardRenderer] ✅ Hex grid rendered! Container now has", container.children.length, "hex elements");
 }
 
 /**
