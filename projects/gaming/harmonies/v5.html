@@ -837,8 +837,10 @@
       // Check for game end BEFORE attempting to refresh
       // Must have at least 9 tokens to refill all 3 spaces (3 spaces × 3 tokens)
       const tokensInPouch = Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0);
+      console.log(`🎲 End of turn - Tokens in pouch: ${tokensInPouch}`);
+      
       if (tokensInPouch < 9) {
-        showMessage(`🏁 Game Over! Pouch cannot refill all 3 spaces (${tokensInPouch} tokens left).`, 'info');
+        console.log('🏁 Game ending - insufficient tokens in pouch');
         endGame();
         return;
       }
@@ -846,14 +848,17 @@
       // Check if board is almost full
       const filledHexes = Object.values(gameState.hexBoard).filter(hex => hex.stack.length > 0).length;
       const emptyHexes = 23 - filledHexes;
+      console.log(`🎲 Filled hexes: ${filledHexes}, Empty: ${emptyHexes}`);
+      
       if (emptyHexes <= 2) {
-        showMessage(`🏁 Game Over! Board almost full (${emptyHexes} empty spaces left).`, 'info');
+        console.log('🏁 Game ending - board almost full');
         endGame();
         return;
       }
       
       // Refresh token supply (we know we have enough tokens)
       refreshTokenSupply();
+      console.log(`✅ Turn complete - Pouch now has: ${Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0)} tokens`);
       
       showMessage(`✓ Turn complete! Select a space and place more tokens.`, 'success');
       
@@ -880,8 +885,12 @@
     
     // End game
     function endGame() {
+      console.log('🎉 Game Over called! Final score:', gameState.score.total);
+      
       const suns = calculateSuns(gameState.score.total);
       const sunEmoji = '☀️'.repeat(suns);
+      
+      console.log(`Calculated ${suns} suns for score ${gameState.score.total}`);
       
       showMessage(
         `🎉 Game Over! Final Score: ${gameState.score.total} points = ${sunEmoji} ${suns} sun${suns !== 1 ? 's' : ''}!`,
@@ -891,10 +900,12 @@
       document.getElementById('end-turn-btn').disabled = true;
       document.getElementById('end-turn-btn').textContent = '🏁 Game Complete';
       
-      // Show detailed sun breakdown
+      // Show detailed sun breakdown after a short delay
       setTimeout(() => {
+        const tokensLeft = Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0);
+        const filledHexes = Object.values(gameState.hexBoard).filter(hex => hex.stack.length > 0).length;
         showMessage(
-          `${sunEmoji} ${suns} suns earned! (Using Side A would add +1 sun)`,
+          `${sunEmoji} ${suns} suns earned! (Tokens left: ${tokensLeft}, Filled hexes: ${filledHexes}/23) Using Side A would add +1 sun!`,
           'info'
         );
       }, 2000);
