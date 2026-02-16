@@ -2,190 +2,91 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#4CAF50">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harmonies v4.0 - Phaser Edition</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-  <title>Harmonies - Multiplayer Board Game</title>
-  <meta name="description" content="Play Harmonies online - A peaceful tile-placement game about creating beautiful natural landscapes">
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #2c3e50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
 
-  <!-- Favicon (using emoji as placeholder) -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
+    #game-container {
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      overflow: hidden;
+      max-width: 100%;
+      max-height: 90vh;
+    }
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="css/styles.css">
+    .info {
+      background: #ecf0f1;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      max-width: 1200px;
+      width: 100%;
+    }
 
-  <!-- Firebase SDK (v9 - Modular) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    .info h1 {
+      margin: 0 0 10px 0;
+      font-size: 24px;
+      color: #2c3e50;
+    }
+
+    .info p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .success {
+      color: #27ae60;
+      font-weight: bold;
+    }
+
+    .status {
+      background: #27ae60;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      display: inline-block;
+    }
+  </style>
 </head>
 <body>
-  <!-- Main App Container -->
-  <div id="app">
-
-    <!-- Screen: Player Setup (Username Login) -->
-    <div id="screen-player-setup" class="screen">
-      <div class="setup-container">
-        <h1 style="font-size: 3em; margin-bottom: 0.2em;">🎮 Harmonies</h1>
-        <p class="subtitle">Create beautiful natural landscapes</p>
-
-        <form id="username-form" class="form-card">
-          <label for="username-input" class="sr-only">Username</label>
-          <input
-            type="text"
-            id="username-input"
-            placeholder="Enter your username"
-            class="input-text"
-            pattern="[a-zA-Z0-9_]{3,20}"
-            required
-            autocomplete="username"
-          >
-          <small class="input-hint">3-20 characters (letters, numbers, underscore)</small>
-          <button type="submit" class="btn btn-primary">Continue</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Screen: Lobby (Create/Join Game) -->
-    <div id="screen-lobby" class="screen hidden">
-      <div class="lobby-container">
-        <div class="lobby-header">
-          <h1>Game Lobby</h1>
-          <div class="player-info">
-            <span class="player-name" id="lobby-player-name"></span>
-            <button id="logout-btn" class="btn btn-secondary btn-sm">Logout</button>
-          </div>
-        </div>
-
-        <!-- Create Game Section -->
-        <div class="lobby-section">
-          <h2>Create New Game</h2>
-          <form id="create-game-form" class="form-inline">
-            <label for="room-code-input" class="sr-only">Room Code (optional)</label>
-            <input
-              type="text"
-              id="room-code-input"
-              placeholder="Room code (optional)"
-              class="input-text"
-              pattern="[A-Z0-9]{4,8}"
-              maxlength="8"
-            >
-            <button type="submit" class="btn btn-primary">Create Game</button>
-          </form>
-          <small class="input-hint">Leave blank for random code</small>
-        </div>
-
-        <!-- Active Games Section -->
-        <div class="lobby-section">
-          <h2>Your Active Games</h2>
-          <div id="active-games-list" class="game-list">
-            <p class="empty-state">No active games</p>
-          </div>
-        </div>
-
-        <!-- Join Game Section -->
-        <div class="lobby-section">
-          <h2>Join a Game</h2>
-          <form id="join-game-form" class="form-inline">
-            <label for="join-code-input" class="sr-only">Room Code</label>
-            <input
-              type="text"
-              id="join-code-input"
-              placeholder="Enter room code"
-              class="input-text"
-              pattern="[A-Z0-9]{4,8}"
-              maxlength="8"
-              required
-            >
-            <button type="submit" class="btn btn-primary">Join Game</button>
-          </form>
-        </div>
-
-        <!-- Public Games List -->
-        <div class="lobby-section">
-          <h2>Public Games</h2>
-          <div id="public-games-list" class="game-list">
-            <p class="empty-state">No public games available</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Screen: Game Room (Main Gameplay) -->
-    <div id="screen-game-room" class="screen hidden">
-      <div class="game-container">
-
-        <!-- Turn Indicator (Sticky Header) -->
-        <div id="turn-indicator" class="turn-indicator">
-          <div class="turn-info">
-            <span id="turn-player-name">Waiting...</span>
-            <span id="turn-phase" class="turn-phase">Setup</span>
-          </div>
-          <button id="menu-btn" class="btn btn-secondary btn-sm">Menu</button>
-        </div>
-
-        <!-- Animal Cards Row (Horizontal Scroll) -->
-        <div class="animal-cards-container">
-          <div class="animal-cards-row" id="animal-cards-row">
-            <!-- Animal cards inserted here by JS -->
-          </div>
-        </div>
-
-        <!-- Central Board (Token Supply) -->
-        <div class="central-board">
-          <h3>Central Board</h3>
-          <div class="central-spaces" id="central-spaces">
-            <!-- Central spaces inserted here by JS -->
-          </div>
-        </div>
-
-        <!-- Hex Grid Container (Player Board) -->
-        <div class="hex-grid-wrapper">
-          <div class="hex-grid-header">
-            <h3 id="current-board-label">Your Board</h3>
-            <div class="score-display">
-              <span id="current-score">0</span> points
-              <button id="score-breakdown-btn" class="btn btn-secondary btn-sm">Details</button>
-            </div>
-          </div>
-          <!-- CSS Hex Grid (no SVG) -->
-          <div id="hex-grid-container" class="hex-grid-container">
-            <!-- Hex cells inserted here by JS -->
-          </div>
-        </div>
-
-        <!-- Bottom Bar (Actions) -->
-        <div class="bottom-bar">
-          <button id="end-turn-btn" class="btn btn-primary" disabled>End Turn</button>
-        </div>
-
-        <!-- Floating Action Button (Undo) -->
-        <button id="undo-btn" class="fab hidden" aria-label="Undo last token">
-          ↶
-        </button>
-
-        <!-- Progress Indicator (Token Placement) -->
-        <div id="progress-indicator" class="progress-indicator hidden">
-          Token <span id="progress-current">0</span>/<span id="progress-total">3</span>
-        </div>
-
-      </div>
-    </div>
-
+  <div class="info">
+    <h1>🎮 Harmonies v4.0 - Phase 1: Game Structure</h1>
+    <p><span class="status">✅ PHASE 1 COMPLETE</span></p>
+    <p><strong>What's Working:</strong></p>
+    <ul style="margin: 10px 0 10px 20px; color: #555;">
+      <li>Phaser game initialization</li>
+      <li>Scene transitions: Preload → Lobby → Game → EndGame</li>
+      <li>Camera controls (arrow keys to pan, mouse wheel to zoom)</li>
+      <li>Placeholder hex grid (7 hexes from Phase 0)</li>
+      <li>Basic UI layer</li>
+    </ul>
+    <p><strong>Next:</strong> Phase 2 - Hex Grid + Token Rendering with Honeycomb</p>
   </div>
 
-  <!-- Modal Overlay (BGA-style) -->
-  <div id="modal-overlay" class="modal-overlay hidden">
-    <div class="modal" id="modal-content">
-      <!-- Modal content inserted here by JS -->
-    </div>
-  </div>
+  <div id="game-container"></div>
 
-  <!-- Toast Notification -->
-  <div id="toast" class="toast hidden"></div>
+  <!-- Phaser 3 from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
 
-  <!-- JavaScript Modules -->
+  <!-- Main game entry point -->
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

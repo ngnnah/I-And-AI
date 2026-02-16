@@ -1,209 +1,186 @@
-# 🌿 Harmonies
+# Harmonies v4.0 - Phaser.js Implementation
 
-A beautiful turn-based multiplayer spatial puzzle game where you build landscapes and create habitats for animals.
-
-**🎮 Play Online:** https://ngnnah.github.io/I-And-AI/projects/gaming/harmonies/  
-**📖 Complete Game Rules:** See [game-rules.md](./game-rules.md) for comprehensive rules and strategy guide.
-
-## What is Harmonies?
-
-Harmonies is a contemplative board game adaptation for web browsers. Play with friends and family at your own pace - no time pressure, no rushing. Build harmonious landscapes by stacking colorful tokens on a hexagonal grid, create animal habitats, and score points through multiple strategic systems.
-
-**Perfect for:** Thoughtful gameplay with your partner, family game nights, or strategic puzzle enthusiasts.
-
-## Game Features
-
-✅ **Turn-based async play** - Take your time, play on your schedule
-✅ **Multiplayer sync** - Changes appear instantly in all windows
-✅ **Player profiles** - Track your games, scores, and history
-✅ **Solo mode** - Practice alone and improve your strategy
-✅ **Cross-device support** - Start on your phone, continue on your laptop
-✅ **Beautiful hex grid** - Build 3D stacked landscapes with SVG graphics
-
-## How to Play
-
-### Game Overview
-
-Each turn, you'll:
-
-1. **Take 3 tokens** from the central board
-2. **Place them** on your hex grid (following stacking rules)
-3. **Optionally take 1 animal card** from the market
-4. **Place animals** on completed habitat patterns
-5. **End your turn** and pass to the next player
-
-### Scoring Systems
-
-- 🌲 **Trees** - Stack brown + green tokens high for more points
-- ⛰️ **Mountains** - Gray tokens score when adjacent to other mountains
-- 🌾 **Fields** - Large yellow areas score progressively
-- 🏘️ **Buildings** - Red buildings score by terrain diversity
-- 🌊 **Water** - Blue rivers score for longest connected path
-- 🦌 **Animals** - Complete habitat patterns for big bonuses
-
-**Game ends when:** The token pouch runs empty OR a player fills their board.
-
-## Quick Start
-
-### 1. Start a Local Server
-
-The game requires a web server (ES6 modules don't work with `file://` URLs).
-
-```bash
-# Option 1: Python (recommended)
-python3 -m http.server 8080
-
-# Option 2: Node.js
-npx http-server -p 8080
-
-# Option 3: npm (if you have package.json)
-npm run dev
-```
-
-Then open **http://localhost:8080** in your browser.
-
-### 2. Play Multiplayer
-
-Open the game in **2 browser windows** (or use incognito for the second):
-
-**Window 1 (Player 1):**
-
-1. Enter your username (e.g., `alice`)
-2. Click **"+ Create New Game"**
-3. Wait for Player 2 to join
-4. Click **"Start Game"**
-
-**Window 2 (Player 2):**
-
-1. Enter your username (e.g., `bob`)
-2. Find Player 1's game in **"Join a Game"** section
-3. Click **"Join"**
-
-**Take Turns:**
-
-- Click 3 tokens from the central 3×3 grid
-- Click **"Confirm Placement"** (they auto-place for now)
-- Click **"End Turn"**
-
-### 3. Solo Mode
-
-Want to practice alone?
-
-1. Click **"🎯 Play Solo"** from the lobby
-2. Game starts immediately with just you
-3. Track your high scores and improve your strategy
-
-## Current Status (MVP Complete)
-
-**Phase 1 & 2 Complete:**
-
-- ✅ Core gameplay (token stacking, turn system)
-- ✅ All 6 scoring modules working
-- ✅ 10 animal cards with pattern matching
-- ✅ Multiplayer real-time sync
-- ✅ Player profiles and game history
-- ✅ Solo mode
-- ✅ Cross-device login/rejoin
-- ✅ 15/16 tests passing
-
-**Coming in Phase 3:**
-
-- 🚧 Drag-and-drop token placement (currently auto-places)
-- 🚧 Click-to-place on expansion hexes
-- 🚧 Full animal card placement with visual pattern highlighting
-- 🚧 Score breakdown modal (see per-category details)
-- 🚧 Smooth animations and visual polish
-
-**Future Enhancements:**
-
-- Game abandonment (if all players agree)
-- Mobile touch gestures
-- Accessibility improvements
-- More animal cards (expand from 10 to 48)
-
-## Troubleshooting
-
-**Game won't load?**
-
-1. Make sure you're using a web server (not opening `index.html` directly)
-2. Clear browser cache: Cmd+Shift+R (Mac) or Ctrl+Shift+R (Windows)
-3. Check browser console (F12) for errors
-
-**Multiplayer not syncing?**
-
-- Verify both players are in the same game (check game name)
-- Refresh both browser windows
-- Check your internet connection (Firebase requires online access)
-
-## Tech Stack
-
-Built with simplicity and speed:
-
-- **Vanilla JavaScript** (ES6 modules) - No framework bloat
-- **SVG** - Beautiful hex grid rendering with 3D stacking effect
-- **Firebase Realtime Database** - Multiplayer sync and persistence
-- **localStorage** - Player identity across sessions
-
-## For Developers
-
-Want to contribute or understand the codebase?
-
-📖 **Read the [AI Agent Development Guide](./AI-AGENT-GUIDE.md)** - Comprehensive technical documentation covering:
-
-- Architecture and design patterns
-- Core algorithms (hex grid, pattern matching, scoring)
-- Firebase data model
-- Testing strategy
-- How to add new features
-
-**Run Tests:**
-
-```bash
-node --test tests/core-logic.test.js
-```
-
-**File Structure:**
-
-```
-harmonies/
-├── js/
-│   ├── game/          # Core logic (pure functions)
-│   ├── screens/       # UI screens (player-setup, lobby, game-room)
-│   ├── ui/            # SVG renderers
-│   └── data/          # Game configuration
-├── css/               # Styling
-├── tests/             # Unit tests
-└── index.html         # Main entry point
-```
-
-## Deployment
-
-When ready to deploy to GitHub Pages:
-
-```bash
-# Sync to public/
-rsync -av --delete --exclude='.git' --exclude='node_modules' --exclude='tests' \
-  projects/gaming/harmonies/ public/projects/gaming/harmonies/
-
-# Force-add data files (bypasses .gitignore)
-git add -f public/projects/gaming/harmonies/js/data/*.js
-
-# Commit and push
-git add public/projects/gaming/harmonies
-git commit -m "feat(harmonies): update spatial puzzle game"
-git push origin main
-```
-
-GitHub Pages auto-deploys in ~1 minute.
-
-## Credits
-
-**Original Game:** [Harmonies by Libellud](https://www.libellud.com/en/our-games/harmonies/)
-**Implementation:** Built with Claude Code in ~3 hours as an MVP
-**Design Philosophy:** Ship fast, iterate smart - prioritize playability over perfection
+**Status:** Phase 0 (Proof of Concept)
+**Date Started:** 2026-02-16
 
 ---
 
-**Have fun building beautiful landscapes! 🌿✨**
+## Phase 0: Proof of Concept ✅ COMPLETE
 
-_Questions or feedback? Open an issue or start a discussion!_
+**Goal:** Verify Phaser.js can render hexagons correctly
+
+**Test File:** [phaser-hex-test.html](./phaser-hex-test.html)
+
+**Result:** ✅ SUCCESS - 7 hexagons render correctly (centered, visible, interactive)
+
+---
+
+## Phase 1: Game Structure ✅ COMPLETE
+
+**Goal:** Create Phaser scenes, config, and basic architecture
+
+**Main File:** [index.html](./index.html)
+
+**Running:** http://localhost:8081/index.html
+
+### What Should You See?
+
+✅ **7 hexagons** rendered on white background:
+
+- 1 blue center hex labeled "Center 0,0"
+- 6 gray neighbor hexes with coordinates (1,0), (1,-1), (0,-1), (-1,0), (-1,1), (0,1)
+
+✅ **Centered on screen** - no tiny hexes at bottom-right corner (v3.0 bug fixed!)
+
+✅ **Interactive** - hover over hexes → they turn green
+
+✅ **Console logs** - open DevTools to see "[Phase 0]" messages
+
+### Success Criteria
+
+- [x] Hexes are clearly visible (not tiny)
+- [x] Hexes are centered (not at bottom-right)
+- [x] Hover interaction works (hexes turn green)
+- [x] No console errors
+- [x] Ready to proceed to Phase 1
+
+---
+
+### What's Working in Phase 1:
+
+✅ **Phaser Scenes:**
+
+- PreloadScene - Loading screen with progress bar
+- LobbyScene - Username/game selection (placeholder UI)
+- GameScene - Main gameplay with camera controls
+- EndGameScene - Final scores and winner
+
+✅ **Camera System:**
+
+- Pan with arrow keys
+- Zoom with mouse wheel (0.5× to 2×)
+- Large bounds for expanding hex grid (-2000 to +2000)
+
+✅ **Hex Grid Placeholder:**
+
+- 7 hexagons from Phase 0 test
+- Will be replaced with proper HexGrid class in Phase 2
+
+✅ **Game Logic Files (from v3.0):**
+
+- `js/game/scoring-engine.js` - All 6 corrected scoring formulas
+- `js/game/token-manager.js` - Stacking rules and validation
+- `js/game/hex-grid.js` - Axial coordinate math
+- `js/game/firebase-config.js` - Multiplayer sync
+- `js/data/tokens-config.js` - Token colors and rules
+- `js/data/animal-cards.js` - 10 animal cards
+
+### Test Phase 1:
+
+1. Open http://localhost:8081/index.html
+2. Click through scenes: Preload → Lobby → Game
+3. In GameScene, use arrow keys to pan, mouse wheel to zoom
+4. Click "Back to Lobby" to test scene transitions
+
+---
+
+## Phase 2: Hex Grid + Token Rendering ✅ COMPLETE
+
+**Goal:** Proper hex rendering with coordinate system and token stacking
+
+**What's Working:**
+
+- ✅ HexGrid class with axial (q,r) coordinates
+- ✅ Hex-to-pixel conversion (flat-topped hexagons)
+- ✅ Automatic expansion hex generation (dashed borders)
+- ✅ Token stacking visualization (vertical offset)
+- ✅ CentralBoard with 5 token supply spaces
+- ✅ Terrain-based hex coloring
+
+**Test:** http://localhost:8081/index.html
+
+- Center hex with 3-token tree (brown, brown, green)
+- 6 expansion hexes (dashed borders)
+- Central board with 5 spaces of random tokens at top
+
+---
+
+## Phase 3-6: Coming Next
+
+1. **Phase 3:** Drag-and-drop token placement - 45 min ⏳ NEXT
+2. **Phase 4:** Scoring integration - 30 min
+3. **Phase 4:** Scoring integration - 30 min
+4. **Phase 5:** Mobile polish & animations - 45 min
+5. **Phase 6:** Testing & deployment - 30 min
+
+**Total:** 3-4 hours
+
+---
+
+## Architecture Overview
+
+### v3.0 (FAILED) → v4.0 (FIXED)
+
+| Issue          | v3.0                          | v4.0                               |
+| -------------- | ----------------------------- | ---------------------------------- |
+| Hex rendering  | CSS Grid (broken positioning) | Phaser Canvas (precise control) ✅ |
+| Hex visibility | Tiny, bottom-right corner     | Centered, clearly visible ✅       |
+| Touch input    | Custom event handlers         | Phaser input system ✅             |
+| Animations     | CSS transitions               | Phaser tweens ✅                   |
+
+### What We Keep from v3.0
+
+- ✅ Game logic (scoring-engine.js, token-manager.js, hex-grid.js)
+- ✅ Firebase multiplayer sync
+- ✅ 64 passing tests
+- ✅ All corrected game rules (GRAY=mountains, RED=buildings)
+
+### What We Rebuild
+
+- ❌ CSS hex grid → ✅ Phaser canvas rendering
+- ❌ DOM-based board → ✅ Game objects
+- ❌ Custom animations → ✅ Phaser tweens
+
+---
+
+## Current File Structure
+
+```
+projects/gaming/harmonies/
+├── README.md                      # This file
+├── phaser-hex-test.html          # Phase 0 POC ✅
+└── (coming in Phase 1+)
+    ├── index.html
+    ├── js/
+    │   ├── phaser/
+    │   │   ├── config.js
+    │   │   ├── scenes/
+    │   │   └── objects/
+    │   └── game/                  # Copied from v3.0
+    └── assets/
+```
+
+---
+
+## Archived v3.0 Code
+
+**Location:** `/Users/nhat/repo-fun/I-And-AI/archive/harmonies-v3.0-failed/`
+
+Contains:
+
+- `projects-harmonies/` - All v3.0 source code
+- `public-harmonies/` - Deployed v3.0 (if existed)
+
+**Why archived:** CSS Grid hex rendering had critical positioning bugs (hexes barely visible, bottom-right corner)
+
+---
+
+## Next Steps
+
+1. **Review Phase 0 test** - Open http://localhost:8081/phaser-hex-test.html
+2. **Verify hexes render correctly** - compare to v3.0 screenshot (tiny/badly positioned)
+3. **Approve Phase 1** - If POC succeeds, proceed with full Phaser implementation
+
+---
+
+**Questions?** See [claude-plan-v4.md](../../archive/harmonies-v3.0-failed/projects-harmonies/claude-plan-v4.md) for full implementation plan.
