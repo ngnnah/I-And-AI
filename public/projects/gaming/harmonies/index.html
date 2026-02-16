@@ -1634,13 +1634,7 @@
 
       // PRIORITY 2: Animal cube placement
       if (!gameState.selectedAnimalCard) return;
-      
-      const hexEl = e.currentTarget;
-      const q = parseInt(hexEl.dataset.q);
-      const r = parseInt(hexEl.dataset.r);
-      const hexKey = `${q}_${r}`;
-      const hexData = gameState.hexBoard[hexKey];
-      
+
       // Check if hex already has an animal
       const existingAnimalIndex = gameState.placedAnimals.findIndex(p => p.hexKey === hexKey);
       
