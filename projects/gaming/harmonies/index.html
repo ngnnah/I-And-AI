@@ -1230,7 +1230,7 @@
       
       // Show stack height and emoji
       const emoji = TOKEN_EMOJI[topColor];
-      const tokenDisplay = stack.length > 1 ? `${emoji}<span style="font-size: 0.7em;">×${stack.length}</span>` : emoji;
+      const stackCount = stack.length;
       
       // Check if hex has animal cube
       const hexKey = `${hexData.q}_${hexData.r}`;
@@ -1241,16 +1241,22 @@
         const animalCard = gameState.playerAnimalCards.find(c => c.id === animalPlacement.cardId);
         const animalEmoji = animalCard ? getAnimalEmoji(animalCard.animal) : '🐾';
         
-        // Show token + specific animal cube
+        // Show token + animal cube + stack count overlay
         hexEl.innerHTML = `
           <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-            <span style="line-height: 1;">${tokenDisplay}</span>
+            <span style="line-height: 1;">${emoji}</span>
+            ${stackCount > 1 ? `<span style="position: absolute; bottom: 0; right: 4px; font-size: 0.5em; font-weight: bold; line-height: 1; text-shadow: 0 0 3px rgba(0,0,0,0.8);">×${stackCount}</span>` : ''}
             <span style="position: absolute; top: 2px; right: 2px; font-size: 0.9em; line-height: 1;" title="${animalCard ? animalCard.name : 'Animal'}">${animalEmoji}</span>
           </div>
         `;
       } else {
-        // Wrap in span for proper centering
-        hexEl.innerHTML = `<span style="line-height: 1; display: inline-block;">${tokenDisplay}</span>`;
+        // Wrap in span with overlay count
+        hexEl.innerHTML = `
+          <div style="position: relative; display: inline-block;">
+            <span style="line-height: 1;">${emoji}</span>
+            ${stackCount > 1 ? `<span style="position: absolute; bottom: 0; right: 0; font-size: 0.5em; font-weight: bold; line-height: 1; text-shadow: 0 0 3px rgba(0,0,0,0.8);">×${stackCount}</span>` : ''}
+          </div>
+        `;
       }
     }
     
