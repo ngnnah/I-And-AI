@@ -3,76 +3,1379 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Harmonies v4.0 - Phaser Edition</title>
+  <title>Harmonies v5.0 - Board Game</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: #2c3e50;
+    /* Custom hex styles */
+    .hex {
+      width: 80px;
+      height: 69px; /* 80 × sqrt(3)/2 = 69.28 */
+      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      position: absolute;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+      border: 3px solid rgba(0, 0, 0, 0.5);
+      box-sizing: border-box;
     }
-
-    #game-container {
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-      border-radius: 8px;
-      overflow: hidden;
-      max-width: 100%;
-      max-height: 90vh;
+    
+    .hex:hover {
+      transform: scale(1.05);
+      border-color: rgba(255, 255, 255, 0.8);
+      z-index: 10;
     }
-
-    .info {
-      background: #ecf0f1;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      max-width: 1200px;
-      width: 100%;
+    
+    .hex.dropzone-active {
+      border-color: #10b981;
+      border-width: 3px;
+      animation: pulse 1s ease-in-out infinite;
     }
-
-    .info h1 {
-      margin: 0 0 10px 0;
-      font-size: 24px;
+    
+    .hex.dropzone-invalid {
+      border-color: #ef4444;
+      border-width: 3px;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    /* Terrain colors */
+    .hex.empty {
+      background: #d5dbdb;
       color: #2c3e50;
     }
-
-    .info p {
-      margin: 5px 0;
-      font-size: 14px;
-      color: #555;
+    
+    .hex.blue {
+      background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
     }
-
-    .success {
-      color: #27ae60;
-      font-weight: bold;
+    
+    .hex.yellow {
+      background: linear-gradient(135deg, #F5A623 0%, #E09000 100%);
     }
-
-    .status {
-      background: #27ae60;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 4px;
-      font-size: 12px;
-      display: inline-block;
+    
+    .hex.brown {
+      background: linear-gradient(135deg, #8B4513 0%, #654321 100%);
+    }
+    
+    .hex.green {
+      background: linear-gradient(135deg, #7ED321 0%, #5FA518 100%);
+    }
+    
+    .hex.red {
+      background: linear-gradient(135deg, #D0021B 0%, #A00116 100%);
+    }
+    
+    .hex.gray {
+      background: linear-gradient(135deg, #7F8C8D 0%, #5D6D6E 100%);
+    }
+    
+    /* Token styles */
+    .token {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: grab;
+      transition: all 0.2s ease;
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .token:active {
+      cursor: grabbing;
+      transform: scale(0.95);
+    }
+    
+    .token.blue { background: #4A90E2; }
+    .token.yellow { background: #F5A623; }
+    .token.brown { background: #8B4513; }
+    .token.green { background: #7ED321; }
+    .token.red { background: #D0021B; }
+    .token.gray { background: #7F8C8D; }
+    
+    /* Token space styles */
+    .token-space {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .token-space:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    .token-space.selected {
+      border-color: #10b981;
+      border-width: 4px;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+    }
+    
+    /* Hex grid container */
+    .hex-grid {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      height: 600px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    
+    /* Animal card styles */
+    .animal-card {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      width: 180px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .hex-grid {
+        height: 420px;
+      }
+      
+      .hex {
+        width: 60px;
+        height: 52px; /* 60 × sqrt(3)/2 = 51.96 */
+        font-size: 10px;
+        border: 2px solid rgba(0, 0, 0, 0.5);
+      }
+      
+      .token {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+      }
+      
+      .animal-card {
+        width: 100%;
+        margin-bottom: 8px;
+      }
     }
   </style>
 </head>
-<body>
-  <div id="game-container"></div>
-
-  <!-- Phaser 3 from CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
-
-  <!-- Main game entry point -->
-  <script type="module" src="js/main.js"></script>
+<body class="bg-gradient-to-br from-slate-800 to-slate-900 min-h-screen">
+  
+  <!-- Game Container -->
+  <div class="container mx-auto px-4 py-6 max-w-7xl">
+    
+    <!-- Header -->
+    <header class="bg-white rounded-lg shadow-lg p-4 mb-6">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <!-- Title -->
+        <div>
+          <h1 class="text-3xl font-bold text-slate-800">🎮 Harmonies v5.0</h1>
+          <p class="text-sm text-slate-600">Build landscapes, attract animals, score points!</p>
+        </div>
+        
+        <!-- Game Stats -->
+        <div class="flex gap-4 items-center">
+          <div class="bg-blue-100 px-4 py-2 rounded-lg">
+            <div class="text-xs text-blue-700 font-semibold">Tokens Left</div>
+            <div id="pouch-counter" class="text-2xl font-bold text-blue-900">120</div>
+          </div>
+          
+          <div class="bg-purple-100 px-4 py-2 rounded-lg">
+            <div class="text-xs text-purple-700 font-semibold">Score</div>
+            <div class="flex items-center gap-2">
+              <div id="total-score" class="text-2xl font-bold text-purple-900">0</div>
+              <div id="sun-display" class="text-xl"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="flex gap-2">
+          <button id="new-game-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+            🎲 New Game
+          </button>
+          <button id="help-btn" class="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition">
+            ❓ Help
+          </button>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Main Game Area -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      
+      <!-- Left Sidebar: Animal Cards -->
+      <aside class="lg:col-span-1 space-y-4">
+        <!-- Your Animal Cards (Cards you've taken) -->
+        <div class="bg-white rounded-lg shadow-lg p-4">
+          <h2 class="text-lg font-bold text-slate-800 mb-2">🎯 Your Animal Cards</h2>
+          <p class="text-xs text-slate-500 mb-3">Max 4 cards - Click to select for placement</p>
+          <div id="player-animal-cards" class="space-y-2 min-h-[100px]">
+            <!-- Your taken animal cards appear here -->
+          </div>
+        </div>
+        
+        <!-- Available Animal Cards (Cards to take) -->
+        <div class="bg-white rounded-lg shadow-lg p-4">
+          <h2 class="text-lg font-bold text-slate-800 mb-2">🃏 Available Cards</h2>
+          <p class="text-xs text-slate-500 mb-3">Click to take a card (once per turn)</p>
+          <div id="available-animal-cards" class="space-y-2">
+            <!-- Available cards to take -->
+          </div>
+          <div id="discard-button-container" class="mt-3 hidden">
+            <button id="discard-mode-btn" class="w-full px-3 py-2 bg-yellow-500 text-white text-sm rounded-lg hover:bg-yellow-600 transition font-semibold">
+              🗑️ Discard & Replace Mode
+            </button>
+            <button id="cancel-discard-btn" class="w-full px-3 py-2 bg-slate-400 text-white text-sm rounded-lg hover:bg-slate-500 transition font-semibold hidden mt-2">
+              ✖️ Cancel Discard
+            </button>
+            <p id="discard-instruction" class="text-xs text-slate-500 mt-1 text-center hidden">Click a card below to discard it</p>
+          </div>
+        </div>
+        
+        <!-- Score Breakdown -->
+        <div class="bg-white rounded-lg shadow-lg p-4">
+          <h2 class="text-lg font-bold text-slate-800 mb-3">📊 Score Breakdown</h2>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-slate-600">🌲 Trees:</span>
+              <span id="score-trees" class="font-bold text-green-700">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-600">⛰️ Mountains:</span>
+              <span id="score-mountains" class="font-bold text-gray-700">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-600">🌾 Fields:</span>
+              <span id="score-fields" class="font-bold text-yellow-700">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-600">🏠 Buildings:</span>
+              <span id="score-buildings" class="font-bold text-red-700">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-600">💧 Rivers:</span>
+              <span id="score-rivers" class="font-bold text-blue-700">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-600">🐾 Animals:</span>
+              <span id="score-animals" class="font-bold text-purple-700">0</span>
+            </div>
+            <div class="border-t border-slate-300 pt-2 mt-2 flex justify-between">
+              <span class="text-slate-800 font-bold">Total:</span>
+              <span id="score-total-sidebar" class="font-bold text-purple-900 text-lg">0</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+      
+      <!-- Center: Hex Grid -->
+      <main class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h2 class="text-lg font-bold text-slate-800 mb-4 text-center">🗺️ Your Landscape</h2>
+          
+          <!-- Hex Grid Container -->
+          <div id="hex-grid-container" class="hex-grid bg-gradient-to-br from-green-50 to-blue-50 rounded-lg border-4 border-slate-300">
+            <!-- Hexes will be inserted here -->
+          </div>
+          
+          <!-- Game Messages -->
+          <div id="game-message" class="mt-4 p-3 rounded-lg text-center font-semibold hidden">
+            <!-- Messages appear here -->
+          </div>
+        </div>
+      </main>
+      
+      <!-- Right Sidebar: Token Supply -->
+      <aside class="lg:col-span-1">
+        <div class="bg-white rounded-lg shadow-lg p-4">
+          <h2 class="text-lg font-bold text-slate-800 mb-3">🎨 Token Supply</h2>
+          <p class="text-sm text-slate-600 mb-4">Click a space to select, then drag tokens to your board</p>
+          
+          <!-- Token Spaces -->
+          <div id="token-supply-container" class="space-y-3">
+            
+            <!-- Space 1 -->
+            <div class="token-space border-4 border-slate-300 rounded-lg p-3 bg-slate-50" data-space="0">
+              <div class="text-xs text-slate-600 font-semibold mb-2">Space 1</div>
+              <div class="flex justify-around items-center">
+                <!-- Tokens generated dynamically -->
+              </div>
+            </div>
+            
+            <!-- Space 2 -->
+            <div class="token-space border-4 border-slate-300 rounded-lg p-3 bg-slate-50" data-space="1">
+              <div class="text-xs text-slate-600 font-semibold mb-2">Space 2</div>
+              <div class="flex justify-around items-center">
+                <!-- Tokens generated dynamically -->
+              </div>
+            </div>
+            
+            <!-- Space 3 -->
+            <div class="token-space border-4 border-slate-300 rounded-lg p-3 bg-slate-50" data-space="2">
+              <div class="text-xs text-slate-600 font-semibold mb-2">Space 3</div>
+              <div class="flex justify-around items-center">
+                <!-- Tokens generated dynamically -->
+              </div>
+            </div>
+          </div>
+          
+          <!-- Turn Actions -->
+          <div class="mt-4 space-y-2">
+            <button id="end-turn-btn" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold disabled:bg-slate-400 disabled:cursor-not-allowed">
+              ✓ End Turn
+            </button>
+            <div class="text-xs text-slate-600 text-center">
+              Place all 3 tokens before ending turn<br>
+              <span class="text-xs text-slate-500">Game ends when pouch empty or ≤2 spaces left</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+      
+    </div>
+    
+    <!-- Footer Info -->
+    <footer class="mt-6 bg-white rounded-lg shadow-lg p-4 text-center">
+      <p class="text-sm text-slate-600">
+        <strong>How to play:</strong> Select a token space → Drag tokens to hexagons → Complete your turn → Score points!
+      </p>
+      <p class="text-xs text-slate-500 mt-2">
+        v5.0 HTML/CSS Implementation • <a href="https://github.com/ngnnah/I-And-AI" class="text-blue-600 hover:underline">GitHub</a>
+      </p>
+    </footer>
+    
+  </div>
+  
+  <!-- Game Logic Scripts (ES6 Modules) -->
+  <script type="module">
+    // Import existing game logic
+    import { canPlaceToken, calculateTerrain } from './js/game/token-manager.js';
+    import { calculateTotalScore } from './js/game/scoring-engine.js';
+    import { INITIAL_POUCH } from './js/data/tokens-config.js';
+    import { ANIMAL_CARDS } from './js/data/animal-cards.js';
+    
+    // Token emoji mapping
+    const TOKEN_EMOJI = {
+      blue: '💧',
+      yellow: '🌾',
+      brown: '🪵',
+      green: '🌿',
+      red: '🏠',
+      gray: '⛰️'
+    };
+    
+    // Color names for display
+    const COLOR_NAMES = {
+      blue: 'Water',
+      yellow: 'Field',
+      brown: 'Trunk',
+      green: 'Leaves',
+      red: 'Building',
+      gray: 'Mountain'
+    };
+    
+    // Game state
+    const gameState = {
+      selectedSpace: null,
+      tokensPlaced: 0,
+      tokensToPlace: 3,
+      hexBoard: {},
+      tokenSupply: [[], [], []],
+      pouch: { ...INITIAL_POUCH },
+      draggedToken: null,
+      gameEnded: false, // Flag to disable gameplay after game over
+      selectedAnimalCard: null, // Currently selected animal card for placement
+      availableAnimalCards: [], // 3 face-up cards available to take
+      playerAnimalCards: [], // Cards player has taken (max 4)
+      takenCardThisTurn: false, // Flag to prevent taking multiple cards per turn
+      discardMode: false, // Flag for discard & replace mode
+      placedAnimals: [], // Array of {cardId, hexKey} for animal cube placements
+      score: {
+        trees: 0,
+        mountains: 0,
+        fields: 0,
+        buildings: 0,
+        water: 0,
+        animals: 0,
+        total: 0
+      }
+    };
+    
+    // Initialize game
+    function initGame() {
+      console.log('🎮 Harmonies v5.0 Initializing...');
+      
+      // Create initial hex grid (23 hexes - Side A board)
+      createInitialHexGrid();
+      
+      // Generate initial token supply
+      refreshTokenSupply();
+      
+      // Setup event listeners
+      setupEventListeners();
+      
+      // Initial score
+      updateScore();
+      
+      // Handle window resize for responsive hex positioning
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          repositionAllHexes();
+        }, 250);
+      });
+      
+      // Select 3 random animal cards for solo mode
+      selectAnimalCards();
+      
+      showMessage('Game ready! Side A board (23 hexes). Select a token space, then drag tokens.', 'success');
+      console.log('✅ Game ready! 23-hex board initialized with 3 available animal cards.');
+    }
+    
+    // Select 3 random animal cards for available pool
+    function selectAnimalCards() {
+      const shuffled = [...ANIMAL_CARDS].sort(() => Math.random() - 0.5);
+      gameState.availableAnimalCards = shuffled.slice(0, 3);
+      displayAvailableAnimalCards();
+      displayPlayerAnimalCards();
+    }
+    
+    // Display available animal cards (to take)
+    function displayAvailableAnimalCards() {
+      const container = document.getElementById('available-animal-cards');
+      const discardBtnContainer = document.getElementById('discard-button-container');
+      if (!container) return;
+      
+      if (gameState.availableAnimalCards.length === 0) {
+        container.innerHTML = '<div class="text-xs text-slate-400 text-center py-4">No cards available</div>';
+        if (discardBtnContainer) discardBtnContainer.classList.add('hidden');
+        return;
+      }
+      
+      const canTake = !gameState.takenCardThisTurn && gameState.playerAnimalCards.length < 4;
+      const canDiscard = !gameState.takenCardThisTurn; // Can discard if didn't take a card
+      
+      // Show/hide discard buttons based on mode and availability
+      if (discardBtnContainer) {
+        const discardModeBtn = document.getElementById('discard-mode-btn');
+        const cancelDiscardBtn = document.getElementById('cancel-discard-btn');
+        const discardInstruction = document.getElementById('discard-instruction');
+        
+        if (canDiscard) {
+          discardBtnContainer.classList.remove('hidden');
+          
+          if (gameState.discardMode) {
+            // In discard mode - show cancel button and instruction
+            if (discardModeBtn) discardModeBtn.classList.add('hidden');
+            if (cancelDiscardBtn) cancelDiscardBtn.classList.remove('hidden');
+            if (discardInstruction) discardInstruction.classList.remove('hidden');
+          } else {
+            // Not in discard mode - show activate button
+            if (discardModeBtn) discardModeBtn.classList.remove('hidden');
+            if (cancelDiscardBtn) cancelDiscardBtn.classList.add('hidden');
+            if (discardInstruction) discardInstruction.classList.add('hidden');
+          }
+        } else {
+          discardBtnContainer.classList.add('hidden');
+        }
+      }
+      
+      container.innerHTML = gameState.availableAnimalCards.map((card, idx) => {
+        let borderClass, cursorClass, actionText;
+        
+        if (gameState.discardMode) {
+          // In discard mode - show cards as discardable
+          borderClass = 'border-yellow-400 hover:border-red-500';
+          cursorClass = 'cursor-pointer';
+          actionText = '<div class="text-xs text-red-600 text-center font-semibold">Click to discard</div>';
+        } else if (canTake) {
+          // Available to take - green border
+          borderClass = 'border-green-400 hover:border-green-500';
+          cursorClass = 'cursor-pointer';
+          actionText = '<div class="text-xs text-green-600 text-center font-semibold">Click to take</div>';
+        } else {
+          // Not available - grayed out
+          borderClass = 'border-slate-300';
+          cursorClass = 'cursor-not-allowed opacity-50';
+          actionText = '';
+        }
+        
+        return `
+          <div class="available-card bg-white rounded-lg p-2 shadow border-2 transition ${borderClass} ${cursorClass}" 
+               data-card-id="${card.id}"
+               data-card-idx="${idx}"
+               data-discard-mode="${gameState.discardMode}">
+            <div class="text-2xl text-center mb-1">${getAnimalEmoji(card.animal)}</div>
+            <div class="text-xs font-semibold text-slate-700 text-center">${card.name}</div>
+            <div class="text-xs text-slate-500 text-center mt-1">
+              ${card.pointsPerPlacement.join('→')} pts
+            </div>
+            ${actionText}
+          </div>
+        `;
+      }).join('');
+      
+      // Add click handlers
+      document.querySelectorAll('.available-card').forEach(cardEl => {
+        if (gameState.discardMode) {
+          cardEl.addEventListener('click', handleDiscardAnimalCard);
+        } else {
+          cardEl.addEventListener('click', handleTakeAnimalCard);
+        }
+      });
+    }
+    
+    // Display player's animal cards (cards they've taken)
+    function displayPlayerAnimalCards() {
+      const container = document.getElementById('player-animal-cards');
+      if (!container) return;
+      
+      if (gameState.playerAnimalCards.length === 0) {
+        container.innerHTML = '<div class="text-xs text-slate-400 text-center py-4">Take a card from below!</div>';
+        return;
+      }
+      
+      container.innerHTML = gameState.playerAnimalCards.map((card, idx) => {
+        const placementCount = gameState.placedAnimals.filter(p => p.cardId === card.id).length;
+        const nextPoints = placementCount < card.maxPlacements ? card.pointsPerPlacement[placementCount] : null;
+        
+        return `
+          <div class="player-card bg-white rounded-lg p-2 shadow border-2 border-slate-300 cursor-pointer hover:border-blue-400 transition" 
+               data-card-id="${card.id}"
+               data-card-idx="${idx}">
+            <div class="text-2xl text-center mb-1">${getAnimalEmoji(card.animal)}</div>
+            <div class="text-xs font-semibold text-slate-700 text-center">${card.name}</div>
+            <div class="text-xs text-slate-500 text-center mt-1">
+              ${placementCount}/${card.maxPlacements} placed
+            </div>
+            ${nextPoints ? `<div class="text-xs font-bold text-green-600 text-center">Next: +${nextPoints} pts</div>` : '<div class="text-xs text-slate-400 text-center">Complete!</div>'}
+          </div>
+        `;
+      }).join('');
+      
+      // Add click handlers
+      document.querySelectorAll('.player-card').forEach(cardEl => {
+        cardEl.addEventListener('click', handleSelectPlayerCard);
+      });
+      
+      // Highlight selected card
+      updateSelectedAnimalCardUI();
+    }
+    
+    // Helper to get animal emoji
+    function getAnimalEmoji(animal) {
+      const emojiMap = {
+        'bear': '🐻',
+        'deer': '🦌',
+        'rabbit': '🐰',
+        'fox': '🦊',
+        'eagle': '🦅',
+        'beaver': '🦫',
+        'owl': '🦉',
+        'squirrel': '🐿️',
+        'salmon': '🐟',
+        'wolf': '🐺'
+      };
+      return emojiMap[animal] || '🦌';
+    }
+    
+    // Reposition all hexes (for window resize)
+    function repositionAllHexes() {
+      document.querySelectorAll('.hex').forEach(hexEl => {
+        const q = parseInt(hexEl.dataset.q);
+        const r = parseInt(hexEl.dataset.r);
+        const pos = hexToPixel(q, r);
+        hexEl.style.left = pos.x + 'px';
+        hexEl.style.top = pos.y + 'px';
+      });
+    }
+    
+    // Create 23 starting hexagons (Side A board layout)
+    function createInitialHexGrid() {
+      const container = document.getElementById('hex-grid-container');
+      
+      // Harmonies Side A board: 5-4-5-4-5 = 23 hexes
+      // Flat-topped hex axial coordinates, centered on (0,0)
+      const boardLayout = {
+        '-2': [-1, 0, 1, 2, 3],   // 5 hexes
+        '-1': [-1, 0, 1, 2],      // 4 hexes
+         '0': [-2, -1, 0, 1, 2],  // 5 hexes (center)
+         '1': [-2, -1, 0, 1],     // 4 hexes
+         '2': [-3, -2, -1, 0, 1], // 5 hexes
+      };
+      
+      for (const [qStr, rValues] of Object.entries(boardLayout)) {
+        const q = parseInt(qStr, 10);
+        for (const r of rValues) {
+          const hexEl = createHexElement(q, r);
+          container.appendChild(hexEl);
+        }
+      }
+    }
+    
+    // Create a hex element
+    function createHexElement(q, r) {
+      const hex = document.createElement('div');
+      hex.className = 'hex empty';
+      hex.dataset.q = q;
+      hex.dataset.r = r;
+      
+      // Calculate pixel position
+      const pos = hexToPixel(q, r);
+      hex.style.left = pos.x + 'px';
+      hex.style.top = pos.y + 'px';
+      
+      // Store in game state
+      gameState.hexBoard[`${q}_${r}`] = {
+        q, r,
+        terrain: null,
+        stack: []
+      };
+      
+      // Drop zone handlers
+      hex.addEventListener('dragover', handleDragOver);
+      hex.addEventListener('dragleave', handleDragLeave);
+      hex.addEventListener('drop', handleDrop);
+      
+      // Animal cube placement handler
+      hex.addEventListener('click', handleHexClickForAnimal);
+      
+      return hex;
+    }
+    
+    // Convert axial coordinates to pixel position
+    function hexToPixel(q, r) {
+      // Detect hex size based on container width
+      const container = document.getElementById('hex-grid-container');
+      const containerWidth = container ? container.clientWidth : 800;
+      const isMobile = containerWidth < 500;
+      
+      // Hex dimensions - use exact sqrt(3)/2 ratio for proper hexagons
+      const hexWidth = isMobile ? 60 : 80;
+      const hexHeight = isMobile ? 52 : 69;
+      
+      // Flat-topped hex positioning (standard axial coordinate formulas)
+      // Horizontal: Each column shifts right by 3/4 of width
+      // Vertical: Each row shifts down by full height, plus half-height per column
+      const x = q * hexWidth * 0.75;
+      const y = r * hexHeight + q * hexHeight * 0.5;
+      
+      // Center in container
+      const centerX = containerWidth / 2;
+      const centerY = isMobile ? 205 : 295;
+      
+      return {
+        x: x + centerX,
+        y: y + centerY
+      };
+    }
+    
+    // Draw random tokens from pouch
+    function drawTokens(count) {
+      const colors = [];
+      const available = Object.entries(gameState.pouch).filter(([_, count]) => count > 0);
+      
+      if (available.length === 0) return colors;
+      
+      for (let i = 0; i < count; i++) {
+        if (available.length === 0) break;
+        
+        const randomIndex = Math.floor(Math.random() * available.length);
+        const [color, _] = available[randomIndex];
+        colors.push(color);
+        
+        gameState.pouch[color]--;
+        if (gameState.pouch[color] === 0) {
+          available.splice(randomIndex, 1);
+        }
+      }
+      
+      return colors;
+    }
+    
+    // Refresh all token spaces
+    function refreshTokenSupply() {
+      for (let i = 0; i < 3; i++) {
+        gameState.tokenSupply[i] = drawTokens(3);
+        updateTokenSpaceUI(i);
+      }
+    }
+    
+    // Update token space UI
+    function updateTokenSpaceUI(spaceIndex) {
+      const space = document.querySelector(`[data-space="${spaceIndex}"]`);
+      const tokensContainer = space.querySelector('.flex');
+      tokensContainer.innerHTML = '';
+      
+      gameState.tokenSupply[spaceIndex].forEach((color, idx) => {
+        const token = document.createElement('div');
+        token.className = `token ${color}`;
+        token.draggable = true;
+        token.dataset.color = color;
+        token.dataset.space = spaceIndex;
+        token.dataset.index = idx;
+        token.textContent = TOKEN_EMOJI[color];
+        
+        // Drag handlers
+        token.addEventListener('dragstart', handleDragStart);
+        token.addEventListener('dragend', handleDragEnd);
+        
+        tokensContainer.appendChild(token);
+      });
+    }
+    
+    // Drag start handler
+    function handleDragStart(e) {
+      // Prevent dragging after game is over
+      if (gameState.gameEnded) {
+        e.preventDefault();
+        showMessage('Game is over! Start a new game to play again.', 'error');
+        return;
+      }
+      
+      const token = e.target;
+      const spaceIndex = parseInt(token.dataset.space);
+      
+      // Check if space is selected
+      if (gameState.selectedSpace === null) {
+        e.preventDefault();
+        showMessage('Select a token space first!', 'error');
+        return;
+      }
+      
+      if (parseInt(gameState.selectedSpace) !== spaceIndex) {
+        e.preventDefault();
+        showMessage('Drag tokens from the selected space only!', 'error');
+        return;
+      }
+      
+      gameState.draggedToken = {
+        color: token.dataset.color,
+        space: spaceIndex,
+        index: parseInt(token.dataset.index),
+        element: token
+      };
+      
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', token.dataset.color);
+      token.style.opacity = '0.5';
+    }
+    
+    // Drag end handler
+    function handleDragEnd(e) {
+      e.target.style.opacity = '1';
+      
+      // Clear all drop zone highlights
+      document.querySelectorAll('.hex').forEach(hex => {
+        hex.classList.remove('dropzone-active', 'dropzone-invalid');
+      });
+    }
+    
+    // Drag over handler (allow drop)
+    function handleDragOver(e) {
+      if (!gameState.draggedToken) return;
+      
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      
+      const hex = e.currentTarget;
+      const q = parseInt(hex.dataset.q);
+      const r = parseInt(hex.dataset.r);
+      const hexKey = `${q}_${r}`;
+      const hexData = gameState.hexBoard[hexKey];
+      
+      // Validate placement
+      const validation = canPlaceToken(hexData, gameState.draggedToken.color);
+      
+      if (validation.valid) {
+        hex.classList.add('dropzone-active');
+        hex.classList.remove('dropzone-invalid');
+      } else {
+        hex.classList.add('dropzone-invalid');
+        hex.classList.remove('dropzone-active');
+      }
+    }
+    
+    // Drag leave handler
+    function handleDragLeave(e) {
+      const hex = e.currentTarget;
+      hex.classList.remove('dropzone-active', 'dropzone-invalid');
+    }
+    
+    // Drop handler
+    function handleDrop(e) {
+      e.preventDefault();
+      
+      if (!gameState.draggedToken) return;
+      
+      const hex = e.currentTarget;
+      const q = parseInt(hex.dataset.q);
+      const r = parseInt(hex.dataset.r);
+      const hexKey = `${q}_${r}`;
+      const hexData = gameState.hexBoard[hexKey];
+      
+      // Validate placement
+      const validation = canPlaceToken(hexData, gameState.draggedToken.color);
+      
+      if (!validation.valid) {
+        showMessage(`❌ ${validation.reason}`, 'error');
+        hex.classList.remove('dropzone-active', 'dropzone-invalid');
+        return;
+      }
+      
+      // Place token
+      const color = gameState.draggedToken.color;
+      hexData.stack.push({ color });
+      hexData.terrain = calculateTerrain(hexData.stack);
+      
+      // Update hex display
+      updateHexDisplay(hex, hexData);
+      
+      // Remove token from supply
+      const { space, index } = gameState.draggedToken;
+      gameState.tokenSupply[space].splice(index, 1);
+      updateTokenSpaceUI(space);
+      
+      // Update counters
+      gameState.tokensPlaced++;
+      
+      // Update score
+      updateScore();
+      
+      // Check if board is almost full (only check this during placement, not pouch)
+      const filledHexes = Object.values(gameState.hexBoard).filter(hex => hex.stack.length > 0).length;
+      const emptyHexes = 23 - filledHexes;
+      if (emptyHexes <= 2) {
+        showMessage(`⚠️ Only ${emptyHexes} empty space${emptyHexes !== 1 ? 's' : ''} left! Finish placing your tokens - game will end (can't place 3 tokens next turn).`, 'info');
+        // Don't end immediately - let player finish placing their 3 tokens
+      }
+      
+      // Check if all tokens placed
+      if (gameState.tokensPlaced >= gameState.tokensToPlace) {
+        showMessage(`✓ All tokens placed! Click "End Turn" to continue.`, 'success');
+      } else {
+        const remaining = gameState.tokensToPlace - gameState.tokensPlaced;
+        showMessage(`✓ Token placed! ${remaining} more to place.`, 'success');
+      }
+      
+      // Clear drag state
+      gameState.draggedToken = null;
+      hex.classList.remove('dropzone-active', 'dropzone-invalid');
+    }
+    
+    // Update hex visual display
+    function updateHexDisplay(hexEl, hexData) {
+      const { stack, terrain } = hexData;
+      
+      if (stack.length === 0) {
+        hexEl.className = 'hex empty';
+        hexEl.innerHTML = '';
+        return;
+      }
+      
+      // Show top token color
+      const topColor = stack[stack.length - 1].color;
+      hexEl.className = `hex ${topColor}`;
+      
+      // Show stack height and emoji
+      const emoji = TOKEN_EMOJI[topColor];
+      const tokenDisplay = stack.length > 1 ? `${emoji}×${stack.length}` : emoji;
+      
+      // Check if hex has animal cube
+      const hexKey = `${hexData.q}_${hexData.r}`;
+      const animalPlacement = gameState.placedAnimals.find(p => p.hexKey === hexKey);
+      
+      if (animalPlacement) {
+        // Find the animal card to get the animal type
+        const animalCard = gameState.playerAnimalCards.find(c => c.id === animalPlacement.cardId);
+        const animalEmoji = animalCard ? getAnimalEmoji(animalCard.animal) : '🐾';
+        
+        // Show token + specific animal cube
+        hexEl.innerHTML = `
+          <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+            <span>${tokenDisplay}</span>
+            <span style="position: absolute; top: 2px; right: 2px; font-size: 0.9em;" title="${animalCard ? animalCard.name : 'Animal'}">${animalEmoji}</span>
+          </div>
+        `;
+      } else {
+        hexEl.textContent = tokenDisplay;
+      }
+    }
+    
+    // Update score display
+    function updateScore() {
+      const playerBoard = {
+        hexGrid: gameState.hexBoard,
+        placedAnimals: gameState.placedAnimals
+      };
+      
+      const result = calculateTotalScore(playerBoard, gameState.playerAnimalCards, 'A');
+      gameState.score = {
+        trees: result.breakdown.trees,
+        mountains: result.breakdown.mountains,
+        fields: result.breakdown.fields,
+        buildings: result.breakdown.buildings,
+        water: result.breakdown.water,
+        animals: result.breakdown.animals,
+        total: result.total
+      };
+      
+      // Update UI
+      document.getElementById('score-trees').textContent = gameState.score.trees;
+      document.getElementById('score-mountains').textContent = gameState.score.mountains;
+      document.getElementById('score-fields').textContent = gameState.score.fields;
+      document.getElementById('score-buildings').textContent = gameState.score.buildings;
+      document.getElementById('score-rivers').textContent = gameState.score.water;
+      document.getElementById('score-animals').textContent = gameState.score.animals;
+      document.getElementById('score-total-sidebar').textContent = gameState.score.total;
+      document.getElementById('total-score').textContent = gameState.score.total;
+      
+      // Update real-time sun display
+      const suns = calculateSuns(gameState.score.total);
+      const sunEmoji = '☀️'.repeat(suns);
+      const sunDisplay = document.getElementById('sun-display');
+      sunDisplay.textContent = sunEmoji;
+      sunDisplay.title = `${suns} sun${suns !== 1 ? 's' : ''} earned`; // Tooltip on hover
+      sunDisplay.style.cursor = 'help'; // Show help cursor on hover
+      
+      // Update pouch counter
+      const tokensLeft = Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0);
+      document.getElementById('pouch-counter').textContent = tokensLeft;
+    }
+    
+    // Show game message
+    function showMessage(text, type = 'info') {
+      const msgEl = document.getElementById('game-message');
+      msgEl.textContent = text;
+      msgEl.className = `mt-4 p-3 rounded-lg text-center font-semibold ${
+        type === 'success' ? 'bg-green-100 text-green-800' :
+        type === 'error' ? 'bg-red-100 text-red-800' :
+        'bg-blue-100 text-blue-800'
+      }`;
+      msgEl.classList.remove('hidden');
+      
+      // Auto-hide after 4 seconds
+      setTimeout(() => {
+        msgEl.classList.add('hidden');
+      }, 4000);
+    }
+    
+    // Setup event listeners
+    function setupEventListeners() {
+      // New game button
+      document.getElementById('new-game-btn').addEventListener('click', () => {
+        if (confirm('Start a new game? Current progress will be lost.')) {
+          location.reload();
+        }
+      });
+      
+      // Help button
+      document.getElementById('help-btn').addEventListener('click', () => {
+        showMessage('Select a token space (click), drag tokens to hexes, then end your turn!', 'info');
+      });
+      
+      // End turn button
+      document.getElementById('end-turn-btn').addEventListener('click', handleEndTurn);
+      
+      // Discard mode button
+      document.getElementById('discard-mode-btn').addEventListener('click', () => {
+        if (gameState.takenCardThisTurn) {
+          showMessage('❌ Cannot discard - you already took a card this turn!', 'error');
+          return;
+        }
+        gameState.discardMode = true;
+        displayAvailableAnimalCards();
+        showMessage('🗑️ Discard mode: Click a card to discard and replace it.', 'info');
+      });
+      
+      // Cancel discard mode button
+      document.getElementById('cancel-discard-btn').addEventListener('click', () => {
+        gameState.discardMode = false;
+        displayAvailableAnimalCards();
+        showMessage('✖️ Discard mode cancelled.', 'info');
+      });
+      
+      // Token space selection
+      document.querySelectorAll('.token-space').forEach(space => {
+        space.addEventListener('click', handleSpaceClick);
+      });
+      
+      console.log('✅ Event listeners attached');
+    }
+    
+    // Handle space click
+    function handleSpaceClick(e) {
+      if (gameState.gameEnded) {
+        showMessage('Game is over! Start a new game to play again.', 'error');
+        return;
+      }
+      
+      const space = e.currentTarget;
+      const spaceId = space.dataset.space;
+      
+      // Deselect all spaces
+      document.querySelectorAll('.token-space').forEach(s => {
+        s.classList.remove('selected');
+      });
+      
+      // Select this space
+      space.classList.add('selected');
+      gameState.selectedSpace = spaceId;
+      
+      showMessage(`Space ${parseInt(spaceId) + 1} selected! Drag tokens to your board.`, 'success');
+    }
+    
+    // Handle taking an animal card from available pool
+    function handleTakeAnimalCard(e) {
+      if (gameState.gameEnded) {
+        showMessage('Game is over! Start a new game to play again.', 'error');
+        return;
+      }
+      
+      if (gameState.takenCardThisTurn) {
+        showMessage('❌ Already taken a card this turn!', 'error');
+        return;
+      }
+      
+      if (gameState.playerAnimalCards.length >= 4) {
+        showMessage('❌ Maximum 4 animal cards! Complete some animals first.', 'error');
+        return;
+      }
+      
+      const cardEl = e.currentTarget;
+      const cardId = cardEl.dataset.cardId;
+      const card = gameState.availableAnimalCards.find(c => c.id === cardId);
+      
+      if (!card) return;
+      
+      // Move card from available to player's hand
+      const cardIndex = gameState.availableAnimalCards.findIndex(c => c.id === cardId);
+      gameState.availableAnimalCards.splice(cardIndex, 1);
+      gameState.playerAnimalCards.push(card);
+      gameState.takenCardThisTurn = true;
+      
+      // Draw replacement card if available
+      const remainingCards = ANIMAL_CARDS.filter(c => 
+        !gameState.availableAnimalCards.some(ac => ac.id === c.id) &&
+        !gameState.playerAnimalCards.some(pc => pc.id === c.id)
+      );
+      
+      if (remainingCards.length > 0) {
+        const newCard = remainingCards[Math.floor(Math.random() * remainingCards.length)];
+        gameState.availableAnimalCards.push(newCard);
+      }
+      
+      displayAvailableAnimalCards();
+      displayPlayerAnimalCards();
+      
+      showMessage(`🎯 ${card.name} taken! Click it to place animal cubes.`, 'success');
+    }
+    
+    // Handle discarding an animal card from available pool
+    function handleDiscardAnimalCard(e) {
+      if (gameState.gameEnded) {
+        showMessage('Game is over! Start a new game to play again.', 'error');
+        return;
+      }
+      
+      const cardEl = e.currentTarget;
+      const cardId = cardEl.dataset.cardId;
+      const card = gameState.availableAnimalCards.find(c => c.id === cardId);
+      
+      if (!card) return;
+      
+      // Remove discarded card
+      const cardIndex = gameState.availableAnimalCards.findIndex(c => c.id === cardId);
+      gameState.availableAnimalCards.splice(cardIndex, 1);
+      
+      // Draw replacement card from remaining deck
+      const usedCardIds = [
+        ...gameState.availableAnimalCards.map(c => c.id),
+        ...gameState.playerAnimalCards.map(c => c.id)
+      ];
+      const remainingCards = ANIMAL_CARDS.filter(c => !usedCardIds.includes(c.id));
+      
+      if (remainingCards.length > 0) {
+        const newCard = remainingCards[Math.floor(Math.random() * remainingCards.length)];
+        gameState.availableAnimalCards.push(newCard);
+      }
+      
+      // Exit discard mode
+      gameState.discardMode = false;
+      
+      displayAvailableAnimalCards();
+      
+      showMessage(`🗑️ ${card.name} discarded and replaced!`, 'success');
+    }
+    
+    // Handle selecting a player's animal card for placement
+    function handleSelectPlayerCard(e) {
+      if (gameState.gameEnded) {
+        showMessage('Game is over! Start a new game to play again.', 'error');
+        return;
+      }
+      
+      const cardEl = e.currentTarget;
+      const cardId = cardEl.dataset.cardId;
+      const card = gameState.playerAnimalCards.find(c => c.id === cardId);
+      
+      if (!card) return;
+      
+      // Check if card is full
+      const placementCount = gameState.placedAnimals.filter(p => p.cardId === cardId).length;
+      if (placementCount >= card.maxPlacements) {
+        showMessage(`${card.name} is complete (${card.maxPlacements}/${card.maxPlacements} placed)!`, 'info');
+        return;
+      }
+      
+      // Toggle selection
+      if (gameState.selectedAnimalCard === cardId) {
+        gameState.selectedAnimalCard = null;
+        showMessage('Animal card deselected.', 'info');
+      } else {
+        gameState.selectedAnimalCard = cardId;
+        const pattern = card.pattern.map(p => p.terrain).join('+');
+        showMessage(`🐾 ${card.name} selected! Click a hex with ${pattern} pattern to place.`, 'success');
+      }
+      
+      updateSelectedAnimalCardUI();
+    }
+    
+    // Update UI to show selected animal card
+    function updateSelectedAnimalCardUI() {
+      document.querySelectorAll('.player-card').forEach(cardEl => {
+        const cardId = cardEl.dataset.cardId;
+        if (cardId === gameState.selectedAnimalCard) {
+          cardEl.classList.add('ring-4', 'ring-blue-500');
+          cardEl.classList.remove('border-slate-300');
+        } else {
+          cardEl.classList.remove('ring-4', 'ring-blue-500');
+          cardEl.classList.add('border-slate-300');
+        }
+      });
+    }
+    
+    // Handle hex click for animal cube placement
+    function handleHexClickForAnimal(e) {
+      if (gameState.gameEnded) return;
+      if (!gameState.selectedAnimalCard) return;
+      
+      // Don't place animal during token dragging
+      if (gameState.draggedToken) return;
+      
+      const hexEl = e.currentTarget;
+      const q = parseInt(hexEl.dataset.q);
+      const r = parseInt(hexEl.dataset.r);
+      const hexKey = `${q}_${r}`;
+      const hexData = gameState.hexBoard[hexKey];
+      
+      // Check if hex already has an animal
+      const existingAnimalIndex = gameState.placedAnimals.findIndex(p => p.hexKey === hexKey);
+      
+      if (existingAnimalIndex !== -1) {
+        // Remove animal cube
+        gameState.placedAnimals.splice(existingAnimalIndex, 1);
+        updateHexDisplay(hexEl, hexData);
+        updateScore();
+        displayPlayerAnimalCards(); // Refresh to update placement counts
+        showMessage('🐾 Animal cube removed!', 'info');
+        return;
+      }
+      
+      // Check if hex has tokens (can't place on empty hex)
+      if (!hexData.stack || hexData.stack.length === 0) {
+        showMessage('❌ Cannot place animal on empty hex!', 'error');
+        return;
+      }
+      
+      // Get selected animal card
+      const card = gameState.playerAnimalCards.find(c => c.id === gameState.selectedAnimalCard);
+      if (!card) return;
+      
+      // Check if pattern matches
+      const patternMatch = checkAnimalPattern(hexKey, card.pattern);
+      
+      if (!patternMatch.valid) {
+        showMessage(`❌ Pattern doesn't match! Need: ${card.pattern.map(p => p.terrain).join('+')}`, 'error');
+        return;
+      }
+      
+      // Check if card is full
+      const placementCount = gameState.placedAnimals.filter(p => p.cardId === card.id).length;
+      if (placementCount >= card.maxPlacements) {
+        showMessage(`❌ ${card.name} is complete (${card.maxPlacements}/${card.maxPlacements})!`, 'error');
+        return;
+      }
+      
+      // Place animal cube
+      gameState.placedAnimals.push({
+        cardId: card.id,
+        hexKey: hexKey
+      });
+      
+      updateHexDisplay(hexEl, hexData);
+      updateScore();
+      displayPlayerAnimalCards(); // Refresh to update placement counts
+      
+      const newCount = placementCount + 1;
+      const points = card.pointsPerPlacement[newCount - 1];
+      showMessage(`🐾 ${card.name} placed! Score: ${points} pts (${newCount}/${card.maxPlacements})`, 'success');
+    }
+    
+    // Check if hex and neighbors match animal card pattern
+    function checkAnimalPattern(hexKey, pattern) {
+      const hexData = gameState.hexBoard[hexKey];
+      if (!hexData || !hexData.terrain) {
+        return { valid: false, reason: 'No terrain' };
+      }
+      
+      // For MVP: Simple pattern check - just verify hex has required terrain
+      // Full implementation would check relative coordinates
+      const requiredTerrains = pattern.map(p => p.terrain);
+      const hexTerrain = hexData.terrain;
+      
+      // Check if this hex matches any terrain in pattern
+      if (!requiredTerrains.includes(hexTerrain)) {
+        return { valid: false, reason: `Need ${requiredTerrains.join(' or ')} terrain` };
+      }
+      
+      // For now, accept any matching terrain (simplified)
+      // TODO: Full pattern matching with relative coordinates
+      return { valid: true };
+    }
+    
+    // Handle end turn
+    function handleEndTurn() {
+      if (gameState.tokensPlaced < gameState.tokensToPlace) {
+        showMessage(`❌ Place all ${gameState.tokensToPlace} tokens before ending turn!`, 'error');
+        return;
+      }
+      
+      // Reset tokens placed counter
+      gameState.tokensPlaced = 0;
+      gameState.takenCardThisTurn = false; // Reset card taking flag
+      gameState.discardMode = false; // Reset discard mode
+      
+      // Refresh available cards display to show green borders again
+      displayAvailableAnimalCards();
+      
+      // Check for game end BEFORE attempting to refresh
+      // Must have at least 9 tokens to refill all 3 spaces (3 spaces × 3 tokens)
+      const tokensInPouch = Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0);
+      console.log(`🎲 End of turn - Tokens in pouch: ${tokensInPouch}`);
+      
+      if (tokensInPouch < 9) {
+        console.log('🏁 Game ending - insufficient tokens in pouch');
+        endGame();
+        return;
+      }
+      
+      // Check if board is almost full
+      const filledHexes = Object.values(gameState.hexBoard).filter(hex => hex.stack.length > 0).length;
+      const emptyHexes = 23 - filledHexes;
+      console.log(`🎲 Filled hexes: ${filledHexes}, Empty: ${emptyHexes}`);
+      
+      if (emptyHexes <= 2) {
+        console.log(`🏁 Game ending - only ${emptyHexes} empty spaces (cannot place 3 tokens next turn)`);
+        endGame();
+        return;
+      }
+      
+      // Refresh token supply (we know we have enough tokens)
+      refreshTokenSupply();
+      console.log(`✅ Turn complete - Pouch now has: ${Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0)} tokens`);
+      
+      showMessage(`✓ Turn complete! Select a space and place more tokens.`, 'success');
+      
+      // Deselect space
+      document.querySelectorAll('.token-space').forEach(s => {
+        s.classList.remove('selected');
+      });
+      gameState.selectedSpace = null;
+    }
+    
+    // Check if game should end (solo mode rules)
+    function checkGameEnd() {
+      // Condition 1: Cannot draw enough tokens to refill all 3 spaces (need 9 tokens)
+      const tokensInPouch = Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0);
+      const cannotRefill = tokensInPouch < 9;
+      
+      // Condition 2: 2 or fewer empty hexes remain (21+ hexes filled)
+      const filledHexes = Object.values(gameState.hexBoard).filter(hex => hex.stack.length > 0).length;
+      const emptyHexes = 23 - filledHexes;
+      const boardAlmostFull = emptyHexes <= 2;
+      
+      return cannotRefill || boardAlmostFull;
+    }
+    
+    // End game
+    function endGame() {
+      console.log('🎉 Game Over called! Final score:', gameState.score.total);
+      
+      // Set game ended flag to disable gameplay
+      gameState.gameEnded = true;
+      
+      const suns = calculateSuns(gameState.score.total);
+      const sunEmoji = '☀️'.repeat(suns);
+      
+      console.log(`Calculated ${suns} suns for score ${gameState.score.total}`);
+      
+      showMessage(
+        `🎉 Game Over! Final Score: ${gameState.score.total} points = ${sunEmoji} ${suns} sun${suns !== 1 ? 's' : ''}!`,
+        'success'
+      );
+      
+      document.getElementById('end-turn-btn').disabled = true;
+      document.getElementById('end-turn-btn').textContent = '🏁 Game Complete';
+      
+      // Show detailed sun breakdown after a short delay
+      setTimeout(() => {
+        const tokensLeft = Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0);
+        const filledHexes = Object.values(gameState.hexBoard).filter(hex => hex.stack.length > 0).length;
+        const emptyHexes = 23 - filledHexes;
+        
+        let endReason = '';
+        if (tokensLeft < 9) {
+          endReason = `Pouch exhausted (${tokensLeft} tokens left, need 9 to refill)`;
+        } else if (emptyHexes <= 2) {
+          endReason = `Only ${emptyHexes} empty space${emptyHexes !== 1 ? 's' : ''} left (can't place 3 tokens next turn)`;
+        }
+        
+        showMessage(
+          `${sunEmoji} ${suns} suns! ${endReason}. Using Side A would add +1 sun!`,
+          'info'
+        );
+      }, 2000);
+    }
+    
+    // Calculate suns based on score (official Harmonies solo mode)
+    function calculateSuns(score) {
+      if (score >= 160) return 8;
+      if (score >= 150) return 7;
+      if (score >= 140) return 6;
+      if (score >= 130) return 5;
+      if (score >= 110) return 4;
+      if (score >= 90) return 3;
+      if (score >= 70) return 2;
+      if (score >= 40) return 1;
+      return 0;
+    }
+    
+    // Start the game!
+    initGame();
+  </script>
+  
 </body>
 </html>
