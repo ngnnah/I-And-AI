@@ -692,10 +692,12 @@
       // Update score
       updateScore();
       
-      // Check for game end conditions
-      if (checkGameEnd()) {
-        endGame();
-        return;
+      // Check if board is almost full (only check this during placement, not pouch)
+      const filledHexes = Object.values(gameState.hexBoard).filter(hex => hex.stack.length > 0).length;
+      const emptyHexes = 23 - filledHexes;
+      if (emptyHexes <= 2) {
+        showMessage(`🏁 Board almost full! Place remaining tokens then game will end.`, 'info');
+        // Don't end immediately - let player finish placing their 3 tokens
       }
       
       // Check if all tokens placed
@@ -832,20 +834,26 @@
       // Reset tokens placed counter
       gameState.tokensPlaced = 0;
       
-      // Check for game end before refreshing
-      if (checkGameEnd()) {
+      // Check for game end BEFORE attempting to refresh
+      // Must have at least 9 tokens to refill all 3 spaces (3 spaces × 3 tokens)
+      const tokensInPouch = Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0);
+      if (tokensInPouch < 9) {
+        showMessage(`🏁 Game Over! Pouch cannot refill all 3 spaces (${tokensInPouch} tokens left).`, 'info');
         endGame();
         return;
       }
       
-      // Refresh token supply
+      // Check if board is almost full
+      const filledHexes = Object.values(gameState.hexBoard).filter(hex => hex.stack.length > 0).length;
+      const emptyHexes = 23 - filledHexes;
+      if (emptyHexes <= 2) {
+        showMessage(`🏁 Game Over! Board almost full (${emptyHexes} empty spaces left).`, 'info');
+        endGame();
+        return;
+      }
+      
+      // Refresh token supply (we know we have enough tokens)
       refreshTokenSupply();
-      
-      // Check again after refresh (pouch might be empty now)
-      if (checkGameEnd()) {
-        endGame();
-        return;
-      }
       
       showMessage(`✓ Turn complete! Select a space and place more tokens.`, 'success');
       
@@ -858,15 +866,16 @@
     
     // Check if game should end (solo mode rules)
     function checkGameEnd() {
-      // Condition 1: Pouch is empty
-      const pouchEmpty = Object.values(gameState.pouch).every(count => count === 0);
+      // Condition 1: Cannot draw enough tokens to refill all 3 spaces (need 9 tokens)
+      const tokensInPouch = Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0);
+      const cannotRefill = tokensInPouch < 9;
       
       // Condition 2: 2 or fewer empty hexes remain (21+ hexes filled)
       const filledHexes = Object.values(gameState.hexBoard).filter(hex => hex.stack.length > 0).length;
       const emptyHexes = 23 - filledHexes;
       const boardAlmostFull = emptyHexes <= 2;
       
-      return pouchEmpty || boardAlmostFull;
+      return cannotRefill || boardAlmostFull;
     }
     
     // End game

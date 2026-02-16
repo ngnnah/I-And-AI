@@ -577,14 +577,16 @@ When playing solo mode, your goal is to earn as many suns ☀️ as possible, re
 
 **Suns from Score:**
 
-| Points  | Suns           |
-| ------- | -------------- |
-| 40-69   | ☀️ 1 sun        |
-| 70-99   | ☀️☀️ 2 suns      |
-| 100-129 | ☀️☀️☀️ 3 suns     |
-| 130-159 | ☀️☀️☀️☀️ 4 suns    |
-| 160-189 | ☀️☀️☀️☀️☀️ 5 suns   |
-| 190+    | ☀️☀️☀️☀️☀️☀️ 6+ suns |
+| Points  | Suns            |
+| ------- | --------------- |
+| 40-69   | ☀️ 1 sun         |
+| 70-89   | ☀️☀️ 2 suns       |
+| 90-109  | ☀️☀️☀️ 3 suns      |
+| 110-129 | ☀️☀️☀️☀️ 4 suns     |
+| 130-139 | ☀️☀️☀️☀️☀️ 5 suns    |
+| 140-149 | ☀️☀️☀️☀️☀️☀️ 6 suns   |
+| 150-159 | ☀️☀️☀️☀️☀️☀️☀️ 7 suns  |
+| 160     | ☀️☀️☀️☀️☀️☀️☀️☀️ 8 suns |
 
 **Bonus Suns:**
 
@@ -593,7 +595,7 @@ When playing solo mode, your goal is to earn as many suns ☀️ as possible, re
 
 The number of suns obtained depends primarily on your score, but is also influenced by the side of the Personal board (A or B) used, as well as the Nature's Spirit you chose at the start of the game.
 
-**Example:** Pauline scored **130 points** (☀️☀️☀️☀️ 4 suns) while using Side A of the Personal board (+1 sun) with the Lion's Spirit (+1 sun). Thus, she earned **7 suns total**. Not bad!
+**Example:** Pauline scored **130 points** (☀️☀️☀️☀️☀️ 5 suns) while using Side A of the Personal board (+1 sun) with the Lion's Spirit (+1 sun). Thus, she earned **7 suns total**. Not bad!
 
 **Goal:** Try to beat your high score in each configuration (Side A vs B, with or without Nature's Spirit).
 
