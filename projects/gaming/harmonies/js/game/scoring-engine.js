@@ -84,11 +84,12 @@ function floodFill(hexGrid, startKey, terrain, visited) {
 // ============================================================================
 
 /**
- * 1. TREES SCORING (CORRECTED)
- * - Green alone = 1 pt
- * - 1 brown + 1 green = 3 pts
- * - 2 brown + 1 green = 5 pts
- * - Brown alone (trunk) = 0 pts
+ * 1. TREES SCORING (CORRECTED - from official cards)
+ * - 2 wood (brown alone) = 0 pts
+ * - 1 leaf (green alone) = 1 pt
+ * - Wood then leaf (1 brown + 1 green) = 3 pts
+ * - Wood, wood, leaf (2 brown + 1 green) = 7 pts
+ * - Max height = 3
  */
 export function scoreTreesModule(hexGrid) {
   let score = 0;
@@ -101,10 +102,11 @@ export function scoreTreesModule(hexGrid) {
     const greenCount = stack.filter((t) => t.color === "green").length;
     const brownCount = stack.filter((t) => t.color === "brown").length;
 
-    // Scoring based on composition
-    if (greenCount === 1 && brownCount === 0) score += 1; // Green alone
-    else if (greenCount === 1 && brownCount === 1) score += 3; // 1 brown + 1 green
-    else if (greenCount === 1 && brownCount === 2) score += 5; // 2 brown + 1 green
+    // Scoring based on composition (max height 3)
+    if (greenCount === 1 && brownCount === 0) score += 1; // 1 leaf = 1 pt
+    else if (greenCount === 1 && brownCount === 1) score += 3; // Wood + leaf = 3 pts
+    else if (greenCount === 1 && brownCount === 2) score += 7; // Wood, wood, leaf = 7 pts
+    // 2 wood (brown only) = 0 pts (no green, so no terrain = tree)
   }
 
   return score;
