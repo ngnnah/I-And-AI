@@ -207,11 +207,19 @@ Since hex positioning is working, Phase 2 is mostly done. Remaining work:
 - Full integration with hex-grid.js for game logic
 - Dynamic hex expansion as game progresses
 
-**Fix Applied**: Corrected hex positioning to work on all screen sizes by:
-- Using flexible container width (`max-width: 800px`)
-- Calculating center based on actual `clientWidth`
-- Responsive hex sizing (27px mobile, 35px desktop)
-- Window resize handler for dynamic repositioning
+**Fixes Applied**: 
+1. **Positioning** - Corrected hex positioning to work on all screen sizes by:
+   - Using flexible container width (`max-width: 800px`)
+   - Calculating center based on actual `clientWidth`
+   - Responsive hex sizing (29px mobile, 40px desktop)
+   - Window resize handler for dynamic repositioning
+
+2. **Rotation & Spacing** - Made hexes touch properly with correct grid alignment:
+   - Rotated hexes 30° to pointy-top orientation (traditional board style)
+   - Counter-rotated content (`<span>`) to keep emojis upright
+   - Switched to pointy-topped positioning formulas (swapped x/y)
+   - Increased hex visual size: 70px desktop, 50px mobile
+   - Hexes now properly touch in official Harmonies grid pattern
 
 ### Working Modules (Don't Touch)
 - `js/game/hex-grid.js` - Coordinate system ✅
@@ -272,7 +280,7 @@ python3 -m http.server 8001
 ---
 
 **Last Updated**: Phases 1-5 complete - MVP fully playable! 🎉  
-**Latest**: Fixed hex positioning for all screen sizes (commit 8e86b22)  
+**Latest**: Fixed hex rotation and spacing for proper grid (commit 3954e84)  
 **View at**: http://localhost:8001/v5.html
 
 ---
