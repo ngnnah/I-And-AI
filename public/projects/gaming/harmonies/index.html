@@ -362,10 +362,13 @@
     /* Compact pattern clickable area */
     .pattern-compact {
       cursor: pointer;
-      padding: 2px 4px;
+      padding: 3px 6px;
       border-radius: 4px;
       transition: background-color 0.2s;
       display: inline-block;
+      min-width: 44px;
+      min-height: 20px;
+      text-align: center;
     }
 
     .pattern-compact:hover {
@@ -1121,14 +1124,14 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
         'trunk': '🪵', 'brown': '🪵'
       };
 
-      // Create mini pattern display with click handler
+      // Create mini pattern display with click handler that stops propagation
       const patternHTML = pattern.map(hex => {
         const emoji = terrainEmoji[hex.terrain] || '❓';
         const marker = hex.isPlacementHex ? '🎯' : '';
         return `<span style="font-size: 10px; line-height: 1;" title="${hex.terrain}">${emoji}${marker}</span>`;
       }).join('');
 
-      return `<span class="pattern-compact" onclick="openPatternHelperById('${cardId}')" title="Tap to see full pattern">${patternHTML}</span>`;
+      return `<span class="pattern-compact" onclick="event.stopPropagation(); openPatternHelperById('${cardId}')" title="Tap to see full pattern">${patternHTML}</span>`;
     }
     
     // Reposition all hexes (for window resize)
