@@ -227,14 +227,16 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.75);
       z-index: 9999;
       justify-content: center;
       align-items: center;
+      pointer-events: none;
     }
 
     .pattern-modal.active {
       display: flex;
+      pointer-events: auto;
     }
 
     .pattern-modal-content {
@@ -245,6 +247,7 @@
       max-height: 90vh;
       overflow: auto;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      pointer-events: auto;
     }
 
     .pattern-grid {
@@ -962,10 +965,12 @@
           <div class="available-card bg-white rounded-lg p-2 shadow border-2 transition ${borderClass} ${cursorClass}" 
                data-card-id="${card.id}"
                data-card-idx="${idx}"
-               data-discard-mode="${gameState.discardMode}"
-               title="${card.description || ''}">
+               data-discard-mode="${gameState.discardMode}">
             <div class="text-2xl text-center mb-1">${getAnimalEmoji(card.animal)}</div>
             <div class="text-xs font-semibold text-slate-700 text-center">${card.name}</div>
+            <div class="text-[10px] text-center mt-1 leading-tight">
+              ${getCompactPattern(card.pattern)}
+            </div>
             <div class="text-xs text-slate-500 text-center mt-1">
               ${card.scoring.join('→')} pts
             </div>
@@ -984,6 +989,22 @@
           cardEl.addEventListener('click', handleDiscardAnimalCard);
         } else {
           cardEl.addEventListener('click', handleTakeAnimalCard);
+        }
+        
+        // Add hover handler for pattern preview
+        const cardId = cardEl.dataset.cardId;
+        const card = gameState.availableAnimalCards.find(c => c.id === cardId);
+        if (card) {
+          cardEl.addEventListener('mouseenter', () => showPatternHelper(card));
+          cardEl.addEventListener('mouseleave', () => {
+            // Delay closing slightly to allow moving mouse to modal
+            setTimeout(() => {
+              const modal = document.getElementById('pattern-modal');
+              if (modal && !modal.matches(':hover')) {
+                closePatternHelper();
+              }
+            }, 100);
+          });
         }
       });
     }
@@ -1008,10 +1029,12 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
         return `
           <div class="player-card bg-white rounded-lg p-2 shadow border-2 border-slate-300 cursor-pointer hover:border-blue-400 transition" 
                data-card-id="${card.id}"
-               data-card-idx="${idx}"
-               title="${card.description || ''}">
+               data-card-idx="${idx}">
             <div class="text-2xl text-center mb-1">${getAnimalEmoji(card.animal)}</div>
             <div class="text-xs font-semibold text-slate-700 text-center">${card.name}</div>
+            <div class="text-[10px] text-center mt-1 leading-tight">
+              ${getCompactPattern(card.pattern)}
+            </div>
             <div class="text-xs text-slate-500 text-center mt-1">
               ${placementCount}/${card.maxPlacements} placed
             </div>
@@ -1027,6 +1050,22 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       // Add click handlers to both containers
       document.querySelectorAll('.player-card').forEach(cardEl => {
         cardEl.addEventListener('click', handleSelectPlayerCard);
+        
+        // Add hover handler for pattern preview
+        const cardId = cardEl.dataset.cardId;
+        const card = gameState.playerAnimalCards.find(c => c.id === cardId);
+        if (card) {
+          cardEl.addEventListener('mouseenter', () => showPatternHelper(card));
+          cardEl.addEventListener('mouseleave', () => {
+            // Delay closing slightly to allow moving mouse to modal
+            setTimeout(() => {
+              const modal = document.getElementById('pattern-modal');
+              if (modal && !modal.matches(':hover')) {
+                closePatternHelper();
+              }
+            }, 100);
+          });
+        }
       });
       
       // Highlight selected card
@@ -1038,6 +1077,26 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       // In new data structure, animal is already an emoji
       // Just return it directly (with fallback for safety)
       return animal || '🐾';
+    }
+
+    // Generate compact inline pattern preview
+    function getCompactPattern(pattern) {
+      // Terrain to mini emoji
+      const terrainEmoji = {
+        'water': '💧', 'blue': '💧',
+        'field': '🌼', 'yellow': '🌼',
+        'tree': '🌿', 'green': '🌿',
+        'mountain': '⛰️', 'gray': '⛰️', 'rock': '⛰️',
+        'building': '🏠', 'red': '🏠',
+        'trunk': '🪵', 'brown': '🪵'
+      };
+
+      // Create mini pattern display
+      return pattern.map(hex => {
+        const emoji = terrainEmoji[hex.terrain] || '❓';
+        const marker = hex.isPlacementHex ? '🎯' : '';
+        return `<span style="font-size: 10px; line-height: 1;" title="${hex.terrain}">${emoji}${marker}</span>`;
+      }).join('');
     }
     
     // Reposition all hexes (for window resize)
@@ -1677,12 +1736,6 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
         if (cardId === gameState.selectedAnimalCard) {
           cardEl.classList.add('ring-4', 'ring-blue-500');
           cardEl.classList.remove('border-slate-300');
-          
-          // Show pattern helper when card is selected
-          const card = gameState.playerAnimalCards.find(c => c.id === cardId);
-          if (card) {
-            showPatternHelper(card);
-          }
         } else {
           cardEl.classList.remove('ring-4', 'ring-blue-500');
           cardEl.classList.add('border-slate-300');
@@ -1724,10 +1777,12 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
     // Close pattern helper modal
     window.closePatternHelper = function() {
       const modal = document.getElementById('pattern-modal');
-      modal.classList.remove('active');
+      if (modal) {
+        modal.classList.remove('active');
+      }
     };
 
-    // Close modal on background click
+    // Close modal on background click and prevent auto-close when hovering modal
     document.addEventListener('DOMContentLoaded', () => {
       const modal = document.getElementById('pattern-modal');
       if (modal) {
@@ -1735,6 +1790,15 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
           if (e.target === modal) {
             closePatternHelper();
           }
+        });
+        
+        // Keep modal open when hovering over it
+        modal.addEventListener('mouseenter', () => {
+          modal.dataset.hovering = 'true';
+        });
+        modal.addEventListener('mouseleave', () => {
+          modal.dataset.hovering = 'false';
+          closePatternHelper();
         });
       }
     });
