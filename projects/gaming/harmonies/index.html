@@ -219,6 +219,98 @@
       flex: 1;
     }
 
+    /* Pattern Helper Modal */
+    .pattern-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .pattern-modal.active {
+      display: flex;
+    }
+
+    .pattern-modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .pattern-grid {
+      position: relative;
+      width: 100%;
+      min-height: 300px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .pattern-hex {
+      position: absolute;
+      width: 60px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      border-radius: 8px;
+      border: 3px solid rgba(0, 0, 0, 0.3);
+      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+      background: #e2e8f0;
+      transition: all 0.2s;
+    }
+
+    .pattern-hex.placement {
+      border: 4px solid #3b82f6;
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+      transform: scale(1.15);
+      z-index: 10;
+    }
+
+    .pattern-hex.blue { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); }
+    .pattern-hex.yellow { background: linear-gradient(135deg, #fbbf24 0%, #fcd34d 100%); }
+    .pattern-hex.brown { background: linear-gradient(135deg, #92400e 0%, #b45309 100%); }
+    .pattern-hex.green { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
+    .pattern-hex.red { background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); }
+    .pattern-hex.gray { background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%); }
+
+    .pattern-label {
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      font-weight: 600;
+      white-space: nowrap;
+      color: #475569;
+      text-align: center;
+    }
+
+    .pattern-placement-indicator {
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 18px;
+      animation: bounce 0.6s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-4px); }
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .hex-grid {
@@ -684,6 +776,27 @@
       </p>
     </footer>
     
+  </div>
+
+  <!-- Pattern Helper Modal -->
+  <div id="pattern-modal" class="pattern-modal">
+    <div class="pattern-modal-content">
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="pattern-modal-title" class="text-lg font-bold text-slate-800">Pattern Guide</h3>
+        <button onclick="closePatternHelper()" class="text-2xl text-slate-600 hover:text-slate-900 font-bold px-3 py-1 rounded hover:bg-slate-100">&times;</button>
+      </div>
+      <p id="pattern-modal-description" class="text-sm text-slate-600 mb-4"></p>
+      <div class="pattern-grid" id="pattern-grid">
+        <!-- Hex pattern will be rendered here -->
+      </div>
+      <div class="mt-4 text-center">
+        <p class="text-xs text-slate-500">🎯 = Place your animal cube here</p>
+        <p class="text-xs text-slate-500 mt-1">Pattern must match on the board to place your cube</p>
+      </div>
+      <div id="pattern-modal-scoring" class="mt-4 text-center">
+        <!-- Scoring info will be rendered here -->
+      </div>
+    </div>
   </div>
   
   <!-- Game Logic Scripts (ES6 Modules) -->
@@ -1564,10 +1677,163 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
         if (cardId === gameState.selectedAnimalCard) {
           cardEl.classList.add('ring-4', 'ring-blue-500');
           cardEl.classList.remove('border-slate-300');
+          
+          // Show pattern helper when card is selected
+          const card = gameState.playerAnimalCards.find(c => c.id === cardId);
+          if (card) {
+            showPatternHelper(card);
+          }
         } else {
           cardEl.classList.remove('ring-4', 'ring-blue-500');
           cardEl.classList.add('border-slate-300');
         }
+      });
+    }
+
+    // Show pattern helper modal
+    function showPatternHelper(card) {
+      const modal = document.getElementById('pattern-modal');
+      const title = document.getElementById('pattern-modal-title');
+      const description = document.getElementById('pattern-modal-description');
+      const grid = document.getElementById('pattern-grid');
+      const scoring = document.getElementById('pattern-modal-scoring');
+
+      // Set content
+      title.textContent = `${getAnimalEmoji(card.animal)} ${card.name} - Pattern Guide`;
+      description.textContent = card.description || 'Match this pattern on the board to place your animal cube.';
+
+      // Render pattern visualization
+      renderPatternVisualization(card.pattern, grid);
+
+      // Show scoring
+      const placementCount = gameState.placedAnimals.filter(p => p.cardId === card.id).length;
+      const scoringText = card.scoring.map((pts, idx) => {
+        const placed = idx < placementCount;
+        const current = idx === placementCount;
+        return `<span class="${placed ? 'text-slate-400' : current ? 'text-green-600 font-bold' : 'text-slate-600'}">${pts}pts</span>`;
+      }).join(' → ');
+      scoring.innerHTML = `
+        <p class="text-sm font-semibold text-slate-700">Scoring: ${scoringText}</p>
+        <p class="text-xs text-slate-500 mt-1">Placed: ${placementCount}/${card.maxPlacements}</p>
+      `;
+
+      // Show modal
+      modal.classList.add('active');
+    }
+
+    // Close pattern helper modal
+    window.closePatternHelper = function() {
+      const modal = document.getElementById('pattern-modal');
+      modal.classList.remove('active');
+    };
+
+    // Close modal on background click
+    document.addEventListener('DOMContentLoaded', () => {
+      const modal = document.getElementById('pattern-modal');
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            closePatternHelper();
+          }
+        });
+      }
+    });
+
+    // Render pattern visualization using mini hexes
+    function renderPatternVisualization(pattern, container) {
+      container.innerHTML = '';
+
+      // Pattern hex positioning (similar to hexToPixel but for mini hexes)
+      const hexWidth = 60;
+      const hexHeight = 52;
+
+      // Find pattern bounds to center it
+      const minQ = Math.min(...pattern.map(p => p.q));
+      const maxQ = Math.max(...pattern.map(p => p.q));
+      const minR = Math.min(...pattern.map(p => p.r));
+      const maxR = Math.max(...pattern.map(p => p.r));
+      
+      const centerQ = (minQ + maxQ) / 2;
+      const centerR = (minR + maxR) / 2;
+
+      // Terrain to color mapping
+      const terrainToColor = {
+        'water': 'blue',
+        'blue': 'blue',
+        'field': 'yellow',
+        'yellow': 'yellow',
+        'tree': 'green',
+        'green': 'green',
+        'mountain': 'gray',
+        'gray': 'gray',
+        'rock': 'gray',
+        'building': 'red',
+        'red': 'red',
+        'trunk': 'brown',
+        'brown': 'brown'
+      };
+
+      const terrainToEmoji = {
+        'water': '💧',
+        'blue': '💧',
+        'field': '🌼',
+        'yellow': '🌼',
+        'tree': '🌿',
+        'green': '🌿',
+        'mountain': '⛰️',
+        'gray': '⛰️',
+        'rock': '⛰️',
+        'building': '🏠',
+        'red': '🏠',
+        'trunk': '🪵',
+        'brown': '🪵'
+      };
+
+      const terrainToName = {
+        'water': 'Water',
+        'blue': 'Water',
+        'field': 'Field',
+        'yellow': 'Field',
+        'tree': 'Tree',
+        'green': 'Tree/Green',
+        'mountain': 'Mountain',
+        'gray': 'Mountain',
+        'rock': 'Rock/Mountain',
+        'building': 'Building',
+        'red': 'Building',
+        'trunk': 'Trunk',
+        'brown': 'Trunk'
+      };
+
+      pattern.forEach(hex => {
+        // Calculate position (relative to center)
+        const offsetQ = hex.q - centerQ;
+        const offsetR = hex.r - centerR;
+        
+        const x = offsetQ * hexWidth * 0.75;
+        const y = offsetR * hexHeight + offsetQ * hexHeight * 0.5;
+
+        // Create hex element
+        const hexEl = document.createElement('div');
+        const color = terrainToColor[hex.terrain] || 'gray';
+        hexEl.className = `pattern-hex ${color}`;
+        if (hex.isPlacementHex) {
+          hexEl.classList.add('placement');
+        }
+        
+        hexEl.style.left = `calc(50% + ${x}px)`;
+        hexEl.style.top = `calc(50% + ${y}px)`;
+        hexEl.style.transform = 'translate(-50%, -50%)';
+        
+        // Add emoji
+        const emoji = terrainToEmoji[hex.terrain] || '❓';
+        hexEl.innerHTML = `
+          <span style="font-size: 24px; line-height: 1;">${emoji}</span>
+          ${hex.isPlacementHex ? '<div class="pattern-placement-indicator">🎯</div>' : ''}
+          <div class="pattern-label">${terrainToName[hex.terrain] || hex.terrain}</div>
+        `;
+
+        container.appendChild(hexEl);
       });
     }
     
