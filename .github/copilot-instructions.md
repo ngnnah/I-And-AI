@@ -98,9 +98,16 @@
 ### Sync Example
 
 ```bash
-rsync -av --delete --exclude='.git' --exclude='node_modules' \
+rsync -av --delete \
+  --exclude='.git' \
+  --exclude='node_modules' \
+  --exclude='tests' \
+  --exclude='archive' \
+  --exclude='*.md' \
   projects/gaming/codenames/ public/projects/gaming/codenames/
 ```
+
+**⚠️ NEVER sync .md files to public/** - They are for development only and contain sensitive planning info.
 
 ### Important Git Gotcha
 
@@ -223,16 +230,34 @@ uv run pytest         # Python utilities (root)
 
 **Workflow:** Push to `main` → `.github/workflows/deploy.yml` → Deploys `./public` directory
 
+**⚠️ CRITICAL: NEVER deploy .md files to public/**
+
+Markdown files (.md) are for development/documentation ONLY. They contain implementation details, TODOs, and sensitive planning information that should NOT be publicly accessible.
+
+**Always exclude .md files when syncing:**
+
+```bash
+rsync -av --delete \
+  --exclude='.git' \
+  --exclude='node_modules' \
+  --exclude='tests' \
+  --exclude='archive' \
+  --exclude='*.md' \
+  projects/<app>/ public/projects/<app>/
+```
+
 **Critical steps:**
 1. Implement in `projects/<app>/`
-2. Sync to `public/projects/<app>/` with rsync
-3. Force-add data files: `git add -f path/to/js/data/*.js` (`.gitignore` excludes `data/`)
-4. Commit & push to `main`
+2. Sync to `public/projects/<app>/` with rsync **INCLUDING `--exclude='*.md'`**
+3. Verify no .md files in public: `ls public/projects/<app>/`
+4. Force-add data files: `git add -f path/to/js/data/*.js` (`.gitignore` excludes `data/`)
+5. Commit & push to `main`
 
 **Common issues:**
 - Missing data files → Force-add with `-f` flag
 - 404 errors → Use relative paths, check file sync
 - Firebase not connecting → Verify project ID in config
+- .md files in public/ → Re-run rsync with `--exclude='*.md'`, delete from public/, commit
 
 ## Code Quality Checklist
 

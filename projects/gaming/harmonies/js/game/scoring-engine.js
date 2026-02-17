@@ -321,7 +321,7 @@ export function scoreAnimalsModule(placedAnimals, animalCards) {
     if (!card) continue;
 
     const placementCount = animalsByCard[cardId].length;
-    const pointsArray = card.pointsPerPlacement || [0];
+    const pointsArray = card.scoring || card.pointsPerPlacement || [0];
 
     // Score is the value at the placement index
     if (placementCount > 0 && placementCount <= pointsArray.length) {

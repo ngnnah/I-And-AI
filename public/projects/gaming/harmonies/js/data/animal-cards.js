@@ -1,156 +1,523 @@
 /**
  * Harmonies - Animal Cards Data
  *
- * Simplified animal cards for MVP (10 cards)
- * Full implementation: 48 cards with complex patterns
+ * All 32 normal animal cards with complex habitat patterns
+ * Based on official Harmonies board game rules
  */
 
 /**
  * Animal card structure:
  * {
  *   id: string - Unique card ID
- *   name: string - Animal name
- *   animal: string - Animal type (for graphics)
- *   pattern: Array<{relativeCoord, terrain}> - Habitat pattern
- *   maxPlacements: number - Max cubes on this card
- *   pointsPerPlacement: Array<number> - Points for 1st, 2nd, 3rd, 4th placement
+ *   name: string - Animal name (with common alternative in parentheses)
+ *   primaryType: string - Card type (Water, Building, Trees, Grass, Forest, Rocks, Hills, Mountains, Plains)
+ *   animal: string - Animal emoji/identifier
+ *   pattern: Array<{q, r, terrain, isPlacementHex}> - Habitat pattern with relative coordinates
+ *   scoring: Array<number> - Points progression for placements
+ *   description: string - Pattern description for UI
  * }
+ *
+ * Coordinate system: Axial (q, r) with (0, 0) as reference point
+ * - East: q+1, r
+ * - West: q-1, r
+ * - Southeast: q, r+1
+ * - Northwest: q, r-1
+ * - Northeast: q+1, r-1
+ * - Southwest: q-1, r+1
+ *
+ * Terrain types: water, field, tree, mountain, building, green (tree tops only), rock (single grey), trunk (brown only)
  */
 
 export const ANIMAL_CARDS = [
-  // 1. BEAR - Simple tree pattern
+  // === WATER ANIMALS (7 cards) ===
+  
   {
-    id: "bear-01",
-    name: "Bear",
-    animal: "bear",
+    id: "gator",
+    name: "Gator (Crocodile)",
+    primaryType: "Water",
+    animal: "🐊",
     pattern: [
-      { relativeCoord: [0, 0], terrain: "tree" },
-      { relativeCoord: [1, 0], terrain: "tree" },
+      { q: 0, r: 0, terrain: "tree", isPlacementHex: true },      // Tree (placement)
+      { q: 1, r: 0, terrain: "water", isPlacementHex: false },    // Blue hex
+      { q: 0, r: 1, terrain: "water", isPlacementHex: false },    // Blue hex (60-degree cluster)
     ],
-    maxPlacements: 4,
-    pointsPerPlacement: [5, 10, 16, 23],
-  },
-
-  // 2. DEER - Tree + field pattern
-  {
-    id: "deer-01",
-    name: "Deer",
-    animal: "deer",
-    pattern: [
-      { relativeCoord: [0, 0], terrain: "tree" },
-      { relativeCoord: [1, 0], terrain: "field" },
-    ],
-    maxPlacements: 4,
-    pointsPerPlacement: [4, 9, 15, 22],
-  },
-
-  // 3. RABBIT - Simple field pattern
-  {
-    id: "rabbit-01",
-    name: "Rabbit",
-    animal: "rabbit",
-    pattern: [
-      { relativeCoord: [0, 0], terrain: "field" },
-      { relativeCoord: [1, 0], terrain: "field" },
-    ],
-    maxPlacements: 4,
-    pointsPerPlacement: [3, 7, 12, 18],
-  },
-
-  // 4. BIRD - Tree cluster (3 hexes)
-  {
-    id: "bird-01",
-    name: "Bird",
-    animal: "bird",
-    pattern: [
-      { relativeCoord: [0, 0], terrain: "tree" },
-      { relativeCoord: [1, 0], terrain: "tree" },
-      { relativeCoord: [0, 1], terrain: "tree" },
-    ],
+    scoring: [15, 9, 4],
+    description: "60° cluster: 1 Tree + 2 Blue hexes",
     maxPlacements: 3,
-    pointsPerPlacement: [7, 14, 22],
   },
 
-  // 5. FENNEC - Mountain pattern
   {
-    id: "fennec-01",
-    name: "Fennec Fox",
-    animal: "fennec",
+    id: "ray",
+    name: "Ray",
+    primaryType: "Water",
+    animal: "🦈",
     pattern: [
-      { relativeCoord: [0, 0], terrain: "mountain" },
-      { relativeCoord: [1, 0], terrain: "mountain" },
+      { q: 0, r: 0, terrain: "rock", isPlacementHex: false },     // Grey
+      { q: 1, r: 0, terrain: "water", isPlacementHex: true },     // Blue (placement)
+      { q: 2, r: 0, terrain: "water", isPlacementHex: false },    // Blue
+      { q: 3, r: 0, terrain: "rock", isPlacementHex: false },     // Grey (linear)
     ],
+    scoring: [15, 10, 6, 4, 2],
+    description: "Linear: Grey, Blue, Blue, Grey",
+    maxPlacements: 5,
+  },
+
+  {
+    id: "fish",
+    name: "Fish",
+    primaryType: "Water",
+    animal: "🐟",
+    pattern: [
+      { q: 0, r: 0, terrain: "mountain", isPlacementHex: false }, // Mountain (Ht 2)
+      { q: 1, r: 0, terrain: "water", isPlacementHex: true },     // Blue hex (placement)
+    ],
+    scoring: [15, 10, 6, 3],
+    description: "Mountain adjacent to Blue hex",
     maxPlacements: 4,
-    pointsPerPlacement: [6, 12, 19, 27],
   },
 
-  // 6. BOAR - Tree + water pattern
   {
-    id: "boar-01",
-    name: "Boar",
-    animal: "boar",
+    id: "otter",
+    name: "Otter",
+    primaryType: "Water",
+    animal: "🦦",
     pattern: [
-      { relativeCoord: [0, 0], terrain: "tree" },
-      { relativeCoord: [1, 0], terrain: "water" },
+      { q: 0, r: 0, terrain: "water", isPlacementHex: true },     // Central Blue (placement)
+      { q: 1, r: 0, terrain: "green", isPlacementHex: false },    // Green hex
+      { q: 0, r: 1, terrain: "green", isPlacementHex: false },    // Green hex (60° cluster)
     ],
-    maxPlacements: 4,
-    pointsPerPlacement: [5, 11, 18, 26],
-  },
-
-  // 7. DUCK - Water cluster
-  {
-    id: "duck-01",
-    name: "Duck",
-    animal: "duck",
-    pattern: [
-      { relativeCoord: [0, 0], terrain: "water" },
-      { relativeCoord: [1, 0], terrain: "water" },
-      { relativeCoord: [0, 1], terrain: "water" },
-    ],
+    scoring: [16, 10, 5],
+    description: "Central Blue + 2 Green hexes (60°)",
     maxPlacements: 3,
-    pointsPerPlacement: [6, 13, 21],
   },
 
-  // 8. LYNX - Mountain + tree pattern
   {
-    id: "lynx-01",
-    name: "Lynx",
-    animal: "lynx",
+    id: "frog",
+    name: "Frog",
+    primaryType: "Water",
+    animal: "🐸",
     pattern: [
-      { relativeCoord: [0, 0], terrain: "mountain" },
-      { relativeCoord: [1, 0], terrain: "tree" },
+      { q: 0, r: 0, terrain: "green", isPlacementHex: true },     // Green hex (placement)
+      { q: 1, r: 0, terrain: "water", isPlacementHex: false },    // Blue hex
+      { q: 0, r: 1, terrain: "building", isPlacementHex: false }, // Building (60° cluster)
     ],
-    maxPlacements: 3,
-    pointsPerPlacement: [7, 15, 24],
-  },
-
-  // 9. SALMON - Water line (4 hexes)
-  {
-    id: "salmon-01",
-    name: "Salmon",
-    animal: "salmon",
-    pattern: [
-      { relativeCoord: [0, 0], terrain: "water" },
-      { relativeCoord: [1, 0], terrain: "water" },
-      { relativeCoord: [2, 0], terrain: "water" },
-      { relativeCoord: [3, 0], terrain: "water" },
-    ],
+    scoring: [12, 5],
+    description: "60° cluster: Green, Blue, Building",
     maxPlacements: 2,
-    pointsPerPlacement: [10, 21],
   },
 
-  // 10. EAGLE - Mixed habitat (tree + mountain + field)
   {
-    id: "eagle-01",
-    name: "Eagle",
-    animal: "eagle",
+    id: "duck",
+    name: "Duck",
+    primaryType: "Water",
+    animal: "🦆",
     pattern: [
-      { relativeCoord: [0, 0], terrain: "mountain" },
-      { relativeCoord: [1, 0], terrain: "tree" },
-      { relativeCoord: [0, 1], terrain: "field" },
+      { q: 0, r: 0, terrain: "mountain", isPlacementHex: false }, // Mountain (Ht 2)
+      { q: 1, r: 0, terrain: "field", isPlacementHex: true },     // Yellow hex (placement)
     ],
+    scoring: [13, 8, 4, 2],
+    description: "Mountain adjacent to Yellow hex",
+    maxPlacements: 4,
+  },
+
+  {
+    id: "flamingo",
+    name: "Flamingo",
+    primaryType: "Water",
+    animal: "🦩",
+    pattern: [
+      { q: 0, r: 0, terrain: "building", isPlacementHex: true },  // Central Building (placement)
+      { q: 1, r: 0, terrain: "water", isPlacementHex: false },    // Blue hex
+      { q: 0, r: 1, terrain: "water", isPlacementHex: false },    // Blue hex (60° cluster)
+    ],
+    scoring: [16, 10, 5],
+    description: "Central Building + 2 Blue hexes (60°)",
     maxPlacements: 3,
-    pointsPerPlacement: [8, 17, 27],
+  },
+
+  // === BUILDING ANIMALS (3 cards) ===
+
+  {
+    id: "gecko",
+    name: "Gecko (Lizard)",
+    primaryType: "Building",
+    animal: "🦎",
+    pattern: [
+      { q: 0, r: 0, terrain: "building", isPlacementHex: true },  // Building (placement)
+      { q: 1, r: 0, terrain: "water", isPlacementHex: false },    // Blue hex
+    ],
+    scoring: [13, 8, 4, 2],
+    description: "Building adjacent to Blue hex",
+    maxPlacements: 4,
+  },
+
+  {
+    id: "mouse",
+    name: "Mouse",
+    primaryType: "Building",
+    animal: "🐭",
+    pattern: [
+      { q: 0, r: 0, terrain: "building", isPlacementHex: true },  // Building (placement)
+      { q: 1, r: 0, terrain: "field", isPlacementHex: false },    // Yellow
+      { q: 2, r: 0, terrain: "field", isPlacementHex: false },    // Yellow
+      { q: 1, r: 1, terrain: "field", isPlacementHex: false },    // Yellow (60° cluster of 3)
+    ],
+    scoring: [17, 10, 5],
+    description: "Building + 60° cluster of 3 Yellow hexes",
+    maxPlacements: 3,
+  },
+
+  {
+    id: "peacock",
+    name: "Peacock",
+    primaryType: "Building",
+    animal: "🦚",
+    pattern: [
+      { q: 0, r: 0, terrain: "building", isPlacementHex: true },  // Building (placement)
+      { q: 1, r: 0, terrain: "field", isPlacementHex: false },    // Yellow
+      { q: 2, r: 0, terrain: "field", isPlacementHex: false },    // Yellow (linear)
+    ],
+    scoring: [16, 10, 4],
+    description: "Linear: Building, Yellow, Yellow",
+    maxPlacements: 3,
+  },
+
+  // === TREES ANIMALS (3 cards) ===
+
+  {
+    id: "squirrel",
+    name: "Squirrel",
+    primaryType: "Building",
+    animal: "🐿️",
+    pattern: [
+      { q: 0, r: 0, terrain: "green", isPlacementHex: true },     // Central Green (placement)
+      { q: 1, r: 0, terrain: "rock", isPlacementHex: false },     // Grey
+      { q: 0, r: 1, terrain: "rock", isPlacementHex: false },     // Grey (60° cluster)
+    ],
+    scoring: [15, 11, 5],
+    description: "Central Green + 2 Grey hexes (60°)",
+    maxPlacements: 3,
+  },
+
+  {
+    id: "hedgehog",
+    name: "Hedgehog",
+    primaryType: "Building",
+    animal: "🦔",
+    pattern: [
+      { q: 0, r: 0, terrain: "mountain", isPlacementHex: true },  // Central Mountain (placement)
+      { q: 1, r: 0, terrain: "field", isPlacementHex: false },    // Yellow (E)
+      { q: -1, r: 0, terrain: "field", isPlacementHex: false },   // Yellow (W, 180°)
+    ],
+    scoring: [12, 5],
+    description: "Mountain + 2 Yellow hexes opposite (180°)",
+    maxPlacements: 2,
+  },
+
+  {
+    id: "bumblebee",
+    name: "Bumblebee",
+    primaryType: "Trees",
+    animal: "🐝",
+    pattern: [
+      { q: 0, r: 0, terrain: "tree", isPlacementHex: true },      // Tree (placement)
+      { q: 1, r: 0, terrain: "field", isPlacementHex: false },    // Yellow
+      { q: 2, r: 0, terrain: "field", isPlacementHex: false },    // Yellow
+      { q: 1, r: 1, terrain: "field", isPlacementHex: false },    // Yellow (60° cluster of 3)
+    ],
+    scoring: [18, 8],
+    description: "Tree + 60° cluster of 3 Yellow hexes",
+    maxPlacements: 2,
+  },
+
+  // === GRASS ANIMALS (2 cards) ===
+
+  {
+    id: "bear",
+    name: "Bear",
+    primaryType: "Grass",
+    animal: "🐻",
+    pattern: [
+      { q: 0, r: 0, terrain: "building", isPlacementHex: true },  // Building (placement)
+      { q: 1, r: 0, terrain: "water", isPlacementHex: false },    // Blue
+      { q: 2, r: 0, terrain: "water", isPlacementHex: false },    // Blue
+      { q: 1, r: 1, terrain: "water", isPlacementHex: false },    // Blue (60° cluster of 3)
+    ],
+    scoring: [12, 6],
+    description: "Building + 60° cluster of 3 Blue hexes",
+    maxPlacements: 2,
+  },
+
+  {
+    id: "rabbit",
+    name: "Rabbit",
+    primaryType: "Grass",
+    animal: "🐰",
+    pattern: [
+      { q: 0, r: 0, terrain: "field", isPlacementHex: true },     // Central Yellow (placement)
+      { q: 1, r: -1, terrain: "rock", isPlacementHex: false },    // Grey (NE)
+      { q: 0, r: 1, terrain: "rock", isPlacementHex: false },     // Grey (SE, 120° V-shape)
+    ],
+    scoring: [16, 9, 4],
+    description: "Central Yellow + 2 Grey (120° V)",
+    maxPlacements: 3,
+  },
+
+  // === TREES/FOREST ANIMALS (4 cards) ===
+
+  {
+    id: "macaw",
+    name: "Macaw (Parrot)",
+    primaryType: "Trees",
+    animal: "🦜",
+    pattern: [
+      { q: 0, r: 0, terrain: "tree", isPlacementHex: true },      // Tree (placement)
+      { q: 1, r: 0, terrain: "water", isPlacementHex: false },    // Blue hex
+    ],
+    scoring: [13, 8, 4],
+    description: "Tree adjacent to Blue hex",
+    maxPlacements: 3,
+  },
+
+  {
+    id: "boar",
+    name: "Boar",
+    primaryType: "Trees",
+    animal: "🐗",
+    pattern: [
+      { q: 0, r: 0, terrain: "tree", isPlacementHex: true },      // Tree (placement)
+      { q: 1, r: 0, terrain: "building", isPlacementHex: false }, // Building
+    ],
+    scoring: [14, 9, 4],
+    description: "Tree adjacent to Building",
+    maxPlacements: 3,
+  },
+
+  {
+    id: "koala",
+    name: "Koala",
+    primaryType: "Trees",
+    animal: "🐨",
+    pattern: [
+      { q: 0, r: 0, terrain: "tree", isPlacementHex: true },      // Central Tree (placement)
+      { q: 1, r: 0, terrain: "green", isPlacementHex: false },    // Green
+      { q: 0, r: 1, terrain: "green", isPlacementHex: false },    // Green (60° cluster)
+    ],
+    scoring: [15, 10, 6, 3],
+    description: "Central Tree + 2 Green hexes (60°)",
+    maxPlacements: 4,
+  },
+
+  {
+    id: "wolf",
+    name: "Wolf",
+    primaryType: "Forest",
+    animal: "🐺",
+    pattern: [
+      { q: 0, r: 0, terrain: "tree", isPlacementHex: true },      // Central Tree (placement)
+      { q: 1, r: 0, terrain: "field", isPlacementHex: false },    // Yellow
+      { q: 0, r: 1, terrain: "field", isPlacementHex: false },    // Yellow (60° cluster)
+    ],
+    scoring: [16, 10, 4],
+    description: "Central Tree + 2 Yellow hexes (60°)",
+    maxPlacements: 3,
+  },
+
+  {
+    id: "kookaburra",
+    name: "Kookaburra (Kingfisher)",
+    primaryType: "Forest",
+    animal: "🦅",
+    pattern: [
+      { q: 0, r: 0, terrain: "tree", isPlacementHex: true },      // Tree (placement)
+      { q: 1, r: 0, terrain: "water", isPlacementHex: false },    // Blue
+      { q: 2, r: 0, terrain: "water", isPlacementHex: false },    // Blue
+      { q: 1, r: 1, terrain: "water", isPlacementHex: false },    // Blue (60° cluster of 3)
+    ],
+    scoring: [18, 11, 5],
+    description: "Tree + 60° cluster of 3 Blue hexes",
+    maxPlacements: 3,
+  },
+
+  // === ROCKS ANIMALS (3 cards) ===
+
+  {
+    id: "penguin",
+    name: "Penguin",
+    primaryType: "Rocks",
+    animal: "🐧",
+    pattern: [
+      { q: 0, r: 0, terrain: "water", isPlacementHex: false },    // Central Blue
+      { q: 1, r: 0, terrain: "mountain", isPlacementHex: true },  // Mountain (placement)
+      { q: 0, r: 1, terrain: "mountain", isPlacementHex: false }, // Mountain (60° cluster)
+    ],
+    scoring: [16, 10, 4],
+    description: "Central Blue + 2 Mountains (60°)",
+    maxPlacements: 3,
+  },
+
+  {
+    id: "bat",
+    name: "Bat",
+    primaryType: "Rocks",
+    animal: "🦇",
+    pattern: [
+      { q: 0, r: 0, terrain: "building", isPlacementHex: true },  // Central Building (placement)
+      { q: 1, r: 0, terrain: "water", isPlacementHex: false },    // Blue
+      { q: 0, r: 1, terrain: "water", isPlacementHex: false },    // Blue (60° cluster)
+    ],
+    scoring: [17, 10, 5],
+    description: "Central Building + 2 Blue hexes (60°)",
+    maxPlacements: 3,
+  },
+
+  {
+    id: "fennec",
+    name: "Fennec Fox (Desert Fox)",
+    primaryType: "Rocks",
+    animal: "🦊",
+    pattern: [
+      { q: 0, r: 0, terrain: "building", isPlacementHex: true },  // Central Building (placement)
+      { q: 1, r: 0, terrain: "field", isPlacementHex: false },    // Yellow (E)
+      { q: -1, r: 0, terrain: "field", isPlacementHex: false },   // Yellow (W, 180°)
+    ],
+    scoring: [15, 9, 4],
+    description: "Building + 2 Yellow hexes opposite (180°)",
+    maxPlacements: 3,
+  },
+
+  // === HILLS/MOUNTAINS/PLAINS ANIMALS (10 cards) ===
+
+  {
+    id: "macaque",
+    name: "Macaque (Baboon)",
+    primaryType: "Hills",
+    animal: "🐵",
+    pattern: [
+      { q: 0, r: 0, terrain: "field", isPlacementHex: false },    // Central Yellow
+      { q: 1, r: 0, terrain: "tree", isPlacementHex: true },      // Tree (placement)
+      { q: 0, r: 1, terrain: "tree", isPlacementHex: false },     // Tree (60° cluster)
+    ],
+    scoring: [11, 5],
+    description: "Central Yellow + 2 Trees (60°)",
+    maxPlacements: 2,
+  },
+
+  {
+    id: "eagle",
+    name: "Eagle (Vulture)",
+    primaryType: "Mountains",
+    animal: "🦅",
+    pattern: [
+      { q: 0, r: 0, terrain: "mountain", isPlacementHex: false }, // Mountain (Ht 3)
+      { q: 1, r: 0, terrain: "field", isPlacementHex: true },     // Yellow (placement)
+    ],
+    scoring: [11, 5],
+    description: "Mountain (Ht 3) adjacent to Yellow",
+    maxPlacements: 2,
+  },
+
+  {
+    id: "meerkat",
+    name: "Meerkat",
+    primaryType: "Plains",
+    animal: "🦦",
+    pattern: [
+      { q: 0, r: 0, terrain: "field", isPlacementHex: true },     // Central Yellow (placement)
+      { q: 1, r: 0, terrain: "green", isPlacementHex: false },    // Green
+      { q: 0, r: 1, terrain: "field", isPlacementHex: false },    // Yellow (60° cluster)
+    ],
+    scoring: [17, 12, 8, 5, 2],
+    description: "Central Yellow + Green + Yellow (60°)",
+    maxPlacements: 5,
+  },
+
+  {
+    id: "raven",
+    name: "Raven",
+    primaryType: "Plains",
+    animal: "🦅",
+    pattern: [
+      { q: 0, r: 0, terrain: "field", isPlacementHex: true },     // Central Yellow (placement)
+      { q: 1, r: 0, terrain: "building", isPlacementHex: false }, // Building
+      { q: 0, r: 1, terrain: "building", isPlacementHex: false }, // Building (60° cluster)
+    ],
+    scoring: [9, 4],
+    description: "Central Yellow + 2 Buildings (60°)",
+    maxPlacements: 2,
+  },
+
+  {
+    id: "llama",
+    name: "Llama (Alpaca)",
+    primaryType: "Plains",
+    animal: "🦙",
+    pattern: [
+      { q: 0, r: 0, terrain: "field", isPlacementHex: true },     // Yellow (placement)
+      { q: 1, r: 0, terrain: "field", isPlacementHex: false },    // Adjacent Yellow (2+ contiguous field)
+    ],
+    scoring: [5], // Fixed bonus for contiguous field of 2+
+    description: "Contiguous Field of 2+ Yellow hexes",
+    maxPlacements: 1,
+  },
+
+  {
+    id: "arctic-fox",
+    name: "Arctic Fox (Snow Fox)",
+    primaryType: "Plains",
+    animal: "🦊",
+    pattern: [
+      { q: 0, r: 0, terrain: "field", isPlacementHex: true },     // Central Yellow (placement)
+      { q: 1, r: 0, terrain: "tree", isPlacementHex: false },     // Tree
+      { q: 0, r: 1, terrain: "tree", isPlacementHex: false },     // Tree (60° cluster)
+    ],
+    scoring: [17, 10, 5],
+    description: "Central Yellow + 2 Trees (60°)",
+    maxPlacements: 3,
+  },
+
+  {
+    id: "raccoon",
+    name: "Raccoon",
+    primaryType: "Plains",
+    animal: "🦝",
+    pattern: [
+      { q: 0, r: 0, terrain: "building", isPlacementHex: true },  // Building (placement)
+      { q: 1, r: 0, terrain: "tree", isPlacementHex: false },     // Tree
+    ],
+    scoring: [13, 8, 4],
+    description: "Building adjacent to Tree",
+    maxPlacements: 3,
+  },
+
+  {
+    id: "ladybug",
+    name: "Ladybug",
+    primaryType: "Plains",
+    animal: "🐞",
+    pattern: [
+      { q: 0, r: 0, terrain: "field", isPlacementHex: true },     // Central Yellow (placement)
+      { q: 1, r: 0, terrain: "mountain", isPlacementHex: false }, // Mountain
+      { q: 0, r: 1, terrain: "mountain", isPlacementHex: false }, // Mountain (60° cluster)
+    ],
+    scoring: [17, 10, 4],
+    description: "Central Yellow + 2 Mountains (60°)",
+    maxPlacements: 3,
+  },
+
+  {
+    id: "panther",
+    name: "Panther",
+    primaryType: "Plains",
+    animal: "🐆",
+    pattern: [
+      { q: 0, r: 0, terrain: "field", isPlacementHex: true },     // Central Yellow (placement)
+      { q: 1, r: 0, terrain: "mountain", isPlacementHex: false }, // Mountain
+      { q: 0, r: 1, terrain: "tree", isPlacementHex: false },     // Tree (60° cluster)
+    ],
+    scoring: [14, 9, 5, 2],
+    description: "Central Yellow + Mountain + Tree (60°)",
+    maxPlacements: 4,
   },
 ];
 
@@ -189,14 +556,33 @@ export function shuffleAnimalCards() {
 
 /**
  * Get starting animal cards for a new game
- * @param {number} count - Number of cards to draw (default 5)
+ * @param {number} count - Number of cards to draw (default 3 for available cards)
  * @returns {Object} { available: Array, deck: Array }
  */
-export function getStartingAnimalCards(count = 5) {
+export function getStartingAnimalCards(count = 3) {
   const shuffled = shuffleAnimalCards();
 
   return {
     available: shuffled.slice(0, count),
     deck: shuffled.slice(count),
   };
+}
+
+/**
+ * Get animal cards by primary type
+ * @param {string} type - Primary type (Water, Building, Trees, etc.)
+ * @returns {Array} Array of matching animal cards
+ */
+export function getAnimalCardsByType(type) {
+  return ANIMAL_CARDS.filter((card) => card.primaryType === type);
+}
+
+/**
+ * Get animal emoji by card ID
+ * @param {string} cardId - Card ID
+ * @returns {string} Animal emoji or default
+ */
+export function getAnimalEmoji(cardId) {
+  const card = getAnimalCardById(cardId);
+  return card ? card.animal : "🐾";
 }
