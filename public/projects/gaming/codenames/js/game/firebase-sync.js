@@ -165,9 +165,11 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     // Duet uses board.revealed instead of gameState.revealedCards
     if (game.board.revealed[cardIndex]) return; // Already revealed
     
-    // Use current player's color map (1 = P1, 2 = P2)
+    // Use the CLUE GIVER's color map (opposite of current guesser)
+    // If currentPlayer is 2 (P2 guessing), use P1's map (P1 gave clue)
+    // If currentPlayer is 1 (P1 guessing), use P2's map (P2 gave clue)
     const currentPlayer = gs.currentPlayer || 1;
-    const colorMap = currentPlayer === 1 ? game.board.colorMapP1 : game.board.colorMapP2;
+    const colorMap = currentPlayer === 1 ? game.board.colorMapP2 : game.board.colorMapP1;
     
     const color = colorMap[cardIndex];
     const newRevealed = [...game.board.revealed];
@@ -230,8 +232,7 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     if (color === 'green') {
       const remaining = gs.guessesRemaining - 1;
       if (remaining <= 0) {
-        // Out of guesses — switch player (1 ↔ 2)
-        updates['gameState/currentPlayer'] = currentPlayer === 1 ? 2 : 1;
+        // Out of guesses — end turn, guesser becomes next clue giver (no player switch)
         updates['gameState/phase'] = 'clue';
         updates['gameState/currentClue'] = null;
         updates['gameState/guessesRemaining'] = 0;
@@ -240,8 +241,7 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
         updates['gameState/guessesRemaining'] = remaining;
       }
     } else {
-      // Wrong guess — switch player (1 ↔ 2)
-      updates['gameState/currentPlayer'] = currentPlayer === 1 ? 2 : 1;
+      // Wrong guess — end turn, guesser becomes next clue giver (no player switch)
       updates['gameState/phase'] = 'clue';
       updates['gameState/currentClue'] = null;
       updates['gameState/guessesRemaining'] = 0;
