@@ -461,3 +461,173 @@ describe('Duet Gameplay - Full Game Flow', () => {
     assert.equal(playerSequence[5].player, 2, 'P2 guesses third');
   });
 });
+
+// ---------------------------------------------------------------------------
+// New Tests: Turn Switching Verification
+// ---------------------------------------------------------------------------
+
+describe('Duet Turn Switching - Critical Flow', () => {
+  it('currentPlayer switches from 1 to 2 when P1 gives clue', () => {
+    const gs = createDuetGameState();
+    assert.equal(gs.currentPlayer, 1, 'Game starts with P1');
+    assert.equal(gs.phase, 'clue', 'Phase is clue');
+    
+    // P1 gives clue
+    const clueWord = getSafeClueWord(gs.board.words);
+    giveDuetClue(gs, clueWord, 2, 'Player1');
+    
+    assert.equal(gs.currentPlayer, 2, 'After P1 gives clue, currentPlayer switches to 2');
+    assert.equal(gs.phase, 'guess', 'Phase switches to guess');
+  });
+
+  it('currentPlayer switches from 2 to 1 when P2 gives clue', () => {
+    const gs = createDuetGameState();
+    gs.currentPlayer = 2; // Start with P2's turn
+    assert.equal(gs.currentPlayer, 2, 'Game starts with P2');
+    
+    // P2 gives clue
+    const clueWord = getSafeClueWord(gs.board.words);
+    giveDuetClue(gs, clueWord, 2, 'Player2');
+    
+    assert.equal(gs.currentPlayer, 1, 'After P2 gives clue, currentPlayer switches to 1');
+    assert.equal(gs.phase, 'guess', 'Phase switches to guess');
+  });
+
+  it('full round: P1 clue → P2 guess → P1 guess → P2 clue', () => {
+    const gs = createDuetGameState();
+    
+    // Round 1: P1 gives clue
+    assert.equal(gs.currentPlayer, 1, 'Start: P1');
+    giveDuetClue(gs, getSafeClueWord(gs.board.words), 1, 'Player1');
+    assert.equal(gs.currentPlayer, 2, 'After P1 clue: P2');
+    assert.equal(gs.phase, 'guess');
+    
+    // P2 guesses and ends turn
+    const p2GreenIndex = gs.board.colorMapP2.indexOf('green');
+    revealDuetCard(gs, p2GreenIndex);
+    gs.phase = 'clue'; // End guessing phase
+    gs.currentPlayer = 2; // P2's turn to give clue
+    
+    // Round 2: P2 gives clue
+    assert.equal(gs.currentPlayer, 2, 'P2 turn to give clue');
+    giveDuetClue(gs, getSafeClueWord(gs.board.words), 1, 'Player2');
+    assert.equal(gs.currentPlayer, 1, 'After P2 clue: P1');
+    assert.equal(gs.phase, 'guess');
+  });
+});
+
+describe('Duet Assassin Positions - Different Per Player', () => {
+  it('P1 and P2 have different assassin positions', () => {
+    const board = generateDuetBoard();
+    
+    // Collect assassin positions for each player
+    const p1Assassins = [];
+    const p2Assassins = [];
+    
+    for (let i = 0; i < 25; i++) {
+      if (board.colorMapP1[i] === 'assassin') p1Assassins.push(i);
+      if (board.colorMapP2[i] === 'assassin') p2Assassins.push(i);
+    }
+    
+    assert.equal(p1Assassins.length, 3, 'P1 has exactly 3 assassins');
+    assert.equal(p2Assassins.length, 3, 'P2 has exactly 3 assassins');
+    
+    // Verify they are different
+    const overlap = p1Assassins.filter(pos => p2Assassins.includes(pos));
+    assert.equal(overlap.length, 0, 'P1 and P2 assassins should be at DIFFERENT positions');
+  });
+
+  it('P1 cannot see P2s assassins as assassins', () => {
+    const board = generateDuetBoard();
+    
+    // Get P2's assassin positions
+    const p2Assassins = [];
+    for (let i = 0; i < 25; i++) {
+      if (board.colorMapP2[i] === 'assassin') p2Assassins.push(i);
+    }
+    
+    // Check what P1 sees at those positions
+    for (const pos of p2Assassins) {
+      assert.notEqual(board.colorMapP1[pos], 'assassin', 
+        `P1 should not see assassin at position ${pos} (P2's assassin)`);
+    }
+  });
+
+  it('revealing P1s assassin does not affect P2s color map', () => {
+    const gs = createDuetGameState();
+    
+    // Get P1's first assassin position
+    const p1AssassinPos = gs.board.colorMapP1.indexOf('assassin');
+    assert.notEqual(p1AssassinPos, -1, 'P1 has at least one assassin');
+    
+    // What does P2 see at this position?
+    const p2ViewOfThisCard = gs.board.colorMapP2[p1AssassinPos];
+    
+    // Reveal the card
+    gs.board.revealed[p1AssassinPos] = true;
+    
+    // P2's color map should be unchanged
+    assert.equal(gs.board.colorMapP2[p1AssassinPos], p2ViewOfThisCard,
+      'P2 color map unchanged after revealing P1 assassin');
+  });
+});
+
+describe('Duet Complete Gameplay Flow', () => {
+  it('simulates full turn: clue, switch player, guess, reveal', () => {
+    const gs = createDuetGameState();
+    
+    // Initial state
+    assert.equal(gs.phase, 'clue', 'Starts in clue phase');
+    assert.equal(gs.currentPlayer, 1, 'P1 starts');
+    
+    // P1 gives clue "ANIMALS 3"
+    giveDuetClue(gs, 'ANIMALS', 3, 'Player1');
+    
+    // Verify state after clue
+    assert.equal(gs.phase, 'guess', 'Phase is now guess');
+    assert.equal(gs.currentPlayer, 2, 'Current player is now P2');
+    assert.equal(gs.currentClue.word, 'ANIMALS', 'Clue word stored');
+    assert.equal(gs.currentClue.number, 3, 'Clue number stored');
+    assert.equal(gs.guessesRemaining, 4, 'Guesses = 3 + 1');
+    
+    // P2 guesses a green card
+    const p2GreenPos = gs.board.colorMapP2.indexOf('green');
+    assert.notEqual(p2GreenPos, -1, 'P2 has green cards');
+    
+    const result = revealDuetCard(gs, p2GreenPos);
+    
+    // Verify result
+    assert.equal(result.color, 'green', 'Revealed card is green');
+    assert.equal(gs.board.revealed[p2GreenPos], true, 'Card is revealed');
+    assert.equal(gs.greenRevealed, 1, 'Green count increased');
+    assert.equal(gs.guessesRemaining, 3, 'Guesses remaining decreased');
+    assert.equal(gs.phase, 'guess', 'Still in guess phase');
+    assert.equal(result.turnEnded, false, 'Turn continues after green');
+  });
+
+  it('neutral card ends turn and advances to next phase', () => {
+    const gs = createDuetGameState();
+    
+    // P1 gives clue
+    giveDuetClue(gs, 'HINT', 2, 'Player1');
+    assert.equal(gs.currentPlayer, 2, 'P2 guesses');
+    
+    // P2 hits a neutral card
+    const neutralPos = gs.board.colorMapP2.indexOf('neutral');
+    assert.notEqual(neutralPos, -1, 'Has neutral cards');
+    
+    const result = revealDuetCard(gs, neutralPos);
+    
+    assert.equal(result.color, 'neutral', 'Hit neutral');
+    assert.equal(result.turnEnded, true, 'Turn ended');
+    assert.equal(gs.mistakesMade, 1, 'Mistake counted');
+    assert.equal(gs.turnsUsed, 1, 'Turn consumed');
+    
+    // Manually advance to next player's clue phase (simulating Firebase update)
+    gs.phase = 'clue';
+    gs.currentPlayer = 2; // Now P2's turn to give clue
+    
+    assert.equal(gs.phase, 'clue', 'Back to clue phase');
+    assert.equal(gs.currentPlayer, 2, 'P2 gives next clue');
+  });
+});

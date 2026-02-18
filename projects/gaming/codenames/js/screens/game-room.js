@@ -627,7 +627,11 @@ function renderBoard(data, container, isFinished) {
   const isPicture = config.cardType === 'image';
   const isSpy = isLocalPlayerSpymaster();
   const myTeam = getLocalPlayerTeam();
-  const canClick = !isFinished && gs.phase === 'guess' && (isDuet || gs.currentTurn === myTeam) && !isSpy;
+  
+  // In Duet mode, anyone can click during guess phase (after Start Guessing)
+  // In competitive mode, only non-spies on the current team can click
+  const canClick = !isFinished && gs.phase === 'guess' && 
+    (isDuet || (gs.currentTurn === myTeam && !isSpy));
 
   container.innerHTML = '';
   
