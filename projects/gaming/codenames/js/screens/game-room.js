@@ -44,6 +44,9 @@ const redScoreEl = document.getElementById('red-score');
 const redTotalEl = document.getElementById('red-total');
 const blueScoreEl = document.getElementById('blue-score');
 const blueTotalEl = document.getElementById('blue-total');
+// Get parent elements to change labels dynamically
+const redScoreParent = redScoreEl.parentElement;
+const blueScoreParent = blueScoreEl.parentElement;
 const btnCancelGame = document.getElementById('btn-cancel-game');
 const inspirationPanel = document.getElementById('inspiration-panel');
 const inspirationWord1 = document.getElementById('inspiration-word-1');
@@ -388,9 +391,15 @@ function renderPlayingPhase(data) {
   const config = getModeConfig(gameMode);
   const isDuet = config.isDuet;
 
-  // Round indicator
-  const currentRound = calculateRound(data.clueLog, data.startingTeam);
-  roundIndicator.textContent = `Round ${currentRound}`;
+  // Round indicator - different for Duet vs competitive
+  if (isDuet) {
+    const turnsUsed = gs.turnsUsed || 0;
+    const maxTurns = config.maxTurns || 9;
+    roundIndicator.textContent = `Timer Token: ${turnsUsed}/${maxTurns}`;
+  } else {
+    const currentRound = calculateRound(data.clueLog, data.startingTeam);
+    roundIndicator.textContent = `Round ${currentRound}`;
+  }
 
   // Scores - different for Duet vs competitive
   if (isDuet) {
@@ -400,19 +409,21 @@ function renderPlayingPhase(data) {
     const maxTurns = config.maxTurns || 9;
     const maxMistakes = config.maxMistakes || 9;
     
-    redScoreEl.textContent = turnsUsed;
-    redTotalEl.textContent = maxTurns;
-    blueScoreEl.textContent = mistakesMade;
-    blueTotalEl.textContent = maxMistakes;
+    // Update labels for Duet mode
+    redScoreParent.innerHTML = `Turns: <span id="red-score">${turnsUsed}</span>/<span id="red-total">${maxTurns}</span>`;
+    blueScoreParent.innerHTML = `Mistakes: <span id="blue-score">${mistakesMade}</span>/<span id="blue-total">${maxMistakes}</span>`;
     
-    // Update labels (need to add elements for this or reuse existing)
-    // For now, use the existing score elements
+    // Remove team color classes for Duet mode
+    redScoreParent.classList.remove('red');
+    blueScoreParent.classList.remove('blue');
   } else {
     // Competitive mode: Show team scores
-    redScoreEl.textContent = gs.redRevealed;
-    redTotalEl.textContent = gs.redTotal;
-    blueScoreEl.textContent = gs.blueRevealed;
-    blueTotalEl.textContent = gs.blueTotal;
+    redScoreParent.innerHTML = `Red: <span id="red-score">${gs.redRevealed}</span>/<span id="red-total">${gs.redTotal}</span>`;
+    blueScoreParent.innerHTML = `Blue: <span id="blue-score">${gs.blueRevealed}</span>/<span id="blue-total">${gs.blueTotal}</span>`;
+    
+    // Add team color classes for competitive mode
+    redScoreParent.classList.add('red');
+    blueScoreParent.classList.add('blue');
   }
 
   // Cancel button (host only)
@@ -514,8 +525,9 @@ function renderPlayingPhase(data) {
     }
   }
 
-  // Legend (spymaster only for competitive, everyone for Duet)
-  boardLegend.classList.toggle('hidden', !(isSpy || isDuet));
+  // Legend (spymaster only for competitive, hidden for Duet)
+  // Duet mode doesn't use Red/Blue legend since everyone sees perspective-based colors
+  boardLegend.classList.toggle('hidden', isDuet ? true : !isSpy);
 
   // Player roster
   renderPlayerRoster(data);
