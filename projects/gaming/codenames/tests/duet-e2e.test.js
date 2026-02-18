@@ -43,18 +43,23 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       // Wait for player name input to be visible
       console.log('[P1] Waiting for player name input...');
       await p1Page.waitForSelector('#player-name-input', { state: 'visible', timeout: 10000 });
+      await p1Page.waitForTimeout(500); // Wait for page to fully settle
       console.log('[P1] Player name input found!');
       
       await p1Page.fill('#player-name-input', 'Player 1');
+      await p1Page.waitForTimeout(300); // Let input register
       await p1Page.click('#btn-continue');
+      await p1Page.waitForTimeout(500); // Wait for transition
       await p1Page.waitForSelector('#screen-lobby', { state: 'visible', timeout: 10000 });
       console.log('[P1] Lobby screen visible');
       
       // P1: Select Duet mode and create game
       await p1Page.click('input[name="game-mode"][value="duet"]');
       console.log('[P1] Duet mode selected');
+      await p1Page.waitForTimeout(300);
       await p1Page.click('#btn-create-game');
       console.log('[P1] Create game clicked');
+      await p1Page.waitForTimeout(1000); // Wait for Firebase room creation
       
       // Wait for game room
       await p1Page.waitForSelector('#screen-game-room', { state: 'visible', timeout: 10000 });
@@ -69,17 +74,22 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       
       console.log('[P2] Waiting for player name input...');
       await p2Page.waitForSelector('#player-name-input', { state: 'visible', timeout: 10000 });
+      await p2Page.waitForTimeout(500); // Wait for page to fully settle
       console.log('[P2] Player name input found!');
       
       await p2Page.fill('#player-name-input', 'Player 2');
+      await p2Page.waitForTimeout(300); // Let input register
       await p2Page.click('#btn-continue');
+      await p2Page.waitForTimeout(500); // Wait for transition
       await p2Page.waitForSelector('#screen-lobby', { state: 'visible', timeout: 10000 });
       console.log('[P2] Lobby screen visible');
       
       await p2Page.fill('#join-code-input', roomCode);
       console.log(`[P2] Entered room code: ${roomCode}`);
+      await p2Page.waitForTimeout(300);
       await p2Page.click('#btn-join-code');
       console.log('[P2] Join button clicked');
+      await p2Page.waitForTimeout(1000); // Wait for Firebase join
       
       // Wait for P2 to see the game room
       await p2Page.waitForSelector('#screen-game-room', { state: 'visible', timeout: 10000 });
@@ -90,7 +100,11 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       // P1 starts the game (host)
       const startButton = p1Page.locator('button:has-text("Start Game")');
       await startButton.waitFor({ state: 'visible', timeout: 5000 });
+      console.log('[P1] Start button found');
+      await p1Page.waitForTimeout(500);
       await startButton.click();
+      console.log('[P1] Start button clicked');
+      await p1Page.waitForTimeout(1500); // Wait for game to start and board to generate
       
       // Wait for game board to appear for both players
       await p1Page.waitForSelector('#game-board', { state: 'visible', timeout: 10000 });
@@ -217,12 +231,17 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       await p1Page.goto(gameURL, { waitUntil: 'load' });
       console.log(`[P1] Current URL: ${p1Page.url()}`);
       await p1Page.waitForSelector('#player-name-input', { state: 'visible', timeout: 10000 });
+      await p1Page.waitForTimeout(500);
       await p1Page.fill('#player-name-input', 'Player 1');
+      await p1Page.waitForTimeout(300);
       await p1Page.click('#btn-continue');
+      await p1Page.waitForTimeout(500);
       await p1Page.waitForSelector('#screen-lobby', { state: 'visible', timeout: 10000 });
       
       await p1Page.click('input[name="game-mode"][value="duet"]');
+      await p1Page.waitForTimeout(300);
       await p1Page.click('#btn-create-game');
+      await p1Page.waitForTimeout(1000); // Wait for Firebase room creation
       await p1Page.waitForSelector('#screen-game-room', { state: 'visible', timeout: 10000 });
       
       roomCode = await p1Page.locator('#game-code').textContent();
@@ -232,17 +251,24 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       await p2Page.goto(gameURL, { waitUntil: 'load' });
       console.log(`[P2] Current URL: ${p2Page.url()}`);
       await p2Page.waitForSelector('#player-name-input', { state: 'visible', timeout: 10000 });
+      await p2Page.waitForTimeout(500);
       await p2Page.fill('#player-name-input', 'Player 2');
+      await p2Page.waitForTimeout(300);
       await p2Page.click('#btn-continue');
+      await p2Page.waitForTimeout(500);
       await p2Page.waitForSelector('#screen-lobby', { state: 'visible' });
       
       await p2Page.fill('#join-code-input', roomCode);
+      await p2Page.waitForTimeout(300);
       await p2Page.click('#btn-join-code');
+      await p2Page.waitForTimeout(1000); // Wait for Firebase join
       await p2Page.waitForSelector('#screen-game-room', { state: 'visible' });
       
       const startButton = p1Page.locator('button:has-text("Start Game")');
       await startButton.waitFor({ state: 'visible' });
+      await p1Page.waitForTimeout(500);
       await startButton.click();
+      await p1Page.waitForTimeout(1500); // Wait for game to start
       
       await p1Page.waitForSelector('#game-board', { state: 'visible' });
       await p2Page.waitForSelector('#game-board', { state: 'visible' });
