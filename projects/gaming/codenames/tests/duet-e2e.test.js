@@ -46,7 +46,8 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       await p1Page.waitForTimeout(500); // Wait for page to fully settle
       console.log('[P1] Player name input found!');
       
-      await p1Page.fill('#player-name-input', 'Player 1');
+      await p1Page.click('#player-name-input'); // Focus the input
+      await p1Page.type('#player-name-input', 'Player1', { delay: 100 }); // Type with delay
       await p1Page.waitForTimeout(300); // Let input register
       await p1Page.press('#player-name-input', 'Enter'); // Press Enter to submit
       await p1Page.waitForTimeout(500); // Wait for transition
@@ -77,7 +78,8 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       await p2Page.waitForTimeout(500); // Wait for page to fully settle
       console.log('[P2] Player name input found!');
       
-      await p2Page.fill('#player-name-input', 'Player 2');
+      await p2Page.click('#player-name-input'); // Focus the input
+      await p2Page.type('#player-name-input', 'Player2', { delay: 100 }); // Type with delay
       await p2Page.waitForTimeout(300); // Let input register
       await p2Page.press('#player-name-input', 'Enter'); // Press Enter to submit
       await p2Page.waitForTimeout(500); // Wait for transition
@@ -232,7 +234,8 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       console.log(`[P1] Current URL: ${p1Page.url()}`);
       await p1Page.waitForSelector('#player-name-input', { state: 'visible', timeout: 10000 });
       await p1Page.waitForTimeout(500);
-      await p1Page.fill('#player-name-input', 'Player 1');
+      await p1Page.click('#player-name-input');
+      await p1Page.type('#player-name-input', 'Player1', { delay: 100 });
       await p1Page.waitForTimeout(300);
       await p1Page.press('#player-name-input', 'Enter');
       await p1Page.waitForTimeout(500);
@@ -252,7 +255,8 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       console.log(`[P2] Current URL: ${p2Page.url()}`);
       await p2Page.waitForSelector('#player-name-input', { state: 'visible', timeout: 10000 });
       await p2Page.waitForTimeout(500);
-      await p2Page.fill('#player-name-input', 'Player 2');
+      await p2Page.click('#player-name-input');
+      await p2Page.type('#player-name-input', 'Player2', { delay: 100 });
       await p2Page.waitForTimeout(300);
       await p2Page.press('#player-name-input', 'Enter');
       await p2Page.waitForTimeout(500);
