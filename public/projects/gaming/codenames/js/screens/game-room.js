@@ -714,6 +714,9 @@ function renderBoard(data, container, isFinished) {
             const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
             // Duet mode: must click Start Guessing first
             canClickCard = isMyTurn && isGuessingActive;
+            if (i === 0) { // Debug first card only
+              console.log(`🎴 Card ${i}: canClick=${canClick}, isMyTurn=${isMyTurn}, isGuessingActive=${isGuessingActive}, canClickCard=${canClickCard}`);
+            }
           } else {
             // Competitive mode: only clickable after Start Guessing
             canClickCard = isGuessingActive;
@@ -722,6 +725,9 @@ function renderBoard(data, container, isFinished) {
           if (canClickCard) {
             card.classList.add('clickable');
             card.addEventListener('click', () => onCardClick(i));
+            if (i === 0) console.log(`  ✅ Card ${i}: Click handler attached!`);
+          } else {
+            if (i === 0) console.log(`  ❌ Card ${i}: NOT clickable`);
           }
         }
       }
@@ -737,19 +743,7 @@ function renderBoard(data, container, isFinished) {
 }
 
 async function onCardClick(cardIndex) {
-  const game = getCurrentGame();
-  if (!game.id || !game.data) return;
-  
-  const data = game.data;
-  const gs = data.gameState;
-  const myRole = getLocalPlayerData()?.role;
-  const myTeam = getLocalPlayerTeam();
-  const gameMode = data.gameMode || 'words';
-  const config = getModeConfig(gameMode);
-  const isDuet = config.isDuet;
-
-  // Check if player can guess
-  if (gs.phase !== 'guess') return;
+  console.log(`\ud83d\udc46 CARD CLICKED: ${cardIndex}`);\n  const game = getCurrentGame();\n  if (!game.id || !game.data) {\n    console.log('  \u274c No game data');\n    return;\n  }\n  \n  const data = game.data;\n  const gs = data.gameState;\n  const myRole = getLocalPlayerData()?.role;\n  const myTeam = getLocalPlayerTeam();\n  const gameMode = data.gameMode || 'words';\n  const config = getModeConfig(gameMode);\n  const isDuet = config.isDuet;\n\n  console.log(`  isDuet=${isDuet}, phase=${gs.phase}, myRole=${myRole}`);\n\n  // Check if player can guess\n  if (gs.phase !== 'guess') {\n    console.log('  \u274c Wrong phase');\n    return;\n  }
   
   // In Duet mode, both players can guess; in competitive mode, only current team's operative can guess
   if (isDuet) {
@@ -947,10 +941,12 @@ async function handleGiveClueClick() {
 
 // Start guessing (competitive mode only - prevents accidental taps)
 btnStartGuessing.addEventListener('click', () => {
+  console.log('🟢 START GUESSING clicked! Setting isGuessingActive = true');
   isGuessingActive = true;
   // Re-render to update UI
   const game = getCurrentGame();
   if (game.data) {
+    console.log('  Re-rendering board...');
     renderClueArea(game.data);
     renderBoard(game.data, boardEl, false);
   }
