@@ -335,25 +335,71 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     if (isGreen) {
       const remaining = gs.guessesRemaining - 1;
       if (remaining <= 0) {
-        // Out of guesses — end turn, guesser becomes next clue giver (no player switch)
-        console.log(`  ✅ Green! Out of guesses. Phase → clue, currentPlayer stays ${currentPlayer}`);
+        // Out of guesses — end turn, check if we need to switch players
+        console.log(`  ✅ Green! Out of guesses. Phase → clue`);
         updates['gameState/phase'] = 'clue';
         updates['gameState/currentClue'] = null;
         updates['gameState/guessesRemaining'] = 0;
         updates['gameState/turnsUsed'] = turnsUsed + 1;
+        
+        // Check if one player has finished their 9 greens - if so, other player takes over
+        const p1GreenCount = newRevealed.filter((isRevealed, idx) => 
+          isRevealed && game.board.colorMapP1[idx] === 'green'
+        ).length;
+        const p2GreenCount = newRevealed.filter((isRevealed, idx) => 
+          isRevealed && game.board.colorMapP2[idx] === 'green'
+        ).length;
+        
+        const p1Finished = p1GreenCount >= 9;
+        const p2Finished = p2GreenCount >= 9;
+        
+        let newPlayer;
+        if (p1Finished && !p2Finished) {
+          newPlayer = 2; // P1 done, P2 takes over
+        } else if (p2Finished && !p1Finished) {
+          newPlayer = 1; // P2 done, P1 takes over
+        } else {
+          newPlayer = currentPlayer; // No switch, same player continues
+        }
+        
+        console.log(`  P1=${p1GreenCount}/9${p1Finished?' ✓':''}, P2=${p2GreenCount}/9${p2Finished?' ✓':''} → P${newPlayer} gives next clue`);
+        updates['gameState/currentPlayer'] = newPlayer;
       } else {
         console.log(`  ✅ Green! ${remaining} guesses remaining`);
         updates['gameState/guessesRemaining'] = remaining;
       }
     } else {
-      // Wrong guess (neutral/mistake) — end turn, guesser becomes next clue giver
-      console.log(`  ❌ ${color}! Turn ends. Phase → clue, currentPlayer stays ${currentPlayer}`);
+      // Wrong guess (neutral/mistake) — end turn, check if we need to switch players
+      console.log(`  ❌ ${color}! Turn ends. Phase → clue`);
       updates['gameState/phase'] = 'clue';
       updates['gameState/currentClue'] = null;
       updates['gameState/guessesRemaining'] = 0;
       updates['gameState/turnsUsed'] = turnsUsed + 1;
+      
+      // Check if one player has finished their 9 greens - if so, other player takes over
+      const p1GreenCount = newRevealed.filter((isRevealed, idx) => 
+        isRevealed && game.board.colorMapP1[idx] === 'green'
+      ).length;
+      const p2GreenCount = newRevealed.filter((isRevealed, idx) => 
+        isRevealed && game.board.colorMapP2[idx] === 'green'
+      ).length;
+      
+      const p1Finished = p1GreenCount >= 9;
+      const p2Finished = p2GreenCount >= 9;
+      
+      let newPlayer;
+      if (p1Finished && !p2Finished) {
+        newPlayer = 2; // P1 done, P2 takes over
+      } else if (p2Finished && !p1Finished) {
+        newPlayer = 1; // P2 done, P1 takes over
+      } else {
+        newPlayer = currentPlayer; // No switch, same player continues
+      }
+      
+      console.log(`  P1=${p1GreenCount}/9${p1Finished?' ✓':''}, P2=${p2GreenCount}/9${p2Finished?' ✓':''} → P${newPlayer} gives next clue`);
+      updates['gameState/currentPlayer'] = newPlayer;
     }
-    
+
     await update(ref(database, `games/${gameId}`), updates);
     return;
   }
