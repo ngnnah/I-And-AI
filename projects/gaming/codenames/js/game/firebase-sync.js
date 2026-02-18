@@ -186,41 +186,11 @@ export async function handleGiveClue(gameId, word, number, spymasterName, team) 
     }
   };
   
-  // In Duet mode: switch player after giving clue UNLESS one player has finished their 9/9
+  // In Duet mode: always switch to the partner for guessing
   if (config.isDuet) {
     const currentPlayer = game.gameState?.currentPlayer || 1;
-    
-    // Check if each player has completed their 9 cards
-    const revealed = game.board?.revealed || [];
-    const colorMapP1 = game.board?.colorMapP1 || [];
-    const colorMapP2 = game.board?.colorMapP2 || [];
-    
-    let p1GreenCount = 0;
-    let p2GreenCount = 0;
-    revealed.forEach((isRevealed, idx) => {
-      if (isRevealed) {
-        if (colorMapP1[idx] === 'green') p1GreenCount++;
-        if (colorMapP2[idx] === 'green') p2GreenCount++;
-      }
-    });
-    
-    const p1Finished = p1GreenCount >= 9;
-    const p2Finished = p2GreenCount >= 9;
-    
-    // If one player finished all their greens, the OTHER player takes over completely
-    // (The finished player's clues would be useless - all their greens are revealed)
-    let newPlayer;
-    if (p1Finished && !p2Finished) {
-      newPlayer = 2; // P1 done, P2 takes over all remaining turns
-    } else if (p2Finished && !p1Finished) {
-      newPlayer = 1; // P2 done, P1 takes over all remaining turns
-    } else {
-      // Both still playing or both finished - alternate normally
-      newPlayer = currentPlayer === 1 ? 2 : 1;
-    }
-    
-    console.log(`🎯 DUET CLUE: P1=${p1GreenCount}/9${p1Finished?' ✓':''}, P2=${p2GreenCount}/9${p2Finished?' ✓':''}`);
-    console.log(`  Current player: P${currentPlayer}, switching to: P${newPlayer}`);
+    const newPlayer = currentPlayer === 1 ? 2 : 1;
+    console.log(`🎯 DUET CLUE: P${currentPlayer} gave clue, switching to P${newPlayer} to guess`);
     updates['gameState/currentPlayer'] = newPlayer;
   }
 
@@ -355,8 +325,34 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
         console.log(`  P1=${p1GreenCount}/9${p1Finished?' ✓':''}, P2=${p2GreenCount}/9${p2Finished?' ✓':''} → P${newPlayer} gives next clue`);
         updates['gameState/currentPlayer'] = newPlayer;
       } else {
-        console.log(`  ✅ Green! ${remaining} guesses remaining`);
-        updates['gameState/guessesRemaining'] = remaining;
+        // Check if clue giver's map is now fully revealed — no more useful guesses
+        const clueGiverGreenTotal = newRevealed.filter((isRevealed, idx) =>
+          isRevealed && clueGiverMap[idx] === 'green'
+        ).length;
+
+        if (clueGiverGreenTotal >= 9) {
+          // End turn — clue giver's map is complete
+          console.log(`  ✅ Green! Clue giver P${clueGiverPlayer}'s map now complete (${clueGiverGreenTotal}/9). Ending turn.`);
+          updates['gameState/phase'] = 'clue';
+          updates['gameState/currentClue'] = null;
+          updates['gameState/guessesRemaining'] = 0;
+          updates['gameState/turnsUsed'] = turnsUsed + 1;
+
+          const p1GreenCount = newRevealed.filter((isRevealed, idx) =>
+            isRevealed && game.board.colorMapP1[idx] === 'green'
+          ).length;
+          const p2GreenCount = newRevealed.filter((isRevealed, idx) =>
+            isRevealed && game.board.colorMapP2[idx] === 'green'
+          ).length;
+
+          let newPlayer = currentPlayer;
+          if (p1GreenCount >= 9 && currentPlayer === 1) newPlayer = 2;
+          if (p2GreenCount >= 9 && currentPlayer === 2) newPlayer = 1;
+          updates['gameState/currentPlayer'] = newPlayer;
+        } else {
+          console.log(`  ✅ Green! ${remaining} guesses remaining`);
+          updates['gameState/guessesRemaining'] = remaining;
+        }
       }
     } else {
       // Wrong guess — end turn
@@ -509,10 +505,24 @@ export async function handleEndGuessing(gameId) {
     [`clueLog/${logIndex}/guesses/${guessIndex}`]: { passed: true }
   };
   
-  // Duet mode: increment turn counter instead of switching teams
+  // Duet mode: increment turn counter and determine next clue giver
   if (config.isDuet) {
     const turnsUsed = gs.turnsUsed || 0;
     updates['gameState/turnsUsed'] = turnsUsed + 1;
+
+    // Guesser becomes next clue giver unless their map is done
+    const currentPlayer = gs.currentPlayer || 1;
+    const revealed = game.board?.revealed || [];
+    const colorMapP1 = game.board?.colorMapP1 || [];
+    const colorMapP2 = game.board?.colorMapP2 || [];
+
+    const p1GreenCount = revealed.filter((r, idx) => r && colorMapP1[idx] === 'green').length;
+    const p2GreenCount = revealed.filter((r, idx) => r && colorMapP2[idx] === 'green').length;
+
+    let newPlayer = currentPlayer;
+    if (p1GreenCount >= 9 && currentPlayer === 1) newPlayer = 2;
+    if (p2GreenCount >= 9 && currentPlayer === 2) newPlayer = 1;
+    updates['gameState/currentPlayer'] = newPlayer;
   } else {
     // Competitive mode: switch teams
     const currentTeam = gs.currentTurn;

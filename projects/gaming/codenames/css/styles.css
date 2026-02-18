@@ -1367,6 +1367,17 @@ input[type="text"]:focus, select:focus {
   color: var(--blue-light);
 }
 
+.duet-map-banner {
+  background: rgba(33, 150, 243, 0.15);
+  border: 1px solid #2196f3;
+  color: #64b5f6;
+  border-radius: var(--radius);
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-top: 4px;
+}
+
 @keyframes pulse-active {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.02); }

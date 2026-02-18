@@ -485,7 +485,21 @@ function renderPlayingPhase(data) {
     });
     
     console.log(`🎯 Duet Score Update: revealed.length=${revealed.length}, P1=${p1GreenCount}/9, P2=${p2GreenCount}/9, totalGreen=${greenRevealed}/${greenTotal}`);
-    
+
+    // Show banner when one player's map is fully revealed
+    const duetMapBanner = document.getElementById('duet-map-banner');
+    if (duetMapBanner) {
+      if (p1GreenCount >= 9 && p2GreenCount < 9) {
+        duetMapBanner.textContent = `✅ P1's map complete! P2 now gives all clues — P1 guesses.`;
+        duetMapBanner.classList.remove('hidden');
+      } else if (p2GreenCount >= 9 && p1GreenCount < 9) {
+        duetMapBanner.textContent = `✅ P2's map complete! P1 now gives all clues — P2 guesses.`;
+        duetMapBanner.classList.remove('hidden');
+      } else {
+        duetMapBanner.classList.add('hidden');
+      }
+    }
+
     // Update labels for Duet mode - show per-player progress
     redScoreParent.innerHTML = `P1: <span id="red-score">${p1GreenCount}</span>/<span id="red-total">9</span>`;
     blueScoreParent.innerHTML = `P2: <span id="blue-score">${p2GreenCount}</span>/<span id="blue-total">9</span>`;
