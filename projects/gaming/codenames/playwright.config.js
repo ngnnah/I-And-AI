@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  testMatch: '**/*.e2e.js',
+  testMatch: '**/*e2e*.js',
   fullyParallel: false, // Run tests sequentially to avoid Firebase conflicts
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,

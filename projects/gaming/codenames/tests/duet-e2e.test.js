@@ -26,42 +26,43 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       // === SETUP PHASE ===
       console.log('\n=== SETUP: Creating Duet game ===');
       
-      // P1: Create a Duet game
+      // P1: Enter name and continue to lobby
       await p1Page.goto('/');
       await p1Page.waitForLoadState('networkidle');
       
-      await p1Page.click('button:has-text("Host Game")');
-      await p1Page.waitForSelector('#game-setup', { state: 'visible' });
+      await p1Page.fill('#player-name-input', 'Player 1');
+      await p1Page.click('#btn-continue');
+      await p1Page.waitForSelector('#screen-lobby', { state: 'visible', timeout: 5000 });
       
-      // Select Duet mode
-      await p1Page.selectOption('select#game-mode', 'duet');
-      await p1Page.fill('input#player-name', 'Player 1');
-      await p1Page.click('button:has-text("Create Room")');
+      // P1: Select Duet mode and create game
+      await p1Page.click('input[name="game-mode"][value="duet"]');
+      await p1Page.click('#btn-create-game');
       
-      // Wait for room code
-      await p1Page.waitForSelector('#room-code', { state: 'visible', timeout: 10000 });
-      roomCode = await p1Page.locator('#room-code').textContent();
+      // Wait for game room
+      await p1Page.waitForSelector('#screen-game-room', { state: 'visible', timeout: 10000 });
+      roomCode = await p1Page.locator('#game-code').textContent();
       console.log(`Room created: ${roomCode}`);
       
-      // P2: Join the game
+      // P2: Enter name and join the game
       await p2Page.goto('/');
       await p2Page.waitForLoadState('networkidle');
       
-      await p2Page.click('button:has-text("Join Game")');
-      await p2Page.waitForSelector('#join-game-screen', { state: 'visible' });
+      await p2Page.fill('#player-name-input', 'Player 2');
+      await p2Page.click('#btn-continue');
+      await p2Page.waitForSelector('#screen-lobby', { state: 'visible', timeout: 5000 });
       
-      await p2Page.fill('input[placeholder*="room code"]', roomCode);
-      await p2Page.fill('input[placeholder*="name"]', 'Player 2');
-      await p2Page.click('button:has-text("Join Room")');
+      await p2Page.fill('#join-code-input', roomCode);
+      await p2Page.click('#btn-join-code');
       
-      // Wait for both players to see the lobby
-      await p1Page.waitForSelector('.player-list', { state: 'visible', timeout: 10000 });
-      await p2Page.waitForSelector('.player-list', { state: 'visible', timeout: 10000 });
+      // Wait for P2 to see the game room
+      await p2Page.waitForSelector('#screen-game-room', { state: 'visible', timeout: 10000 });
       
       console.log('Both players joined');
       
-      // P1 starts the game
-      await p1Page.click('button:has-text("Start Game")');
+      // P1 starts the game (host)
+      const startButton = p1Page.locator('button:has-text("Start Game")');
+      await startButton.waitFor({ state: 'visible', timeout: 5000 });
+      await startButton.click();
       
       // Wait for game board to appear for both players
       await p1Page.waitForSelector('#game-board', { state: 'visible', timeout: 10000 });
@@ -180,20 +181,28 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       console.log('\n=== SETUP: Creating Duet game for color map test ===');
       
       await p1Page.goto('/');
-      await p1Page.click('button:has-text("Host Game")');
-      await p1Page.selectOption('select#game-mode', 'duet');
-      await p1Page.fill('input#player-name', 'Player 1');
-      await p1Page.click('button:has-text("Create Room")');
+      await p1Page.fill('#player-name-input', 'Player 1');
+      await p1Page.click('#btn-continue');
+      await p1Page.waitForSelector('#screen-lobby', { state: 'visible' });
       
-      roomCode = await p1Page.locator('#room-code').textContent();
+      await p1Page.click('input[name="game-mode"][value="duet"]');
+      await p1Page.click('#btn-create-game');
+      await p1Page.waitForSelector('#screen-game-room', { state: 'visible' });
+      
+      roomCode = await p1Page.locator('#game-code').textContent();
       
       await p2Page.goto('/');
-      await p2Page.click('button:has-text("Join Game")');
-      await p2Page.fill('input[placeholder*="room code"]', roomCode);
-      await p2Page.fill('input[placeholder*="name"]', 'Player 2');
-      await p2Page.click('button:has-text("Join Room")');
+      await p2Page.fill('#player-name-input', 'Player 2');
+      await p2Page.click('#btn-continue');
+      await p2Page.waitForSelector('#screen-lobby', { state: 'visible' });
       
-      await p1Page.click('button:has-text("Start Game")');
+      await p2Page.fill('#join-code-input', roomCode);
+      await p2Page.click('#btn-join-code');
+      await p2Page.waitForSelector('#screen-game-room', { state: 'visible' });
+      
+      const startButton = p1Page.locator('button:has-text("Start Game")');
+      await startButton.waitFor({ state: 'visible' });
+      await startButton.click();
       
       await p1Page.waitForSelector('#game-board', { state: 'visible' });
       await p2Page.waitForSelector('#game-board', { state: 'visible' });
