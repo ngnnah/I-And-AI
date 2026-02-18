@@ -1000,7 +1000,6 @@ input[type="text"]:focus, select:focus {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 30%; /* Shift image up to show more of bottom */
   border-radius: inherit;
   display: block;
 }
