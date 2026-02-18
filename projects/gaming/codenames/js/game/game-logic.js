@@ -218,7 +218,8 @@ export function validateClue(word, number, boardWords) {
   if (boardWords.map(w => w.toUpperCase()).includes(trimmed)) {
     return { valid: false, error: 'Clue cannot be a word on the board' };
   }
-  if (typeof number !== 'number' || (number !== Infinity && (!Number.isInteger(number) || number < 0 || number > 9))) {
+  // -1 is the internal sentinel for ∞ (Infinity can't be stored in Firebase JSON)
+  if (typeof number !== 'number' || !Number.isInteger(number) || (number !== -1 && (number < 0 || number > 9))) {
     return { valid: false, error: 'Number must be between 0 and 9, or ∞' };
   }
   return { valid: true, error: null };
@@ -308,8 +309,8 @@ export function getTeamPlayers(players, team) {
  * @returns {number} Max guesses allowed (clueNumber + 1, or Infinity for 0)
  */
 export function calculateGuessesAllowed(clueNumber) {
-  // Both 0 and Infinity mean unlimited guesses (99, never decremented)
-  if (clueNumber === 0 || clueNumber === Infinity) return 99;
+  // 0 and -1 (∞ sentinel) both mean unlimited guesses (99)
+  if (clueNumber === 0 || clueNumber === -1) return 99;
   return clueNumber + 1;
 }
 
