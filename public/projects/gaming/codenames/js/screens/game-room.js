@@ -477,9 +477,11 @@ function renderPlayingPhase(data) {
     // Count green cards revealed from each player's perspective
     let p1GreenCount = 0;
     let p2GreenCount = 0;
-    revealed.forEach(idx => {
-      if (colorMapP1[idx] === 'green') p1GreenCount++;
-      if (colorMapP2[idx] === 'green') p2GreenCount++;
+    revealed.forEach((isRevealed, idx) => {
+      if (isRevealed) {
+        if (colorMapP1[idx] === 'green') p1GreenCount++;
+        if (colorMapP2[idx] === 'green') p2GreenCount++;
+      }
     });
     
     // Update labels for Duet mode - show per-player progress
