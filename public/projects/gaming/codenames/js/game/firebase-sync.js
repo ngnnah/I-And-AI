@@ -220,18 +220,29 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     // Duet uses board.revealed instead of gameState.revealedCards
     if (game.board.revealed[cardIndex]) return; // Already revealed
     
-    // Use the CLUE GIVER's color map (opposite of current guesser)
-    // If currentPlayer is 2 (P2 guessing), use P1's map (P1 gave clue)
-    // If currentPlayer is 1 (P1 guessing), use P2's map (P2 gave clue)
+    // In Duet, check BOTH color maps to determine the result
     const currentPlayer = gs.currentPlayer || 1;
-    const colorMap = currentPlayer === 1 ? game.board.colorMapP2 : game.board.colorMapP1;
+    const colorP1 = game.board.colorMapP1[cardIndex];
+    const colorP2 = game.board.colorMapP2[cardIndex];
+    
+    // A card is "green" if it's green on EITHER map
+    // A card is "assassin" if it's assassin on the CURRENT GUESSER's map
+    // Otherwise it's neutral/mistake
+    const isGreenP1 = colorP1 === 'green';
+    const isGreenP2 = colorP2 === 'green';
+    const isGreen = isGreenP1 || isGreenP2;
+    
+    // Check assassin from guesser's perspective
+    const guesserMap = currentPlayer === 1 ? game.board.colorMapP1 : game.board.colorMapP2;
+    const color = guesserMap[cardIndex];
     
     console.log(`🎲 CARD REVEAL: Card ${cardIndex}`);
-    console.log(`  Current player (guesser): ${currentPlayer}`);
-    console.log(`  Using color map: ${currentPlayer === 1 ? 'P2' : 'P1'} (clue giver's perspective)`);
-    console.log(`  Color from map: ${colorMap[cardIndex]}`);
+    console.log(`  Current player (guesser): P${currentPlayer}`);
+    console.log(`  Color on P1 map: ${colorP1}`);
+    console.log(`  Color on P2 map: ${colorP2}`);
+    console.log(`  Is green on either? ${isGreen}`);
+    console.log(`  Guesser sees: ${color}`);
     
-    const color = colorMap[cardIndex];
     const newRevealed = [...game.board.revealed];
     newRevealed[cardIndex] = true;
     
@@ -240,9 +251,11 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     let mistakesMade = gs.mistakesMade || 0;
     let turnsUsed = gs.turnsUsed || 0;
     
-    if (color === 'green') {
+    // A card counts as green if it's green on EITHER map (this counts unique greens correctly)
+    if (isGreen) {
       greenRevealed++;
     } else if (color === 'neutral') {
+      // Only neutral cards (not green on either map, not assassin) count as mistakes
       mistakesMade++;
     }
     
