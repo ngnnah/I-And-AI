@@ -263,9 +263,6 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     const clueGiverMap = currentPlayer === 1 ? game.board.colorMapP1 : game.board.colorMapP2;
     const clueGiverColor = clueGiverMap[cardIndex];
     
-    // Assassin check: lose if assassin on EITHER map
-    const isAssassin = colorP1 === 'assassin' || colorP2 === 'assassin';
-    
     console.log(`🎲 CARD REVEAL: Card ${cardIndex}`);
     console.log(`  Clue giver: P${currentPlayer}, Guesser: P${currentPlayer === 1 ? 2 : 1}`);
     console.log(`  Color on P1 map: ${colorP1}`);
@@ -273,6 +270,7 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     console.log(`  Clue giver sees: ${clueGiverColor}`);
     console.log(`  Green on either map? ${isGreenOnEitherMap} (counts toward 15)`);
     console.log(`  Correct guess (clue giver's green)? ${clueGiverColor === 'green'}`);
+    console.log(`  Assassin on clue giver's map? ${clueGiverColor === 'assassin'}`);
     
     const newRevealed = [...game.board.revealed];
     newRevealed[cardIndex] = true;
@@ -285,8 +283,9 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     // Count toward 15 if green on EITHER map
     if (isGreenOnEitherMap) {
       greenRevealed++;
-    } else if (!isAssassin) {
-      // Only truly neutral cards (not green, not assassin) count as mistakes
+    } else if (clueGiverColor === 'neutral') {
+      // Only neutral cards from clue giver's perspective count as mistakes
+      // (Assassin on guesser's own map is just neutral from clue giver's view)
       mistakesMade++;
     }
     
@@ -304,13 +303,13 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
       [`clueLog/${logIndex}/guesses/${guessIndex}`]: {
         cardIndex,
         word: game.board.words ? game.board.words[cardIndex] : `Card ${cardIndex + 1}`,
-        result: clueGiverColor === 'green' ? 'correct' : isAssassin ? 'assassin' : 'wrong',
+        result: clueGiverColor === 'green' ? 'correct' : clueGiverColor === 'assassin' ? 'assassin' : 'wrong',
         color: clueGiverColor
       }
     };
     
-    // Check for assassin (immediate loss if assassin on EITHER map)
-    if (isAssassin) {
+    // Check for assassin (immediate loss ONLY if assassin on CLUE GIVER's map)
+    if (clueGiverColor === 'assassin') {
       updates['gameState/winner'] = 'loss';
       updates['gameState/winReason'] = 'assassin';
       updates['gameState/currentClue'] = null;
