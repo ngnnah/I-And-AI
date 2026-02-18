@@ -73,17 +73,24 @@ export function generateDuetBoard(gameMode = 'duet') {
   const greenArray = Array.from(greenPositions);
   
   // Split green agents: Player 1 sees 9, Player 2 sees 9, with 3 overlapping
-  // Overlap positions: indices 6, 7, 8 from greenArray
+  // This creates the "shared key card" mechanic:
+  // - P1 only: 6 greens (indices 0-5)
+  // - Shared: 3 greens (indices 6-8) — both players see these
+  // - P2 only: 6 greens (indices 9-14)
+  // Total: 15 unique green cards
   const p1Green = greenArray.slice(0, 9); // indices 0-8
   const p2Green = greenArray.slice(6, 15); // indices 6-14 (overlap at 6,7,8)
   
-  // Place 3 assassins in remaining positions
+  // Place assassins - each player has DIFFERENT assassins (like two-sided key card)
   const remainingPositions = [];
   for (let i = 0; i < totalCards; i++) {
     if (!greenPositions.has(i)) remainingPositions.push(i);
   }
   shuffleArray(remainingPositions);
-  const assassinPositions = remainingPositions.slice(0, config.assassinCount);
+  
+  // P1 gets first 3 assassins, P2 gets next 3 assassins (can overlap for difficulty)
+  const p1Assassins = remainingPositions.slice(0, config.assassinCount);
+  const p2Assassins = remainingPositions.slice(config.assassinCount, config.assassinCount * 2);
   
   // Build color maps
   const colorMapP1 = Array(totalCards).fill('neutral');
@@ -91,10 +98,8 @@ export function generateDuetBoard(gameMode = 'duet') {
   
   p1Green.forEach(idx => { colorMapP1[idx] = 'green'; });
   p2Green.forEach(idx => { colorMapP2[idx] = 'green'; });
-  assassinPositions.forEach(idx => { 
-    colorMapP1[idx] = 'assassin'; 
-    colorMapP2[idx] = 'assassin'; 
-  });
+  p1Assassins.forEach(idx => { colorMapP1[idx] = 'assassin'; });
+  p2Assassins.forEach(idx => { colorMapP2[idx] = 'assassin'; });
   
   return {
     cardIds: getRandomCardIds(config.totalImages, totalCards),
@@ -150,6 +155,34 @@ export function checkDuetWinCondition(revealedCards, colorMapP1, colorMapP2, tur
     return { isOver: true, winner: 'coop', reason: 'all_revealed' };
   }
   
+  return { isOver: false, winner: null, reason: null };
+}
+
+/**
+ * Simplified Duet win condition check (used by firebase-sync)
+ * @param {number} greenRevealed - Number of green cards revealed
+ * @param {number} mistakesMade - Number of mistakes (neutral cards hit)
+ * @param {number} turnsUsed - Number of turns used
+ * @param {object} config - Game mode config with maxTurns, maxMistakes, greenCount
+ * @returns {{ isOver: boolean, winner: string|null, reason: string|null }}
+ */
+export function checkDuetWinConditionSimple(greenRevealed, mistakesMade, turnsUsed, config) {
+  // Win: all green cards revealed
+  if (greenRevealed >= config.greenCount) {
+    return { isOver: true, winner: 'win', reason: 'all-green' };
+  }
+  
+  // Loss: too many mistakes
+  if (mistakesMade > config.maxMistakes) {
+    return { isOver: true, winner: 'loss', reason: 'too-many-mistakes' };
+  }
+  
+  // Loss: ran out of turns
+  if (turnsUsed > config.maxTurns) {
+    return { isOver: true, winner: 'loss', reason: 'out-of-turns' };
+  }
+  
+  // Game continues
   return { isOver: false, winner: null, reason: null };
 }
 

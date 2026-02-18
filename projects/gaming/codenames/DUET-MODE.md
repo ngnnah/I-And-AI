@@ -15,17 +15,36 @@
 
 **Board:** 5×5 grid (25 picture cards)
 
-**Card Distribution:**
-- **15 Green** cards — shared targets (both players must find all 15 together)
-- **3 Assassins** — instant loss if revealed
-- **7 Neutral** — each mistake costs 1 token
+**The Shared Key Card Mechanic:**
 
-**Asymmetric Perspectives:**
-- Each player sees a **different color map** for the same board
-- P1's green cards ≠ P2's green cards
-- Some P1 greens are P2 neutrals (and vice versa)
-- Assassins are different for each player
-- **Key insight:** Players must give clues based on their unique view to help their partner
+Like the physical Duet game's two-sided key card, each player sees a **different perspective** of the same board:
+
+- **P1 sees:** 9 green cards from their side
+- **P2 sees:** 9 green cards from their side  
+- **3 cards are SHARED** — both players see them as green
+- **Total unique greens:** 15 cards (6 P1-only + 3 shared + 6 P2-only)
+
+**Example:**
+```
+P1's view: Cards 1,2,3,4,5,6,★7,★8,★9 are green (9 total)
+P2's view: Cards ★7,★8,★9,10,11,12,13,14,15 are green (9 total)
+Shared: ★7, ★8, ★9 (3 cards both see as green)
+Goal: Find all 15 unique greens together
+```
+
+**Assassins (Different per Player):**
+- **P1 has 3 assassins** at certain positions (instant loss if P1 reveals them)
+- **P2 has 3 DIFFERENT assassins** at other positions (instant loss if P2 reveals them)
+- Players must avoid BOTH sets of assassins
+- What's safe for P1 might be deadly for P2!
+
+**Neutral Cards:**
+- Remaining cards are neutral for that player
+- Revealing neutral = 1 mistake (max 9 allowed)
+- One player's neutral might be another's green or assassin
+
+**Key Insight:**
+Players must give clues based on their unique perspective while considering their partner sees different dangers and targets.
 
 ### Turn Flow
 
@@ -87,15 +106,15 @@
 
 ### Key Implementation Differences from Competitive Mode
 
-| Feature | Competitive Mode | Duet Mode |
-|---------|-----------------|-----------|
-| **Teams** | Red vs Blue | Cooperative (no teams) |
-| **Revealed tracking** | `gameState.revealedCards[]` | `board.revealed[]` |
-| **Turn tracking** | `currentTurn: 'red' \| 'blue'` | `currentPlayer: 1 \| 2` |
-| **Color maps** | Single `colorMap[]` | Dual `colorMapP1[]` + `colorMapP2[]` |
-| **Win condition** | Team finds all agents | Find all 15 greens |
-| **Loss conditions** | Opponent wins | Assassin, 9 turns, or 9 mistakes |
-| **Player roles** | Spymaster/Operative | Both give clues and guess |
+| Feature               | Competitive Mode               | Duet Mode                            |
+| --------------------- | ------------------------------ | ------------------------------------ |
+| **Teams**             | Red vs Blue                    | Cooperative (no teams)               |
+| **Revealed tracking** | `gameState.revealedCards[]`    | `board.revealed[]`                   |
+| **Turn tracking**     | `currentTurn: 'red' \| 'blue'` | `currentPlayer: 1 \| 2`              |
+| **Color maps**        | Single `colorMap[]`            | Dual `colorMapP1[]` + `colorMapP2[]` |
+| **Win condition**     | Team finds all agents          | Find all 15 greens                   |
+| **Loss conditions**   | Opponent wins                  | Assassin, 9 turns, or 9 mistakes     |
+| **Player roles**      | Spymaster/Operative            | Both give clues and guess            |
 
 ### Board Generation
 
@@ -103,19 +122,33 @@
 // generateDuetBoard() in game-logic.js
 function generateDuetBoard(gameMode) {
   const config = getModeConfig('duet');
-  const indices = shuffleArray([...Array(config.totalCards).keys()]);
   
-  // Assign 15 greens, 3 assassins, 7 neutrals for P1
-  const colorMapP1 = assignColors(indices, config);
+  // 1. Pick 15 random positions for green cards
+  const greenPositions = selectRandomPositions(15, 25);
+  const greenArray = Array.from(greenPositions);
   
-  // Generate P2 map with overlap rules
-  const colorMapP2 = generateP2Map(colorMapP1, config);
+  // 2. Create shared key card mechanic:
+  //    P1 sees first 9 greens (indices 0-8)
+  //    P2 sees last 9 greens (indices 6-14)
+  //    Overlap: indices 6,7,8 (3 shared greens)
+  const p1Green = greenArray.slice(0, 9);   // 9 greens for P1
+  const p2Green = greenArray.slice(6, 15);  // 9 greens for P2 (3 overlap)
+  
+  // 3. Assign different assassins to each player
+  const remaining = nonGreenPositions(greenPositions, 25);
+  shuffleArray(remaining);
+  const p1Assassins = remaining.slice(0, 3);  // P1's 3 assassins
+  const p2Assassins = remaining.slice(3, 6);  // P2's 3 assassins (different!)
+  
+  // 4. Build color maps (rest are neutral)
+  const colorMapP1 = buildColorMap(p1Green, p1Assassins, 25);
+  const colorMapP2 = buildColorMap(p2Green, p2Assassins, 25);
   
   return {
-    colorMapP1,
-    colorMapP2,
+    colorMapP1,      // P1's perspective
+    colorMapP2,      // P2's perspective  
     cardIds: selectRandomCards(config),
-    revealed: new Array(config.totalCards).fill(false)
+    revealed: new Array(25).fill(false)  // Shared revelation state
   };
 }
 ```

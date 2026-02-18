@@ -55,9 +55,9 @@ export const GAME_MODES = {
     description: '5×5, 25 cards · 2-player co-op',
     gridCols: 5,
     totalCards: 25,
-    greenCount: 15,
-    assassinCount: 3,
-    neutralCount: 7,
+    greenCount: 15,        // Total unique greens (P1: 9, P2: 9, overlap: 3)
+    assassinCount: 3,      // Per player (P1 has 3, P2 has 3 different ones)
+    neutralCount: 7,       // Remaining cards per player perspective
     maxTurns: 9,
     maxMistakes: 9,
     cardType: 'image',

@@ -9,7 +9,8 @@ import {
   generateDuetBoard, 
   checkGuessResult, 
   checkWinCondition, 
-  checkDuetWinCondition
+  checkDuetWinCondition,
+  checkDuetWinConditionSimple
 } from './game-logic.js';
 import { getModeConfig } from '../data/game-modes.js';
 import { getLocalPlayer, getCurrentGame } from './game-state.js';
@@ -105,9 +106,15 @@ export async function handleStartGame(gameId) {
  * @param {string} team
  */
 export async function handleGiveClue(gameId, word, number, spymasterName, team) {
+  // Get game data to check mode
+  const gameSnapshot = await get(ref(database, `games/${gameId}`));
+  if (!gameSnapshot.exists()) return;
+  const game = gameSnapshot.val();
+  const gameMode = game.gameMode || 'words';
+  const config = getModeConfig(gameMode);
+  
   // Get current clue log length to determine next index
-  const snapshot = await get(ref(database, `games/${gameId}/clueLog`));
-  const clueLog = snapshot.exists() ? snapshot.val() : [];
+  const clueLog = game.clueLog || [];
   const nextIndex = Array.isArray(clueLog) ? clueLog.length : Object.keys(clueLog || {}).length;
 
   const guessesRemaining = number === 0 ? 99 : number + 1; // 99 as "unlimited"
@@ -124,6 +131,12 @@ export async function handleGiveClue(gameId, word, number, spymasterName, team) 
       guesses: []
     }
   };
+  
+  // In Duet mode: switch player after giving clue (clue giver → guesser)
+  if (config.isDuet) {
+    const currentPlayer = game.gameState?.currentPlayer || 1;
+    updates['gameState/currentPlayer'] = currentPlayer === 1 ? 2 : 1;
+  }
 
   await update(ref(database, `games/${gameId}`), updates);
 }
@@ -198,7 +211,7 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     }
     
     // Check win/loss conditions
-    const winCheck = checkDuetWinCondition(greenRevealed, mistakesMade, turnsUsed, config);
+    const winCheck = checkDuetWinConditionSimple(greenRevealed, mistakesMade, turnsUsed, config);
     if (winCheck.isOver) {
       updates['gameState/winner'] = winCheck.winner;
       updates['gameState/winReason'] = winCheck.reason;
