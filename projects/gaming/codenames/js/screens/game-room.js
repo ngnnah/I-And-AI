@@ -896,6 +896,10 @@ function renderClueArea(data) {
   if (gs.phase === 'clue') {
     isGuessingActive = false;
   }
+  // Duet mode: auto-activate guessing (no "Start Guessing" tap required)
+  if (gs.phase === 'guess' && isDuet) {
+    isGuessingActive = true;
+  }
 
   if (gs.phase === 'clue') {
     if (isDuet) {
@@ -944,17 +948,10 @@ function renderClueArea(data) {
       console.log(`🎯 Guess Phase UI: isMyTurn=${isMyTurn}, isGuessingActive=${isGuessingActive}`);
       
       if (isMyTurn) {
-        if (!isGuessingActive) {
-          // Show Start Guessing button
-          btnStartGuessing.classList.remove('hidden');
-          statusMessage.textContent = 'Click "Start Guessing" when ready to make your guesses.';
-          console.log('  → Showing Start Guessing button');
-        } else {
-          // Show End Guessing button (guessing is active)
-          btnEndGuessing.classList.remove('hidden');
-          statusMessage.textContent = 'Click a card to guess, or end guessing.';
-          console.log('  → Showing End Guessing button, cards are clickable');
-        }
+        // Duet: guessing auto-activates, show End Guessing directly
+        btnEndGuessing.classList.remove('hidden');
+        statusMessage.textContent = 'Tap a card to guess, or end guessing.';
+        console.log('  → Showing End Guessing button, cards are clickable');
       } else {
         const currentPlayerLabel = currentPlayer === 1 ? 'P1' : 'P2';
         statusMessage.textContent = `${currentPlayerLabel} is guessing...`;
