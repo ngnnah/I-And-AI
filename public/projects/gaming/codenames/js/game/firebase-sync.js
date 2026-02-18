@@ -375,7 +375,7 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
       }
     } else {
       // Wrong guess (neutral/mistake) — end turn, check if we need to switch players
-      console.log(`  ❌ ${color}! Turn ends. Phase → clue`);
+      console.log(`  ❌ ${clueGiverColor}! Turn ends. Phase → clue`);
       updates['gameState/phase'] = 'clue';
       updates['gameState/currentClue'] = null;
       updates['gameState/guessesRemaining'] = 0;
