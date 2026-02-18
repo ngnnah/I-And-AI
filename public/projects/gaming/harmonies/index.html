@@ -41,6 +41,23 @@
       border-color: #ff5252;
       box-shadow: 0 0 0 3px rgba(255, 82, 82, 0.3);
     }
+
+    /* Valid animal placement highlight */
+    .hex.valid-animal-placement {
+      border-color: #10b981;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.4), 0 0 20px rgba(16, 185, 129, 0.3);
+      animation: pulse-glow 1.5s ease-in-out infinite;
+      z-index: 5;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { 
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.4), 0 0 20px rgba(16, 185, 129, 0.3);
+      }
+      50% { 
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.6), 0 0 30px rgba(16, 185, 129, 0.5);
+      }
+    }
     
     /* Terrain colors */
     .hex.empty {
@@ -1754,11 +1771,12 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       // Toggle selection
       if (gameState.selectedAnimalCard === cardId) {
         gameState.selectedAnimalCard = null;
+        clearValidPlacementHighlights();
         showMessage('Animal card deselected.', 'info');
       } else {
         gameState.selectedAnimalCard = cardId;
         const description = card.description || card.pattern.map(p => p.terrain).join('+');
-        showMessage(`🐾 ${card.name} selected! Pattern: ${description}`, 'success');
+        showMessage(`🐾 ${card.name} selected! Click any green highlighted hex to place`, 'success');
       }
       
       updateSelectedAnimalCardUI();
@@ -1766,14 +1784,53 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
     
     // Update UI to show selected animal card
     function updateSelectedAnimalCardUI() {
+      // Clear previous highlights
+      clearValidPlacementHighlights();
+
       document.querySelectorAll('.player-card').forEach(cardEl => {
         const cardId = cardEl.dataset.cardId;
         if (cardId === gameState.selectedAnimalCard) {
           cardEl.classList.add('ring-4', 'ring-blue-500');
           cardEl.classList.remove('border-slate-300');
+          
+          // Highlight valid placement hexes for this card
+          const card = gameState.playerAnimalCards.find(c => c.id === cardId);
+          if (card) {
+            highlightValidPlacements(card);
+          }
         } else {
           cardEl.classList.remove('ring-4', 'ring-blue-500');
           cardEl.classList.add('border-slate-300');
+        }
+      });
+    }
+
+    // Clear valid placement highlights from all hexes
+    function clearValidPlacementHighlights() {
+      document.querySelectorAll('.hex.valid-animal-placement').forEach(hexEl => {
+        hexEl.classList.remove('valid-animal-placement');
+      });
+    }
+
+    // Highlight all hexes where the selected animal card can be placed
+    function highlightValidPlacements(card) {
+      if (!card || !card.pattern) return;
+
+      // Check if card is already full
+      const placementCount = gameState.placedAnimals.filter(p => p.cardId === card.id).length;
+      if (placementCount >= card.maxPlacements) {
+        return; // Card is complete, no valid placements
+      }
+
+      // Iterate through all hexes on the board
+      Object.entries(gameState.hexBoard).forEach(([hexKey, hexData]) => {
+        // Check if this hex can accept the animal pattern
+        if (checkAnimalPattern(hexKey, card.pattern)) {
+          // Find the hex element and add highlight class
+          const hexEl = document.querySelector(`.hex[data-q="${hexData.q}"][data-r="${hexData.r}"]`);
+          if (hexEl) {
+            hexEl.classList.add('valid-animal-placement');
+          }
         }
       });
     }
@@ -2075,6 +2132,11 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       const newCount = placementCount + 1;
       const points = card.scoring[newCount - 1];
       showMessage(`🐾 ${card.name} placed! Score: ${points} pts (${newCount}/${card.maxPlacements})`, 'success');
+      
+      // Clear highlights and deselect card after placement
+      clearValidPlacementHighlights();
+      gameState.selectedAnimalCard = null;
+      updateSelectedAnimalCardUI();
     }
     
     // Check if hex and neighbors match animal card pattern
