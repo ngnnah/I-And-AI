@@ -747,7 +747,28 @@ function renderBoard(data, container, isFinished) {
 }
 
 async function onCardClick(cardIndex) {
-  console.log(`\ud83d\udc46 CARD CLICKED: ${cardIndex}`);\n  const game = getCurrentGame();\n  if (!game.id || !game.data) {\n    console.log('  \u274c No game data');\n    return;\n  }\n  \n  const data = game.data;\n  const gs = data.gameState;\n  const myRole = getLocalPlayerData()?.role;\n  const myTeam = getLocalPlayerTeam();\n  const gameMode = data.gameMode || 'words';\n  const config = getModeConfig(gameMode);\n  const isDuet = config.isDuet;\n\n  console.log(`  isDuet=${isDuet}, phase=${gs.phase}, myRole=${myRole}`);\n\n  // Check if player can guess\n  if (gs.phase !== 'guess') {\n    console.log('  \u274c Wrong phase');\n    return;\n  }
+  console.log(`👆 CARD CLICKED: ${cardIndex}`);
+  const game = getCurrentGame();
+  if (!game.id || !game.data) {
+    console.log('  ❌ No game data');
+    return;
+  }
+  
+  const data = game.data;
+  const gs = data.gameState;
+  const myRole = getLocalPlayerData()?.role;
+  const myTeam = getLocalPlayerTeam();
+  const gameMode = data.gameMode || 'words';
+  const config = getModeConfig(gameMode);
+  const isDuet = config.isDuet;
+
+  console.log(`  isDuet=${isDuet}, phase=${gs.phase}, myRole=${myRole}`);
+
+  // Check if player can guess
+  if (gs.phase !== 'guess') {
+    console.log('  ❌ Wrong phase');
+    return;
+  }
   
   // In Duet mode, both players can guess; in competitive mode, only current team's operative can guess
   if (isDuet) {
