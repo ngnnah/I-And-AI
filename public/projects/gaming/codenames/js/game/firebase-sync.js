@@ -250,28 +250,29 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     // Duet uses board.revealed instead of gameState.revealedCards
     if (game.board.revealed[cardIndex]) return; // Already revealed
     
-    // In Duet, check BOTH color maps to determine the result
+    // In Duet: currentPlayer is the CLUE GIVER, the other player is guessing
     const currentPlayer = gs.currentPlayer || 1;
     const colorP1 = game.board.colorMapP1[cardIndex];
     const colorP2 = game.board.colorMapP2[cardIndex];
     
-    // A card is "green" if it's green on EITHER map
-    // A card is "assassin" if it's assassin on the CURRENT GUESSER's map
-    // Otherwise it's neutral/mistake
-    const isGreenP1 = colorP1 === 'green';
-    const isGreenP2 = colorP2 === 'green';
-    const isGreen = isGreenP1 || isGreenP2;
+    // For WIN CONDITION: count greens from EITHER map (15 total unique greens)
+    const isGreenOnEitherMap = colorP1 === 'green' || colorP2 === 'green';
     
-    // Check assassin from guesser's perspective
-    const guesserMap = currentPlayer === 1 ? game.board.colorMapP1 : game.board.colorMapP2;
-    const color = guesserMap[cardIndex];
+    // For TURN PROGRESSION: only correct if green on CLUE GIVER's map
+    // (P1 gives clue → P2 guessing P1's greens, P2 gives clue → P1 guessing P2's greens)
+    const clueGiverMap = currentPlayer === 1 ? game.board.colorMapP1 : game.board.colorMapP2;
+    const clueGiverColor = clueGiverMap[cardIndex];
+    
+    // Assassin check: lose if assassin on EITHER map
+    const isAssassin = colorP1 === 'assassin' || colorP2 === 'assassin';
     
     console.log(`🎲 CARD REVEAL: Card ${cardIndex}`);
-    console.log(`  Current player (guesser): P${currentPlayer}`);
+    console.log(`  Clue giver: P${currentPlayer}, Guesser: P${currentPlayer === 1 ? 2 : 1}`);
     console.log(`  Color on P1 map: ${colorP1}`);
     console.log(`  Color on P2 map: ${colorP2}`);
-    console.log(`  Is green on either? ${isGreen}`);
-    console.log(`  Guesser sees: ${color}`);
+    console.log(`  Clue giver sees: ${clueGiverColor}`);
+    console.log(`  Green on either map? ${isGreenOnEitherMap} (counts toward 15)`);
+    console.log(`  Correct guess (clue giver's green)? ${clueGiverColor === 'green'}`);
     
     const newRevealed = [...game.board.revealed];
     newRevealed[cardIndex] = true;
@@ -281,11 +282,11 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     let mistakesMade = gs.mistakesMade || 0;
     let turnsUsed = gs.turnsUsed || 0;
     
-    // A card counts as green if it's green on EITHER map (this counts unique greens correctly)
-    if (isGreen) {
+    // Count toward 15 if green on EITHER map
+    if (isGreenOnEitherMap) {
       greenRevealed++;
-    } else if (color === 'neutral') {
-      // Only neutral cards (not green on either map, not assassin) count as mistakes
+    } else if (!isAssassin) {
+      // Only truly neutral cards (not green, not assassin) count as mistakes
       mistakesMade++;
     }
     
@@ -303,13 +304,13 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
       [`clueLog/${logIndex}/guesses/${guessIndex}`]: {
         cardIndex,
         word: game.board.words ? game.board.words[cardIndex] : `Card ${cardIndex + 1}`,
-        result: isGreen ? 'correct' : color === 'assassin' ? 'assassin' : 'wrong',
-        color: color
+        result: clueGiverColor === 'green' ? 'correct' : isAssassin ? 'assassin' : 'wrong',
+        color: clueGiverColor
       }
     };
     
-    // Check for assassin (immediate loss)
-    if (color === 'assassin') {
+    // Check for assassin (immediate loss if assassin on EITHER map)
+    if (isAssassin) {
       updates['gameState/winner'] = 'loss';
       updates['gameState/winReason'] = 'assassin';
       updates['gameState/currentClue'] = null;
@@ -332,7 +333,8 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     }
     
     // Handle turn progression in Duet mode
-    if (isGreen) {
+    // Only continue guessing if the card is green on the CLUE GIVER's map
+    if (clueGiverColor === 'green') {
       const remaining = gs.guessesRemaining - 1;
       if (remaining <= 0) {
         // Out of guesses — end turn, check if we need to switch players
