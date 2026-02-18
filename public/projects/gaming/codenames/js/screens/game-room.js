@@ -675,31 +675,54 @@ function renderBoard(data, container, isFinished) {
         card.classList.add('just-revealed');
       }
       if ((isSpy || isDuet) && !isFinished) card.classList.add('revealed-dimmed');
-    } else if (isSpy || isDuet) {
-      // Show spy view for spymasters OR everyone in Duet mode
-      card.classList.add(`spy-${colorMap[i]}`);
     } else {
-      card.classList.add('unrevealed');
-      if (canClick) {
-        // Check if it's player's turn for Duet mode
-        let canClickCard = false;
-        if (isDuet) {
-          const currentPlayer = gs.currentPlayer || 1;
-          const players = data.players || {};
-          const activePlayerIds = Object.keys(players).filter(id => players[id].isActive).sort();
-          const myId = getLocalPlayer().id;
-          const playerIndex = activePlayerIds.indexOf(myId);
-          const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
-          // Duet mode: must click Start Guessing first
-          canClickCard = isMyTurn && isGuessingActive;
-        } else {
-          // Competitive mode: only clickable after Start Guessing
-          canClickCard = isGuessingActive;
-        }
+      // Determine if we should show the key card (spy view)
+      let showKeyCard = false;
+      
+      if (isDuet) {
+        // In Duet: Only show key when it's NOT your turn to guess
+        // (either you're giving a clue, or watching the other player guess)
+        const currentPlayer = gs.currentPlayer || 1;
+        const players = data.players || {};
+        const activePlayerIds = Object.keys(players).filter(id => players[id].isActive).sort();
+        const myId = getLocalPlayer().id;
+        const playerIndex = activePlayerIds.indexOf(myId);
+        const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
         
-        if (canClickCard) {
-          card.classList.add('clickable');
-          card.addEventListener('click', () => onCardClick(i));
+        // Show key card when:
+        // - Phase is 'clue' (both players see keys when giving/preparing clues)
+        // - Phase is 'guess' but it's NOT my turn (watching other player)
+        showKeyCard = (gs.phase === 'clue') || (gs.phase === 'guess' && !isMyTurn);
+      } else {
+        // Competitive mode: only spymasters see the key
+        showKeyCard = isSpy;
+      }
+      
+      if (showKeyCard) {
+        card.classList.add(`spy-${colorMap[i]}`);
+      } else {
+        card.classList.add('unrevealed');
+        if (canClick) {
+          // Check if it's player's turn for Duet mode
+          let canClickCard = false;
+          if (isDuet) {
+            const currentPlayer = gs.currentPlayer || 1;
+            const players = data.players || {};
+            const activePlayerIds = Object.keys(players).filter(id => players[id].isActive).sort();
+            const myId = getLocalPlayer().id;
+            const playerIndex = activePlayerIds.indexOf(myId);
+            const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
+            // Duet mode: must click Start Guessing first
+            canClickCard = isMyTurn && isGuessingActive;
+          } else {
+            // Competitive mode: only clickable after Start Guessing
+            canClickCard = isGuessingActive;
+          }
+          
+          if (canClickCard) {
+            card.classList.add('clickable');
+            card.addEventListener('click', () => onCardClick(i));
+          }
         }
       }
     }
@@ -819,19 +842,24 @@ function renderClueArea(data) {
       const playerIndex = activePlayerIds.indexOf(myId);
       const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
       
+      console.log(`🎯 Guess Phase UI: isMyTurn=${isMyTurn}, isGuessingActive=${isGuessingActive}`);
+      
       if (isMyTurn) {
         if (!isGuessingActive) {
           // Show Start Guessing button
           btnStartGuessing.classList.remove('hidden');
           statusMessage.textContent = 'Click "Start Guessing" when ready to make your guesses.';
+          console.log('  → Showing Start Guessing button');
         } else {
           // Show End Guessing button (guessing is active)
           btnEndGuessing.classList.remove('hidden');
           statusMessage.textContent = 'Click a card to guess, or end guessing.';
+          console.log('  → Showing End Guessing button, cards are clickable');
         }
       } else {
         const currentPlayerLabel = currentPlayer === 1 ? 'P1' : 'P2';
         statusMessage.textContent = `${currentPlayerLabel} is guessing...`;
+        console.log(`  → Watching ${currentPlayerLabel} guess`);
       }
     } else {
       // Competitive mode
