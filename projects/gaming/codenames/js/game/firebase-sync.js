@@ -1,3 +1,4 @@
+import { calculateGuessesAllowed } from './game-logic.js';
 /**
  * Firebase sync handlers for Codenames
  * All functions that write to Firebase live here
