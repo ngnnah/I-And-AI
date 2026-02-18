@@ -185,11 +185,11 @@ export async function handleGiveClue(gameId, word, number, spymasterName, team) 
     }
   };
   
-  // In Duet mode: switch player after giving clue UNLESS current player has finished their 9/9
+  // In Duet mode: switch player after giving clue UNLESS one player has finished their 9/9
   if (config.isDuet) {
     const currentPlayer = game.gameState?.currentPlayer || 1;
     
-    // Check if current player has completed their 9 cards
+    // Check if each player has completed their 9 cards
     const revealed = game.board?.revealed || [];
     const colorMapP1 = game.board?.colorMapP1 || [];
     const colorMapP2 = game.board?.colorMapP2 || [];
@@ -206,18 +206,19 @@ export async function handleGiveClue(gameId, word, number, spymasterName, team) 
     const p1Finished = p1GreenCount >= 9;
     const p2Finished = p2GreenCount >= 9;
     
-    // Only switch if the other player hasn't finished yet
-    // If P1 finished and it's P2's turn, keep P2 going
-    // If P2 finished and it's P1's turn, keep P1 going
-    let newPlayer = currentPlayer;
-    if (currentPlayer === 1 && !p2Finished) {
-      newPlayer = 2; // Switch to P2 if they haven't finished
-    } else if (currentPlayer === 2 && !p1Finished) {
-      newPlayer = 1; // Switch to P1 if they haven't finished
+    // If one player finished all their greens, the OTHER player takes over completely
+    // (The finished player's clues would be useless - all their greens are revealed)
+    let newPlayer;
+    if (p1Finished && !p2Finished) {
+      newPlayer = 2; // P1 done, P2 takes over all remaining turns
+    } else if (p2Finished && !p1Finished) {
+      newPlayer = 1; // P2 done, P1 takes over all remaining turns
+    } else {
+      // Both still playing or both finished - alternate normally
+      newPlayer = currentPlayer === 1 ? 2 : 1;
     }
-    // Otherwise stay on current player (the one who hasn't finished)
     
-    console.log(`🎯 DUET CLUE: P1=${p1GreenCount}/9, P2=${p2GreenCount}/9`);
+    console.log(`🎯 DUET CLUE: P1=${p1GreenCount}/9${p1Finished?' ✓':''}, P2=${p2GreenCount}/9${p2Finished?' ✓':''}`);
     console.log(`  Current player: P${currentPlayer}, switching to: P${newPlayer}`);
     updates['gameState/currentPlayer'] = newPlayer;
   }
