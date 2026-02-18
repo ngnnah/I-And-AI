@@ -241,16 +241,20 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     newRevealed[cardIndex] = true;
     
     // Update Duet-specific counters
-    let greenRevealed = gs.greenRevealed || 0;
     let mistakesMade = gs.mistakesMade || 0;
     let turnsUsed = gs.turnsUsed || 0;
-    
-    // Only clue giver's perspective determines green/mistake (official rules)
-    if (clueGiverColor === 'green') {
-      greenRevealed++;
-    } else if (clueGiverColor === 'neutral') {
+
+    // Clue giver's perspective determines turn outcome (official rules)
+    if (clueGiverColor === 'neutral') {
       mistakesMade++;
     }
+
+    // Win condition: count unique greens revealed across BOTH maps
+    // (a card green on either map counts toward the 15-green goal,
+    //  regardless of whose clue turn it was when revealed)
+    const greenRevealed = newRevealed.filter((r, idx) =>
+      r && (game.board.colorMapP1[idx] === 'green' || game.board.colorMapP2[idx] === 'green')
+    ).length;
     
     // Append guess to current clue log entry
     const clueLog = game.clueLog || [];
