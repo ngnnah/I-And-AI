@@ -135,10 +135,14 @@ export async function handleGiveClue(gameId, word, number, spymasterName, team) 
   // In Duet mode: switch player after giving clue (clue giver → guesser)
   if (config.isDuet) {
     const currentPlayer = game.gameState?.currentPlayer || 1;
-    updates['gameState/currentPlayer'] = currentPlayer === 1 ? 2 : 1;
+    const newPlayer = currentPlayer === 1 ? 2 : 1;
+    console.log(`🎯 DUET CLUE: Switching currentPlayer ${currentPlayer} → ${newPlayer}`);
+    updates['gameState/currentPlayer'] = newPlayer;
   }
 
+  console.log('📤 handleGiveClue updates:', updates);
   await update(ref(database, `games/${gameId}`), updates);
+  console.log('✅ handleGiveClue complete');
 }
 
 /**

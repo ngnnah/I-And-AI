@@ -439,6 +439,8 @@ function renderPlayingPhase(data) {
     const playerIndex = activePlayerIds.indexOf(myId);
     const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
     
+    console.log(`🎮 UI Update: myId=${myId}, playerIndex=${playerIndex}, currentPlayer=${currentPlayer}, phase=${gs.phase}, isMyTurn=${isMyTurn}`);
+    
     const currentPlayerLabel = currentPlayer === 1 ? 'P1' : 'P2';
     
     if (gs.phase === 'clue') {
