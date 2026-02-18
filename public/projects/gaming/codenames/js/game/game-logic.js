@@ -308,7 +308,8 @@ export function getTeamPlayers(players, team) {
  * @returns {number} Max guesses allowed (clueNumber + 1, or Infinity for 0)
  */
 export function calculateGuessesAllowed(clueNumber) {
-  if (clueNumber === 0) return Infinity;
+  // Always return 99 for unlimited clues (never Infinity)
+  if (clueNumber === 0 || clueNumber === Infinity) return 99;
   return clueNumber + 1;
 }
 
