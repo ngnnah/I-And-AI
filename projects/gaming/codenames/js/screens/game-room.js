@@ -1128,7 +1128,7 @@ function renderFinishedPhase(data) {
   if (!gs) return;
 
   const winner = gs.winner;
-  const config = getModeConfig(data.mode);
+  const config = getModeConfig(data.gameMode);
   const isDuet = config.isDuet;
 
   // Duet mode: win/loss, Competitive mode: red/blue
@@ -1170,11 +1170,10 @@ function renderFinishedPhase(data) {
   // Clue log
   renderClueLog(data.clueLog, finishedClueLog);
 
-  // Rematch button: only show for competitive mode (doesn't make sense in Duet)
-  // New game button: show for all modes
   const isHost = isLocalPlayerHost();
   btnRematch.classList.toggle('hidden', !isHost || isDuet);
   btnNewGame.classList.toggle('hidden', !isHost);
+  btnNewGame.textContent = isDuet ? 'New Game (same players)' : 'New Game (reset teams)';
   
   // Trigger victory confetti
   launchConfetti(winner);
