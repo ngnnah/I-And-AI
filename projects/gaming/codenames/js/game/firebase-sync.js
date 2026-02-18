@@ -185,11 +185,40 @@ export async function handleGiveClue(gameId, word, number, spymasterName, team) 
     }
   };
   
-  // In Duet mode: switch player after giving clue (clue giver → guesser)
+  // In Duet mode: switch player after giving clue UNLESS current player has finished their 9/9
   if (config.isDuet) {
     const currentPlayer = game.gameState?.currentPlayer || 1;
-    const newPlayer = currentPlayer === 1 ? 2 : 1;
-    console.log(`🎯 DUET CLUE: Switching currentPlayer ${currentPlayer} → ${newPlayer}`);
+    
+    // Check if current player has completed their 9 cards
+    const revealed = game.board?.revealed || [];
+    const colorMapP1 = game.board?.colorMapP1 || [];
+    const colorMapP2 = game.board?.colorMapP2 || [];
+    
+    let p1GreenCount = 0;
+    let p2GreenCount = 0;
+    revealed.forEach((isRevealed, idx) => {
+      if (isRevealed) {
+        if (colorMapP1[idx] === 'green') p1GreenCount++;
+        if (colorMapP2[idx] === 'green') p2GreenCount++;
+      }
+    });
+    
+    const p1Finished = p1GreenCount >= 9;
+    const p2Finished = p2GreenCount >= 9;
+    
+    // Only switch if the other player hasn't finished yet
+    // If P1 finished and it's P2's turn, keep P2 going
+    // If P2 finished and it's P1's turn, keep P1 going
+    let newPlayer = currentPlayer;
+    if (currentPlayer === 1 && !p2Finished) {
+      newPlayer = 2; // Switch to P2 if they haven't finished
+    } else if (currentPlayer === 2 && !p1Finished) {
+      newPlayer = 1; // Switch to P1 if they haven't finished
+    }
+    // Otherwise stay on current player (the one who hasn't finished)
+    
+    console.log(`🎯 DUET CLUE: P1=${p1GreenCount}/9, P2=${p2GreenCount}/9`);
+    console.log(`  Current player: P${currentPlayer}, switching to: P${newPlayer}`);
     updates['gameState/currentPlayer'] = newPlayer;
   }
 
