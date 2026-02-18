@@ -484,6 +484,8 @@ function renderPlayingPhase(data) {
       }
     });
     
+    console.log(`🎯 Duet Score Update: revealed.length=${revealed.length}, P1=${p1GreenCount}/9, P2=${p2GreenCount}/9, totalGreen=${greenRevealed}/${greenTotal}`);
+    
     // Update labels for Duet mode - show per-player progress
     redScoreParent.innerHTML = `P1: <span id="red-score">${p1GreenCount}</span>/<span id="red-total">9</span>`;
     blueScoreParent.innerHTML = `P2: <span id="blue-score">${p2GreenCount}</span>/<span id="blue-total">9</span>`;
