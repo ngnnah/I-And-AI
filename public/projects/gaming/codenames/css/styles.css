@@ -1,14 +1,14 @@
 /* ===== Variables ===== */
 :root {
-  /* More vibrant red for better visibility */
-  --red: #f44336;
+  /* Darker, stronger red for better visibility */
+  --red: #c62828;
   --red-light: #ffcdd2;
-  --red-bg: rgba(244, 67, 54, 0.12);
+  --red-bg: rgba(198, 40, 40, 0.12);
   
-  /* More vibrant blue for better visibility */
-  --blue: #2196f3;
+  /* Darker, stronger blue for better visibility */
+  --blue: #1565c0;
   --blue-light: #bbdefb;
-  --blue-bg: rgba(33, 150, 243, 0.12);
+  --blue-bg: rgba(21, 101, 192, 0.12);
   
   --neutral: #8d6e63;
   --neutral-light: #d7ccc8;
@@ -689,6 +689,62 @@ input[type="text"]:focus, select:focus {
   pointer-events: none;
 }
 
+/* Colored card numbers for revealed cards */
+.card.revealed-red .card-number {
+  color: #fff;
+  background: rgba(198, 40, 40, 0.9);
+  font-weight: 900;
+}
+.card.revealed-blue .card-number {
+  color: #fff;
+  background: rgba(21, 101, 192, 0.9);
+  font-weight: 900;
+}
+.card.revealed-green .card-number {
+  color: #fff;
+  background: rgba(27, 94, 32, 0.9);
+  font-weight: 900;
+}
+.card.revealed-neutral .card-number {
+  color: #fff;
+  background: rgba(141, 110, 99, 0.9);
+  font-weight: 900;
+}
+.card.revealed-assassin .card-number {
+  color: var(--assassin-border);
+  background: rgba(13, 13, 13, 0.95);
+  font-weight: 900;
+  border: 1px solid var(--assassin-border);
+}
+
+/* Spymaster view card numbers */
+.card.spy-red .card-number {
+  color: var(--red-light);
+  background: rgba(198, 40, 40, 0.6);
+  font-weight: 800;
+}
+.card.spy-blue .card-number {
+  color: var(--blue-light);
+  background: rgba(21, 101, 192, 0.6);
+  font-weight: 800;
+}
+.card.spy-green .card-number {
+  color: var(--green-light);
+  background: rgba(27, 94, 32, 0.6);
+  font-weight: 800;
+}
+.card.spy-neutral .card-number {
+  color: #d7ccc8;
+  background: rgba(161, 136, 127, 0.5);
+  font-weight: 800;
+}
+.card.spy-assassin .card-number {
+  color: var(--assassin-border);
+  background: rgba(13, 13, 13, 0.8);
+  font-weight: 800;
+  border: 1px solid var(--assassin-border);
+}
+
 /* Card text container for word cards */
 .card-text {
   width: 100%;
@@ -717,16 +773,16 @@ input[type="text"]:focus, select:focus {
   border-color: var(--text-muted);
 }
 
-/* Revealed cards - no animation by default */
+/* Revealed cards - thicker borders for red/blue */
 .card.revealed-red { 
   background: var(--red); 
   color: #fff; 
-  border-color: var(--red);
+  border: 4px solid var(--red);
 }
 .card.revealed-blue { 
   background: var(--blue); 
   color: #fff; 
-  border-color: var(--blue);
+  border: 4px solid var(--blue);
 }
 .card.revealed-green { 
   background: var(--green); 
@@ -741,7 +797,7 @@ input[type="text"]:focus, select:focus {
 .card.revealed-assassin { 
   background: var(--assassin); 
   color: var(--assassin-text); 
-  border-color: var(--assassin-border);
+  border: 4px solid var(--assassin-border);
   box-shadow: 0 0 20px var(--assassin-glow), inset 0 0 15px rgba(255, 109, 0, 0.3);
   animation: deathPulse 2s ease-in-out infinite;
 }
@@ -776,8 +832,8 @@ input[type="text"]:focus, select:focus {
 }
 
 /* Spymaster overlay — strong colored backgrounds on unrevealed cards */
-.card.spy-red { border-color: var(--red); background: rgba(244, 67, 54, 0.35); color: #ffcdd2; }
-.card.spy-blue { border-color: var(--blue); background: rgba(33, 150, 243, 0.35); color: #bbdefb; }
+.card.spy-red { border-color: var(--red); background: rgba(198, 40, 40, 0.35); color: #ffcdd2; }
+.card.spy-blue { border-color: var(--blue); background: rgba(21, 101, 192, 0.35); color: #bbdefb; }
 .card.spy-green { border-color: var(--green); background: rgba(27, 94, 32, 0.4); color: #c8e6c9; }
 .card.spy-neutral { border-color: #a1887f; background: rgba(161, 136, 127, 0.25); color: #d7ccc8; }
 .card.spy-assassin {
@@ -822,8 +878,8 @@ input[type="text"]:focus, select:focus {
   display: block;
 }
 /* Spymaster view: thick colored borders + colored mat background (no overlay) */
-.card-picture.spy-red { border: 4px solid var(--red); background: rgba(244, 67, 54, 0.25); }
-.card-picture.spy-blue { border: 4px solid var(--blue); background: rgba(33, 150, 243, 0.25); }
+.card-picture.spy-red { border: 4px solid var(--red); background: rgba(198, 40, 40, 0.25); }
+.card-picture.spy-blue { border: 4px solid var(--blue); background: rgba(21, 101, 192, 0.25); }
 .card-picture.spy-green { border: 4px solid var(--green); background: rgba(27, 94, 32, 0.3); }
 .card-picture.spy-neutral { border: 4px solid #a1887f; background: rgba(161, 136, 127, 0.2); }
 .card-picture.spy-assassin { border: 4px solid var(--assassin-border); background: rgba(13, 13, 13, 0.9); box-shadow: 0 0 15px var(--assassin-glow), inset 0 0 10px rgba(255, 109, 0, 0.2); }
