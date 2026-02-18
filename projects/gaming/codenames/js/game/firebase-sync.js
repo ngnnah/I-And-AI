@@ -303,7 +303,7 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
       [`clueLog/${logIndex}/guesses/${guessIndex}`]: {
         cardIndex,
         word: game.board.words ? game.board.words[cardIndex] : `Card ${cardIndex + 1}`,
-        result: color === 'green' ? 'correct' : color === 'assassin' ? 'assassin' : 'wrong',
+        result: isGreen ? 'correct' : color === 'assassin' ? 'assassin' : 'wrong',
         color: color
       }
     };
@@ -332,7 +332,7 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     }
     
     // Handle turn progression in Duet mode
-    if (color === 'green') {
+    if (isGreen) {
       const remaining = gs.guessesRemaining - 1;
       if (remaining <= 0) {
         // Out of guesses — end turn, guesser becomes next clue giver (no player switch)
@@ -346,7 +346,7 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
         updates['gameState/guessesRemaining'] = remaining;
       }
     } else {
-      // Wrong guess — end turn, guesser becomes next clue giver (no player switch)
+      // Wrong guess (neutral/mistake) — end turn, guesser becomes next clue giver
       console.log(`  ❌ ${color}! Turn ends. Phase → clue, currentPlayer stays ${currentPlayer}`);
       updates['gameState/phase'] = 'clue';
       updates['gameState/currentClue'] = null;
