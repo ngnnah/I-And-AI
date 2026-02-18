@@ -171,8 +171,8 @@ export async function handleGiveClue(gameId, word, number, spymasterName, team) 
   const nextIndex = Array.isArray(clueLog) ? clueLog.length : Object.keys(clueLog || {}).length;
 
   // Handle unlimited guessing: both 0 and Infinity allow unlimited guesses
-  // But store them differently to display correctly
-  const guessesRemaining = (number === 0 || number === Infinity) ? Infinity : number + 1;
+  // Firebase cannot store Infinity, so use 99 for unlimited
+  const guessesRemaining = (number === 0 || number === Infinity) ? 99 : number + 1;
 
   const updates = {
     'gameState/currentClue': { word: word.toUpperCase(), number, givenBy: spymasterName },
