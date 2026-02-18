@@ -63,6 +63,7 @@ const currentClueWord = document.getElementById('current-clue-word');
 const currentClueNumber = document.getElementById('current-clue-number');
 const guessesRemaining = document.getElementById('guesses-remaining');
 const statusMessage = document.getElementById('status-message');
+const btnStartGuessing = document.getElementById('btn-start-guessing');
 const btnEndGuessing = document.getElementById('btn-end-guessing');
 const clueLogEl = document.getElementById('clue-log');
 
@@ -83,6 +84,9 @@ const guessConfirmText = document.getElementById('guess-confirm-text');
 const btnConfirmGuess = document.getElementById('btn-confirm-guess');
 const btnCancelGuess = document.getElementById('btn-cancel-guess');
 let pendingCardIndex = null;
+
+// Start guessing state
+let isGuessingActive = false;
 
 let unsubscribeGame = null;
 let previouslyRevealedCards = []; // Track which cards were revealed in previous render
@@ -623,8 +627,11 @@ function renderBoard(data, container, isFinished) {
     } else {
       card.classList.add('unrevealed');
       if (canClick) {
-        card.classList.add('clickable');
-        card.addEventListener('click', () => onCardClick(i));
+        // Only add clickable class if guessing is active (or in Duet mode where it's always active)
+        if (isDuet || isGuessingActive) {
+          card.classList.add('clickable');
+          card.addEventListener('click', () => onCardClick(i));
+        }
       }
     }
 
@@ -660,8 +667,9 @@ async function onCardClick(cardIndex) {
     if (myRole !== 'operative' || myTeam !== gs.currentTurn) return;
   }
 
-  // Card already revealed
-  if (data.board.revealed[cardIndex]) return;
+  // Card already revealed - check correct array based on mode
+  const revealedArray = isDuet ? (data.board.revealed || []) : (gs.revealedCards || []);
+  if (revealedArray[cardIndex]) return;
 
   // Show confirmation dialog
   const cardText = data.board.words?.[cardIndex] || `Card ${cardIndex + 1}`;
@@ -683,9 +691,15 @@ function renderClueArea(data) {
   // Hide all sections first
   clueInputSection.classList.add('hidden');
   currentClueDisplay.classList.add('hidden');
+  btnStartGuessing.classList.add('hidden');
   btnEndGuessing.classList.add('hidden');
   clueError.classList.add('hidden');
   statusMessage.textContent = '';
+
+  // Reset guessing state when entering clue phase
+  if (gs.phase === 'clue') {
+    isGuessingActive = false;
+  }
 
   if (gs.phase === 'clue') {
     if (isDuet) {
@@ -710,7 +724,7 @@ function renderClueArea(data) {
     }
 
     if (isDuet) {
-      // Duet: any player can guess and end guessing
+      // Duet: any player can guess and end guessing (no Start Guessing button needed)
       btnEndGuessing.classList.remove('hidden');
       statusMessage.textContent = 'Click a card to guess, or end guessing.';
     } else {
@@ -718,8 +732,15 @@ function renderClueArea(data) {
       const myData = getLocalPlayerData();
       const isOperative = myData?.role === 'operative';
       if (isMyTurn && isOperative) {
-        btnEndGuessing.classList.remove('hidden');
-        statusMessage.textContent = 'Click a card to guess, or end guessing.';
+        if (!isGuessingActive) {
+          // Show Start Guessing button
+          btnStartGuessing.classList.remove('hidden');
+          statusMessage.textContent = 'Click "Start Guessing" when ready to make your guesses.';
+        } else {
+          // Show End Guessing button (guessing is active)
+          btnEndGuessing.classList.remove('hidden');
+          statusMessage.textContent = 'Click a card to guess, or end guessing.';
+        }
       } else if (isMyTurn && isSpy) {
         statusMessage.textContent = 'Your operatives are guessing...';
       } else {
@@ -789,6 +810,17 @@ async function handleGiveClueClick() {
     btnGiveClue.disabled = false;
   }
 }
+
+// Start guessing (competitive mode only - prevents accidental taps)
+btnStartGuessing.addEventListener('click', () => {
+  isGuessingActive = true;
+  // Re-render to update UI
+  const game = getCurrentGame();
+  if (game.data) {
+    renderClueArea(game.data);
+    renderBoard(game.data, boardEl, false);
+  }
+});
 
 // End guessing
 btnEndGuessing.addEventListener('click', async () => {
