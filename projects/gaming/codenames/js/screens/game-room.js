@@ -202,16 +202,33 @@ function renderSetupPhase(data) {
 
   if (isDuet) {
     // Duet mode: Simple player list, no team selection
-    // Hide team selection UI
-    document.querySelector('.team-selection')?.classList.add('hidden');
+    // Hide competitive UI, show Duet UI
+    document.getElementById('teams-container')?.classList.add('hidden');
+    document.getElementById('setup-instruction-competitive')?.classList.add('hidden');
+    document.getElementById('duet-players-container')?.classList.remove('hidden');
+    document.getElementById('setup-instruction-duet')?.classList.remove('hidden');
     
-    // Count active players
-    const activePlayers = Object.values(players).filter(p => p.isActive);
+    // List all active players
+    const activePlayers = Object.entries(players).filter(([, p]) => p.isActive);
     const playerCount = activePlayers.length;
+    
+    const duetPlayersList = document.getElementById('duet-players-list');
+    if (duetPlayersList) {
+      duetPlayersList.innerHTML = activePlayers.map(([id, p], index) => {
+        const isYou = id === myId;
+        const perspective = index === 0 ? 'P1' : index === 1 ? 'P2' : `P${index + 1}`;
+        return `
+          <div class="duet-player-item ${isYou ? 'is-me' : ''}">
+            <span class="player-perspective">${perspective}</span>
+            <span class="player-name">${p.name}${isYou ? ' (you)' : ''}</span>
+          </div>
+        `;
+      }).join('');
+    }
     
     // Show setup message
     setupErrors.classList.remove('hidden');
-    setupErrors.textContent = `Duet Mode - ${playerCount} player(s) joined. Need at least 2 to start.`;
+    setupErrors.textContent = `${playerCount} player(s) joined. Need at least 2 to start.`;
     
     // Start button (host only)
     const isHost = isLocalPlayerHost();
@@ -222,7 +239,10 @@ function renderSetupPhase(data) {
     btnCancelGameSetup.classList.toggle('hidden', !isHost);
   } else {
     // Competitive mode: Show team selection
-    document.querySelector('.team-selection')?.classList.remove('hidden');
+    document.getElementById('teams-container')?.classList.remove('hidden');
+    document.getElementById('setup-instruction-competitive')?.classList.remove('hidden');
+    document.getElementById('duet-players-container')?.classList.add('hidden');
+    document.getElementById('setup-instruction-duet')?.classList.add('hidden');
     
     // Render team slots
     renderSpymasterSlot(redSpymasterSlot, players, 'red', myId);
@@ -406,15 +426,33 @@ function renderPlayingPhase(data) {
   let promptText = '';
   
   if (isDuet) {
-    // Duet mode prompts
+    // Duet mode prompts - show whose turn it is
     const clueDisplay = gs.currentClue ? `${gs.currentClue.word} ${gs.currentClue.number}` : '';
     const greenRevealed = gs.greenRevealed || 0;
     const greenTotal = config.greenCount || 15;
+    const currentPlayer = gs.currentPlayer || 1;
+    
+    // Determine if it's the local player's turn
+    const players = data.players || {};
+    const activePlayerIds = Object.keys(players).filter(id => players[id].isActive).sort();
+    const myId = getLocalPlayer().id;
+    const playerIndex = activePlayerIds.indexOf(myId);
+    const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
+    
+    const currentPlayerLabel = currentPlayer === 1 ? 'P1' : 'P2';
     
     if (gs.phase === 'clue') {
-      promptText = `🤝 Give a clue (${greenRevealed}/${greenTotal} green cards found)`;
+      if (isMyTurn) {
+        promptText = `🤝 YOUR TURN (${currentPlayerLabel}): Give a clue (${greenRevealed}/${greenTotal} green found)`;
+      } else {
+        promptText = `🤝 ${currentPlayerLabel} is giving a clue... (${greenRevealed}/${greenTotal} green found)`;
+      }
     } else if (gs.phase === 'guess') {
-      promptText = `🤝 Guessing "${clueDisplay}" (${gs.guessesRemaining} left)`;
+      if (isMyTurn) {
+        promptText = `🤝 YOUR TURN (${currentPlayerLabel}): Guessing "${clueDisplay}" (${gs.guessesRemaining} left)`;
+      } else {
+        promptText = `🤝 ${currentPlayerLabel} is guessing "${clueDisplay}"`;
+      }
     }
   } else {
     // Competitive mode prompts
@@ -627,8 +665,23 @@ function renderBoard(data, container, isFinished) {
     } else {
       card.classList.add('unrevealed');
       if (canClick) {
-        // Only add clickable class if guessing is active (or in Duet mode where it's always active)
-        if (isDuet || isGuessingActive) {
+        // Check if it's player's turn for Duet mode
+        let canClickCard = false;
+        if (isDuet) {
+          const currentPlayer = gs.currentPlayer || 1;
+          const players = data.players || {};
+          const activePlayerIds = Object.keys(players).filter(id => players[id].isActive).sort();
+          const myId = getLocalPlayer().id;
+          const playerIndex = activePlayerIds.indexOf(myId);
+          const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
+          // Duet mode: must click Start Guessing first
+          canClickCard = isMyTurn && isGuessingActive;
+        } else {
+          // Competitive mode: only clickable after Start Guessing
+          canClickCard = isGuessingActive;
+        }
+        
+        if (canClickCard) {
           card.classList.add('clickable');
           card.addEventListener('click', () => onCardClick(i));
         }
@@ -661,7 +714,15 @@ async function onCardClick(cardIndex) {
   
   // In Duet mode, both players can guess; in competitive mode, only current team's operative can guess
   if (isDuet) {
-    // Duet: anyone can guess during guess phase (no role restriction for simplicity)
+    // Duet: only current player can guess
+    const currentPlayer = gs.currentPlayer || 1;
+    const players = data.players || {};
+    const activePlayerIds = Object.keys(players).filter(id => players[id].isActive).sort();
+    const myId = getLocalPlayer().id;
+    const playerIndex = activePlayerIds.indexOf(myId);
+    const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
+    
+    if (!isMyTurn) return;
   } else {
     // Competitive: only operatives on current turn can guess
     if (myRole !== 'operative' || myTeam !== gs.currentTurn) return;
@@ -701,8 +762,20 @@ function renderClueArea(data) {
 
   if (gs.phase === 'clue') {
     if (isDuet) {
-      // Duet: any player can give a clue
-      clueInputSection.classList.remove('hidden');
+      // Duet: only current player can give a clue
+      const currentPlayer = gs.currentPlayer || 1;
+      const players = data.players || {};
+      const activePlayerIds = Object.keys(players).filter(id => players[id].isActive).sort();
+      const myId = getLocalPlayer().id;
+      const playerIndex = activePlayerIds.indexOf(myId);
+      const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
+      
+      if (isMyTurn) {
+        clueInputSection.classList.remove('hidden');
+      } else {
+        const currentPlayerLabel = currentPlayer === 1 ? 'P1' : 'P2';
+        statusMessage.textContent = `Waiting for ${currentPlayerLabel} to give a clue...`;
+      }
     } else if (isSpy && isMyTurn) {
       // Competitive: Active spymaster shows clue input
       clueInputSection.classList.remove('hidden');
@@ -722,9 +795,28 @@ function renderClueArea(data) {
     }
 
     if (isDuet) {
-      // Duet: any player can guess and end guessing (no Start Guessing button needed)
-      btnEndGuessing.classList.remove('hidden');
-      statusMessage.textContent = 'Click a card to guess, or end guessing.';
+      // Duet: only current player can guess and end guessing
+      const currentPlayer = gs.currentPlayer || 1;
+      const players = data.players || {};
+      const activePlayerIds = Object.keys(players).filter(id => players[id].isActive).sort();
+      const myId = getLocalPlayer().id;
+      const playerIndex = activePlayerIds.indexOf(myId);
+      const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
+      
+      if (isMyTurn) {
+        if (!isGuessingActive) {
+          // Show Start Guessing button
+          btnStartGuessing.classList.remove('hidden');
+          statusMessage.textContent = 'Click "Start Guessing" when ready to make your guesses.';
+        } else {
+          // Show End Guessing button (guessing is active)
+          btnEndGuessing.classList.remove('hidden');
+          statusMessage.textContent = 'Click a card to guess, or end guessing.';
+        }
+      } else {
+        const currentPlayerLabel = currentPlayer === 1 ? 'P1' : 'P2';
+        statusMessage.textContent = `${currentPlayerLabel} is guessing...`;
+      }
     } else {
       // Competitive mode
       const myData = getLocalPlayerData();

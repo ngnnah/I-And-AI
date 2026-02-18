@@ -103,8 +103,11 @@
 
       <!-- Phase: Setup -->
       <div id="phase-setup" class="phase">
-        <p class="phase-instruction">Pick your team and role, then the host starts the game.</p>
-        <div class="teams-container">
+        <p id="setup-instruction-competitive" class="phase-instruction">Pick your team and role, then the host starts the game.</p>
+        <p id="setup-instruction-duet" class="phase-instruction hidden">Duet Mode - Players join and wait for host to start.</p>
+        
+        <!-- Competitive Team Selection -->
+        <div id="teams-container" class="teams-container">
           <!-- Red Team -->
           <div class="team-panel team-red">
             <h3 class="team-title red">Red Team</h3>
@@ -136,6 +139,12 @@
             </div>
           </div>
         </div>
+        
+        <!-- Duet Mode Player List -->
+        <div id="duet-players-container" class="duet-players-container hidden">
+          <div class="duet-players-list" id="duet-players-list"></div>
+        </div>
+        
         <div id="setup-errors" class="error-message hidden"></div>
         <div class="setup-actions">
           <button id="btn-start-game" class="btn btn-primary btn-wide hidden">Start Game</button>
