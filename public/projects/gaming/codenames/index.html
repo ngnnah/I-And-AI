@@ -49,6 +49,11 @@
           <span class="mode-label">✂️ DIY</span>
           <span class="mode-desc">5×4 · custom images</span>
         </label>
+        <label class="mode-option">
+          <input type="radio" name="game-mode" value="duet">
+          <span class="mode-label">🤝 Duet</span>
+          <span class="mode-desc">5×5 · 2-player co-op</span>
+        </label>
       </div>
       <div class="btn-center">
         <button id="btn-create-game" class="btn btn-primary btn-wide">Create New Game</button>
@@ -247,6 +252,18 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Guess Confirmation Dialog -->
+  <div id="guess-confirm-overlay" class="guess-confirm-overlay hidden">
+    <div class="guess-confirm-dialog">
+      <h3>Confirm Guess</h3>
+      <p id="guess-confirm-text">Are you sure you want to reveal this card?</p>
+      <div class="guess-confirm-actions">
+        <button id="btn-confirm-guess" class="btn btn-primary">Yes, Reveal</button>
+        <button id="btn-cancel-guess" class="btn btn-secondary">Cancel</button>
+      </div>
     </div>
   </div>
 

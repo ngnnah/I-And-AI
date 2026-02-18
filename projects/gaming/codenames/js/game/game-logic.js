@@ -56,6 +56,104 @@ export function getRandomCardIds(totalImages, count) {
 }
 
 /**
+ * Generate a Duet mode board (cooperative 2-player)
+ * Each player sees a different color map with overlapping green agents
+ * @param {string} gameMode - Should be 'duet'
+ * @returns {{ cardIds: number[], colorMapP1: string[], colorMapP2: string[], revealed: boolean[] }}
+ */
+export function generateDuetBoard(gameMode = 'duet') {
+  const config = getModeConfig(gameMode);
+  
+  // Generate 15 unique positions for green agents
+  const totalCards = config.totalCards;
+  const greenPositions = new Set();
+  while (greenPositions.size < config.greenCount) {
+    greenPositions.add(Math.floor(Math.random() * totalCards));
+  }
+  const greenArray = Array.from(greenPositions);
+  
+  // Split green agents: Player 1 sees 9, Player 2 sees 9, with 3 overlapping
+  // Overlap positions: indices 6, 7, 8 from greenArray
+  const p1Green = greenArray.slice(0, 9); // indices 0-8
+  const p2Green = greenArray.slice(6, 15); // indices 6-14 (overlap at 6,7,8)
+  
+  // Place 3 assassins in remaining positions
+  const remainingPositions = [];
+  for (let i = 0; i < totalCards; i++) {
+    if (!greenPositions.has(i)) remainingPositions.push(i);
+  }
+  shuffleArray(remainingPositions);
+  const assassinPositions = remainingPositions.slice(0, config.assassinCount);
+  
+  // Build color maps
+  const colorMapP1 = Array(totalCards).fill('neutral');
+  const colorMapP2 = Array(totalCards).fill('neutral');
+  
+  p1Green.forEach(idx => { colorMapP1[idx] = 'green'; });
+  p2Green.forEach(idx => { colorMapP2[idx] = 'green'; });
+  assassinPositions.forEach(idx => { 
+    colorMapP1[idx] = 'assassin'; 
+    colorMapP2[idx] = 'assassin'; 
+  });
+  
+  return {
+    cardIds: getRandomCardIds(config.totalImages, totalCards),
+    colorMapP1,
+    colorMapP2,
+    revealed: Array(totalCards).fill(false),
+  };
+}
+
+/**
+ * Check if Duet mode game is over
+ * @param {boolean[]} revealedCards - Which cards are revealed
+ * @param {string[]} colorMapP1 - Player 1's color map
+ * @param {string[]} colorMapP2 - Player 2's color map
+ * @param {number} turnCount - Number of turns taken
+ * @param {number} mistakeCount - Number of mistakes made
+ * @param {number} maxTurns - Maximum turns allowed
+ * @param {number} maxMistakes - Maximum mistakes allowed
+ * @returns {{ isOver: boolean, winner: string|null, reason: string|null }}
+ */
+export function checkDuetWinCondition(revealedCards, colorMapP1, colorMapP2, turnCount, mistakeCount, maxTurns, maxMistakes) {
+  // Check for assassin hit
+  for (let i = 0; i < revealedCards.length; i++) {
+    if (revealedCards[i] && (colorMapP1[i] === 'assassin' || colorMapP2[i] === 'assassin')) {
+      return { isOver: true, winner: null, reason: 'assassin' };
+    }
+  }
+  
+  // Check for turn limit
+  if (turnCount >= maxTurns) {
+    return { isOver: true, winner: null, reason: 'turns_exceeded' };
+  }
+  
+  // Check for mistake limit
+  if (mistakeCount >= maxMistakes) {
+    return { isOver: true, winner: null, reason: 'mistakes_exceeded' };
+  }
+  
+  // Check if all green agents found (from both perspectives)
+  const allGreenPositions = new Set();
+  for (let i = 0; i < colorMapP1.length; i++) {
+    if (colorMapP1[i] === 'green' || colorMapP2[i] === 'green') {
+      allGreenPositions.add(i);
+    }
+  }
+  
+  let greenRevealed = 0;
+  for (const pos of allGreenPositions) {
+    if (revealedCards[pos]) greenRevealed++;
+  }
+  
+  if (greenRevealed >= allGreenPositions.size) {
+    return { isOver: true, winner: 'coop', reason: 'all_revealed' };
+  }
+  
+  return { isOver: false, winner: null, reason: null };
+}
+
+/**
  * Validate a player name
  * @param {string} name
  * @returns {{ valid: boolean, error: string|null }}

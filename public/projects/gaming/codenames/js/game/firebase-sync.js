@@ -4,7 +4,13 @@
  */
 
 import { database, ref, get, update, set, remove } from './firebase-config.js';
-import { generateBoard, checkGuessResult, checkWinCondition, generateInspirationWords } from './game-logic.js';
+import { 
+  generateBoard, 
+  generateDuetBoard, 
+  checkGuessResult, 
+  checkWinCondition, 
+  checkDuetWinCondition
+} from './game-logic.js';
 import { getModeConfig } from '../data/game-modes.js';
 import { getLocalPlayer, getCurrentGame } from './game-state.js';
 
@@ -32,18 +38,39 @@ export async function handleStartGame(gameId) {
   const gameMode = gameData?.gameMode || 'words';
   const config = getModeConfig(gameMode);
 
+  // Duet mode has different setup
+  if (config.isDuet) {
+    const board = generateDuetBoard(gameMode);
+
+    const updates = {
+      status: 'playing',
+      startedAt: Date.now(),
+      'board/colorMapP1': board.colorMapP1,
+      'board/colorMapP2': board.colorMapP2,
+      'board/cardIds': board.cardIds,
+      'board/revealed': board.revealed,
+      'gameState/currentPlayer': 1,
+      'gameState/currentClue': null,
+      'gameState/turnCount': 0,
+      'gameState/mistakeCount': 0,
+      'gameState/greenRevealed': 0,
+      'gameState/greenTotal': config.greenCount,
+      'gameState/winner': null,
+      'gameState/winReason': null
+    };
+
+    await update(ref(database, `games/${gameId}`), updates);
+    return;
+  }
+
+  // Standard competitive mode
   const startingTeam = Math.random() < 0.5 ? 'red' : 'blue';
   const board = generateBoard(startingTeam, gameMode);
-
-  // Generate inspiration words for spymasters
-  // For word mode: exclude board words; for picture modes: use any random words
-  const inspirationWords = generateInspirationWords(board.words || [], [], gameMode);
 
   const updates = {
     status: 'playing',
     startingTeam,
     startedAt: Date.now(),
-    inspirationWords,
     'board/colorMap': board.colorMap,
     'gameState/currentTurn': startingTeam,
     'gameState/phase': 'clue',
@@ -282,15 +309,11 @@ export async function handleRematch(gameId) {
   const startingTeam = Math.random() < 0.5 ? 'red' : 'blue';
   const board = generateBoard(startingTeam, gameMode);
 
-  // Generate new inspiration words (works for all modes)
-  const inspirationWords = generateInspirationWords(board.words || [], [], gameMode);
-
   const updates = {
     status: 'playing',
     startingTeam,
     startedAt: Date.now(),
     finishedAt: null,
-    inspirationWords,
     'board/colorMap': board.colorMap,
     'gameState/currentTurn': startingTeam,
     'gameState/phase': 'clue',

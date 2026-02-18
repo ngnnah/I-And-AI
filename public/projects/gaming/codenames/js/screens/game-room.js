@@ -77,6 +77,13 @@ const btnRematch = document.getElementById('btn-rematch');
 const btnNewGame = document.getElementById('btn-new-game');
 const btnBackLobby = document.getElementById('btn-back-lobby');
 
+// Guess confirmation dialog
+const guessConfirmOverlay = document.getElementById('guess-confirm-overlay');
+const guessConfirmText = document.getElementById('guess-confirm-text');
+const btnConfirmGuess = document.getElementById('btn-confirm-guess');
+const btnCancelGuess = document.getElementById('btn-cancel-guess');
+let pendingCardIndex = null;
+
 let unsubscribeGame = null;
 let previouslyRevealedCards = []; // Track which cards were revealed in previous render
 let selectedClueNumber = 1; // Track the currently selected clue number
@@ -141,6 +148,13 @@ function handleGameUpdate(data) {
   phaseSetup.classList.toggle('hidden', data.status !== 'setup');
   phasePlaying.classList.toggle('hidden', data.status !== 'playing');
   phaseFinished.classList.toggle('hidden', data.status !== 'finished');
+
+  // Add turn-based class to active phase
+  if (data.status === 'playing' && data.gameState?.currentTurn) {
+    phasePlaying.className = `phase ${data.gameState.currentTurn}-turn`;
+  } else if (data.status === 'playing') {
+    phasePlaying.className = 'phase';
+  }
 
   // Mid-game picker: show if game is playing but local player has no team
   const needsTeamPick = data.status === 'playing' && (!myData || !myData.team);
@@ -314,7 +328,26 @@ function renderPlayingPhase(data) {
   // Action prompt with team colors
   const myTeam = getLocalPlayerTeam();
   const myRole = getLocalPlayerData()?.role;
-  const promptText = getActionPrompt(gs, myTeam, myRole, data.players);
+  
+  // Simplified action prompt
+  const teamLabel = turnTeam === 'red' ? 'Red' : 'Blue';
+  const clueDisplay = gs.currentClue ? `${gs.currentClue.word} ${gs.currentClue.number}` : '';
+  
+  let promptText = '';
+  if (gs.phase === 'clue') {
+    if (myRole === 'spymaster' && myTeam === turnTeam) {
+      promptText = '🎯 YOUR TURN: Give a clue';
+    } else {
+      promptText = `${teamLabel} is giving a clue...`;
+    }
+  } else if (gs.phase === 'guess') {
+    if (myRole === 'operative' && myTeam === turnTeam) {
+      promptText = `🎯 ${teamLabel} is guessing "${clueDisplay}" (${gs.guessesRemaining} left)`;
+    } else {
+      promptText = `${teamLabel} is guessing "${clueDisplay}"`;
+    }
+  }
+  
   actionPrompt.textContent = promptText;
   
   // Set color classes
@@ -362,43 +395,28 @@ function renderPlayingPhase(data) {
 
 function renderPlayerRoster(data) {
   const players = data.players || {};
-  const gs = data.gameState;
   const localId = getLocalPlayer().id;
-  const activeTurn = gs.currentTurn;
-  const activePhase = gs.phase;
 
-  // Collect all active players
-  const allPlayers = Object.entries(players)
-    .filter(([, p]) => p.isActive && p.team && p.role)
-    .sort((a, b) => {
-      // Sort: Red spymaster, Red ops, Blue spymaster, Blue ops
-      const teamOrder = { red: 0, blue: 1 };
-      const roleOrder = { spymaster: 0, operative: 1 };
-      if (a[1].team !== b[1].team) return teamOrder[a[1].team] - teamOrder[b[1].team];
-      return roleOrder[a[1].role] - roleOrder[b[1].role];
-    });
+  const redPlayers = [];
+  const bluePlayers = [];
 
-  const badgesHtml = allPlayers.map(([id, p]) => {
+  Object.entries(players).forEach(([id, p]) => {
+    if (!p.isActive || !p.team || !p.role) return;
+    
     const isYou = id === localId;
-    const isActivePlayer = p.team === activeTurn && (
-      (activePhase === 'clue' && p.role === 'spymaster') ||
-      (activePhase === 'guess' && p.role === 'operative')
-    );
-    
-    const classes = ['player-badge', p.team];
-    if (isActivePlayer) classes.push('active');
-    
     const roleIcon = p.role === 'spymaster' ? '🎯' : '🔍';
-    const roleLabel = p.role === 'spymaster' ? 'SPY' : 'OP';
-    const name = isYou ? `${p.name} 👤` : p.name;
-    const teamLabel = p.team.charAt(0).toUpperCase() + p.team.slice(1);
+    const name = isYou ? `${p.name} (you)` : p.name;
+    const badge = `<span class="player-badge ${p.team}"><span class="role-icon">${roleIcon}</span>${name}</span>`;
     
-    return `<span class="${classes.join(' ')}" title="${p.name} - ${teamLabel} ${roleLabel}">
-      ${name}<span class="role-icon">${roleIcon}</span>
-    </span>`;
-  }).join('');
+    if (p.team === 'red') redPlayers.push(badge);
+    else if (p.team === 'blue') bluePlayers.push(badge);
+  });
 
-  playerRoster.innerHTML = badgesHtml || '<span style="color: var(--text-muted);">No players</span>';
+  playerRoster.innerHTML = `
+    <div class="roster-red-team">${redPlayers.join(' ') || '<span class="empty-message" style="color: var(--text-muted); font-size: 0.8rem;">No red players</span>'}</div>
+    <div class="roster-divider"></div>
+    <div class="roster-blue-team">${bluePlayers.join(' ') || '<span class="empty-message" style="color: var(--text-muted); font-size: 0.8rem;">No blue players</span>'}</div>
+  `;
 }
 
 function renderBoard(data, container, isFinished) {
@@ -477,11 +495,25 @@ function renderBoard(data, container, isFinished) {
 async function onCardClick(cardIndex) {
   const game = getCurrentGame();
   if (!game.id || !game.data) return;
-  const gs = game.data.gameState;
-  if (gs.revealedCards[cardIndex]) return;
+  
+  const data = game.data;
+  const gs = data.gameState;
+  const myRole = getLocalPlayerData()?.role;
+  const myTeam = getLocalPlayerTeam();
 
-  const myName = getLocalPlayer().name;
-  await handleCardReveal(game.id, cardIndex, myName);
+  // Only operatives can guess during their turn
+  if (gs.phase !== 'guess' || myRole !== 'operative' || myTeam !== gs.currentTurn) {
+    return;
+  }
+
+  // Card already revealed
+  if (data.board.revealed[cardIndex]) return;
+
+  // Show confirmation dialog
+  const cardText = data.board.words?.[cardIndex] || `Card ${cardIndex + 1}`;
+  guessConfirmText.textContent = `Reveal "${cardText}"?`;
+  pendingCardIndex = cardIndex;
+  guessConfirmOverlay.classList.remove('hidden');
 }
 
 function renderClueArea(data) {
@@ -632,9 +664,9 @@ function renderLogGuesses(guesses) {
     if (!g) return '';
     if (g.passed) return '<span class="log-passed">passed</span>';
     const cls = g.result === 'correct' ? 'log-correct' : 'log-wrong';
-    const symbol = g.result === 'correct' ? '&check;' : '&cross;';
+    const symbol = g.result === 'correct' ? '✓' : '✗';
     return `<span class="${cls}">${g.word} ${symbol}</span>`;
-  }).join(' &middot; ');
+  }).join(' · ');
 }
 
 // --- Finished Phase ---
@@ -759,4 +791,28 @@ gameCode.addEventListener('click', () => {
     gameCode.textContent = 'Copied!';
     setTimeout(() => { gameCode.textContent = orig; }, 1000);
   });
+});
+
+// Guess confirmation dialog handlers
+btnConfirmGuess.addEventListener('click', async () => {
+  if (pendingCardIndex !== null) {
+    const game = getCurrentGame();
+    const myName = getLocalPlayer().name;
+    await handleCardReveal(game.id, pendingCardIndex, myName);
+    pendingCardIndex = null;
+  }
+  guessConfirmOverlay.classList.add('hidden');
+});
+
+btnCancelGuess.addEventListener('click', () => {
+  pendingCardIndex = null;
+  guessConfirmOverlay.classList.add('hidden');
+});
+
+// Close on overlay click
+guessConfirmOverlay.addEventListener('click', (e) => {
+  if (e.target === guessConfirmOverlay) {
+    pendingCardIndex = null;
+    guessConfirmOverlay.classList.add('hidden');
+  }
 });

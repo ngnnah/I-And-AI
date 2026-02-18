@@ -18,6 +18,7 @@ export const GAME_MODES = {
     imageDir: null,
     totalImages: null,
     cardList: null,
+    isDuet: false,
   },
   pictures: {
     label: 'Pictures',
@@ -32,6 +33,7 @@ export const GAME_MODES = {
     imageDir: 'images/cards/',
     totalImages: 280,
     cardList: null,
+    isDuet: false,
   },
   diy: {
     label: 'DIY',
@@ -46,6 +48,23 @@ export const GAME_MODES = {
     imageDir: 'images/diy/',
     totalImages: DIY_CARDS.length,
     cardList: DIY_CARDS,
+    isDuet: false,
+  },
+  duet: {
+    label: 'Duet',
+    description: '5×5, 25 cards · 2-player co-op',
+    gridCols: 5,
+    totalCards: 25,
+    greenCount: 15,
+    assassinCount: 3,
+    neutralCount: 7,
+    maxTurns: 9,
+    maxMistakes: 9,
+    cardType: 'image',
+    imageDir: 'images/cards/',
+    totalImages: 280,
+    cardList: null,
+    isDuet: true,
   },
 };
 
