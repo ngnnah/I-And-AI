@@ -116,6 +116,18 @@ output/
 *.bak
 
 # ===========================
+# Testing Artifacts
+# ===========================
+# Playwright
+playwright-report/
+test-results/
+.last-run.json
+
+# Jest / Vitest
+coverage/
+*.lcov
+
+# ===========================
 # IDE & Editors
 # ===========================
 .idea/
