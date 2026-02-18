@@ -160,8 +160,18 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
   const gameMode = game.gameMode || 'words';
   const config = getModeConfig(gameMode);
   
+  // Detect Duet mode: either explicit gameMode='duet' OR presence of Duet board structure
+  const hasDuetBoard = game.board?.colorMapP1 && game.board?.colorMapP2;
+  const isDuetMode = config.isDuet || hasDuetBoard;
+  
+  console.log(`🎮 CARD REVEAL - Mode Detection:`);
+  console.log(`  gameMode: ${gameMode}`);
+  console.log(`  config.isDuet: ${config.isDuet}`);
+  console.log(`  hasDuetBoard: ${hasDuetBoard}`);
+  console.log(`  isDuetMode (final): ${isDuetMode}`);
+  
   // Handle Duet mode separately
-  if (config.isDuet) {
+  if (isDuetMode) {
     // Duet uses board.revealed instead of gameState.revealedCards
     if (game.board.revealed[cardIndex]) return; // Already revealed
     
