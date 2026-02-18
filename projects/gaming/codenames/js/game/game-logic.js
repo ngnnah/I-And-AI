@@ -92,6 +92,12 @@ export function generateDuetBoard(gameMode = 'duet') {
   const p1Assassins = remainingPositions.slice(0, config.assassinCount);
   const p2Assassins = remainingPositions.slice(config.assassinCount, config.assassinCount * 2);
   
+  console.log('🎲 Duet Board Generation:');
+  console.log('  P1 assassins:', p1Assassins);
+  console.log('  P2 assassins:', p2Assassins);
+  console.log('  P1 greens:', p1Green);
+  console.log('  P2 greens:', p2Green);
+  
   // Build color maps
   const colorMapP1 = Array(totalCards).fill('neutral');
   const colorMapP2 = Array(totalCards).fill('neutral');

@@ -603,8 +603,17 @@ function renderBoard(data, container, isFinished) {
     const playerIndex = activePlayerIds.indexOf(localId);
     const isP1 = playerIndex === 0;
     
+    console.log(`👤 Player Perspective: localId=${localId}, playerIndex=${playerIndex}, isP1=${isP1}`);
+    
     // Use appropriate color map based on perspective
     colorMap = isP1 ? data.board.colorMapP1 : data.board.colorMapP2;
+    
+    // Debug: Show assassin positions for this player
+    const myAssassins = [];
+    colorMap.forEach((color, idx) => {
+      if (color === 'assassin') myAssassins.push(idx);
+    });
+    console.log(`  My assassins at positions:`, myAssassins);
     
     // Fallback to P1 if no map found
     if (!colorMap) colorMap = data.board.colorMapP1 || [];
