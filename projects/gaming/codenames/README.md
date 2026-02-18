@@ -21,9 +21,13 @@
 
 ## Features
 
-- **Three modes:** 📝 Words (5×5), 📷 Pictures (5×4), ✂️ DIY (5×4)
+- **Four game modes:** 
+  - 📝 **Words** (5×5) — Classic competitive mode
+  - 📷 **Pictures** (5×4) — Image-based competitive
+  - ✂️ **DIY** (5×4) — Custom images competitive
+  - 🤝 **Duet** (5×5) — 2-player cooperative ([see guide](DUET-MODE.md))
 - **Multiplayer:** 2-8 players, 6-char room codes, real-time Firebase sync
-- **Teams & Roles:** Red vs Blue, Spymaster/Operative assignments
+- **Competitive & Cooperative:** Red vs Blue teams OR work together in Duet mode
 - **Game History:** Completed games tracked with player rosters and results
 - **Mobile-first:** Touch-friendly, responsive design
 
@@ -40,6 +44,8 @@ npm test                     # Run tests
 
 ## How to Play
 
+### Competitive Mode (Words / Pictures / DIY)
+
 1. **Setup:** Enter name → Pick mode → Create/join room → Choose team & role
 2. **Spymaster's turn:** Give one-word clue + number (e.g., "ANIMAL 3")
 3. **Operatives' turn:** Guess up to N+1 cards
@@ -47,6 +53,12 @@ npm test                     # Run tests
    - ❌ Wrong/Neutral → Turn ends
    - ☠️ Assassin → Instant loss
 4. **Win:** First team to reveal all their agents wins
+
+### Duet Mode (Cooperative) 🤝
+
+2-player cooperative variant where both players work together to find 15 green agents before running out of 9 turns or making 9 mistakes. Each player sees different color maps for the same board.
+
+**[→ Full Duet Mode Guide](DUET-MODE.md)**
 
 ---
 
