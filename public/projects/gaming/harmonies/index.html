@@ -1825,7 +1825,8 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       // Iterate through all hexes on the board
       Object.entries(gameState.hexBoard).forEach(([hexKey, hexData]) => {
         // Check if this hex can accept the animal pattern
-        if (checkAnimalPattern(hexKey, card.pattern)) {
+        const result = checkAnimalPattern(hexKey, card.pattern);
+        if (result.valid) {
           // Find the hex element and add highlight class
           const hexEl = document.querySelector(`.hex[data-q="${hexData.q}"][data-r="${hexData.r}"]`);
           if (hexEl) {
