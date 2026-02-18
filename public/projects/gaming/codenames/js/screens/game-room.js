@@ -828,11 +828,21 @@ function renderClueArea(data) {
       const playerIndex = activePlayerIds.indexOf(myId);
       const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
       
+      console.log(`🎯 CLUE PHASE UI:`);
+      console.log(`  My ID: ${myId}`);
+      console.log(`  Active players: ${JSON.stringify(activePlayerIds)}`);
+      console.log(`  My playerIndex: ${playerIndex} (0=P1, 1=P2)`);
+      console.log(`  currentPlayer from Firebase: ${currentPlayer}`);
+      console.log(`  isMyTurn: ${isMyTurn}`);
+      console.log(`  Should I see clue form? ${isMyTurn ? 'YES' : 'NO'}`);
+      
       if (isMyTurn) {
         clueInputSection.classList.remove('hidden');
+        console.log(`  → Showing clue input form`);
       } else {
         const currentPlayerLabel = currentPlayer === 1 ? 'P1' : 'P2';
         statusMessage.textContent = `Waiting for ${currentPlayerLabel} to give a clue...`;
+        console.log(`  → Waiting for ${currentPlayerLabel}`);
       }
     } else if (isSpy && isMyTurn) {
       // Competitive: Active spymaster shows clue input

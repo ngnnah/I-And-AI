@@ -171,6 +171,11 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     const currentPlayer = gs.currentPlayer || 1;
     const colorMap = currentPlayer === 1 ? game.board.colorMapP2 : game.board.colorMapP1;
     
+    console.log(`🎲 CARD REVEAL: Card ${cardIndex}`);
+    console.log(`  Current player (guesser): ${currentPlayer}`);
+    console.log(`  Using color map: ${currentPlayer === 1 ? 'P2' : 'P1'} (clue giver's perspective)`);
+    console.log(`  Color from map: ${colorMap[cardIndex]}`);
+    
     const color = colorMap[cardIndex];
     const newRevealed = [...game.board.revealed];
     newRevealed[cardIndex] = true;
@@ -233,15 +238,18 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
       const remaining = gs.guessesRemaining - 1;
       if (remaining <= 0) {
         // Out of guesses — end turn, guesser becomes next clue giver (no player switch)
+        console.log(`  ✅ Green! Out of guesses. Phase → clue, currentPlayer stays ${currentPlayer}`);
         updates['gameState/phase'] = 'clue';
         updates['gameState/currentClue'] = null;
         updates['gameState/guessesRemaining'] = 0;
         updates['gameState/turnsUsed'] = turnsUsed + 1;
       } else {
+        console.log(`  ✅ Green! ${remaining} guesses remaining`);
         updates['gameState/guessesRemaining'] = remaining;
       }
     } else {
       // Wrong guess — end turn, guesser becomes next clue giver (no player switch)
+      console.log(`  ❌ ${color}! Turn ends. Phase → clue, currentPlayer stays ${currentPlayer}`);
       updates['gameState/phase'] = 'clue';
       updates['gameState/currentClue'] = null;
       updates['gameState/guessesRemaining'] = 0;
