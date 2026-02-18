@@ -21,43 +21,70 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
     // Enable console logging for debugging
     p1Page.on('console', msg => console.log(`[P1] ${msg.text()}`));
     p2Page.on('console', msg => console.log(`[P2] ${msg.text()}`));
+    
+    // Debug: Log page errors
+    p1Page.on('pageerror', err => console.error(`[P1 ERROR] ${err.message}`));
+    p2Page.on('pageerror', err => console.error(`[P2 ERROR] ${err.message}`));
+    
+    // Debug: Log navigation
+    p1Page.on('load', () => console.log(`[P1] Page loaded: ${p1Page.url()}`));
+    p2Page.on('load', () => console.log(`[P2] Page loaded: ${p2Page.url()}`));
 
     try {
       // === SETUP PHASE ===
       console.log('\n=== SETUP: Creating Duet game ===');
       
-      // P1: Enter name and continue to lobby
-      await p1Page.goto('/');
-      await p1Page.waitForLoadState('networkidle');
+      // P1: Navigate and wait for page to be ready
+      console.log('[P1] Navigating to homepage...');
+      await p1Page.goto('/', { waitUntil: 'load' });
+      console.log(`[P1] Current URL: ${p1Page.url()}`);
+      
+      // Wait for player name input to be visible
+      console.log('[P1] Waiting for player name input...');
+      await p1Page.waitForSelector('#player-name-input', { state: 'visible', timeout: 10000 });
+      console.log('[P1] Player name input found!');
       
       await p1Page.fill('#player-name-input', 'Player 1');
       await p1Page.click('#btn-continue');
-      await p1Page.waitForSelector('#screen-lobby', { state: 'visible', timeout: 5000 });
+      await p1Page.waitForSelector('#screen-lobby', { state: 'visible', timeout: 10000 });
+      console.log('[P1] Lobby screen visible');
       
       // P1: Select Duet mode and create game
       await p1Page.click('input[name="game-mode"][value="duet"]');
+      console.log('[P1] Duet mode selected');
       await p1Page.click('#btn-create-game');
+      console.log('[P1] Create game clicked');
       
       // Wait for game room
       await p1Page.waitForSelector('#screen-game-room', { state: 'visible', timeout: 10000 });
+      console.log('[P1] Game room visible');
       roomCode = await p1Page.locator('#game-code').textContent();
-      console.log(`Room created: ${roomCode}`);
+      console.log(`✅ Room created: ${roomCode}`);
       
       // P2: Enter name and join the game
-      await p2Page.goto('/');
-      await p2Page.waitForLoadState('networkidle');
+      console.log('\n[P2] Navigating to homepage...');
+      await p2Page.goto('/', { waitUntil: 'load' });
+      console.log(`[P2] Current URL: ${p2Page.url()}`);
+      
+      console.log('[P2] Waiting for player name input...');
+      await p2Page.waitForSelector('#player-name-input', { state: 'visible', timeout: 10000 });
+      console.log('[P2] Player name input found!');
       
       await p2Page.fill('#player-name-input', 'Player 2');
       await p2Page.click('#btn-continue');
-      await p2Page.waitForSelector('#screen-lobby', { state: 'visible', timeout: 5000 });
+      await p2Page.waitForSelector('#screen-lobby', { state: 'visible', timeout: 10000 });
+      console.log('[P2] Lobby screen visible');
       
       await p2Page.fill('#join-code-input', roomCode);
+      console.log(`[P2] Entered room code: ${roomCode}`);
       await p2Page.click('#btn-join-code');
+      console.log('[P2] Join button clicked');
       
       // Wait for P2 to see the game room
       await p2Page.waitForSelector('#screen-game-room', { state: 'visible', timeout: 10000 });
+      console.log('[P2] Game room visible');
       
-      console.log('Both players joined');
+      console.log('\n✅ Both players joined');
       
       // P1 starts the game (host)
       const startButton = p1Page.locator('button:has-text("Start Game")');
@@ -170,28 +197,37 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
 
     // Capture console logs to verify color map usage
     const p2Logs = [];
+    p1Page.on('console', msg => console.log(`[P1] ${msg.text()}`));
     p2Page.on('console', msg => {
       const text = msg.text();
       p2Logs.push(text);
       console.log(`[P2] ${text}`);
     });
+    
+    p1Page.on('pageerror', err => console.error(`[P1 ERROR] ${err.message}`));
+    p2Page.on('pageerror', err => console.error(`[P2 ERROR] ${err.message}`));
 
     try {
       // Setup: Create and join Duet game (similar to above)
       console.log('\n=== SETUP: Creating Duet game for color map test ===');
       
-      await p1Page.goto('/');
+      console.log('[P1] Navigating to homepage...');
+      await p1Page.goto('/', { waitUntil: 'load' });
+      await p1Page.waitForSelector('#player-name-input', { state: 'visible', timeout: 10000 });
       await p1Page.fill('#player-name-input', 'Player 1');
       await p1Page.click('#btn-continue');
-      await p1Page.waitForSelector('#screen-lobby', { state: 'visible' });
+      await p1Page.waitForSelector('#screen-lobby', { state: 'visible', timeout: 10000 });
       
       await p1Page.click('input[name="game-mode"][value="duet"]');
       await p1Page.click('#btn-create-game');
-      await p1Page.waitForSelector('#screen-game-room', { state: 'visible' });
+      await p1Page.waitForSelector('#screen-game-room', { state: 'visible', timeout: 10000 });
       
       roomCode = await p1Page.locator('#game-code').textContent();
+      console.log(`✅ Room created: ${roomCode}`);
       
-      await p2Page.goto('/');
+      console.log('\n[P2] Navigating to homepage...');
+      await p2Page.goto('/', { waitUntil: 'load' });
+      await p2Page.waitForSelector('#player-name-input', { state: 'visible', timeout: 10000 });
       await p2Page.fill('#player-name-input', 'Player 2');
       await p2Page.click('#btn-continue');
       await p2Page.waitForSelector('#screen-lobby', { state: 'visible' });
