@@ -170,28 +170,56 @@ function handleGameUpdate(data) {
 function renderSetupPhase(data) {
   const myId = getLocalPlayer().id;
   const players = data.players || {};
+  const gameMode = data.gameMode || 'words';
+  const config = getModeConfig(gameMode);
+  const isDuet = config.isDuet;
 
-  // Render team slots
-  renderSpymasterSlot(redSpymasterSlot, players, 'red', myId);
-  renderSpymasterSlot(blueSpymasterSlot, players, 'blue', myId);
-  renderOperatives(redOperatives, players, 'red', myId);
-  renderOperatives(blueOperatives, players, 'blue', myId);
-
-  // Start button (host only)
-  const isHost = isLocalPlayerHost();
-  const { canStart, errors } = canStartGame(players);
-
-  btnStartGame.classList.toggle('hidden', !isHost);
-  btnStartGame.disabled = !canStart;
-
-  // Cancel button (host only)
-  btnCancelGameSetup.classList.toggle('hidden', !isHost);
-
-  if (isHost && !canStart && errors.length > 0) {
-    setupErrors.textContent = errors.join('. ');
+  if (isDuet) {
+    // Duet mode: Simple player list, no team selection
+    // Hide team selection UI
+    document.querySelector('.team-selection')?.classList.add('hidden');
+    
+    // Count active players
+    const activePlayers = Object.values(players).filter(p => p.isActive);
+    const playerCount = activePlayers.length;
+    
+    // Show setup message
     setupErrors.classList.remove('hidden');
+    setupErrors.textContent = `Duet Mode - ${playerCount} player(s) joined. Need at least 2 to start.`;
+    
+    // Start button (host only)
+    const isHost = isLocalPlayerHost();
+    const canStart = playerCount >= 2;
+    
+    btnStartGame.classList.toggle('hidden', !isHost);
+    btnStartGame.disabled = !canStart;
+    btnCancelGameSetup.classList.toggle('hidden', !isHost);
   } else {
-    setupErrors.classList.add('hidden');
+    // Competitive mode: Show team selection
+    document.querySelector('.team-selection')?.classList.remove('hidden');
+    
+    // Render team slots
+    renderSpymasterSlot(redSpymasterSlot, players, 'red', myId);
+    renderSpymasterSlot(blueSpymasterSlot, players, 'blue', myId);
+    renderOperatives(redOperatives, players, 'red', myId);
+    renderOperatives(blueOperatives, players, 'blue', myId);
+
+    // Start button (host only)
+    const isHost = isLocalPlayerHost();
+    const { canStart, errors } = canStartGame(players);
+
+    btnStartGame.classList.toggle('hidden', !isHost);
+    btnStartGame.disabled = !canStart;
+
+    // Cancel button (host only)
+    btnCancelGameSetup.classList.toggle('hidden', !isHost);
+
+    if (isHost && !canStart && errors.length > 0) {
+      setupErrors.textContent = errors.join('. ');
+      setupErrors.classList.remove('hidden');
+    } else {
+      setupErrors.classList.add('hidden');
+    }
   }
 }
 
@@ -310,16 +338,36 @@ function renderPlayingPhase(data) {
   const gs = data.gameState;
   if (!gs) return;
 
+  const gameMode = data.gameMode || 'words';
+  const config = getModeConfig(gameMode);
+  const isDuet = config.isDuet;
+
   // Round indicator
   const currentRound = calculateRound(data.clueLog, data.startingTeam);
   roundIndicator.textContent = `Round ${currentRound}`;
 
-  // Scores
-  const turnTeam = gs.currentTurn;
-  redScoreEl.textContent = gs.redRevealed;
-  redTotalEl.textContent = gs.redTotal;
-  blueScoreEl.textContent = gs.blueRevealed;
-  blueTotalEl.textContent = gs.blueTotal;
+  // Scores - different for Duet vs competitive
+  if (isDuet) {
+    // Duet mode: Show turns and mistakes
+    const turnsUsed = gs.turnsUsed || 0;
+    const mistakesMade = gs.mistakesMade || 0;
+    const maxTurns = config.maxTurns || 9;
+    const maxMistakes = config.maxMistakes || 9;
+    
+    redScoreEl.textContent = turnsUsed;
+    redTotalEl.textContent = maxTurns;
+    blueScoreEl.textContent = mistakesMade;
+    blueTotalEl.textContent = maxMistakes;
+    
+    // Update labels (need to add elements for this or reuse existing)
+    // For now, use the existing score elements
+  } else {
+    // Competitive mode: Show team scores
+    redScoreEl.textContent = gs.redRevealed;
+    redTotalEl.textContent = gs.redTotal;
+    blueScoreEl.textContent = gs.blueRevealed;
+    blueTotalEl.textContent = gs.blueTotal;
+  }
 
   // Cancel button (host only)
   const isHost = isLocalPlayerHost();
@@ -329,43 +377,66 @@ function renderPlayingPhase(data) {
   const myTeam = getLocalPlayerTeam();
   const myRole = getLocalPlayerData()?.role;
   
-  // Simplified action prompt
-  const teamLabel = turnTeam === 'red' ? 'Red' : 'Blue';
-  const clueDisplay = gs.currentClue ? `${gs.currentClue.word} ${gs.currentClue.number}` : '';
-  
   let promptText = '';
-  if (gs.phase === 'clue') {
-    if (myRole === 'spymaster' && myTeam === turnTeam) {
-      promptText = '🎯 YOUR TURN: Give a clue';
-    } else {
-      promptText = `${teamLabel} is giving a clue...`;
+  
+  if (isDuet) {
+    // Duet mode prompts
+    const clueDisplay = gs.currentClue ? `${gs.currentClue.word} ${gs.currentClue.number}` : '';
+    const greenRevealed = gs.greenRevealed || 0;
+    const greenTotal = config.greenCount || 15;
+    
+    if (gs.phase === 'clue') {
+      promptText = `🤝 Give a clue (${greenRevealed}/${greenTotal} green cards found)`;
+    } else if (gs.phase === 'guess') {
+      promptText = `🤝 Guessing "${clueDisplay}" (${gs.guessesRemaining} left)`;
     }
-  } else if (gs.phase === 'guess') {
-    if (myRole === 'operative' && myTeam === turnTeam) {
-      promptText = `🎯 ${teamLabel} is guessing "${clueDisplay}" (${gs.guessesRemaining} left)`;
-    } else {
-      promptText = `${teamLabel} is guessing "${clueDisplay}"`;
+  } else {
+    // Competitive mode prompts
+    const turnTeam = gs.currentTurn;
+    const teamLabel = turnTeam === 'red' ? 'Red' : 'Blue';
+    const clueDisplay = gs.currentClue ? `${gs.currentClue.word} ${gs.currentClue.number}` : '';
+    
+    if (gs.phase === 'clue') {
+      if (myRole === 'spymaster' && myTeam === turnTeam) {
+        promptText = '🎯 YOUR TURN: Give a clue';
+      } else {
+        promptText = `${teamLabel} is giving a clue...`;
+      }
+    } else if (gs.phase === 'guess') {
+      if (myRole === 'operative' && myTeam === turnTeam) {
+        promptText = `🎯 ${teamLabel} is guessing "${clueDisplay}" (${gs.guessesRemaining} left)`;
+      } else {
+        promptText = `${teamLabel} is guessing "${clueDisplay}"`;
+      }
     }
   }
   
   actionPrompt.textContent = promptText;
   
   // Set color classes
-  const isMyTurn = gs.currentTurn === myTeam && (
-    (gs.phase === 'clue' && myRole === 'spymaster') ||
-    (gs.phase === 'guess' && myRole === 'operative')
-  );
   actionPrompt.className = 'action-prompt';
-  if (isMyTurn) {
-    actionPrompt.classList.add('my-turn');
+  
+  if (isDuet) {
+    // Duet mode: always show cooperative color
+    actionPrompt.classList.add('my-turn'); // Use my-turn for active state
   } else {
-    actionPrompt.classList.add(`${turnTeam}-turn`);
+    // Competitive mode: highlight based on whose turn it is
+    const turnTeam = gs.currentTurn;
+    const isMyTurn = turnTeam === myTeam && (
+      (gs.phase === 'clue' && myRole === 'spymaster') ||
+      (gs.phase === 'guess' && myRole === 'operative')
+    );
+    if (isMyTurn) {
+      actionPrompt.classList.add('my-turn');
+    } else {
+      actionPrompt.classList.add(`${turnTeam}-turn`);
+    }
   }
 
-  // Inspiration panel (spymasters only)
+  // Inspiration panel (spymasters only for competitive, everyone for Duet)
   const isSpy = isLocalPlayerSpymaster();
-  inspirationPanel.classList.toggle('hidden', !isSpy);
-  if (isSpy) {
+  inspirationPanel.classList.toggle('hidden', !(isSpy || isDuet));
+  if (isSpy || isDuet) {
     // Generate local inspiration words if not already displayed
     if (!inspirationWord1.textContent || inspirationWord1.textContent === '—') {
       const boardWords = data.board?.words || [];
@@ -377,8 +448,8 @@ function renderPlayingPhase(data) {
     }
   }
 
-  // Legend (spymaster only)
-  boardLegend.classList.toggle('hidden', !isSpy);
+  // Legend (spymaster only for competitive, everyone for Duet)
+  boardLegend.classList.toggle('hidden', !(isSpy || isDuet));
 
   // Player roster
   renderPlayerRoster(data);
@@ -396,40 +467,92 @@ function renderPlayingPhase(data) {
 function renderPlayerRoster(data) {
   const players = data.players || {};
   const localId = getLocalPlayer().id;
+  const gameMode = data.gameMode || 'words';
+  const config = getModeConfig(gameMode);
+  const isDuet = config.isDuet;
 
-  const redPlayers = [];
-  const bluePlayers = [];
-
-  Object.entries(players).forEach(([id, p]) => {
-    if (!p.isActive || !p.team || !p.role) return;
+  if (isDuet) {
+    // Duet mode: Show all players in order (P1, P2, spectators)
+    const activePlayerIds = Object.keys(players)
+      .filter(id => players[id].isActive)
+      .sort(); // Sort for consistent P1/P2 assignment
     
-    const isYou = id === localId;
-    const roleIcon = p.role === 'spymaster' ? '🎯' : '🔍';
-    const name = isYou ? `${p.name} (you)` : p.name;
-    const badge = `<span class="player-badge ${p.team}"><span class="role-icon">${roleIcon}</span>${name}</span>`;
-    
-    if (p.team === 'red') redPlayers.push(badge);
-    else if (p.team === 'blue') bluePlayers.push(badge);
-  });
+    const playerBadges = activePlayerIds.map((id, index) => {
+      const p = players[id];
+      const isYou = id === localId;
+      const perspective = index === 0 ? 'P1' : index === 1 ? 'P2' : 'Spectator';
+      const name = isYou ? `${p.name} (you)` : p.name;
+      return `<span class="player-badge duet"><span class="role-icon">${perspective}</span>${name}</span>`;
+    });
 
-  playerRoster.innerHTML = `
-    <div class="roster-red-team">${redPlayers.join(' ') || '<span class="empty-message" style="color: var(--text-muted); font-size: 0.8rem;">No red players</span>'}</div>
-    <div class="roster-divider"></div>
-    <div class="roster-blue-team">${bluePlayers.join(' ') || '<span class="empty-message" style="color: var(--text-muted); font-size: 0.8rem;">No blue players</span>'}</div>
-  `;
+    playerRoster.innerHTML = `
+      <div class="roster-duet">${playerBadges.join(' ') || '<span class="empty-message" style="color: var(--text-muted); font-size: 0.8rem;">No players</span>'}</div>
+    `;
+  } else {
+    // Competitive mode: Show red and blue teams
+    const redPlayers = [];
+    const bluePlayers = [];
+
+    Object.entries(players).forEach(([id, p]) => {
+      if (!p.isActive || !p.team || !p.role) return;
+      
+      const isYou = id === localId;
+      const roleIcon = p.role === 'spymaster' ? '🎯' : '🔍';
+      const name = isYou ? `${p.name} (you)` : p.name;
+      const badge = `<span class="player-badge ${p.team}"><span class="role-icon">${roleIcon}</span>${name}</span>`;
+      
+      if (p.team === 'red') redPlayers.push(badge);
+      else if (p.team === 'blue') bluePlayers.push(badge);
+    });
+
+    playerRoster.innerHTML = `
+      <div class="roster-red-team">${redPlayers.join(' ') || '<span class="empty-message" style="color: var(--text-muted); font-size: 0.8rem;">No red players</span>'}</div>
+      <div class="roster-divider"></div>
+      <div class="roster-blue-team">${bluePlayers.join(' ') || '<span class="empty-message" style="color: var(--text-muted); font-size: 0.8rem;">No blue players</span>'}</div>
+    `;
+  }
 }
 
 function renderBoard(data, container, isFinished) {
   const gs = data.gameState;
-  const colorMap = data.board.colorMap;
-  const revealed = gs.revealedCards;
-  const totalCards = colorMap.length;
   const gameMode = data.gameMode || 'words';
   const config = getModeConfig(gameMode);
+  const isDuet = config.isDuet;
+  
+  // Handle Duet mode's dual color maps
+  let colorMap;
+  let revealed;
+  
+  if (isDuet) {
+    // Use board/revealed for Duet mode
+    revealed = data.board.revealed || [];
+    
+    // Determine player perspective (P1 or P2)
+    const localId = getLocalPlayer().id;
+    const players = data.players || {};
+    const activePlayerIds = Object.keys(players)
+      .filter(id => players[id].isActive)
+      .sort(); // Sort alphabetically for consistent ordering
+    
+    const playerIndex = activePlayerIds.indexOf(localId);
+    const isP1 = playerIndex === 0;
+    
+    // Use appropriate color map based on perspective
+    colorMap = isP1 ? data.board.colorMapP1 : data.board.colorMapP2;
+    
+    // Fallback to P1 if no map found
+    if (!colorMap) colorMap = data.board.colorMapP1 || [];
+  } else {
+    // Standard competitive mode
+    colorMap = data.board.colorMap;
+    revealed = gs.revealedCards;
+  }
+  
+  const totalCards = colorMap.length;
   const isPicture = config.cardType === 'image';
   const isSpy = isLocalPlayerSpymaster();
   const myTeam = getLocalPlayerTeam();
-  const canClick = !isFinished && gs.phase === 'guess' && gs.currentTurn === myTeam && !isSpy;
+  const canClick = !isFinished && gs.phase === 'guess' && (isDuet || gs.currentTurn === myTeam) && !isSpy;
 
   container.innerHTML = '';
   container.className = isFinished
@@ -500,10 +623,19 @@ async function onCardClick(cardIndex) {
   const gs = data.gameState;
   const myRole = getLocalPlayerData()?.role;
   const myTeam = getLocalPlayerTeam();
+  const gameMode = data.gameMode || 'words';
+  const config = getModeConfig(gameMode);
+  const isDuet = config.isDuet;
 
-  // Only operatives can guess during their turn
-  if (gs.phase !== 'guess' || myRole !== 'operative' || myTeam !== gs.currentTurn) {
-    return;
+  // Check if player can guess
+  if (gs.phase !== 'guess') return;
+  
+  // In Duet mode, both players can guess; in competitive mode, only current team's operative can guess
+  if (isDuet) {
+    // Duet: anyone can guess during guess phase (no role restriction for simplicity)
+  } else {
+    // Competitive: only operatives on current turn can guess
+    if (myRole !== 'operative' || myTeam !== gs.currentTurn) return;
   }
 
   // Card already revealed
@@ -518,6 +650,10 @@ async function onCardClick(cardIndex) {
 
 function renderClueArea(data) {
   const gs = data.gameState;
+  const gameMode = data.gameMode || 'words';
+  const config = getModeConfig(gameMode);
+  const isDuet = config.isDuet;
+  
   const isSpy = isLocalPlayerSpymaster();
   const myTeam = getLocalPlayerTeam();
   const isMyTurn = gs.currentTurn === myTeam;
@@ -530,8 +666,11 @@ function renderClueArea(data) {
   statusMessage.textContent = '';
 
   if (gs.phase === 'clue') {
-    if (isSpy && isMyTurn) {
-      // Active spymaster — show clue input
+    if (isDuet) {
+      // Duet: any player can give a clue
+      clueInputSection.classList.remove('hidden');
+    } else if (isSpy && isMyTurn) {
+      // Competitive: Active spymaster shows clue input
       clueInputSection.classList.remove('hidden');
     } else {
       // Everyone else waits
@@ -548,16 +687,23 @@ function renderClueArea(data) {
       guessesRemaining.textContent = `(${remaining} left)`;
     }
 
-    const myData = getLocalPlayerData();
-    const isOperative = myData?.role === 'operative';
-    if (isMyTurn && isOperative) {
+    if (isDuet) {
+      // Duet: any player can guess and end guessing
       btnEndGuessing.classList.remove('hidden');
       statusMessage.textContent = 'Click a card to guess, or end guessing.';
-    } else if (isMyTurn && isSpy) {
-      statusMessage.textContent = 'Your operatives are guessing...';
     } else {
-      const teamLabel = gs.currentTurn === 'red' ? 'Red' : 'Blue';
-      statusMessage.textContent = `${teamLabel} Team is guessing...`;
+      // Competitive mode
+      const myData = getLocalPlayerData();
+      const isOperative = myData?.role === 'operative';
+      if (isMyTurn && isOperative) {
+        btnEndGuessing.classList.remove('hidden');
+        statusMessage.textContent = 'Click a card to guess, or end guessing.';
+      } else if (isMyTurn && isSpy) {
+        statusMessage.textContent = 'Your operatives are guessing...';
+      } else {
+        const teamLabel = gs.currentTurn === 'red' ? 'Red' : 'Blue';
+        statusMessage.textContent = `${teamLabel} Team is guessing...`;
+      }
     }
   }
 }
@@ -604,7 +750,10 @@ async function handleGiveClueClick() {
   btnGiveClue.disabled = true;
   try {
     const myName = getLocalPlayer().name;
-    const myTeam = getLocalPlayerTeam();
+    const gameMode = game.data.gameMode || 'words';
+    const config = getModeConfig(gameMode);
+    const myTeam = config.isDuet ? 'duet' : getLocalPlayerTeam();
+    
     await handleGiveClue(game.id, word, number, myName, myTeam);
     clueWordInput.value = '';
     // Reset to number 1
@@ -644,7 +793,8 @@ function renderClueLog(clueLog, container) {
   const entries = Array.isArray(clueLog) ? clueLog : Object.values(clueLog);
   container.innerHTML = entries.map(entry => {
     if (!entry) return '';
-    const teamClass = entry.team === 'red' ? 'log-red' : 'log-blue';
+    // Duet mode won't have a team field, so default to neutral styling
+    const teamClass = entry.team === 'red' ? 'log-red' : entry.team === 'blue' ? 'log-blue' : '';
     const guessesHtml = renderLogGuesses(entry.guesses);
     return `
       <div class="log-entry ${teamClass}">
