@@ -918,26 +918,17 @@ function renderClueArea(data) {
       // Duet: only current player can give a clue
       const currentPlayer = gs.currentPlayer || 1;
       const players = data.players || {};
-      const activePlayerIds = Object.keys(players).filter(id => players[id].isActive).sort();
+      // Find the player whose slotNumber matches currentPlayer
+      const currentPlayerEntry = Object.entries(players).find(([, p]) => p.isActive && p.slotNumber === currentPlayer);
+      const currentPlayerName = currentPlayerEntry ? currentPlayerEntry[1].name : `P${currentPlayer}`;
       const myId = getLocalPlayer().id;
-      const playerIndex = activePlayerIds.indexOf(myId);
-      const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
-      
-      console.log(`🎯 CLUE PHASE UI:`);
-      console.log(`  My ID: ${myId}`);
-      console.log(`  Active players: ${JSON.stringify(activePlayerIds)}`);
-      console.log(`  My playerIndex: ${playerIndex} (0=P1, 1=P2)`);
-      console.log(`  currentPlayer from Firebase: ${currentPlayer}`);
-      console.log(`  isMyTurn: ${isMyTurn}`);
-      console.log(`  Should I see clue form? ${isMyTurn ? 'YES' : 'NO'}`);
+      const myData = players[myId];
+      const isMyTurn = myData && myData.isActive && myData.slotNumber === currentPlayer;
       
       if (isMyTurn) {
         clueInputSection.classList.remove('hidden');
-        console.log(`  → Showing clue input form`);
       } else {
-        const currentPlayerLabel = currentPlayer === 1 ? 'P1' : 'P2';
-        statusMessage.textContent = `Waiting for ${currentPlayerLabel} to give a clue...`;
-        console.log(`  → Waiting for ${currentPlayerLabel}`);
+        statusMessage.textContent = `Waiting for P${currentPlayer} (${currentPlayerName}) to give a clue...`;
       }
     } else if (isSpy && isMyTurn) {
       // Competitive: Active spymaster shows clue input
