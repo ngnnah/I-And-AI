@@ -13,7 +13,7 @@ import { getModeConfig } from '../data/game-modes.js';
 import {
   handleTeamJoin, handleStartGame, handleGiveClue,
   handleCardReveal, handleEndGuessing, handleNewGame,
-  handleCancelGame, handleRematch
+  handleCancelGame, handleRematch, handleSlotClaim, handleSlotLeave
 } from '../game/firebase-sync.js';
 import { navigateTo } from '../main.js';
 
@@ -147,14 +147,8 @@ function handleGameUpdate(data) {
   
   if (myData) {
     if (isDuet) {
-      // Duet mode: show player perspective (P1/P2)
-      const players = data.players || {};
-      const activePlayerIds = Object.keys(players)
-        .filter(id => players[id].isActive)
-        .sort();
-      const myId = getLocalPlayer().id;
-      const playerIndex = activePlayerIds.indexOf(myId);
-      const perspective = playerIndex === 0 ? 'P1' : playerIndex === 1 ? 'P2' : 'Spectator';
+      // Duet mode: show player perspective (P1/P2) based on slotNumber
+      const perspective = myData.slotNumber ? `P${myData.slotNumber}` : 'Spectator';
       
       localPlayerInfo.textContent = `${myData.name} • ${perspective}`;
       localPlayerInfo.className = 'local-player-info duet';
@@ -204,38 +198,104 @@ function renderSetupPhase(data) {
   const isDuet = config.isDuet;
 
   if (isDuet) {
-    // Duet mode: Simple player list, no team selection
+    // Duet mode: Slot selection system
     // Hide competitive UI, show Duet UI
     document.getElementById('teams-container')?.classList.add('hidden');
     document.getElementById('setup-instruction-competitive')?.classList.add('hidden');
     document.getElementById('duet-players-container')?.classList.remove('hidden');
     document.getElementById('setup-instruction-duet')?.classList.remove('hidden');
     
-    // List all active players
+    // Get all active players
     const activePlayers = Object.entries(players).filter(([, p]) => p.isActive);
     const playerCount = activePlayers.length;
     
+    // Separate players into slots and waiting pool
+    const maxSlots = 2; // Duet supports 2 players (P1 and P2)
+    const slotsData = Array(maxSlots).fill(null).map((_, i) => {
+      const slotNumber = i + 1;
+      const playerInSlot = activePlayers.find(([, p]) => p.slotNumber === slotNumber);
+      return { slotNumber, player: playerInSlot };
+    });
+    const waitingPlayers = activePlayers.filter(([, p]) => p.slotNumber === null);
+    
     const duetPlayersList = document.getElementById('duet-players-list');
     if (duetPlayersList) {
-      duetPlayersList.innerHTML = activePlayers.map(([id, p], index) => {
-        const isYou = id === myId;
-        const perspective = index === 0 ? 'P1' : index === 1 ? 'P2' : `P${index + 1}`;
-        return `
-          <div class="duet-player-item ${isYou ? 'is-me' : ''}">
-            <span class="player-perspective">${perspective}</span>
-            <span class="player-name">${p.name}${isYou ? ' (you)' : ''}</span>
-          </div>
-        `;
-      }).join('');
+      let html = '<div class=\"duet-slots\">';
+      
+      // Render slots
+      slotsData.forEach(({ slotNumber, player }) => {
+        if (player) {
+          const [id, p] = player;
+          const isYou = id === myId;
+          html += `
+            <div class=\"duet-slot occupied ${isYou ? 'is-me' : ''}\">
+              <span class=\"slot-number\">P${slotNumber}</span>
+              <span class=\"player-name\">${p.name}${isYou ? ' (you)' : ''}</span>
+              ${isYou ? '<button class=\"btn-slot-action btn-leave-slot\" data-slot=\"${slotNumber}\">Leave Slot</button>' : ''}
+            </div>
+          `;
+        } else {
+          html += `
+            <div class=\"duet-slot empty\">
+              <span class=\"slot-number\">P${slotNumber}</span>
+              <span class=\"slot-label\">Empty</span>
+              <button class=\"btn-slot-action btn-claim-slot\" data-slot=\"${slotNumber}\">Claim</button>
+            </div>
+          `;
+        }
+      });
+      
+      html += '</div>';
+      
+      // Render waiting pool if any
+      if (waitingPlayers.length > 0) {
+        html += '<div class=\"waiting-pool\">';
+        html += '<div class=\"waiting-pool-header\">Waiting Pool:</div>';
+        html += '<div class=\"waiting-players\">';
+        waitingPlayers.forEach(([id, p]) => {
+          const isYou = id === myId;
+          html += `<span class=\"waiting-player ${isYou ? 'is-me' : ''}\">${p.name}${isYou ? ' (you)' : ''}</span>`;
+        });
+        html += '</div></div>';
+      }
+      
+      duetPlayersList.innerHTML = html;
+      
+      // Add event listeners for slot actions
+      duetPlayersList.querySelectorAll('.btn-claim-slot').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const slotNumber = parseInt(e.target.dataset.slot);
+          try {
+            await handleSlotClaim(getCurrentGame().id, myId, slotNumber);
+          } catch (err) {
+            alert(err.message);
+          }
+        });
+      });
+      
+      duetPlayersList.querySelectorAll('.btn-leave-slot').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          try {
+            await handleSlotLeave(getCurrentGame().id, myId);
+          } catch (err) {
+            alert(err.message);
+          }
+        });
+      });
     }
     
     // Show setup message
+    const filledSlots = slotsData.filter(s => s.player !== null).length;
     setupErrors.classList.remove('hidden');
-    setupErrors.textContent = `${playerCount} player(s) joined. Need at least 2 to start.`;
+    if (filledSlots >= 2) {
+      setupErrors.textContent = `Ready to start! ${filledSlots} players in slots.`;
+    } else {
+      setupErrors.textContent = `${playerCount} player(s) joined. Need 2 players in slots to start.`;
+    }
     
     // Start button (host only)
     const isHost = isLocalPlayerHost();
-    const canStart = playerCount >= 2;
+    const canStart = filledSlots >= 2;
     
     btnStartGame.classList.toggle('hidden', !isHost);
     btnStartGame.disabled = !canStart;

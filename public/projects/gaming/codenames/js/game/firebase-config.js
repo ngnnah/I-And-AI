@@ -47,6 +47,32 @@ export function generatePlayerId() {
 }
 
 /**
+ * Get random available slot from 1 to maxSlots
+ * @param {object} players - Players object from game
+ * @param {number} maxSlots - Maximum number of slots
+ * @returns {number|null} Available slot number or null if all full
+ */
+function getRandomAvailableSlot(players, maxSlots) {
+  if (!players) return 1;
+  
+  const occupiedSlots = Object.values(players)
+    .filter(p => p.isActive && p.slotNumber !== null)
+    .map(p => p.slotNumber);
+  
+  const availableSlots = [];
+  for (let i = 1; i <= maxSlots; i++) {
+    if (!occupiedSlots.includes(i)) {
+      availableSlots.push(i);
+    }
+  }
+  
+  if (availableSlots.length === 0) return null; // All slots full, go to waiting pool
+  
+  // Return random available slot
+  return availableSlots[Math.floor(Math.random() * availableSlots.length)];
+}
+
+/**
  * Create a new game
  * @param {string} playerName
  * @param {string} playerId
@@ -57,6 +83,8 @@ export async function createGame(playerName, playerId, gameMode = 'words') {
   const gameId = generateGameId();
   const displayName = generateDisplayName();
   const gameRef = ref(database, `games/${gameId}`);
+  const config = getModeConfig(gameMode);
+  const isDuet = config.isDuet;
 
   await set(gameRef, {
     createdAt: Date.now(),
@@ -71,7 +99,8 @@ export async function createGame(playerName, playerId, gameMode = 'words') {
         joinedAt: Date.now(),
         isActive: true,
         team: null,
-        role: null
+        role: null,
+        slotNumber: isDuet ? 1 : null  // Duet: creator gets slot 1
       }
     }
   });
@@ -109,12 +138,22 @@ export async function joinGame(gameId, playerName, playerId) {
     throw new Error("Cannot join a finished game");
   }
 
+  // Assign slot for Duet mode
+  const config = getModeConfig(game.gameMode);
+  const isDuet = config.isDuet;
+  let slotNumber = null;
+  
+  if (isDuet) {
+    slotNumber = getRandomAvailableSlot(game.players, 2); // Max 2 slots for Duet
+  }
+
   await set(ref(database, `games/${gameId}/players/${playerId}`), {
     name: playerName,
     joinedAt: Date.now(),
     isActive: true,
     team: null,
-    role: null
+    role: null,
+    slotNumber
   });
 
   return true;

@@ -30,6 +30,43 @@ export async function handleTeamJoin(gameId, playerId, team, role) {
 }
 
 /**
+ * Claim a slot in Duet mode
+ * @param {string} gameId
+ * @param {string} playerId
+ * @param {number} slotNumber - 1, 2, 3, etc.
+ */
+export async function handleSlotClaim(gameId, playerId, slotNumber) {
+  const gameRef = ref(database, `games/${gameId}`);
+  const snapshot = await get(gameRef);
+  const game = snapshot.val();
+  
+  // Check if slot is already taken
+  const players = game.players || {};
+  const slotTaken = Object.values(players).some(p => 
+    p.isActive && p.slotNumber === slotNumber
+  );
+  
+  if (slotTaken) {
+    throw new Error(`Slot ${slotNumber} is already taken`);
+  }
+  
+  await update(ref(database, `games/${gameId}/players/${playerId}`), {
+    slotNumber
+  });
+}
+
+/**
+ * Leave current slot and go to waiting pool in Duet mode
+ * @param {string} gameId
+ * @param {string} playerId
+ */
+export async function handleSlotLeave(gameId, playerId) {
+  await update(ref(database, `games/${gameId}/players/${playerId}`), {
+    slotNumber: null
+  });
+}
+
+/**
  * Start the game — generate board, set initial state
  * @param {string} gameId
  */
