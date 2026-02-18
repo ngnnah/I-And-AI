@@ -55,9 +55,16 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       console.log('[P1] Lobby screen visible');
       
       // P1: Select Duet mode and create game
-      await p1Page.click('input[name="game-mode"][value="duet"]');
+      await p1Page.waitForTimeout(500); // Wait for lobby to fully render
+      await p1Page.waitForSelector('.mode-selector', { state: 'visible', timeout: 5000 });
+      console.log('[P1] Mode selector visible');
+      
+      // Click the label for Duet mode (easier than radio input)
+      await p1Page.click('label:has(input[value="duet"])');
       console.log('[P1] Duet mode selected');
       await p1Page.waitForTimeout(300);
+      
+      await p1Page.waitForSelector('#btn-create-game', { state: 'visible', timeout: 5000 });
       await p1Page.click('#btn-create-game');
       console.log('[P1] Create game clicked');
       await p1Page.waitForTimeout(1000); // Wait for Firebase room creation
@@ -241,8 +248,11 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       await p1Page.waitForTimeout(500);
       await p1Page.waitForSelector('#screen-lobby', { state: 'visible', timeout: 10000 });
       
-      await p1Page.click('input[name="game-mode"][value="duet"]');
+      await p1Page.waitForTimeout(500);
+      await p1Page.waitForSelector('.mode-selector', { state: 'visible', timeout: 5000 });
+      await p1Page.click('label:has(input[value="duet"])');
       await p1Page.waitForTimeout(300);
+      await p1Page.waitForSelector('#btn-create-game', { state: 'visible', timeout: 5000 });
       await p1Page.click('#btn-create-game');
       await p1Page.waitForTimeout(1000); // Wait for Firebase room creation
       await p1Page.waitForSelector('#screen-game-room', { state: 'visible', timeout: 10000 });
