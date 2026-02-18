@@ -396,6 +396,8 @@ btnStartGame.addEventListener('click', async () => {
     await handleStartGame(game.id);
   } catch (err) {
     console.error('Start game error:', err);
+    alert(err.message || 'Failed to start game');
+    btnStartGame.disabled = false;
   }
 });
 

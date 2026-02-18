@@ -10,7 +10,8 @@ import {
   checkGuessResult, 
   checkWinCondition, 
   checkDuetWinCondition,
-  checkDuetWinConditionSimple
+  checkDuetWinConditionSimple,
+  canStartGame
 } from './game-logic.js';
 import { getModeConfig } from '../data/game-modes.js';
 import { getLocalPlayer, getCurrentGame } from './game-state.js';
@@ -78,6 +79,14 @@ export async function handleStartGame(gameId) {
 
   // Duet mode has different setup
   if (config.isDuet) {
+    // Validate: Need at least 2 players with assigned slots
+    const players = gameData.players || {};
+    const playersInSlots = Object.values(players).filter(p => p.isActive && p.slotNumber !== null);
+    
+    if (playersInSlots.length < 2) {
+      throw new Error('Need 2 players in slots to start Duet mode');
+    }
+
     const board = generateDuetBoard(gameMode);
 
     const updates = {
@@ -104,6 +113,13 @@ export async function handleStartGame(gameId) {
   }
 
   // Standard competitive mode
+  const players = gameData.players || {};
+  const { canStart, errors } = canStartGame(players);
+  
+  if (!canStart) {
+    throw new Error(errors.join('. '));
+  }
+  
   const startingTeam = Math.random() < 0.5 ? 'red' : 'blue';
   const board = generateBoard(startingTeam, gameMode);
 
