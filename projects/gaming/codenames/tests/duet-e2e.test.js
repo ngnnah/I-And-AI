@@ -35,8 +35,9 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       console.log('\n=== SETUP: Creating Duet game ===');
       
       // P1: Navigate and wait for page to be ready
-      console.log('[P1] Navigating to homepage...');
-      await p1Page.goto('/', { waitUntil: 'load' });
+      const gameURL = 'https://ngnnah.github.io/I-And-AI/projects/gaming/codenames/';
+      console.log(`[P1] Navigating to: ${gameURL}`);
+      await p1Page.goto(gameURL, { waitUntil: 'load' });
       console.log(`[P1] Current URL: ${p1Page.url()}`);
       
       // Wait for player name input to be visible
@@ -63,7 +64,7 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       
       // P2: Enter name and join the game
       console.log('\n[P2] Navigating to homepage...');
-      await p2Page.goto('/', { waitUntil: 'load' });
+      await p2Page.goto(gameURL, { waitUntil: 'load' });
       console.log(`[P2] Current URL: ${p2Page.url()}`);
       
       console.log('[P2] Waiting for player name input...');
@@ -211,8 +212,10 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       // Setup: Create and join Duet game (similar to above)
       console.log('\n=== SETUP: Creating Duet game for color map test ===');
       
-      console.log('[P1] Navigating to homepage...');
-      await p1Page.goto('/', { waitUntil: 'load' });
+      const gameURL = 'https://ngnnah.github.io/I-And-AI/projects/gaming/codenames/';
+      console.log(`[P1] Navigating to: ${gameURL}`);
+      await p1Page.goto(gameURL, { waitUntil: 'load' });
+      console.log(`[P1] Current URL: ${p1Page.url()}`);
       await p1Page.waitForSelector('#player-name-input', { state: 'visible', timeout: 10000 });
       await p1Page.fill('#player-name-input', 'Player 1');
       await p1Page.click('#btn-continue');
@@ -226,7 +229,8 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       console.log(`✅ Room created: ${roomCode}`);
       
       console.log('\n[P2] Navigating to homepage...');
-      await p2Page.goto('/', { waitUntil: 'load' });
+      await p2Page.goto(gameURL, { waitUntil: 'load' });
+      console.log(`[P2] Current URL: ${p2Page.url()}`);
       await p2Page.waitForSelector('#player-name-input', { state: 'visible', timeout: 10000 });
       await p2Page.fill('#player-name-input', 'Player 2');
       await p2Page.click('#btn-continue');
