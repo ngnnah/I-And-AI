@@ -811,8 +811,8 @@ function renderBoard(data, container, isFinished) {
           
           if (canClickCard) {
             card.classList.add('clickable');
-            card.addEventListener('click', () => onCardClick(i));
-            if (i === 0) console.log(`  ✅ Card ${i}: Click handler attached!`);
+            card.dataset.cardIndex = i;
+            if (i === 0) console.log(`  ✅ Card ${i}: marked clickable`);
           } else {
             if (i === 0) console.log(`  ❌ Card ${i}: NOT clickable`);
           }
@@ -896,10 +896,6 @@ function renderClueArea(data) {
   if (gs.phase === 'clue') {
     isGuessingActive = false;
   }
-  // Duet mode: auto-activate guessing (no "Start Guessing" tap required)
-  if (gs.phase === 'guess' && isDuet) {
-    isGuessingActive = true;
-  }
 
   if (gs.phase === 'clue') {
     if (isDuet) {
@@ -948,10 +944,17 @@ function renderClueArea(data) {
       console.log(`🎯 Guess Phase UI: isMyTurn=${isMyTurn}, isGuessingActive=${isGuessingActive}`);
       
       if (isMyTurn) {
-        // Duet: guessing auto-activates, show End Guessing directly
-        btnEndGuessing.classList.remove('hidden');
-        statusMessage.textContent = 'Tap a card to guess, or end guessing.';
-        console.log('  → Showing End Guessing button, cards are clickable');
+        if (!isGuessingActive) {
+          // Show Start Guessing button
+          btnStartGuessing.classList.remove('hidden');
+          statusMessage.textContent = 'Click "Start Guessing" when ready to make your guesses.';
+          console.log('  → Showing Start Guessing button');
+        } else {
+          // Show End Guessing button (guessing is active)
+          btnEndGuessing.classList.remove('hidden');
+          statusMessage.textContent = 'Tap a card to guess, or end guessing.';
+          console.log('  → Showing End Guessing button, cards are clickable');
+        }
       } else {
         const currentPlayerLabel = currentPlayer === 1 ? 'P1' : 'P2';
         statusMessage.textContent = `${currentPlayerLabel} is guessing...`;
@@ -1043,7 +1046,16 @@ async function handleGiveClueClick() {
   }
 }
 
-// Start guessing (competitive mode only - prevents accidental taps)
+// Delegated card click handler — attached once, survives board re-renders
+// Fixes mobile touch issue: per-card listeners were lost when renderBoard wiped the DOM
+boardEl.addEventListener('click', (e) => {
+  const card = e.target.closest('.card.clickable[data-card-index]');
+  if (!card) return;
+  const index = parseInt(card.dataset.cardIndex, 10);
+  if (!isNaN(index)) onCardClick(index);
+});
+
+// Start guessing (prevents accidental taps while scrolling)
 btnStartGuessing.addEventListener('click', () => {
   console.log('🟢 START GUESSING clicked! Setting isGuessingActive = true');
   isGuessingActive = true;

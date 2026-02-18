@@ -893,6 +893,7 @@ input[type="text"]:focus, select:focus {
 }
 .card.unrevealed.clickable {
   cursor: pointer;
+  touch-action: manipulation;
 }
 .card.unrevealed.clickable:hover {
   transform: scale(1.04);
