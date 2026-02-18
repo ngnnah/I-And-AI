@@ -48,7 +48,7 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       
       await p1Page.fill('#player-name-input', 'Player 1');
       await p1Page.waitForTimeout(300); // Let input register
-      await p1Page.click('#btn-continue');
+      await p1Page.press('#player-name-input', 'Enter'); // Press Enter to submit
       await p1Page.waitForTimeout(500); // Wait for transition
       await p1Page.waitForSelector('#screen-lobby', { state: 'visible', timeout: 10000 });
       console.log('[P1] Lobby screen visible');
@@ -79,7 +79,7 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       
       await p2Page.fill('#player-name-input', 'Player 2');
       await p2Page.waitForTimeout(300); // Let input register
-      await p2Page.click('#btn-continue');
+      await p2Page.press('#player-name-input', 'Enter'); // Press Enter to submit
       await p2Page.waitForTimeout(500); // Wait for transition
       await p2Page.waitForSelector('#screen-lobby', { state: 'visible', timeout: 10000 });
       console.log('[P2] Lobby screen visible');
@@ -234,7 +234,7 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       await p1Page.waitForTimeout(500);
       await p1Page.fill('#player-name-input', 'Player 1');
       await p1Page.waitForTimeout(300);
-      await p1Page.click('#btn-continue');
+      await p1Page.press('#player-name-input', 'Enter');
       await p1Page.waitForTimeout(500);
       await p1Page.waitForSelector('#screen-lobby', { state: 'visible', timeout: 10000 });
       
@@ -254,7 +254,7 @@ test.describe('Duet Mode - 2 Player Multiplayer', () => {
       await p2Page.waitForTimeout(500);
       await p2Page.fill('#player-name-input', 'Player 2');
       await p2Page.waitForTimeout(300);
-      await p2Page.click('#btn-continue');
+      await p2Page.press('#player-name-input', 'Enter');
       await p2Page.waitForTimeout(500);
       await p2Page.waitForSelector('#screen-lobby', { state: 'visible' });
       
