@@ -178,13 +178,13 @@ export function checkDuetWinConditionSimple(greenRevealed, mistakesMade, turnsUs
     return { isOver: true, winner: 'win', reason: 'all-green' };
   }
   
-  // Loss: too many mistakes
-  if (mistakesMade > config.maxMistakes) {
+  // Loss: too many mistakes (>= not > because maxMistakes is the limit, not allowed count)
+  if (mistakesMade >= config.maxMistakes) {
     return { isOver: true, winner: 'loss', reason: 'too-many-mistakes' };
   }
   
-  // Loss: ran out of turns
-  if (turnsUsed > config.maxTurns) {
+  // Loss: ran out of turns (>= not > because maxTurns is the limit, not allowed count)
+  if (turnsUsed >= config.maxTurns) {
     return { isOver: true, winner: 'loss', reason: 'out-of-turns' };
   }
   

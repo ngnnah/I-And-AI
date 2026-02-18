@@ -1140,16 +1140,40 @@ function renderFinishedPhase(data) {
   if (!gs) return;
 
   const winner = gs.winner;
-  winnerBanner.className = `winner-banner ${winner}-wins`;
-  const winnerLabel = winner === 'red' ? 'Red' : 'Blue';
-  winnerText.textContent = `${winnerLabel} Team Wins!`;
-  winnerText.className = `${winner}-wins-text`;
+  const config = getModeConfig(data.mode);
+  const isDuet = config.isDuet;
 
-  if (gs.winReason === 'assassin') {
-    const loser = winner === 'red' ? 'Blue' : 'Red';
-    winReason.textContent = `${loser} Team revealed the Assassin!`;
+  // Duet mode: win/loss, Competitive mode: red/blue
+  winnerBanner.className = `winner-banner ${winner}-wins`;
+  
+  if (isDuet) {
+    // Duet mode announcements
+    winnerText.textContent = winner === 'win' ? '🎉 Victory!' : '💀 Defeat!';
+    winnerText.className = `${winner}-wins-text`;
+    
+    if (gs.winReason === 'assassin') {
+      winReason.textContent = 'You revealed an Assassin!';
+    } else if (gs.winReason === 'all-green') {
+      winReason.textContent = 'All 15 green agents found!';
+    } else if (gs.winReason === 'too-many-mistakes') {
+      winReason.textContent = `Too many mistakes (${gs.mistakesMade}/${config.maxMistakes})`;
+    } else if (gs.winReason === 'out-of-turns') {
+      winReason.textContent = `Out of turns (${gs.turnsUsed}/${config.maxTurns})`;
+    } else {
+      winReason.textContent = '';
+    }
   } else {
-    winReason.textContent = `All ${winnerLabel} agents found!`;
+    // Competitive mode announcements
+    const winnerLabel = winner === 'red' ? 'Red' : 'Blue';
+    winnerText.textContent = `${winnerLabel} Team Wins!`;
+    winnerText.className = `${winner}-wins-text`;
+    
+    if (gs.winReason === 'assassin') {
+      const loser = winner === 'red' ? 'Blue' : 'Red';
+      winReason.textContent = `${loser} Team revealed the Assassin!`;
+    } else {
+      winReason.textContent = `All ${winnerLabel} agents found!`;
+    }
   }
 
   // Render board with all cards revealed
@@ -1158,9 +1182,10 @@ function renderFinishedPhase(data) {
   // Clue log
   renderClueLog(data.clueLog, finishedClueLog);
 
-  // Rematch and New game buttons (host only)
+  // Rematch button: only show for competitive mode (doesn't make sense in Duet)
+  // New game button: show for all modes
   const isHost = isLocalPlayerHost();
-  btnRematch.classList.toggle('hidden', !isHost);
+  btnRematch.classList.toggle('hidden', !isHost || isDuet);
   btnNewGame.classList.toggle('hidden', !isHost);
   
   // Trigger victory confetti
