@@ -371,6 +371,11 @@ input[type="text"]:focus, select:focus {
   color: var(--blue-light);
   border-color: var(--blue);
 }
+.local-player-info.duet {
+  background: rgba(76, 175, 80, 0.15);
+  color: #81c784;
+  border-color: var(--green);
+}
 
 /* -- Phase: Setup -- */
 .phase-instruction { color: var(--text-muted); text-align: center; margin-bottom: 16px; }

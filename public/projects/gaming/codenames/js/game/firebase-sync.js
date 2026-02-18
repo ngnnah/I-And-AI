@@ -50,9 +50,11 @@ export async function handleStartGame(gameId) {
       'board/cardIds': board.cardIds,
       'board/revealed': board.revealed,
       'gameState/currentPlayer': 1,
+      'gameState/phase': 'clue',
       'gameState/currentClue': null,
-      'gameState/turnCount': 0,
-      'gameState/mistakeCount': 0,
+      'gameState/guessesRemaining': 0,
+      'gameState/turnsUsed': 0,
+      'gameState/mistakesMade': 0,
       'gameState/greenRevealed': 0,
       'gameState/greenTotal': config.greenCount,
       'gameState/winner': null,
@@ -137,7 +139,102 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
   if (!snapshot.exists()) return;
   const game = snapshot.val();
   const gs = game.gameState;
-
+  
+  const gameMode = game.gameMode || 'words';
+  const config = getModeConfig(gameMode);
+  
+  // Handle Duet mode separately
+  if (config.isDuet) {
+    // Duet uses board.revealed instead of gameState.revealedCards
+    if (game.board.revealed[cardIndex]) return; // Already revealed
+    
+    // Use current player's color map (1 = P1, 2 = P2)
+    const currentPlayer = gs.currentPlayer || 1;
+    const colorMap = currentPlayer === 1 ? game.board.colorMapP1 : game.board.colorMapP2;
+    
+    const color = colorMap[cardIndex];
+    const newRevealed = [...game.board.revealed];
+    newRevealed[cardIndex] = true;
+    
+    // Update Duet-specific counters
+    let greenRevealed = gs.greenRevealed || 0;
+    let mistakesMade = gs.mistakesMade || 0;
+    let turnsUsed = gs.turnsUsed || 0;
+    
+    if (color === 'green') {
+      greenRevealed++;
+    } else if (color === 'neutral') {
+      mistakesMade++;
+    }
+    
+    // Append guess to current clue log entry
+    const clueLog = game.clueLog || [];
+    const logIndex = (Array.isArray(clueLog) ? clueLog.length : Object.keys(clueLog).length) - 1;
+    const currentEntry = Array.isArray(clueLog) ? clueLog[logIndex] : clueLog[logIndex];
+    const guesses = currentEntry?.guesses || [];
+    const guessIndex = Array.isArray(guesses) ? guesses.length : Object.keys(guesses || {}).length;
+    
+    const updates = {
+      'board/revealed': newRevealed,
+      'gameState/greenRevealed': greenRevealed,
+      'gameState/mistakesMade': mistakesMade,
+      [`clueLog/${logIndex}/guesses/${guessIndex}`]: {
+        cardIndex,
+        word: game.board.words ? game.board.words[cardIndex] : `Card ${cardIndex + 1}`,
+        result: color === 'green' ? 'correct' : color === 'assassin' ? 'assassin' : 'wrong'
+      }
+    };
+    
+    // Check for assassin (immediate loss)
+    if (color === 'assassin') {
+      updates['gameState/winner'] = 'loss';
+      updates['gameState/winReason'] = 'assassin';
+      updates['gameState/currentClue'] = null;
+      updates['status'] = 'finished';
+      updates['finishedAt'] = Date.now();
+      await update(ref(database, `games/${gameId}`), updates);
+      return;
+    }
+    
+    // Check win/loss conditions
+    const winCheck = checkDuetWinCondition(greenRevealed, mistakesMade, turnsUsed, config);
+    if (winCheck.isOver) {
+      updates['gameState/winner'] = winCheck.winner;
+      updates['gameState/winReason'] = winCheck.reason;
+      updates['gameState/currentClue'] = null;
+      updates['status'] = 'finished';
+      updates['finishedAt'] = Date.now();
+      await update(ref(database, `games/${gameId}`), updates);
+      return;
+    }
+    
+    // Handle turn progression in Duet mode
+    if (color === 'green') {
+      const remaining = gs.guessesRemaining - 1;
+      if (remaining <= 0) {
+        // Out of guesses — switch player (1 ↔ 2)
+        updates['gameState/currentPlayer'] = currentPlayer === 1 ? 2 : 1;
+        updates['gameState/phase'] = 'clue';
+        updates['gameState/currentClue'] = null;
+        updates['gameState/guessesRemaining'] = 0;
+        updates['gameState/turnsUsed'] = turnsUsed + 1;
+      } else {
+        updates['gameState/guessesRemaining'] = remaining;
+      }
+    } else {
+      // Wrong guess — switch player (1 ↔ 2)
+      updates['gameState/currentPlayer'] = currentPlayer === 1 ? 2 : 1;
+      updates['gameState/phase'] = 'clue';
+      updates['gameState/currentClue'] = null;
+      updates['gameState/guessesRemaining'] = 0;
+      updates['gameState/turnsUsed'] = turnsUsed + 1;
+    }
+    
+    await update(ref(database, `games/${gameId}`), updates);
+    return;
+  }
+  
+  // Competitive mode logic below
   // Already revealed — skip
   if (gs.revealedCards[cardIndex]) return;
 
@@ -237,7 +334,9 @@ export async function handleEndGuessing(gameId) {
   if (!snapshot.exists()) return;
   const game = snapshot.val();
   const gs = game.gameState;
-  const currentTeam = gs.currentTurn;
+  
+  const gameMode = game.gameMode || 'words';
+  const config = getModeConfig(gameMode);
 
   // Append "passed" marker to current clue log
   const clueLog = game.clueLog || [];
@@ -246,13 +345,24 @@ export async function handleEndGuessing(gameId) {
   const guesses = currentEntry?.guesses || [];
   const guessIndex = Array.isArray(guesses) ? guesses.length : Object.keys(guesses || {}).length;
 
-  await update(ref(database, `games/${gameId}`), {
-    'gameState/currentTurn': currentTeam === 'red' ? 'blue' : 'red',
+  const updates = {
     'gameState/phase': 'clue',
     'gameState/currentClue': null,
     'gameState/guessesRemaining': 0,
     [`clueLog/${logIndex}/guesses/${guessIndex}`]: { passed: true }
-  });
+  };
+  
+  // Duet mode: increment turn counter instead of switching teams
+  if (config.isDuet) {
+    const turnsUsed = gs.turnsUsed || 0;
+    updates['gameState/turnsUsed'] = turnsUsed + 1;
+  } else {
+    // Competitive mode: switch teams
+    const currentTeam = gs.currentTurn;
+    updates['gameState/currentTurn'] = currentTeam === 'red' ? 'blue' : 'red';
+  }
+
+  await update(ref(database, `games/${gameId}`), updates);
 }
 
 /**

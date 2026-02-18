@@ -134,12 +134,34 @@ function handleGameUpdate(data) {
   
   // Update local player info in header
   const myData = getLocalPlayerData();
-  if (myData && myData.team && myData.role) {
-    const teamName = myData.team.charAt(0).toUpperCase() + myData.team.slice(1);
-    const roleLabel = myData.role === 'spymaster' ? 'Spymaster' : 'Operative';
-    localPlayerInfo.textContent = `${myData.name} • ${teamName} ${roleLabel}`;
-    localPlayerInfo.className = `local-player-info ${myData.team}`;
-    localPlayerInfo.classList.remove('hidden');
+  const gameMode = data.gameMode || 'words';
+  const config = getModeConfig(gameMode);
+  const isDuet = config.isDuet;
+  
+  if (myData) {
+    if (isDuet) {
+      // Duet mode: show player perspective (P1/P2)
+      const players = data.players || {};
+      const activePlayerIds = Object.keys(players)
+        .filter(id => players[id].isActive)
+        .sort();
+      const myId = getLocalPlayer().id;
+      const playerIndex = activePlayerIds.indexOf(myId);
+      const perspective = playerIndex === 0 ? 'P1' : playerIndex === 1 ? 'P2' : 'Spectator';
+      
+      localPlayerInfo.textContent = `${myData.name} • ${perspective}`;
+      localPlayerInfo.className = 'local-player-info duet';
+      localPlayerInfo.classList.remove('hidden');
+    } else if (myData.team && myData.role) {
+      // Competitive mode: show team and role
+      const teamName = myData.team.charAt(0).toUpperCase() + myData.team.slice(1);
+      const roleLabel = myData.role === 'spymaster' ? 'Spymaster' : 'Operative';
+      localPlayerInfo.textContent = `${myData.name} • ${teamName} ${roleLabel}`;
+      localPlayerInfo.className = `local-player-info ${myData.team}`;
+      localPlayerInfo.classList.remove('hidden');
+    } else {
+      localPlayerInfo.classList.add('hidden');
+    }
   } else {
     localPlayerInfo.classList.add('hidden');
   }
@@ -149,15 +171,15 @@ function handleGameUpdate(data) {
   phasePlaying.classList.toggle('hidden', data.status !== 'playing');
   phaseFinished.classList.toggle('hidden', data.status !== 'finished');
 
-  // Add turn-based class to active phase
-  if (data.status === 'playing' && data.gameState?.currentTurn) {
+  // Add turn-based class to active phase (competitive mode only)
+  if (!isDuet && data.status === 'playing' && data.gameState?.currentTurn) {
     phasePlaying.className = `phase ${data.gameState.currentTurn}-turn`;
   } else if (data.status === 'playing') {
     phasePlaying.className = 'phase';
   }
 
-  // Mid-game picker: show if game is playing but local player has no team
-  const needsTeamPick = data.status === 'playing' && (!myData || !myData.team);
+  // Mid-game picker: show if game is playing but local player has no team (competitive mode only)
+  const needsTeamPick = !isDuet && data.status === 'playing' && (!myData || !myData.team);
   midGamePicker.classList.toggle('hidden', !needsTeamPick);
 
   if (data.status === 'setup') renderSetupPhase(data);
