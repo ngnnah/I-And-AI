@@ -1,24 +1,29 @@
 /* ===== Variables ===== */
 :root {
-  --red: #d32f2f;
+  /* More vibrant red for better visibility */
+  --red: #f44336;
   --red-light: #ffcdd2;
-  --red-bg: rgba(211, 47, 47, 0.12);
-  --blue: #1565c0;
+  --red-bg: rgba(244, 67, 54, 0.12);
+  
+  /* More vibrant blue for better visibility */
+  --blue: #2196f3;
   --blue-light: #bbdefb;
-  --blue-bg: rgba(21, 101, 192, 0.12);
+  --blue-bg: rgba(33, 150, 243, 0.12);
+  
   --neutral: #8d6e63;
   --neutral-light: #d7ccc8;
   
-  /* Toxic/poisonous assassin colors (purple mushroom theme) */
-  --assassin: #1a1a1a;
-  --assassin-border: #9c27b0;
-  --assassin-glow: #ab47bc;
-  --assassin-bg: rgba(156, 39, 176, 0.1);
-  --assassin-text: #ce93d8;
+  /* Death/skull assassin theme - black with bright red accents for visibility */
+  --assassin: #0d0d0d;
+  --assassin-border: #ff1744;
+  --assassin-glow: #ff5252;
+  --assassin-bg: rgba(255, 23, 68, 0.15);
+  --assassin-text: #ffcdd2;
   
-  --green: #2e7d32;
-  --green-light: #81c784;
-  --green-bg: rgba(46, 125, 50, 0.12);
+  /* Darker green for Duet mode - better visibility and contrast */
+  --green: #1b5e20;
+  --green-light: #66bb6a;
+  --green-bg: rgba(27, 94, 32, 0.12);
   
   --bg: #1a1a2e;
   --bg-card: #2a2a4a;
@@ -625,15 +630,14 @@ input[type="text"]:focus, select:focus {
   border-radius: 3px;
   border: 1px solid rgba(255,255,255,0.2);
 }
-.legend-swatch.swatch-red { background: rgba(211, 47, 47, 0.5); border-color: var(--red); }
-.legend-swatch.swatch-blue { background: rgba(21, 101, 192, 0.5); border-color: var(--blue); }
-.legend-swatch.swatch-green { background: rgba(76, 175, 80, 0.5); border-color: var(--green); }
+.legend-swatch.swatch-red { background: rgba(244, 67, 54, 0.5); border-color: var(--red); }
+.legend-swatch.swatch-blue { background: rgba(33, 150, 243, 0.5); border-color: var(--blue); }
+.legend-swatch.swatch-green { background: rgba(27, 94, 32, 0.6); border-color: var(--green); }
 .legend-swatch.swatch-neutral { background: rgba(161, 136, 127, 0.4); border-color: #a1887f; }
 .legend-swatch.swatch-assassin { 
   background: var(--assassin); 
   border-color: var(--assassin-border);
-  box-shadow: 0 0 8px var(--assassin-glow);
-  box-shadow: 0 0 8px rgba(118, 255, 3, 0.3);
+  box-shadow: 0 0 6px var(--assassin-glow);
 }
 
 /* -- Board -- */
@@ -738,9 +742,8 @@ input[type="text"]:focus, select:focus {
   background: var(--assassin); 
   color: var(--assassin-text); 
   border-color: var(--assassin-border);
-  box-shadow: 0 0 15px var(--assassin-glow);
-  box-shadow: 0 0 20px rgba(118, 255, 3, 0.5), inset 0 0 20px rgba(118, 255, 3, 0.2);
-  animation: toxicPulse 2s ease-in-out infinite;
+  box-shadow: 0 0 20px var(--assassin-glow), inset 0 0 15px rgba(255, 23, 68, 0.3);
+  animation: deathPulse 2s ease-in-out infinite;
 }
 
 /* Flip animation only for newly revealed cards */
@@ -748,7 +751,7 @@ input[type="text"]:focus, select:focus {
   animation: cardFlip 0.6s ease-out;
 }
 .card.revealed-assassin.just-revealed {
-  animation: cardFlip 0.6s ease-out, toxicPulse 2s ease-in-out infinite;
+  animation: cardFlip 0.6s ease-out, deathPulse 2s ease-in-out infinite;
 }
 
 @keyframes cardFlip {
@@ -763,26 +766,25 @@ input[type="text"]:focus, select:focus {
   }
 }
 
-@keyframes toxicPulse {
+@keyframes deathPulse {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(118, 255, 3, 0.5), inset 0 0 20px rgba(118, 255, 3, 0.2);
+    box-shadow: 0 0 20px var(--assassin-glow), inset 0 0 15px rgba(255, 23, 68, 0.3);
   }
   50% {
-    box-shadow: 0 0 30px rgba(118, 255, 3, 0.7), inset 0 0 30px rgba(118, 255, 3, 0.3);
+    box-shadow: 0 0 35px var(--assassin-glow), inset 0 0 25px rgba(255, 23, 68, 0.5);
   }
 }
 
 /* Spymaster overlay — strong colored backgrounds on unrevealed cards */
-.card.spy-red { border-color: var(--red); background: rgba(211, 47, 47, 0.35); color: #ffcdd2; }
-.card.spy-blue { border-color: var(--blue); background: rgba(21, 101, 192, 0.35); color: #bbdefb; }
-.card.spy-green { border-color: var(--green); background: rgba(76, 175, 80, 0.35); color: #c8e6c9; }
+.card.spy-red { border-color: var(--red); background: rgba(244, 67, 54, 0.35); color: #ffcdd2; }
+.card.spy-blue { border-color: var(--blue); background: rgba(33, 150, 243, 0.35); color: #bbdefb; }
+.card.spy-green { border-color: var(--green); background: rgba(27, 94, 32, 0.4); color: #c8e6c9; }
 .card.spy-neutral { border-color: #a1887f; background: rgba(161, 136, 127, 0.25); color: #d7ccc8; }
 .card.spy-assassin {
   border-color: var(--assassin-border);
-  background: linear-gradient(135deg, var(--assassin) 0%, #2a2a2a 100%);
+  background: linear-gradient(135deg, var(--assassin) 0%, #1a1a1a 100%);
   color: var(--assassin-text);
-  box-shadow: 0 0 8px var(--assassin-glow);
-  box-shadow: inset 0 0 12px rgba(156, 39, 176, 0.3), 0 0 8px rgba(171, 71, 188, 0.2);
+  box-shadow: inset 0 0 15px rgba(255, 23, 68, 0.4), 0 0 12px rgba(255, 82, 82, 0.3);
   position: relative;
 }
 
@@ -820,11 +822,11 @@ input[type="text"]:focus, select:focus {
   display: block;
 }
 /* Spymaster view: thick colored borders + colored mat background (no overlay) */
-.card-picture.spy-red { border: 4px solid var(--red); background: rgba(211, 47, 47, 0.25); }
-.card-picture.spy-blue { border: 4px solid var(--blue); background: rgba(21, 101, 192, 0.25); }
-.card-picture.spy-green { border: 4px solid var(--green); background: rgba(76, 175, 80, 0.25); }
+.card-picture.spy-red { border: 4px solid var(--red); background: rgba(244, 67, 54, 0.25); }
+.card-picture.spy-blue { border: 4px solid var(--blue); background: rgba(33, 150, 243, 0.25); }
+.card-picture.spy-green { border: 4px solid var(--green); background: rgba(27, 94, 32, 0.3); }
 .card-picture.spy-neutral { border: 4px solid #a1887f; background: rgba(161, 136, 127, 0.2); }
-.card-picture.spy-assassin { border: 4px solid var(--assassin-border); background: rgba(0, 0, 0, 0.15); box-shadow: 0 0 12px var(--assassin-glow); }
+.card-picture.spy-assassin { border: 4px solid var(--assassin-border); background: rgba(13, 13, 13, 0.9); box-shadow: 0 0 15px var(--assassin-glow), inset 0 0 10px rgba(255, 23, 68, 0.2); }
 .card-picture.spy-red img,
 .card-picture.spy-blue img,
 .card-picture.spy-green img,
@@ -837,21 +839,21 @@ input[type="text"]:focus, select:focus {
   top: 2px;
   right: 4px;
   font-size: 1.4rem;
-  color: var(--assassin-text);
-  text-shadow: 0 0 6px rgba(0, 0, 0, 0.9), 0 0 3px var(--assassin-glow);
+  color: var(--assassin-border);
+  text-shadow: 0 0 8px var(--assassin-glow), 0 0 4px rgba(0, 0, 0, 0.9);
   pointer-events: none;
   z-index: 1;
 }
 
 /* Revealed picture cards: colored border + dimmed image */
-.card-picture.revealed-red { border: 4px solid var(--red); background: rgba(211, 47, 47, 0.3); }
-.card-picture.revealed-blue { border: 4px solid var(--blue); background: rgba(21, 101, 192, 0.3); }
-.card-picture.revealed-green { border: 4px solid var(--green); background: rgba(76, 175, 80, 0.3); }
+.card-picture.revealed-red { border: 4px solid var(--red); background: rgba(244, 67, 54, 0.3); }
+.card-picture.revealed-blue { border: 4px solid var(--blue); background: rgba(33, 150, 243, 0.3); }
+.card-picture.revealed-green { border: 4px solid var(--green); background: rgba(27, 94, 32, 0.35); }
 .card-picture.revealed-neutral { border: 4px solid var(--neutral); background: rgba(141, 110, 99, 0.25); }
 .card-picture.revealed-assassin { 
-  border: 4px solid var(--assassin-glow); 
+  border: 4px solid var(--assassin-border); 
   background: var(--assassin);
-  box-shadow: 0 0 20px rgba(118, 255, 3, 0.5);
+  box-shadow: 0 0 25px var(--assassin-glow), inset 0 0 15px rgba(255, 23, 68, 0.3);
 }
 .card-picture.revealed-red img,
 .card-picture.revealed-blue img,
@@ -867,11 +869,11 @@ input[type="text"]:focus, select:focus {
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 3rem;
-  color: var(--assassin-glow);
-  text-shadow: 0 0 20px rgba(118, 255, 3, 0.8), 0 0 40px rgba(118, 255, 3, 0.5);
+  color: var(--assassin-border);
+  text-shadow: 0 0 25px var(--assassin-glow), 0 0 50px rgba(255, 23, 68, 0.6);
   pointer-events: none;
   z-index: 2;
-  animation: toxicPulse 2s ease-in-out infinite;
+  animation: deathPulse 2s ease-in-out infinite;
 }
 
 /* -- Clue Area -- */
