@@ -395,7 +395,9 @@ function renderPlayingPhase(data) {
   if (isDuet) {
     const turnsUsed = gs.turnsUsed || 0;
     const maxTurns = config.maxTurns || 9;
-    roundIndicator.textContent = `Timer Token: ${turnsUsed}/${maxTurns}`;
+    const greenRevealed = gs.greenRevealed || 0;
+    const greenTotal = config.greenCount || 15;
+    roundIndicator.textContent = `Token: ${turnsUsed}/${maxTurns} • Found: ${greenRevealed}/${greenTotal}`;
   } else {
     const currentRound = calculateRound(data.clueLog, data.startingTeam);
     roundIndicator.textContent = `Round ${currentRound}`;
@@ -403,15 +405,24 @@ function renderPlayingPhase(data) {
 
   // Scores - different for Duet vs competitive
   if (isDuet) {
-    // Duet mode: Show turns and mistakes
-    const turnsUsed = gs.turnsUsed || 0;
-    const mistakesMade = gs.mistakesMade || 0;
-    const maxTurns = config.maxTurns || 9;
-    const maxMistakes = config.maxMistakes || 9;
+    // Duet mode: Show individual player progress and total
+    const greenRevealed = gs.greenRevealed || 0;
+    const greenTotal = config.greenCount || 15;
+    const revealed = data.board?.revealed || [];
+    const colorMapP1 = data.board?.colorMapP1 || [];
+    const colorMapP2 = data.board?.colorMapP2 || [];
     
-    // Update labels for Duet mode
-    redScoreParent.innerHTML = `Turns: <span id="red-score">${turnsUsed}</span>/<span id="red-total">${maxTurns}</span>`;
-    blueScoreParent.innerHTML = `Mistakes: <span id="blue-score">${mistakesMade}</span>/<span id="blue-total">${maxMistakes}</span>`;
+    // Count green cards revealed from each player's perspective
+    let p1GreenCount = 0;
+    let p2GreenCount = 0;
+    revealed.forEach(idx => {
+      if (colorMapP1[idx] === 'green') p1GreenCount++;
+      if (colorMapP2[idx] === 'green') p2GreenCount++;
+    });
+    
+    // Update labels for Duet mode - show per-player progress
+    redScoreParent.innerHTML = `P1: <span id="red-score">${p1GreenCount}</span>/<span id="red-total">9</span>`;
+    blueScoreParent.innerHTML = `P2: <span id="blue-score">${p2GreenCount}</span>/<span id="blue-total">9</span>`;
     
     // Remove team color classes for Duet mode
     redScoreParent.classList.remove('red');
