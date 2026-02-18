@@ -1,18 +1,18 @@
-import { calculateGuessesAllowed } from './game-logic.js';
 /**
  * Firebase sync handlers for Codenames
  * All functions that write to Firebase live here
  */
 
 import { database, ref, get, update, set, remove } from './firebase-config.js';
-import { 
-  generateBoard, 
-  generateDuetBoard, 
-  checkGuessResult, 
-  checkWinCondition, 
+import {
+  generateBoard,
+  generateDuetBoard,
+  checkGuessResult,
+  checkWinCondition,
   checkDuetWinCondition,
   checkDuetWinConditionSimple,
-  canStartGame
+  canStartGame,
+  calculateGuessesAllowed
 } from './game-logic.js';
 import { getModeConfig } from '../data/game-modes.js';
 import { getLocalPlayer, getCurrentGame } from './game-state.js';
@@ -171,8 +171,7 @@ export async function handleGiveClue(gameId, word, number, spymasterName, team) 
   const clueLog = game.clueLog || [];
   const nextIndex = Array.isArray(clueLog) ? clueLog.length : Object.keys(clueLog || {}).length;
 
-  // Always use calculateGuessesAllowed to avoid Infinity
-  const guessesRemaining = window.calculateGuessesAllowed ? window.calculateGuessesAllowed(number) : 99;
+  const guessesRemaining = calculateGuessesAllowed(number);
 
   const updates = {
     'gameState/currentClue': { word: word.toUpperCase(), number, givenBy: spymasterName },
@@ -252,30 +251,21 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     // Duet uses board.revealed instead of gameState.revealedCards
     if (game.board.revealed[cardIndex]) return; // Already revealed
     
-    // CRITICAL: currentPlayer = CLUE GIVER (not the guesser!)
-    // When P1 gives clue → currentPlayer = 1, P2 guesses, check P1's map
-    // When P2 gives clue → currentPlayer = 2, P1 guesses, check P2's map
+    // currentPlayer = GUESSER. handleGiveClue switches currentPlayer to the OTHER player
+    // after the clue is given, so during guess phase currentPlayer = the guesser.
+    // We need the CLUE GIVER's map: that's the opposite player.
+    // When currentPlayer=2 (P2 guessing) → P1 gave the clue → use colorMapP1
+    // When currentPlayer=1 (P1 guessing) → P2 gave the clue → use colorMapP2
     const currentPlayer = gs.currentPlayer || 1;
-    const colorP1 = game.board.colorMapP1[cardIndex];
-    const colorP2 = game.board.colorMapP2[cardIndex];
-    
-    // WIN CONDITION ONLY: Count greens from EITHER map (toward 15 total)
-    const isGreenOnEitherMap = colorP1 === 'green' || colorP2 === 'green';
-    
-    // ALL GAME LOGIC: Use ONLY clue giver's map, NEVER guesser's map!
-    // Guesser's own map is COMPLETELY IRRELEVANT for turn progression/assassin/mistakes
-    const clueGiverMap = currentPlayer === 1 ? game.board.colorMapP1 : game.board.colorMapP2;
-    const clueGiverColor = clueGiverMap[cardIndex]; // This is the ONLY color that matters!
-    
-    const guesserPlayer = currentPlayer === 1 ? 2 : 1;
+    const clueGiverPlayer = currentPlayer === 1 ? 2 : 1;
+
+    // Use ONLY clue giver's map for ALL game logic (assassin, green, neutral)
+    const clueGiverMap = currentPlayer === 1 ? game.board.colorMapP2 : game.board.colorMapP1;
+    const clueGiverColor = clueGiverMap[cardIndex];
+
     console.log(`🎲 CARD REVEAL: Card ${cardIndex}`);
-    console.log(`  Clue giver: P${currentPlayer}, Guesser: P${guesserPlayer} (guesser's own map is IGNORED!)`);
-    console.log(`  Color on P1 map: ${colorP1}`);
-    console.log(`  Color on P2 map: ${colorP2}`);
-    console.log(`  >>> Clue giver (P${currentPlayer}) sees: ${clueGiverColor} <<< THIS IS WHAT MATTERS`);
-    console.log(`  Green on either map? ${isGreenOnEitherMap} (counts toward 15 win condition)`);
-    console.log(`  Correct guess? ${clueGiverColor === 'green'} (only clue giver's green counts)`);
-    console.log(`  Hit assassin? ${clueGiverColor === 'assassin'} (only clue giver's assassin kills)`);
+    console.log(`  Guesser: P${currentPlayer}, Clue giver: P${clueGiverPlayer}`);
+    console.log(`  >>> Clue giver (P${clueGiverPlayer}) sees: ${clueGiverColor} <<<`);
     
     const newRevealed = [...game.board.revealed];
     newRevealed[cardIndex] = true;
@@ -285,12 +275,10 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     let mistakesMade = gs.mistakesMade || 0;
     let turnsUsed = gs.turnsUsed || 0;
     
-    // Count toward 15 if green on EITHER map (win condition)
-    if (isGreenOnEitherMap) {
+    // Only clue giver's perspective determines green/mistake (official rules)
+    if (clueGiverColor === 'green') {
       greenRevealed++;
     } else if (clueGiverColor === 'neutral') {
-      // ONLY neutral from CLUE GIVER's perspective counts as mistake
-      // (If guesser's own assassin but clue giver sees neutral → just a mistake, not instant loss)
       mistakesMade++;
     }
     
@@ -341,34 +329,29 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     if (clueGiverColor === 'green') {
       const remaining = gs.guessesRemaining - 1;
       if (remaining <= 0) {
-        // Out of guesses — end turn, check if we need to switch players
+        // Out of guesses — end turn
         console.log(`  ✅ Green! Out of guesses. Phase → clue`);
         updates['gameState/phase'] = 'clue';
         updates['gameState/currentClue'] = null;
         updates['gameState/guessesRemaining'] = 0;
         updates['gameState/turnsUsed'] = turnsUsed + 1;
-        
-        // Check if one player has finished their 9 greens - if so, other player takes over
-        const p1GreenCount = newRevealed.filter((isRevealed, idx) => 
+
+        // The guesser (currentPlayer) gives the next clue (official alternation).
+        // Exception: if that player's own greens are all revealed, the other takes over.
+        const p1GreenCount = newRevealed.filter((isRevealed, idx) =>
           isRevealed && game.board.colorMapP1[idx] === 'green'
         ).length;
-        const p2GreenCount = newRevealed.filter((isRevealed, idx) => 
+        const p2GreenCount = newRevealed.filter((isRevealed, idx) =>
           isRevealed && game.board.colorMapP2[idx] === 'green'
         ).length;
-        
+
         const p1Finished = p1GreenCount >= 9;
         const p2Finished = p2GreenCount >= 9;
-        
-        let newPlayer;
-        if (p1Finished && !p2Finished) {
-          newPlayer = 2; // P1 done, P2 gives ALL remaining clues
-        } else if (p2Finished && !p1Finished) {
-          newPlayer = 1; // P2 done, P1 gives ALL remaining clues
-        } else {
-          // Both still playing (or both finished) - alternate normally
-          newPlayer = currentPlayer === 1 ? 2 : 1;
-        }
-        
+
+        let newPlayer = currentPlayer; // guesser → next clue giver
+        if (p1Finished && currentPlayer === 1) newPlayer = 2;
+        if (p2Finished && currentPlayer === 2) newPlayer = 1;
+
         console.log(`  P1=${p1GreenCount}/9${p1Finished?' ✓':''}, P2=${p2GreenCount}/9${p2Finished?' ✓':''} → P${newPlayer} gives next clue`);
         updates['gameState/currentPlayer'] = newPlayer;
       } else {
@@ -376,34 +359,29 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
         updates['gameState/guessesRemaining'] = remaining;
       }
     } else {
-      // Wrong guess (neutral/mistake) — end turn, check if we need to switch players
+      // Wrong guess — end turn
       console.log(`  ❌ ${clueGiverColor}! Turn ends. Phase → clue`);
       updates['gameState/phase'] = 'clue';
       updates['gameState/currentClue'] = null;
       updates['gameState/guessesRemaining'] = 0;
       updates['gameState/turnsUsed'] = turnsUsed + 1;
-      
-      // Check if one player has finished their 9 greens - if so, other player takes over
-      const p1GreenCount = newRevealed.filter((isRevealed, idx) => 
+
+      // The guesser (currentPlayer) gives the next clue (official alternation).
+      // Exception: if that player's own greens are all revealed, the other takes over.
+      const p1GreenCount = newRevealed.filter((isRevealed, idx) =>
         isRevealed && game.board.colorMapP1[idx] === 'green'
       ).length;
-      const p2GreenCount = newRevealed.filter((isRevealed, idx) => 
+      const p2GreenCount = newRevealed.filter((isRevealed, idx) =>
         isRevealed && game.board.colorMapP2[idx] === 'green'
       ).length;
-      
+
       const p1Finished = p1GreenCount >= 9;
       const p2Finished = p2GreenCount >= 9;
-      
-      let newPlayer;
-      if (p1Finished && !p2Finished) {
-        newPlayer = 2; // P1 done, P2 gives ALL remaining clues
-      } else if (p2Finished && !p1Finished) {
-        newPlayer = 1; // P2 done, P1 gives ALL remaining clues
-      } else {
-        // Both still playing (or both finished) - alternate normally
-        newPlayer = currentPlayer === 1 ? 2 : 1;
-      }
-      
+
+      let newPlayer = currentPlayer; // guesser → next clue giver
+      if (p1Finished && currentPlayer === 1) newPlayer = 2;
+      if (p2Finished && currentPlayer === 2) newPlayer = 1;
+
       console.log(`  P1=${p1GreenCount}/9${p1Finished?' ✓':''}, P2=${p2GreenCount}/9${p2Finished?' ✓':''} → P${newPlayer} gives next clue`);
       updates['gameState/currentPlayer'] = newPlayer;
     }

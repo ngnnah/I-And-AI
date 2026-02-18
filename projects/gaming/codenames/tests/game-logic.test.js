@@ -295,8 +295,9 @@ describe('calculateGuessesAllowed', () => {
     assert.equal(calculateGuessesAllowed(9), 10);
   });
 
-  it('returns Infinity for 0 clue', () => {
-    assert.equal(calculateGuessesAllowed(0), Infinity);
+  it('returns 99 (unlimited) for 0 clue — Firebase cannot store Infinity', () => {
+    assert.equal(calculateGuessesAllowed(0), 99);
+    assert.equal(calculateGuessesAllowed(Infinity), 99);
   });
 });
 

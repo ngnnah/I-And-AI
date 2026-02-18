@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Context
 
 Personal project repository focused on:
+
 - Educational games and interactive web apps (GitHub Pages)
 - AI-assisted development workflows
 - Rapid MVP prototyping and iteration
@@ -54,11 +55,13 @@ Always use `uv run` instead of activating the venv manually or calling `python` 
 # [Project Name] - Implementation Plan
 
 ## Overview
+
 - Purpose: [concise description]
 - Users: [target audience]
 - MVP features: [core functionality only]
 
 ## Tech Stack
+
 - Framework: [specific tool + version]
 - UI: [styling approach]
 - State: [management solution]
@@ -67,13 +70,15 @@ Always use `uv run` instead of activating the venv manually or calling `python` 
 
 ## Architecture
 ```
+
 project-name/
 ├── src/
-│   ├── components/
-│   ├── state/
-│   └── utils/
+│ ├── components/
+│ ├── state/
+│ └── utils/
 ├── package.json
 └── [config files]
+
 ```
 
 ## Key Data Models
@@ -116,6 +121,7 @@ project-name/
 ## Modern Stack for Rapid Development (2026)
 
 ### Game Frameworks
+
 - **Phaser.js** - 2D games (arcade, platformer, puzzle)
 - **PixiJS** - High-performance 2D rendering
 - **Three.js / React Three Fiber** - 3D games
@@ -123,29 +129,34 @@ project-name/
 - **Godot HTML5** - Full game engine
 
 ### App Frameworks
+
 - **Astro** - Static-first (perfect for GitHub Pages)
 - **Next.js** - React with SSG mode
 - **SvelteKit** - Svelte with static adapter
 - **Vite + React/Vue/Svelte** - Fast dev builds
 
 ### UI & Styling
+
 - **Tailwind CSS** - Utility-first CSS
 - **shadcn/ui** - React components on Radix
 - **DaisyUI** - Tailwind component library
 - **UnoCSS** - Instant atomic CSS
 
 ### Multiplayer & Backend
+
 - **Supabase** - Postgres + Realtime + Auth
 - **Colyseus** - Multiplayer game server
 - **PartyKit** - Realtime edge computing
 - **Firebase** - Current choice for simple multiplayer
 
 ### State Management
+
 - **Zustand** - Minimal, flexible
 - **Jotai** - Atomic state
 - **TanStack Query** - Server state, caching
 
 ### Testing
+
 - **Vitest** - Vite-native testing
 - **Testing Library** - User-centric testing
 - **Playwright** - E2E testing (current choice)
@@ -153,6 +164,7 @@ project-name/
 ## Code Style
 
 **JavaScript/Web:**
+
 - Descriptive names: `currentPlayer`, not `p`
 - Semantic HTML with ARIA labels
 - Mobile-first, responsive by default
@@ -160,6 +172,7 @@ project-name/
 - Accessibility: keyboard nav, screen readers
 
 **Python:**
+
 - Follow PEP 8, use type hints
 - Keep files focused
 
@@ -189,8 +202,15 @@ project-name/
 
 ### Sync Example
 
+Only sync web assets (skip docs, tests, node_modules, build artifacts):
+
 ```bash
-rsync -av --delete --exclude='.git' --exclude='node_modules' \
+rsync -av --delete --delete-excluded \
+  --filter='+ /css/***' \
+  --filter='+ /images/***' \
+  --filter='+ /js/***' \
+  --filter='+ /index.html' \
+  --filter='- *' \
   projects/gaming/codenames/ public/projects/gaming/codenames/
 ```
 
@@ -207,21 +227,24 @@ rsync -av --delete --exclude='.git' --exclude='node_modules' \
 
 ```bash
 npm test              # Vitest/Jest tests
-npm run test:e2e      # Playwright E2E  
+npm run test:e2e      # Playwright E2E
 uv run pytest         # Python utilities
 ```
 
 ## Current Projects
 
 **Educational Games** (Pokemon Math World, Iron Academy)
+
 - Level progression, immediate feedback, local storage
 - Structure: `js/data/`, `js/game/`, `js/screens/`
 
-**Multiplayer Games** (Nanja Monja, Codenames, Ito)  
+**Multiplayer Games** (Nanja Monja, Codenames, Ito)
+
 - Firebase Realtime sync, optimistic UI, room codes
 - Structure: `firebase-config.js`, `firebase-sync.js`, `game-state.js`, `game-logic.js`
 
 **GitHub TODO App**
+
 - Static app using GitHub Contents API, PAT storage
 
 ## Quick Reference
@@ -318,7 +341,7 @@ Best practices:
 This repo deploys to GitHub Pages from the `public/` directory on `main`.
 
 - **Deploy process**: Copy project files to `public/` then commit and push
-  - Example: `rsync -av --delete --exclude='.git' --exclude='node_modules' projects/gaming/codenames/ public/projects/gaming/codenames/`
+  - Example: `rsync -av --delete --delete-excluded --filter='+ /css/***' --filter='+ /images/***' --filter='+ /js/***' --filter='+ /index.html' --filter='- *' projects/gaming/codenames/ public/projects/gaming/codenames/`
 - **Gotcha — `.gitignore` `data/` pattern**: The gitignore has `data/` which matches any `data/` directory, including `js/data/`. Files in `js/data/` (e.g., `word-lists.js`, `game-modes.js`) must be force-added: `git add -f path/to/js/data/file.js` for both `projects/` and `public/` copies.
 - After pushing, GitHub Pages rebuilds automatically (takes ~1 min)
 

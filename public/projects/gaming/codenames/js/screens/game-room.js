@@ -688,30 +688,16 @@ function renderBoard(data, container, isFinished) {
     // Use board/revealed for Duet mode
     revealed = data.board.revealed || [];
     
-    // Determine player perspective (P1 or P2)
+    // Determine player perspective via slotNumber (1 = colorMapP1, 2 = colorMapP2)
     const localId = getLocalPlayer().id;
     const players = data.players || {};
-    const activePlayerIds = Object.keys(players)
-      .filter(id => players[id].isActive)
-      .sort(); // Sort alphabetically for consistent ordering
-    
-    const playerIndex = activePlayerIds.indexOf(localId);
-    const isP1 = playerIndex === 0;
-    
-    console.log(`👤 Player Perspective: localId=${localId}, playerIndex=${playerIndex}, isP1=${isP1}`);
-    
-    // Use appropriate color map based on perspective
-    colorMap = isP1 ? data.board.colorMapP1 : data.board.colorMapP2;
-    
-    // Debug: Show assassin positions for this player
-    const myAssassins = [];
-    colorMap.forEach((color, idx) => {
-      if (color === 'assassin') myAssassins.push(idx);
-    });
-    console.log(`  My assassins at positions:`, myAssassins);
-    
-    // Fallback to P1 if no map found
-    if (!colorMap) colorMap = data.board.colorMapP1 || [];
+    const myData = players[localId];
+    const isP1 = myData?.slotNumber === 1;
+
+    console.log(`👤 Player Perspective: localId=${localId}, slotNumber=${myData?.slotNumber}, isP1=${isP1}`);
+
+    // Use appropriate color map based on slot
+    colorMap = isP1 ? data.board.colorMapP1 : (data.board.colorMapP2 || data.board.colorMapP1 || []);
   } else {
     // Standard competitive mode
     colorMap = data.board.colorMap;
@@ -779,18 +765,11 @@ function renderBoard(data, container, isFinished) {
       let showKeyCard = false;
       
       if (isDuet) {
-        // In Duet: Only show key when it's NOT your turn to guess
-        // (either you're giving a clue, or watching the other player guess)
+        // Show key when it's NOT your turn to guess (you're giving a clue or watching)
         const currentPlayer = gs.currentPlayer || 1;
-        const players = data.players || {};
-        const activePlayerIds = Object.keys(players).filter(id => players[id].isActive).sort();
         const myId = getLocalPlayer().id;
-        const playerIndex = activePlayerIds.indexOf(myId);
-        const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
-        
-        // Show key card when:
-        // - Phase is 'clue' (both players see keys when giving/preparing clues)
-        // - Phase is 'guess' but it's NOT my turn (watching other player)
+        const mySlot = (data.players || {})[myId]?.slotNumber;
+        const isMyTurn = mySlot === currentPlayer;
         showKeyCard = (gs.phase === 'clue') || (gs.phase === 'guess' && !isMyTurn);
       } else {
         // Competitive mode: only spymasters see the key
@@ -806,16 +785,11 @@ function renderBoard(data, container, isFinished) {
           let canClickCard = false;
           if (isDuet) {
             const currentPlayer = gs.currentPlayer || 1;
-            const players = data.players || {};
-            const activePlayerIds = Object.keys(players).filter(id => players[id].isActive).sort();
             const myId = getLocalPlayer().id;
-            const playerIndex = activePlayerIds.indexOf(myId);
-            const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
+            const mySlot = (data.players || {})[myId]?.slotNumber;
+            const isMyTurn = mySlot === currentPlayer;
             // Duet mode: must click Start Guessing first
             canClickCard = isMyTurn && isGuessingActive;
-            if (i === 0) { // Debug first card only
-              console.log(`🎴 Card ${i}: canClick=${canClick}, isMyTurn=${isMyTurn}, isGuessingActive=${isGuessingActive}, canClickCard=${canClickCard}`);
-            }
           } else {
             // Competitive mode: only clickable after Start Guessing
             canClickCard = isGuessingActive;
@@ -951,14 +925,12 @@ function renderClueArea(data) {
     }
 
     if (isDuet) {
-      // Duet: only current player can guess and end guessing
+      // Duet: only current player (the guesser) can guess and end guessing
       const currentPlayer = gs.currentPlayer || 1;
-      const players = data.players || {};
-      const activePlayerIds = Object.keys(players).filter(id => players[id].isActive).sort();
       const myId = getLocalPlayer().id;
-      const playerIndex = activePlayerIds.indexOf(myId);
-      const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
-      
+      const mySlot = (data.players || {})[myId]?.slotNumber;
+      const isMyTurn = mySlot === currentPlayer;
+
       console.log(`🎯 Guess Phase UI: isMyTurn=${isMyTurn}, isGuessingActive=${isGuessingActive}`);
       
       if (isMyTurn) {

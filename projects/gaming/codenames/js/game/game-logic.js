@@ -1,5 +1,3 @@
-// Make available globally for browser
-window.calculateGuessesAllowed = calculateGuessesAllowed;
 /**
  * Pure game logic for Codenames — no side effects, fully testable
  */
@@ -180,13 +178,13 @@ export function checkDuetWinConditionSimple(greenRevealed, mistakesMade, turnsUs
     return { isOver: true, winner: 'win', reason: 'all-green' };
   }
   
-  // Loss: too many mistakes (>= not > because maxMistakes is the limit, not allowed count)
-  if (mistakesMade >= config.maxMistakes) {
+  // Loss: too many mistakes (> not >= because at exactly maxMistakes you still have one more try)
+  if (mistakesMade > config.maxMistakes) {
     return { isOver: true, winner: 'loss', reason: 'too-many-mistakes' };
   }
-  
-  // Loss: ran out of turns (>= not > because maxTurns is the limit, not allowed count)
-  if (turnsUsed >= config.maxTurns) {
+
+  // Loss: ran out of turns (> not >= because at exactly maxTurns you still have one more try)
+  if (turnsUsed > config.maxTurns) {
     return { isOver: true, winner: 'loss', reason: 'out-of-turns' };
   }
   
