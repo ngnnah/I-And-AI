@@ -795,19 +795,9 @@ function renderBoard(data, container, isFinished) {
       } else {
         card.classList.add('unrevealed');
         if (canClick) {
-          // Check if it's player's turn for Duet mode
-          let canClickCard = false;
-          if (isDuet) {
-            const currentPlayer = gs.currentPlayer || 1;
-            const myId = getLocalPlayer().id;
-            const mySlot = (data.players || {})[myId]?.slotNumber;
-            const isMyTurn = mySlot === currentPlayer;
-            // Duet mode: must click Start Guessing first
-            canClickCard = isMyTurn && isGuessingActive;
-          } else {
-            // Competitive mode: only clickable after Start Guessing
-            canClickCard = isGuessingActive;
-          }
+          // Cards become interactive after Start Guessing in both modes.
+          // onCardClick guards wrong-player taps (returns early if not your turn).
+          const canClickCard = isGuessingActive;
           
           if (canClickCard) {
             card.classList.add('clickable');
