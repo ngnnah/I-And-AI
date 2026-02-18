@@ -619,9 +619,13 @@ function renderBoard(data, container, isFinished) {
   const canClick = !isFinished && gs.phase === 'guess' && (isDuet || gs.currentTurn === myTeam) && !isSpy;
 
   container.innerHTML = '';
-  container.className = isFinished
-    ? (isPicture ? 'board board-pictures board-finished' : 'board board-finished')
-    : (isPicture ? 'board board-pictures' : 'board');
+  
+  // Build class names
+  let classNames = ['board'];
+  if (isDuet) classNames.push('board-duet');
+  if (isPicture) classNames.push('board-pictures');
+  if (isFinished) classNames.push('board-finished');
+  container.className = classNames.join(' ');
 
   for (let i = 0; i < totalCards; i++) {
     const card = document.createElement('div');

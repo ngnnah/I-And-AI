@@ -644,6 +644,11 @@ input[type="text"]:focus, select:focus {
   margin-bottom: 12px;
 }
 
+/* Duet mode: 5x5 grid */
+.board-duet {
+  grid-template-columns: repeat(5, 1fr);
+}
+
 .card {
   aspect-ratio: 1.4;
   position: relative;
