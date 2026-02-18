@@ -515,7 +515,8 @@ function renderPlayingPhase(data) {
   
   if (isDuet) {
     // Duet mode prompts - show whose turn it is
-    const clueDisplay = gs.currentClue ? `${gs.currentClue.word} ${gs.currentClue.number}` : '';
+    const clueNumber = gs.currentClue?.number === 0 ? '∞' : gs.currentClue?.number;
+    const clueDisplay = gs.currentClue ? `${gs.currentClue.word} ${clueNumber}` : '';
     const greenRevealed = gs.greenRevealed || 0;
     const greenTotal = config.greenCount || 15;
     const currentPlayer = gs.currentPlayer || 1;
@@ -548,7 +549,8 @@ function renderPlayingPhase(data) {
     // Competitive mode prompts
     const turnTeam = gs.currentTurn;
     const teamLabel = turnTeam === 'red' ? 'Red' : 'Blue';
-    const clueDisplay = gs.currentClue ? `${gs.currentClue.word} ${gs.currentClue.number}` : '';
+    const clueNumber = gs.currentClue?.number === 0 ? '∞' : gs.currentClue?.number;
+    const clueDisplay = gs.currentClue ? `${gs.currentClue.word} ${clueNumber}` : '';
     
     if (gs.phase === 'clue') {
       if (myRole === 'spymaster' && myTeam === turnTeam) {
@@ -946,7 +948,7 @@ function renderClueArea(data) {
     if (gs.currentClue) {
       currentClueDisplay.classList.remove('hidden');
       currentClueWord.textContent = gs.currentClue.word;
-      currentClueNumber.textContent = gs.currentClue.number;
+      currentClueNumber.textContent = gs.currentClue.number === 0 ? '∞' : gs.currentClue.number;
       const remaining = gs.guessesRemaining >= 99 ? 'unlimited' : gs.guessesRemaining;
       guessesRemaining.textContent = `(${remaining} left)`;
     }
@@ -1104,9 +1106,10 @@ function renderClueLog(clueLog, container) {
     // Duet mode won't have a team field, so default to neutral styling
     const teamClass = entry.team === 'red' ? 'log-red' : entry.team === 'blue' ? 'log-blue' : '';
     const guessesHtml = renderLogGuesses(entry.guesses);
+    const displayNumber = entry.number === 0 ? '∞' : entry.number;
     return `
       <div class="log-entry ${teamClass}">
-        <div class="log-clue">${entry.spymaster}: "${entry.word}" (${entry.number})</div>
+        <div class="log-clue">${entry.spymaster}: "${entry.word}" (${displayNumber})</div>
         ${guessesHtml ? `<div class="log-guesses">${guessesHtml}</div>` : ''}
       </div>`;
   }).join('');
