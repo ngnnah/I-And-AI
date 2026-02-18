@@ -181,7 +181,8 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
       [`clueLog/${logIndex}/guesses/${guessIndex}`]: {
         cardIndex,
         word: game.board.words ? game.board.words[cardIndex] : `Card ${cardIndex + 1}`,
-        result: color === 'green' ? 'correct' : color === 'assassin' ? 'assassin' : 'wrong'
+        result: color === 'green' ? 'correct' : color === 'assassin' ? 'assassin' : 'wrong',
+        color: color
       }
     };
     
@@ -264,7 +265,8 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     [`clueLog/${logIndex}/guesses/${guessIndex}`]: {
       cardIndex,
       word: game.board.words ? game.board.words[cardIndex] : `Card ${cardIndex + 1}`,
-      result
+      result,
+      color: color
     }
   };
 

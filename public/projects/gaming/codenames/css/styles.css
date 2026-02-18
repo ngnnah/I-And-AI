@@ -986,11 +986,12 @@ input[type="text"]:focus, select:focus {
   font-size: 0.8rem; 
 }
 
-/* Use team colors for correct/wrong with checkmark/X */
-.log-entry.log-red .log-correct { color: var(--red-light); font-weight: 600; }
-.log-entry.log-red .log-wrong { color: rgba(211, 47, 47, 0.5); }
-.log-entry.log-blue .log-correct { color: var(--blue-light); font-weight: 600; }
-.log-entry.log-blue .log-wrong { color: rgba(21, 101, 192, 0.5); }
+/* Color-coded guesses based on actual card color */
+.log-guess-red { color: #ef5350; font-weight: 600; }
+.log-guess-blue { color: #42a5f5; font-weight: 600; }
+.log-guess-green { color: #66bb6a; font-weight: 600; }
+.log-guess-neutral { color: #bcaaa4; font-weight: 500; opacity: 0.9; }
+.log-guess-assassin { color: var(--assassin-glow); font-weight: 700; text-shadow: 0 0 4px rgba(118, 255, 3, 0.3); }
 
 .log-passed { 
   color: var(--text-muted); 

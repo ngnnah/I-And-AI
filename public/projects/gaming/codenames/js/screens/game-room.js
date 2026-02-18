@@ -83,7 +83,7 @@ const guessConfirmOverlay = document.getElementById('guess-confirm-overlay');
 const guessConfirmText = document.getElementById('guess-confirm-text');
 const btnConfirmGuess = document.getElementById('btn-confirm-guess');
 const btnCancelGuess = document.getElementById('btn-cancel-guess');
-let pendingCardIndex = null;
+// Confirmation dialog removed for better UX - cards reveal immediately
 
 // Start guessing state
 let isGuessingActive = false;
@@ -671,11 +671,9 @@ async function onCardClick(cardIndex) {
   const revealedArray = isDuet ? (data.board.revealed || []) : (gs.revealedCards || []);
   if (revealedArray[cardIndex]) return;
 
-  // Show confirmation dialog
-  const cardText = data.board.words?.[cardIndex] || `Card ${cardIndex + 1}`;
-  guessConfirmText.textContent = `Reveal "${cardText}"?`;
-  pendingCardIndex = cardIndex;
-  guessConfirmOverlay.classList.remove('hidden');
+  // Reveal card immediately (no confirmation needed)
+  const myName = getLocalPlayer().name;
+  await handleCardReveal(game.id, cardIndex, myName);
 }
 
 function renderClueArea(data) {
@@ -867,7 +865,10 @@ function renderLogGuesses(guesses) {
   return items.map(g => {
     if (!g) return '';
     if (g.passed) return '<span class="log-passed">passed</span>';
-    const cls = g.result === 'correct' ? 'log-correct' : 'log-wrong';
+    
+    // Use actual card color for styling
+    const color = g.color || (g.result === 'correct' ? 'team' : 'neutral');
+    const cls = `log-guess log-guess-${color}`;
     const symbol = g.result === 'correct' ? '✓' : '✗';
     return `<span class="${cls}">${g.word} ${symbol}</span>`;
   }).join(' · ');
@@ -997,7 +998,8 @@ gameCode.addEventListener('click', () => {
   });
 });
 
-// Guess confirmation dialog handlers
+// Guess confirmation dialog handlers - DISABLED (cards reveal immediately)
+/*
 btnConfirmGuess.addEventListener('click', async () => {
   if (pendingCardIndex !== null) {
     const game = getCurrentGame();
@@ -1020,3 +1022,4 @@ guessConfirmOverlay.addEventListener('click', (e) => {
     guessConfirmOverlay.classList.add('hidden');
   }
 });
+*/
