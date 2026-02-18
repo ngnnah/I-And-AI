@@ -172,7 +172,7 @@ export async function handleGiveClue(gameId, word, number, spymasterName, team) 
   const nextIndex = Array.isArray(clueLog) ? clueLog.length : Object.keys(clueLog || {}).length;
 
   // Always use calculateGuessesAllowed to avoid Infinity
-  const guessesRemaining = calculateGuessesAllowed(number);
+  const guessesRemaining = window.calculateGuessesAllowed ? window.calculateGuessesAllowed(number) : 99;
 
   const updates = {
     'gameState/currentClue': { word: word.toUpperCase(), number, givenBy: spymasterName },

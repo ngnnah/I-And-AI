@@ -1,3 +1,5 @@
+// Make available globally for browser
+window.calculateGuessesAllowed = calculateGuessesAllowed;
 /**
  * Pure game logic for Codenames — no side effects, fully testable
  */
