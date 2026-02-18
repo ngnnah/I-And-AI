@@ -1000,7 +1000,7 @@ input[type="text"]:focus, select:focus {
 .card-picture img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain; /* Changed from cover to prevent cropping */
   border-radius: inherit;
   display: block;
 }
@@ -1560,6 +1560,7 @@ input[type="text"]:focus, select:focus {
   .game-title { font-size: 2rem; letter-spacing: 4px; }
   .teams-container { grid-template-columns: 1fr; }
   .card { font-size: 0.6rem; aspect-ratio: 1.2; }
+  .card-picture { aspect-ratio: 1.2; } /* Match mobile card aspect ratio to prevent image cropping */
   .clue-input-row { flex-wrap: wrap; }
   .clue-input-row input { min-width: 0; width: 100%; }
   .clue-number-buttons { width: 100%; justify-content: center; }
