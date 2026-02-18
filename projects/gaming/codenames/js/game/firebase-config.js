@@ -12,6 +12,7 @@ import {
   remove
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 import { generateDisplayName } from '../data/room-names.js';
+import { getModeConfig } from '../data/game-modes.js';
 
 const app = initializeApp({
   databaseURL: "https://codenames-game-f4ff8-default-rtdb.asia-southeast1.firebasedatabase.app"
