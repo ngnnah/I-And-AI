@@ -651,10 +651,11 @@ function renderPlayerRoster(data) {
       .filter(id => players[id].isActive)
       .sort(); // Sort for consistent P1/P2 assignment
     
-    const playerBadges = activePlayerIds.map((id, index) => {
+    const playerBadges = activePlayerIds.map((id) => {
       const p = players[id];
       const isYou = id === localId;
-      const perspective = index === 0 ? 'P1' : index === 1 ? 'P2' : 'Spectator';
+      const slot = p.slotNumber;
+      const perspective = slot === 1 ? 'P1' : slot === 2 ? 'P2' : 'Spectator';
       const name = isYou ? `${p.name} (you)` : p.name;
       return `<span class="player-badge duet"><span class="role-icon">${perspective}</span>${name}</span>`;
     });
