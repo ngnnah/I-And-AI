@@ -11,6 +11,7 @@ import {
   onValue,
   remove
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { generateDisplayName } from '../data/room-names.js';
 
 const app = initializeApp({
   databaseURL: "https://codenames-game-f4ff8-default-rtdb.asia-southeast1.firebasedatabase.app"
@@ -18,7 +19,7 @@ const app = initializeApp({
 
 const database = getDatabase(app);
 
-export { database, ref, set, get, update, onValue, remove };
+export { database, ref, set, get, update, onValue, remove, generateDisplayName };
 
 /**
  * Generate a random 6-character game ID
@@ -31,19 +32,6 @@ export function generateGameId() {
     id += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return id;
-}
-
-/**
- * Generate a random display name for a game
- * @returns {string}
- */
-export function generateDisplayName() {
-  const words = [
-    "PHOENIX", "DRAGON", "EAGLE", "LION", "WOLF", "HAWK", "SHARK", "TIGER",
-    "COBRA", "FALCON", "PANTHER", "VIPER", "RAVEN", "STORM", "BLAZE", "FROST",
-    "SHADOW", "THUNDER", "COMET", "AURORA", "GALAXY", "NEBULA", "TITAN", "ATLAS"
-  ];
-  return words[Math.floor(Math.random() * words.length)];
 }
 
 /**
