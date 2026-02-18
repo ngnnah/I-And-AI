@@ -537,14 +537,13 @@ function renderPlayingPhase(data) {
     const greenTotal = config.greenCount || 15;
     const currentPlayer = gs.currentPlayer || 1;
     
-    // Determine if it's the local player's turn
+    // Determine if it's the local player's turn — use slotNumber as canonical identity
     const players = data.players || {};
-    const activePlayerIds = Object.keys(players).filter(id => players[id].isActive).sort();
     const myId = getLocalPlayer().id;
-    const playerIndex = activePlayerIds.indexOf(myId);
-    const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
-    
-    console.log(`🎮 UI Update: myId=${myId}, playerIndex=${playerIndex}, currentPlayer=${currentPlayer}, phase=${gs.phase}, isMyTurn=${isMyTurn}`);
+    const mySlot = players[myId]?.slotNumber;
+    const isMyTurn = mySlot === currentPlayer;
+
+    console.log(`🎮 UI Update: myId=${myId}, mySlot=${mySlot}, currentPlayer=${currentPlayer}, phase=${gs.phase}, isMyTurn=${isMyTurn}`);
     
     const currentPlayerLabel = currentPlayer === 1 ? 'P1' : 'P2';
     
@@ -855,15 +854,11 @@ async function onCardClick(cardIndex) {
   
   // In Duet mode, both players can guess; in competitive mode, only current team's operative can guess
   if (isDuet) {
-    // Duet: only current player can guess
+    // Duet: only current player can guess — use slotNumber as canonical identity
     const currentPlayer = gs.currentPlayer || 1;
-    const players = data.players || {};
-    const activePlayerIds = Object.keys(players).filter(id => players[id].isActive).sort();
     const myId = getLocalPlayer().id;
-    const playerIndex = activePlayerIds.indexOf(myId);
-    const isMyTurn = (playerIndex === 0 && currentPlayer === 1) || (playerIndex === 1 && currentPlayer === 2);
-    
-    if (!isMyTurn) return;
+    const mySlot = (data.players || {})[myId]?.slotNumber;
+    if (mySlot !== currentPlayer) return;
   } else {
     // Competitive: only operatives on current turn can guess
     if (myRole !== 'operative' || myTeam !== gs.currentTurn) return;
