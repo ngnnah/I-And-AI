@@ -250,27 +250,30 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     // Duet uses board.revealed instead of gameState.revealedCards
     if (game.board.revealed[cardIndex]) return; // Already revealed
     
-    // In Duet: currentPlayer is the CLUE GIVER, the other player is guessing
+    // CRITICAL: currentPlayer = CLUE GIVER (not the guesser!)
+    // When P1 gives clue → currentPlayer = 1, P2 guesses, check P1's map
+    // When P2 gives clue → currentPlayer = 2, P1 guesses, check P2's map
     const currentPlayer = gs.currentPlayer || 1;
     const colorP1 = game.board.colorMapP1[cardIndex];
     const colorP2 = game.board.colorMapP2[cardIndex];
     
-    // For WIN CONDITION: count greens from EITHER map (15 total unique greens)
+    // WIN CONDITION ONLY: Count greens from EITHER map (toward 15 total)
     const isGreenOnEitherMap = colorP1 === 'green' || colorP2 === 'green';
     
-    // For TURN PROGRESSION: only correct if green on CLUE GIVER's map
-    // (P1 gives clue → P2 guessing P1's greens, P2 gives clue → P1 guessing P2's greens)
+    // ALL GAME LOGIC: Use ONLY clue giver's map, NEVER guesser's map!
+    // Guesser's own map is COMPLETELY IRRELEVANT for turn progression/assassin/mistakes
     const clueGiverMap = currentPlayer === 1 ? game.board.colorMapP1 : game.board.colorMapP2;
-    const clueGiverColor = clueGiverMap[cardIndex];
+    const clueGiverColor = clueGiverMap[cardIndex]; // This is the ONLY color that matters!
     
+    const guesserPlayer = currentPlayer === 1 ? 2 : 1;
     console.log(`🎲 CARD REVEAL: Card ${cardIndex}`);
-    console.log(`  Clue giver: P${currentPlayer}, Guesser: P${currentPlayer === 1 ? 2 : 1}`);
+    console.log(`  Clue giver: P${currentPlayer}, Guesser: P${guesserPlayer} (guesser's own map is IGNORED!)`);
     console.log(`  Color on P1 map: ${colorP1}`);
     console.log(`  Color on P2 map: ${colorP2}`);
-    console.log(`  Clue giver sees: ${clueGiverColor}`);
-    console.log(`  Green on either map? ${isGreenOnEitherMap} (counts toward 15)`);
-    console.log(`  Correct guess (clue giver's green)? ${clueGiverColor === 'green'}`);
-    console.log(`  Assassin on clue giver's map? ${clueGiverColor === 'assassin'}`);
+    console.log(`  >>> Clue giver (P${currentPlayer}) sees: ${clueGiverColor} <<< THIS IS WHAT MATTERS`);
+    console.log(`  Green on either map? ${isGreenOnEitherMap} (counts toward 15 win condition)`);
+    console.log(`  Correct guess? ${clueGiverColor === 'green'} (only clue giver's green counts)`);
+    console.log(`  Hit assassin? ${clueGiverColor === 'assassin'} (only clue giver's assassin kills)`);
     
     const newRevealed = [...game.board.revealed];
     newRevealed[cardIndex] = true;
@@ -280,12 +283,12 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
     let mistakesMade = gs.mistakesMade || 0;
     let turnsUsed = gs.turnsUsed || 0;
     
-    // Count toward 15 if green on EITHER map
+    // Count toward 15 if green on EITHER map (win condition)
     if (isGreenOnEitherMap) {
       greenRevealed++;
     } else if (clueGiverColor === 'neutral') {
-      // Only neutral cards from clue giver's perspective count as mistakes
-      // (Assassin on guesser's own map is just neutral from clue giver's view)
+      // ONLY neutral from CLUE GIVER's perspective counts as mistake
+      // (If guesser's own assassin but clue giver sees neutral → just a mistake, not instant loss)
       mistakesMade++;
     }
     
