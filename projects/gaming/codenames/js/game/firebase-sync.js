@@ -359,11 +359,12 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
         
         let newPlayer;
         if (p1Finished && !p2Finished) {
-          newPlayer = 2; // P1 done, P2 takes over
+          newPlayer = 2; // P1 done, P2 gives ALL remaining clues
         } else if (p2Finished && !p1Finished) {
-          newPlayer = 1; // P2 done, P1 takes over
+          newPlayer = 1; // P2 done, P1 gives ALL remaining clues
         } else {
-          newPlayer = currentPlayer; // No switch, same player continues
+          // Both still playing (or both finished) - alternate normally
+          newPlayer = currentPlayer === 1 ? 2 : 1;
         }
         
         console.log(`  P1=${p1GreenCount}/9${p1Finished?' ✓':''}, P2=${p2GreenCount}/9${p2Finished?' ✓':''} → P${newPlayer} gives next clue`);
@@ -393,11 +394,12 @@ export async function handleCardReveal(gameId, cardIndex, playerName) {
       
       let newPlayer;
       if (p1Finished && !p2Finished) {
-        newPlayer = 2; // P1 done, P2 takes over
+        newPlayer = 2; // P1 done, P2 gives ALL remaining clues
       } else if (p2Finished && !p1Finished) {
-        newPlayer = 1; // P2 done, P1 takes over
+        newPlayer = 1; // P2 done, P1 gives ALL remaining clues
       } else {
-        newPlayer = currentPlayer; // No switch, same player continues
+        // Both still playing (or both finished) - alternate normally
+        newPlayer = currentPlayer === 1 ? 2 : 1;
       }
       
       console.log(`  P1=${p1GreenCount}/9${p1Finished?' ✓':''}, P2=${p2GreenCount}/9${p2Finished?' ✓':''} → P${newPlayer} gives next clue`);
