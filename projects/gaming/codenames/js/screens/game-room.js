@@ -659,8 +659,9 @@ function renderBoard(data, container, isFinished) {
       if (isNewlyRevealed) {
         card.classList.add('just-revealed');
       }
-      if (isSpy && !isFinished) card.classList.add('revealed-dimmed');
-    } else if (isSpy) {
+      if ((isSpy || isDuet) && !isFinished) card.classList.add('revealed-dimmed');
+    } else if (isSpy || isDuet) {
+      // Show spy view for spymasters OR everyone in Duet mode
       card.classList.add(`spy-${colorMap[i]}`);
     } else {
       card.classList.add('unrevealed');

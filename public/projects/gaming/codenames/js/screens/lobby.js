@@ -105,7 +105,7 @@ function renderGameList(allGames) {
     for (const [gid, game] of myGames) {
       const playerCount = Object.values(game.players || {}).filter(p => p.isActive).length;
       const statusLabel = game.status === 'setup' ? 'Setting up' : 'In progress';
-      const modeTag = game.gameMode && game.gameMode !== 'words' ? ` &middot; ${game.gameMode === 'pictures' ? 'Pictures' : 'DIY'}` : '';
+      const modeTag = game.gameMode && game.gameMode !== 'words' ? ` &middot; ${game.gameMode === 'pictures' ? 'Pictures' : game.gameMode === 'duet' ? 'Duet' : 'DIY'}` : '';
       html += `
         <div class="game-list-item">
           <div class="game-info">
@@ -125,7 +125,7 @@ function renderGameList(allGames) {
     for (const [gid, game] of joinableGames) {
       const playerCount = Object.values(game.players || {}).filter(p => p.isActive).length;
       const statusHint = game.status === 'playing' ? ' &middot; In progress' : '';
-      const modeTag = game.gameMode && game.gameMode !== 'words' ? ` &middot; ${game.gameMode === 'pictures' ? 'Pictures' : 'DIY'}` : '';
+      const modeTag = game.gameMode && game.gameMode !== 'words' ? ` &middot; ${game.gameMode === 'pictures' ? 'Pictures' : game.gameMode === 'duet' ? 'Duet' : 'DIY'}` : '';
       html += `
         <div class="game-list-item">
           <div class="game-info">
@@ -202,7 +202,7 @@ function createHistoryItem(game) {
   const winReasonText = winReason === 'assassin' ? '☠️ Assassin hit' : winReason === 'all-cards' ? '🎯 All cards found' : '✨ Won';
   
   // Game mode tag
-  const modeTag = game.gameMode === 'pictures' ? '📷 Pictures' : game.gameMode === 'diy' ? '✂️ DIY' : '📝 Words';
+  const modeTag = game.gameMode === 'pictures' ? '📷 Pictures' : game.gameMode === 'diy' ? '✂️ DIY' : game.gameMode === 'duet' ? '🤝 Duet' : '📝 Words';
 
   // Get all players grouped by team
   const redPlayers = [];
