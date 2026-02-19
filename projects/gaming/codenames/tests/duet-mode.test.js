@@ -534,41 +534,65 @@ describe('Duet Turn Switching - Critical Flow', () => {
   });
 });
 
-describe('Duet Assassin Positions - Different Per Player', () => {
-  it('P1 and P2 have different assassin positions', () => {
+describe('Duet Assassin Positions - Official Key Card Rules', () => {
+  it('exactly 1 shared assassin (black for both players)', () => {
     const board = generateDuetBoard();
-    
-    // Collect assassin positions for each player
-    const p1Assassins = [];
-    const p2Assassins = [];
-    
-    for (let i = 0; i < 25; i++) {
-      if (board.colorMapP1[i] === 'assassin') p1Assassins.push(i);
-      if (board.colorMapP2[i] === 'assassin') p2Assassins.push(i);
-    }
-    
+
+    const p1Assassins = board.colorMapP1.map((c, i) => c === 'assassin' ? i : -1).filter(i => i !== -1);
+    const p2Assassins = board.colorMapP2.map((c, i) => c === 'assassin' ? i : -1).filter(i => i !== -1);
+
     assert.equal(p1Assassins.length, 3, 'P1 has exactly 3 assassins');
     assert.equal(p2Assassins.length, 3, 'P2 has exactly 3 assassins');
-    
-    // Verify they are different
-    const overlap = p1Assassins.filter(pos => p2Assassins.includes(pos));
-    assert.equal(overlap.length, 0, 'P1 and P2 assassins should be at DIFFERENT positions');
+
+    // Per official rules: exactly 1 shared assassin (black for BOTH)
+    const shared = p1Assassins.filter(pos => p2Assassins.includes(pos));
+    assert.equal(shared.length, 1, 'Exactly 1 shared assassin (black for both P1 and P2)');
   });
 
-  it('P1 cannot see P2s assassins as assassins', () => {
+  it("P2's unique assassins appear as green or neutral to P1, never assassin", () => {
     const board = generateDuetBoard();
-    
-    // Get P2's assassin positions
-    const p2Assassins = [];
-    for (let i = 0; i < 25; i++) {
-      if (board.colorMapP2[i] === 'assassin') p2Assassins.push(i);
+
+    const p1Assassins = new Set(board.colorMapP1.map((c, i) => c === 'assassin' ? i : -1).filter(i => i !== -1));
+    const p2Assassins = board.colorMapP2.map((c, i) => c === 'assassin' ? i : -1).filter(i => i !== -1);
+
+    // P2's 2 unique assassins (exclude the shared one): P1 sees them as green or neutral
+    const p2UniqueAssassins = p2Assassins.filter(pos => !p1Assassins.has(pos));
+    assert.equal(p2UniqueAssassins.length, 2, 'P2 has 2 unique assassins (shared excluded)');
+
+    for (const pos of p2UniqueAssassins) {
+      assert.notEqual(board.colorMapP1[pos], 'assassin',
+        `P1 must not see position ${pos} as assassin (it is P2's unique assassin)`);
     }
-    
-    // Check what P1 sees at those positions
-    for (const pos of p2Assassins) {
-      assert.notEqual(board.colorMapP1[pos], 'assassin', 
-        `P1 should not see assassin at position ${pos} (P2's assassin)`);
-    }
+  });
+
+  it('cross-danger: exactly 1 of P2s unique assassins is green for P1', () => {
+    const board = generateDuetBoard();
+
+    const p1Assassins = new Set(board.colorMapP1.map((c, i) => c === 'assassin' ? i : -1).filter(i => i !== -1));
+    const p2Assassins = board.colorMapP2.map((c, i) => c === 'assassin' ? i : -1).filter(i => i !== -1);
+    const p2UniqueAssassins = p2Assassins.filter(pos => !p1Assassins.has(pos));
+
+    // Exactly 1 cross-danger: P2's assassin that P1 sees as green
+    const crossDanger = p2UniqueAssassins.filter(pos => board.colorMapP1[pos] === 'green');
+    assert.equal(crossDanger.length, 1, 'Exactly 1 cross-danger: P2 assassin that is P1 green');
+
+    // The other unique P2 assassin is neutral for P1
+    const neutralDanger = p2UniqueAssassins.filter(pos => board.colorMapP1[pos] === 'neutral');
+    assert.equal(neutralDanger.length, 1, 'Exactly 1 P2 assassin that P1 sees as neutral');
+  });
+
+  it('cross-danger: exactly 1 of P1s unique assassins is green for P2', () => {
+    const board = generateDuetBoard();
+
+    const p2Assassins = new Set(board.colorMapP2.map((c, i) => c === 'assassin' ? i : -1).filter(i => i !== -1));
+    const p1Assassins = board.colorMapP1.map((c, i) => c === 'assassin' ? i : -1).filter(i => i !== -1);
+    const p1UniqueAssassins = p1Assassins.filter(pos => !p2Assassins.has(pos));
+
+    const crossDanger = p1UniqueAssassins.filter(pos => board.colorMapP2[pos] === 'green');
+    assert.equal(crossDanger.length, 1, 'Exactly 1 cross-danger: P1 assassin that is P2 green');
+
+    const neutralDanger = p1UniqueAssassins.filter(pos => board.colorMapP2[pos] === 'neutral');
+    assert.equal(neutralDanger.length, 1, 'Exactly 1 P1 assassin that P2 sees as neutral');
   });
 
   it('revealing P1s assassin does not affect P2s color map', () => {
