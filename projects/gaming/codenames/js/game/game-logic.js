@@ -63,50 +63,52 @@ export function getRandomCardIds(totalImages, count) {
  */
 export function generateDuetBoard(gameMode = 'duet') {
   const config = getModeConfig(gameMode);
-  
-  // Generate 15 unique positions for green agents
-  const totalCards = config.totalCards;
-  const greenPositions = new Set();
-  while (greenPositions.size < config.greenCount) {
-    greenPositions.add(Math.floor(Math.random() * totalCards));
-  }
-  const greenArray = Array.from(greenPositions);
-  
-  // Split green agents: Player 1 sees 9, Player 2 sees 9, with 3 overlapping
-  // This creates the "shared key card" mechanic:
-  // - P1 only: 6 greens (indices 0-5)
-  // - Shared: 3 greens (indices 6-8) — both players see these
-  // - P2 only: 6 greens (indices 9-14)
-  // Total: 15 unique green cards
-  const p1Green = greenArray.slice(0, 9); // indices 0-8
-  const p2Green = greenArray.slice(6, 15); // indices 6-14 (overlap at 6,7,8)
-  
-  // Place assassins - each player has DIFFERENT assassins (like two-sided key card)
-  const remainingPositions = [];
-  for (let i = 0; i < totalCards; i++) {
-    if (!greenPositions.has(i)) remainingPositions.push(i);
-  }
-  shuffleArray(remainingPositions);
-  
-  // P1 gets first 3 assassins, P2 gets next 3 assassins (can overlap for difficulty)
-  const p1Assassins = remainingPositions.slice(0, config.assassinCount);
-  const p2Assassins = remainingPositions.slice(config.assassinCount, config.assassinCount * 2);
-  
-  console.log('🎲 Duet Board Generation:');
-  console.log('  P1 assassins:', p1Assassins);
-  console.log('  P2 assassins:', p2Assassins);
-  console.log('  P1 greens:', p1Green);
-  console.log('  P2 greens:', p2Green);
-  
-  // Build color maps
+  const totalCards = config.totalCards; // 25
+
+  // Shuffle all 25 positions and assign roles per official Duet key card rules.
+  // Each side always has exactly: 9 Green, 3 Black (assassin), 13 Tan (neutral).
+  //
+  // Role breakdown (25 positions):
+  //   sharedGreen      (3): Green for BOTH players
+  //   p1OnlyGreen      (5): Green for P1, Neutral for P2
+  //   p2OnlyGreen      (5): Green for P2, Neutral for P1
+  //   sharedAssassin   (1): Black for BOTH players (instant loss either way)
+  //   p1BlackIsP2Green (1): Black for P1, Green for P2  ← P1's clue must avoid this!
+  //   p2BlackIsP1Green (1): Black for P2, Green for P1  ← P2's clue must avoid this!
+  //   p1BlackIsP2Tan   (1): Black for P1, Neutral for P2
+  //   p2BlackIsP1Tan   (1): Black for P2, Neutral for P1
+  //   bothTan          (7): Neutral for BOTH players
+  //
+  // P1 totals: 3+5+1 = 9 green, 1+1+1 = 3 black, 5+1+7 = 13 neutral ✓
+  // P2 totals: 3+5+1 = 9 green, 1+1+1 = 3 black, 5+1+7 = 13 neutral ✓
+  // Unique greens: 3+5+5+1+1 = 15 ✓
+
+  const positions = Array.from({ length: totalCards }, (_, i) => i);
+  shuffleArray(positions);
+
+  let idx = 0;
+  const sharedGreen      = positions.slice(idx, idx + 3); idx += 3;
+  const p1OnlyGreen      = positions.slice(idx, idx + 5); idx += 5;
+  const p2OnlyGreen      = positions.slice(idx, idx + 5); idx += 5;
+  const sharedAssassin   = positions.slice(idx, idx + 1); idx += 1;
+  const p1BlackIsP2Green = positions.slice(idx, idx + 1); idx += 1;
+  const p2BlackIsP1Green = positions.slice(idx, idx + 1); idx += 1;
+  const p1BlackIsP2Tan   = positions.slice(idx, idx + 1); idx += 1;
+  const p2BlackIsP1Tan   = positions.slice(idx, idx + 1); idx += 1;
+  // Remaining 7 positions (idx 18-24) are neutral for both
+
   const colorMapP1 = Array(totalCards).fill('neutral');
   const colorMapP2 = Array(totalCards).fill('neutral');
-  
-  p1Green.forEach(idx => { colorMapP1[idx] = 'green'; });
-  p2Green.forEach(idx => { colorMapP2[idx] = 'green'; });
-  p1Assassins.forEach(idx => { colorMapP1[idx] = 'assassin'; });
-  p2Assassins.forEach(idx => { colorMapP2[idx] = 'assassin'; });
-  
+
+  sharedGreen.forEach(i      => { colorMapP1[i] = 'green';    colorMapP2[i] = 'green';    });
+  p1OnlyGreen.forEach(i      => { colorMapP1[i] = 'green';                                });
+  p2OnlyGreen.forEach(i      => {                              colorMapP2[i] = 'green';    });
+  sharedAssassin.forEach(i   => { colorMapP1[i] = 'assassin'; colorMapP2[i] = 'assassin'; });
+  p1BlackIsP2Green.forEach(i => { colorMapP1[i] = 'assassin'; colorMapP2[i] = 'green';    });
+  p2BlackIsP1Green.forEach(i => { colorMapP1[i] = 'green';    colorMapP2[i] = 'assassin'; });
+  p1BlackIsP2Tan.forEach(i   => { colorMapP1[i] = 'assassin';                             });
+  p2BlackIsP1Tan.forEach(i   => {                              colorMapP2[i] = 'assassin'; });
+
   return {
     cardIds: getRandomCardIds(config.totalImages, totalCards),
     colorMapP1,

@@ -7,6 +7,7 @@
 ## How to Play
 
 ### Setup
+
 1. Two players join a room (P1 and P2)
 2. Select **"Duet"** game mode from the lobby
 3. Host starts the game — board is generated with dual perspective color maps
@@ -15,45 +16,49 @@
 
 **Board:** 5×5 grid (25 picture cards)
 
-**The Shared Key Card Mechanic:**
+---
 
-Like the physical Duet game's two-sided key card, each player sees a **different perspective** of the same board:
+### The Dual Key Card — Official Rules
 
-- **P1 sees:** 9 green cards from their side
-- **P2 sees:** 9 green cards from their side  
-- **3 cards are SHARED** — both players see them as green
-- **Total unique greens:** 15 cards (6 P1-only + 3 shared + 6 P2-only)
+Each player sees a **different perspective** of the same 25-card board, following strict mathematical rules:
 
-**Example:**
-```
-P1's view: Cards 1,2,3,4,5,6,★7,★8,★9 are green (9 total)
-P2's view: Cards ★7,★8,★9,10,11,12,13,14,15 are green (9 total)
-Shared: ★7, ★8, ★9 (3 cards both see as green)
-Goal: Find all 15 unique greens together
-```
+**Every side always has exactly: 9 Green · 3 Black · 13 Tan**
 
-**Assassins (Different per Player):**
-- **P1 has 3 assassins** at certain positions (instant loss if P1 reveals them)
-- **P2 has 3 DIFFERENT assassins** at other positions (instant loss if P2 reveals them)
-- Players must avoid BOTH sets of assassins
-- What's safe for P1 might be deadly for P2!
+| Position type            | P1 sees       | P2 sees       | Count  |
+| ------------------------ | ------------- | ------------- | ------ |
+| Shared agents            | Green         | Green         | 3      |
+| P1-only agents           | Green         | Tan           | 5      |
+| P2-only agents           | Tan           | Green         | 5      |
+| Shared assassin          | Black         | Black         | 1      |
+| P1 assassin = P2 agent   | Black         | **Green**     | 1      |
+| P2 assassin = P1 agent   | **Green**     | Black         | 1      |
+| P1 assassin (P2 neutral) | Black         | Tan           | 1      |
+| P2 assassin (P1 neutral) | Tan           | Black         | 1      |
+| Both neutral             | Tan           | Tan           | 7      |
+| **Total**                | **9G 3B 13T** | **9G 3B 13T** | **25** |
 
-**Neutral Cards:**
-- Remaining cards are neutral for that player
-- Revealing neutral = 1 mistake (max 9 allowed)
-- One player's neutral might be another's green or assassin
+**Key facts:**
 
-**Key Insight:**
-Players must give clues based on their unique perspective while considering their partner sees different dangers and targets.
+- **Shared agents:** Exactly 3 positions are Green on **both** sides — both players must find these
+- **Shared assassin:** Exactly 1 position is Black on **both** sides — instant loss whoever reveals it
+- **Cross-danger:** 1 of P1's assassins is Green on P2's side (and vice versa) — P1 must never clue P2 toward their own assassin!
+- **Total unique greens:** Always exactly 15 (3 shared + 6 P1-only + 6 P2-only)
+
+> P1's 6 "unique" greens = 5 that are P2's neutral + 1 that is P2's assassin
+> P2's 6 "unique" greens = 5 that are P1's neutral + 1 that is P1's assassin
+
+---
 
 ### Turn Flow
 
 1. **Clue Phase:** Active player gives one-word clue + number (e.g., "OCEAN 2")
 2. **Guess Phase:** Partner guesses up to N+1 cards
-   - 🟢 **Green card:** Continue guessing (remaining guesses decrement)
-   - ⚪ **Neutral card:** Turn ends, mistake counter +1
-   - ☠️ **Assassin:** Game over — immediate loss
+   - 🟢 **Green card (clue giver's map):** Continue guessing (remaining guesses decrement)
+   - ⚪ **Neutral card (clue giver's map):** Turn ends, mistake counter +1
+   - ☠️ **Assassin (clue giver's map):** Game over — immediate loss
    - Players can **end guessing early** to preserve turns
+
+   > The outcome of each guess is determined by the **clue giver's** color map, not the guesser's. A card that is the guesser's assassin but the clue giver's green counts as a success.
 
 3. **Turn ends** → Switch to other player's clue phase
 
@@ -62,7 +67,8 @@ Players must give clues based on their unique perspective while considering thei
 **Win:** Reveal all 15 green agents before limits are reached
 
 **Loss:**
-- ☠️ Reveal any assassin (immediate)
+
+- ☠️ Reveal any assassin from the clue giver's map (immediate)
 - 🔴 Use all 9 turns without finding all greens
 - 🔴 Make 9 mistakes (neutral cards)
 
@@ -79,6 +85,7 @@ Players must give clues based on their unique perspective while considering thei
 ### Data Structure
 
 **Game State:**
+
 ```javascript
 {
   gameMode: 'duet',
@@ -120,125 +127,83 @@ Players must give clues based on their unique perspective while considering thei
 
 ```javascript
 // generateDuetBoard() in game-logic.js
-function generateDuetBoard(gameMode) {
-  const config = getModeConfig('duet');
-  
-  // 1. Pick 15 random positions for green cards
-  const greenPositions = selectRandomPositions(15, 25);
-  const greenArray = Array.from(greenPositions);
-  
-  // 2. Create shared key card mechanic:
-  //    P1 sees first 9 greens (indices 0-8)
-  //    P2 sees last 9 greens (indices 6-14)
-  //    Overlap: indices 6,7,8 (3 shared greens)
-  const p1Green = greenArray.slice(0, 9);   // 9 greens for P1
-  const p2Green = greenArray.slice(6, 15);  // 9 greens for P2 (3 overlap)
-  
-  // 3. Assign different assassins to each player
-  const remaining = nonGreenPositions(greenPositions, 25);
-  shuffleArray(remaining);
-  const p1Assassins = remaining.slice(0, 3);  // P1's 3 assassins
-  const p2Assassins = remaining.slice(3, 6);  // P2's 3 assassins (different!)
-  
-  // 4. Build color maps (rest are neutral)
-  const colorMapP1 = buildColorMap(p1Green, p1Assassins, 25);
-  const colorMapP2 = buildColorMap(p2Green, p2Assassins, 25);
-  
-  return {
-    colorMapP1,      // P1's perspective
-    colorMapP2,      // P2's perspective  
-    cardIds: selectRandomCards(config),
-    revealed: new Array(25).fill(false)  // Shared revelation state
-  };
-}
+// Shuffle 25 positions and assign roles per official rules:
+
+const sharedGreen      = positions[0..2];   // Green for BOTH
+const p1OnlyGreen      = positions[3..7];   // Green P1, Neutral P2
+const p2OnlyGreen      = positions[8..12];  // Green P2, Neutral P1
+const sharedAssassin   = positions[13];     // Black for BOTH
+const p1BlackIsP2Green = positions[14];     // Black P1, Green P2  ← cross-danger!
+const p2BlackIsP1Green = positions[15];     // Black P2, Green P1  ← cross-danger!
+const p1BlackIsP2Tan   = positions[16];     // Black P1, Neutral P2
+const p2BlackIsP1Tan   = positions[17];     // Black P2, Neutral P1
+// positions[18..24]: Neutral for both (7 cards)
 ```
 
 ### Card Reveal Logic
 
-**Duet-specific handling in `handleCardReveal()`:**
+Outcome is always based on the **clue giver's** color map:
 
 ```javascript
-// firebase-sync.js
-if (config.isDuet) {
-  // Use current player's perspective
-  const currentPlayer = gs.currentPlayer || 1;
-  const colorMap = currentPlayer === 1 
-    ? game.board.colorMapP1 
-    : game.board.colorMapP2;
-  
-  const color = colorMap[cardIndex];
-  
-  if (color === 'green') {
-    greenRevealed++;
-    // Continue guessing if guesses remain
-  } else if (color === 'neutral') {
-    mistakesMade++;
-    // End turn, switch player
-  } else if (color === 'assassin') {
-    // Immediate loss
-  }
-  
-  // Switch player (1 ↔ 2)
-  updates['gameState/currentPlayer'] = currentPlayer === 1 ? 2 : 1;
+// firebase-sync.js — handleCardReveal (Duet)
+const clueGiver = currentPlayer === 1 ? 2 : 1; // opposite of guesser
+const clueGiverMap = clueGiver === 1 ? colorMapP1 : colorMapP2;
+const color = clueGiverMap[cardIndex];
+
+if (color === "green") {
+  greenRevealed++; /* continue */
 }
+if (color === "neutral") {
+  mistakesMade++; /* end turn  */
+}
+if (color === "assassin") {
+  /* immediate loss */
+}
+
+// greenRevealed = count of positions revealed that are green on EITHER map
 ```
 
 ### UI Adaptations
 
 **Setup Phase:**
+
 - No team selection UI
 - Shows player count instead of team slots
 - Requires minimum 2 players
 
 **Playing Phase:**
-- Shows both players as "P1" and "P2" (based on join order)
+
+- Shows both players as "P1" and "P2" (based on slot claimed during setup)
 - Unified cooperative color scheme (no red/blue distinction)
 - Score displays: Turns Used / Mistakes Made
 - Action prompt shows green cards found progress
 - Both players can give clues and guess (no role restrictions)
 
 **Board Rendering:**
+
 - Uses `board.revealed[]` instead of `gameState.revealedCards[]`
 - Each player sees their own color map perspective
-- Player perspective determined by sorted player ID order
-
----
-
-## Testing
-
-```bash
-# Run Duet mode tests
-node --test tests/duet-mode.test.js
-
-# Test coverage includes:
-# - Board generation with dual color maps
-# - Correct card reveal (green)
-# - Neutral card reveal (mistake)
-# - Assassin reveal (loss)
-# - Win condition (all greens found)
-# - Turn limit loss
-# - Mistake limit loss
-# - Player switching logic
-```
+- Player perspective determined by `slotNumber` claimed during setup
 
 ---
 
 ## Strategy Tips
 
-1. **Communicate perspectives:** Remember your partner sees different cards as green/neutral
-2. **Safe clues:** Avoid clues that might lead to assassins from either perspective
-3. **Manage resources:** Balance between aggressive guessing and preserving turns
-4. **Pattern recognition:** Look for clusters of greens only you can see
-5. **Trust your partner:** They're working from information you don't have
+1. **Cross-danger awareness:** Your assassin might be your partner's green — avoid cluing toward it
+2. **Shared assassin:** One card kills instantly no matter who picks it; treat it as absolutely forbidden
+3. **Communicate perspectives:** Your partner sees different cards as green/neutral/black
+4. **Safe clues:** Avoid clues that might lead to assassins from either perspective
+5. **Manage resources:** Balance aggressive guessing against preserving turns
+6. **Trust your partner:** They're working from information you don't have
 
 ---
 
 ## Technical Notes
 
 - **Firebase sync:** Real-time updates for both players viewing same game state
-- **Player ordering:** Consistent P1/P2 assignment via sorted active player IDs
+- **Player ordering:** Consistent P1/P2 assignment via slot claimed during setup
 - **Backward compatibility:** Duet mode coexists with competitive modes in same codebase
-- **Gatekeeping:** Prevents card reveals during clue phase (phase-based access control)
+- **Reveal guard:** Prevents card reveals during clue phase (phase-based access control)
 
 ---
 
@@ -253,6 +218,7 @@ node --test tests/duet-mode.test.js
 ---
 
 **Related Files:**
+
 - Implementation: `js/game/firebase-sync.js`, `js/game/game-logic.js`
 - Configuration: `js/data/game-modes.js`
 - UI: `js/screens/game-room.js`
