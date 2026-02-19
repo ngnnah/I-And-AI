@@ -979,18 +979,6 @@ input[type="text"]:focus, select:focus {
   position: relative;
 }
 
-/* Skull emoji on text assassin cards */
-.card.spy-assassin::before {
-  content: '💀';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 4rem;
-  opacity: 0.2;
-  pointer-events: none;
-  z-index: 0;
-}
 
 /* Revealed + spymaster dimmed */
 .card.revealed-dimmed { opacity: 0.45; }
