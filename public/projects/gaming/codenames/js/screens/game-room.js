@@ -584,25 +584,24 @@ function renderPlayingPhase(data) {
     }
   }
   
-  actionPrompt.textContent = promptText;
-  
-  // Set color classes
+  // Set color classes (reset first)
   actionPrompt.className = 'action-prompt';
-  
-  if (isDuet) {
-    // Duet mode: always show cooperative color
-    actionPrompt.classList.add('my-turn'); // Use my-turn for active state
+
+  // Hide during guess phase — clue area already shows clue + guesser status
+  if (gs.phase === 'guess') {
+    actionPrompt.classList.add('hidden');
   } else {
-    // Competitive mode: highlight based on whose turn it is
-    const turnTeam = gs.currentTurn;
-    const isMyTurn = turnTeam === myTeam && (
-      (gs.phase === 'clue' && myRole === 'spymaster') ||
-      (gs.phase === 'guess' && myRole === 'operative')
-    );
-    if (isMyTurn) {
+    actionPrompt.textContent = promptText;
+    if (isDuet) {
       actionPrompt.classList.add('my-turn');
     } else {
-      actionPrompt.classList.add(`${turnTeam}-turn`);
+      const turnTeam = gs.currentTurn;
+      const isMyTurn = turnTeam === myTeam && gs.phase === 'clue' && myRole === 'spymaster';
+      if (isMyTurn) {
+        actionPrompt.classList.add('my-turn');
+      } else {
+        actionPrompt.classList.add(`${turnTeam}-turn`);
+      }
     }
   }
 
