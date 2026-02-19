@@ -24,28 +24,28 @@ Each player sees a **different perspective** of the same 25-card board, followin
 
 **Every side always has exactly: 9 Green · 3 Black · 13 Tan**
 
-| Position type            | P1 sees       | P2 sees       | Count  |
-| ------------------------ | ------------- | ------------- | ------ |
-| Shared agents            | Green         | Green         | 3      |
-| P1-only agents           | Green         | Tan           | 5      |
-| P2-only agents           | Tan           | Green         | 5      |
-| Shared assassin          | Black         | Black         | 1      |
-| P1 assassin = P2 agent   | Black         | **Green**     | 1      |
-| P2 assassin = P1 agent   | **Green**     | Black         | 1      |
-| P1 assassin (P2 neutral) | Black         | Tan           | 1      |
-| P2 assassin (P1 neutral) | Tan           | Black         | 1      |
-| Both neutral             | Tan           | Tan           | 7      |
-| **Total**                | **9G 3B 13T** | **9G 3B 13T** | **25** |
+| Position type            | P1 sees             | P2 sees             | Count  |
+| ------------------------ | ------------------- | ------------------- | ------ |
+| Shared agents            | Green               | Green               | 3      |
+| P1-only agents †         | Green               | Tan (5) / Black (1) | **6**  |
+| P2-only agents †         | Tan (5) / Black (1) | Green               | **6**  |
+| Shared assassin          | Black               | Black               | 1      |
+| P1 assassin (P2 neutral) | Black               | Tan                 | 1      |
+| P2 assassin (P1 neutral) | Tan                 | Black               | 1      |
+| Both neutral             | Tan                 | Tan                 | 7      |
+| **Total**                | **9G 3B 13T**       | **9G 3B 13T**       | **25** |
+
+† Within each player's 6 unique agents, **1 is the partner's assassin** (cross-danger card):
+
+- 1 of P1's 6 unique greens is **Black on P2's map** — P2 must never guess it when P2 gives clues!
+- 1 of P2's 6 unique greens is **Black on P1's map** — P1 must never guess it when P1 gives clues!
 
 **Key facts:**
 
 - **Shared agents:** Exactly 3 positions are Green on **both** sides — both players must find these
 - **Shared assassin:** Exactly 1 position is Black on **both** sides — instant loss whoever reveals it
-- **Cross-danger:** 1 of P1's assassins is Green on P2's side (and vice versa) — P1 must never clue P2 toward their own assassin!
+- **Cross-danger:** 1 of your agents is your partner's assassin — they must never clue toward it!
 - **Total unique greens:** Always exactly 15 (3 shared + 6 P1-only + 6 P2-only)
-
-> P1's 6 "unique" greens = 5 that are P2's neutral + 1 that is P2's assassin
-> P2's 6 "unique" greens = 5 that are P1's neutral + 1 that is P1's assassin
 
 ---
 
