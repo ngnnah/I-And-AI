@@ -10,6 +10,19 @@ import { STATUS_CARDS } from '../data/cards.js';
 import { navigateTo } from '../main.js';
 import { playSound } from '../game/sounds.js';
 
+// ---- Toast utility ----
+const toastContainer = document.getElementById('toast-container');
+function showToast(msg, isError = false) {
+  const el = document.createElement('div');
+  el.className = `toast${isError ? ' toast-error' : ''}`;
+  el.textContent = msg;
+  toastContainer.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('toast-out');
+    el.addEventListener('animationend', () => el.remove());
+  }, 3000);
+}
+
 // ---- DOM refs ----
 const backBtn         = document.getElementById('game-back-btn');
 const displayNameEl   = document.getElementById('game-display-name');
@@ -101,7 +114,8 @@ function onLeaveGameRoom() {
 function renderGame(game, gameId) {
   displayNameEl.textContent  = game.displayName || gameId;
   codeBadgeEl.textContent    = gameId;
-  headerStatusEl.textContent = game.status;
+  const statusLabels = { lobby: 'Waiting', playing: 'In Progress', finished: 'Finished' };
+  headerStatusEl.textContent = statusLabels[game.status] || game.status;
 
   // Show correct phase
   phaseLobby.classList.add('hidden');
@@ -162,7 +176,7 @@ startGameBtn.addEventListener('click', async () => {
   try {
     await startGame(getCurrentGame().id, game.players);
   } catch (err) {
-    alert(`Cannot start: ${err.message}`);
+    showToast(`Cannot start: ${err.message}`, true);
     startGameBtn.disabled = false;
   }
 });
@@ -218,9 +232,12 @@ function renderPlayingPhase(game, gameId) {
   const redDanger  = redRevealed >= 3 ? 'deck-danger' : redRevealed === 2 ? 'deck-warning' : '';
   const deckInfoEl = document.getElementById('deck-info');
   if (deckInfoEl) {
+    const redLabel = redRevealed >= 3
+      ? `${redRevealed} red cards — NEXT RED ENDS GAME`
+      : `${redRevealed} of 6 red cards revealed`;
     deckInfoEl.innerHTML = `
       <span class="deck-cards-left">${cardsLeft} card${cardsLeft !== 1 ? 's' : ''} left</span>
-      <span class="deck-red ${redDanger}">${redRevealed}/3 red revealed${redRevealed >= 3 ? ' — NEXT RED ENDS GAME' : ''}</span>
+      <span class="deck-red ${redDanger}">${redLabel}</span>
     `;
   }
 
@@ -250,7 +267,7 @@ function renderPlayingPhase(game, gameId) {
           <span class="slot-total">${bidTotal > 0 ? bidTotal : '—'}</span>
           <span class="slot-money">${netMoney}💰</span>
         </div>
-        <div class="slot-score">${cardCount} card${cardCount !== 1 ? 's' : ''} · score ${score}</div>
+        <div class="slot-score">${cardCount > 0 ? `${cardCount} card${cardCount !== 1 ? 's' : ''} · ${score}pts` : 'no cards yet'}</div>
         <div class="slot-status ${hasPassed ? 'slot-passed' : isActive ? 'slot-bidding' : ''}">
           ${hasPassed ? passLabel : isActive ? 'bidding...' : ''}
         </div>
@@ -274,8 +291,12 @@ function renderPlayingPhase(game, gameId) {
   // --- My identity + hand ---
   const myColor    = myData.color || 'crimson';
   const myBidCards = auction.bids?.[myId] || [];  // cards already on table (committed)
-  const myAvailableMoney = getMoneyTotal(myData.moneyCards || []) - getBidTotal(myBidCards);
-  myMoneyTotalEl.textContent = `${myAvailableMoney}`;
+  const myTotalMoney     = getMoneyTotal(myData.moneyCards || []);
+  const myCommittedTotal = getBidTotal(myBidCards);
+  const myAvailableMoney = myTotalMoney - myCommittedTotal;
+  myMoneyTotalEl.textContent = myCommittedTotal > 0
+    ? `${myAvailableMoney} avail (${myTotalMoney} total)`
+    : `${myTotalMoney}`;
   const myIdentityEl = document.getElementById('my-identity');
   if (myIdentityEl) {
     const myCards = (myData.statusCards || []).map(id => STATUS_CARDS[id]).filter(Boolean);
@@ -283,7 +304,7 @@ function renderPlayingPhase(game, gameId) {
     myIdentityEl.innerHTML = `
       <span class="my-color-dot" style="background:var(--color-${myColor})"></span>
       <span class="my-name">${myData.name || getLocalPlayer().name}</span>
-      <span class="my-score-badge">score ${myScore}</span>
+      ${myCards.length > 0 ? `<span class="my-score-badge">score ${myScore}</span>` : ''}
       ${myCards.length > 0 ? `<div class="my-cards-row">${myCards.map(c => `<span class="my-card-chip ${c.type !== 'luxury' ? 'chip-red' : ''}" title="${c.name}">${c.emoji}${c.value || ''}</span>`).join('')}</div>` : ''}
     `;
   }
@@ -471,7 +492,7 @@ confirmBidBtn.addEventListener('click', async () => {
     await placeBid(gameId, playerId, [...stagedCards]);
     stagedCards = [];
   } catch (err) {
-    alert(`Bid failed: ${err.message}`);
+    showToast(`Bid failed: ${err.message}`, true);
     confirmBidBtn.disabled = false;
   }
 });
@@ -485,7 +506,7 @@ foldPassBtn.addEventListener('click', async () => {
     await foldOrPass(gameId, playerId);
     stagedCards = [];
   } catch (err) {
-    alert(`Action failed: ${err.message}`);
+    showToast(`Action failed: ${err.message}`, true);
     foldPassBtn.disabled = false;
   }
 });
@@ -517,33 +538,26 @@ function renderAuctionLog(log) {
   `;
 }
 
-// ---- Thief modal (inline) ----
+// ---- Thief modal ----
 function renderThiefModal(game, myId) {
   const myCards  = game.players[myId].statusCards || [];
   const luxuries = myCards.filter(id => STATUS_CARDS[id]?.type === 'luxury');
   if (luxuries.length === 0) return;
 
-  // Simple inline overlay
-  const existing = document.getElementById('thief-modal');
-  if (existing) return; // already showing
+  if (document.getElementById('thief-modal')) return; // already showing
 
   const overlay = document.createElement('div');
   overlay.id = 'thief-modal';
-  overlay.style.cssText = `
-    position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;
-    display:flex;align-items:center;justify-content:center;padding:24px;
-  `;
+  overlay.className = 'thief-modal-overlay';
   overlay.innerHTML = `
-    <div style="background:#2a1f1a;border:2px solid #c0392b;border-radius:12px;padding:24px;max-width:380px;width:100%;text-align:center;">
-      <div style="font-size:1.5rem;color:#c0392b;margin-bottom:8px;">🦹 Thief!</div>
-      <p style="color:#c4a87a;margin-bottom:16px;font-size:.9rem;">
-        You must discard one of your luxury cards.
-      </p>
-      <div id="thief-card-list" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;"></div>
+    <div class="thief-modal-panel">
+      <div class="thief-modal-title">Thief!</div>
+      <p class="thief-modal-desc">You must discard one of your luxury cards.</p>
+      <div class="thief-card-list"></div>
     </div>
   `;
 
-  const list = overlay.querySelector('#thief-card-list');
+  const list = overlay.querySelector('.thief-card-list');
   luxuries.forEach(cardId => {
     const card = STATUS_CARDS[cardId];
     const btn = document.createElement('button');
@@ -669,8 +683,15 @@ backToLobbyBtn.addEventListener('click', () => {
 // ============================================================
 
 backBtn.addEventListener('click', async () => {
-  const { id: gameId } = getCurrentGame();
+  const { id: gameId, data: game } = getCurrentGame();
   const { id: playerId } = getLocalPlayer();
+
+  // Warn before leaving an active game
+  if (game?.status === 'playing') {
+    const confirmed = window.confirm('Leave the game? You will be removed from the active auction.');
+    if (!confirmed) return;
+  }
+
   if (gameId) {
     await leaveGame(gameId, playerId).catch(() => {});
   }
