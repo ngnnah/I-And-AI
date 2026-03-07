@@ -413,6 +413,23 @@ html, body {
 
 @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.5; } }
 
+@keyframes bidder-glow {
+  0%, 100% { box-shadow: 0 0 4px rgba(201,162,39,0.3); }
+  50%       { box-shadow: 0 0 18px rgba(201,162,39,0.95); }
+}
+@keyframes disgrace-glow {
+  0%, 100% { box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+  50%       { box-shadow: 0 4px 30px rgba(192,57,43,0.7), 0 0 40px rgba(192,57,43,0.3); }
+}
+@keyframes cardReveal {
+  from { opacity:0; transform: translateY(-14px) scale(0.94); }
+  to   { opacity:1; transform: translateY(0)     scale(1); }
+}
+@keyframes your-turn-flash {
+  0%, 100% { opacity:1; }
+  50%       { opacity:0.65; }
+}
+
 /* ---------- Auction Log ---------- */
 .auction-log {
   margin: 0 12px 8px;
@@ -465,6 +482,7 @@ html, body {
   text-align: center;
   position: relative;
   box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  animation: cardReveal 0.3s ease-out;
 }
 
 .status-card.card-luxury {
@@ -477,6 +495,7 @@ html, body {
   background: linear-gradient(160deg, #3a0e12, #1e0608);
   border: 3px solid var(--red);
   color: var(--cream);
+  animation: cardReveal 0.3s ease-out, disgrace-glow 2s 0.4s ease-in-out infinite;
 }
 
 .card-emoji    { font-size: 2.8rem; line-height: 1; }
@@ -506,6 +525,29 @@ html, body {
 .auction-luxury  { background: #1e3a1e; color: #6bcb77; }
 .auction-disgrace { background: #3a1e1e; color: #e07070; }
 
+/* ---------- Bids Header ---------- */
+.bids-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 12px 0;
+  font-size: 0.75rem;
+}
+.bids-label   { color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+.bids-highest { color: var(--gold); font-weight: bold; }
+.bids-highest.no-bids { color: var(--text-muted); font-weight: normal; }
+
+/* ---------- Bid Hint ---------- */
+.bid-hint {
+  font-size: 0.78rem;
+  text-align: center;
+  min-height: 18px;
+  padding: 0 4px;
+}
+.bid-hint.hint-valid { color: var(--green); }
+.bid-hint.hint-need  { color: var(--cream-muted); }
+.bid-hint.hint-error { color: var(--red-light); }
+
 /* ---------- All-Bids Panel ---------- */
 .all-bids-panel {
   padding: 8px 12px;
@@ -533,7 +575,7 @@ html, body {
   overflow: hidden;
 }
 
-.player-bid-slot.is-active-bidder { border-color: var(--gold); }
+.player-bid-slot.is-active-bidder { border-color: var(--gold); animation: bidder-glow 1.4s ease-in-out infinite; }
 .player-bid-slot.has-passed        { opacity: 0.45; }
 .player-bid-slot.is-local          { border-style: dashed; }
 
@@ -560,6 +602,7 @@ html, body {
 .turn-indicator.your-turn {
   color: var(--gold);
   font-weight: bold;
+  animation: your-turn-flash 1.2s ease-in-out infinite;
 }
 
 /* ---------- My Panel ---------- */
@@ -626,20 +669,20 @@ html, body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 56px;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  width: 48px;
+  height: 60px;
+  border-radius: 8px;
+  font-size: 0.9rem;
   font-weight: bold;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.1s, box-shadow 0.1s;
+  transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
   border: 2px solid rgba(255,255,255,0.15);
   box-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
 
-.money-card:hover  { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
-.money-card.staged { transform: translateY(-3px); border-color: var(--gold); box-shadow: 0 0 8px var(--gold); }
+.money-card:hover  { transform: translateY(-4px); box-shadow: 0 6px 14px rgba(0,0,0,0.5); }
+.money-card.staged { transform: translateY(-6px); border-color: var(--gold); box-shadow: 0 0 10px var(--gold), 0 4px 12px rgba(0,0,0,0.5); }
 .money-card.disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 
 /* Player color theming for money cards */

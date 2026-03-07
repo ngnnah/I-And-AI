@@ -124,6 +124,10 @@
 
       <!-- All players' bid areas -->
       <div id="all-bids-panel" class="all-bids-panel">
+        <div class="bids-header">
+          <span class="bids-label">Bids</span>
+          <span id="bids-highest" class="bids-highest no-bids">No bids yet</span>
+        </div>
         <div id="players-bids" class="players-bids"></div>
       </div>
 
@@ -158,6 +162,7 @@
           <button id="confirm-bid-btn" class="btn btn-primary" disabled>Confirm Bid</button>
           <button id="fold-pass-btn" class="btn btn-danger"></button>
         </div>
+        <div id="bid-hint" class="bid-hint"></div>
       </div>
     </div>
 

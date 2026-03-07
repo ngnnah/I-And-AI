@@ -511,3 +511,98 @@ describe('getNextBidder — edge cases', () => {
     assert.equal(next, 'alice'); // only alice remains, cycles to herself
   });
 });
+
+// ============================================================
+// validateBid — additional boundary tests
+// ============================================================
+
+describe('validateBid — boundary tests', () => {
+  it('accepts bid of 1 when current highest is 0', () => {
+    assert.equal(validateBid(1, 0).valid, true);
+  });
+
+  it('rejects bid of 0 against current highest 0', () => {
+    assert.equal(validateBid(0, 0).valid, false);
+  });
+
+  it('rejects bid equal to current highest', () => {
+    assert.equal(validateBid(15, 15).valid, false);
+  });
+
+  it('accepts large bid that clearly beats current', () => {
+    assert.equal(validateBid(106, 100).valid, true);
+  });
+
+  it('error message mentions the current highest', () => {
+    const { error } = validateBid(10, 20);
+    assert.ok(error.includes('20'), `Expected error to mention 20, got: ${error}`);
+  });
+});
+
+// ============================================================
+// findEliminatedPlayer — zero money and all tied
+// ============================================================
+
+describe('findEliminatedPlayer — additional edge cases', () => {
+  it('eliminates player with zero money', () => {
+    const players = {
+      alice: { isActive: true, moneyCards: [], joinedAt: 1000 },
+      bob:   { isActive: true, moneyCards: [5], joinedAt: 2000 },
+    };
+    assert.equal(findEliminatedPlayer(players), 'alice');
+  });
+
+  it('with all players tied on money, eliminates first joiner', () => {
+    const players = {
+      late:  { isActive: true, moneyCards: [10], joinedAt: 3000 },
+      early: { isActive: true, moneyCards: [10], joinedAt: 1000 },
+      mid:   { isActive: true, moneyCards: [10], joinedAt: 2000 },
+    };
+    assert.equal(findEliminatedPlayer(players), 'early');
+  });
+
+  it('returns null for empty players map', () => {
+    assert.equal(findEliminatedPlayer({}), null);
+  });
+});
+
+// ============================================================
+// calculateScore — prestige-only, luxury-only edge cases
+// ============================================================
+
+describe('calculateScore — edge cases', () => {
+  it('prestige cards with no luxury cards = score 0', () => {
+    // No luxury to multiply → 0 × 2^3 = 0
+    const score = calculateScore([10, 11, 12], MOCK_CARDS);
+    assert.equal(score, 0);
+  });
+
+  it('exactly one luxury + one prestige', () => {
+    // luxury value 5 × 2 = 10
+    const score = calculateScore([4, 10], MOCK_CARDS);
+    assert.equal(score, 10);
+  });
+
+  it('Scandale with zero luxury = 0 (floor of 0 / 2)', () => {
+    const score = calculateScore([14], MOCK_CARDS);
+    assert.equal(score, 0);
+  });
+
+  it('score never goes negative', () => {
+    // passée with no luxury: 0 - 5 = -5 → clamped to 0
+    const score = calculateScore([15], MOCK_CARDS);
+    assert.equal(score, 0);
+  });
+
+  it('Scandale applied after Passée reduction (not before)', () => {
+    // luxury sum: 10 (id=9), prestige ×1 = 10, passée −5 = 5, scandale halves → 2
+    const score = calculateScore([9, 14, 15], MOCK_CARDS);
+    assert.equal(score, 2); // floor(5/2) = 2
+  });
+
+  it('three prestige multiplies by 8', () => {
+    // luxury sum: 1+2 = 3; ×8 = 24
+    const score = calculateScore([0, 1, 10, 11, 12], MOCK_CARDS);
+    assert.equal(score, 24);
+  });
+});

@@ -8,6 +8,7 @@ import { getLocalPlayer, getCurrentGame, updateCurrentGame, setCurrentGameId, cl
 import { getBidTotal, calculateScore, getMoneyTotal } from '../game/game-logic.js';
 import { STATUS_CARDS } from '../data/cards.js';
 import { navigateTo } from '../main.js';
+import { playSound } from '../game/sounds.js';
 
 // ---- DOM refs ----
 const backBtn         = document.getElementById('game-back-btn');
@@ -41,8 +42,10 @@ const myActionsEl     = document.getElementById('my-actions');
 const confirmBidBtn   = document.getElementById('confirm-bid-btn');
 const foldPassBtn     = document.getElementById('fold-pass-btn');
 
-// Auction log
-const auctionLogEl = document.getElementById('auction-log');
+// Auction log + bid feedback
+const auctionLogEl   = document.getElementById('auction-log');
+const bidsHighestEl  = document.getElementById('bids-highest');
+const bidHintEl      = document.getElementById('bid-hint');
 
 // Finished phase
 const winnerBannerEl    = document.getElementById('winner-banner');
@@ -53,6 +56,8 @@ const backToLobbyBtn    = document.getElementById('back-to-lobby-btn');
 // ---- Local state ----
 let unsubscribe = null;
 let stagedCards = []; // denominations currently staged for bid
+let prevActiveBidder = null; // track turn changes for sound
+let prevCardId = null;       // track card changes to gate reveal animation
 
 // ============================================================
 // Screen lifecycle
@@ -71,6 +76,9 @@ function onEnterGameRoom() {
   if (!gameId) { navigateTo('lobby'); return; }
 
   stagedCards = [];
+  prevActiveBidder = null;
+  prevCardId = null;
+  finishedSoundPlayed = false;
 
   unsubscribe = listenToGame(gameId, game => {
     if (!game) { navigateTo('lobby'); return; }
@@ -175,9 +183,18 @@ function renderPlayingPhase(game, gameId) {
     stagedCards = [];
   }
 
-  // --- Current card ---
+  // Sound: play "your turn" chime when turn transitions to local player
+  if (isMyTurn && !iHavePassed && auction.activeBidder !== prevActiveBidder) {
+    playSound('yourTurn');
+  }
+  prevActiveBidder = auction.activeBidder;
+
+  // --- Current card (only re-render + animate when card changes) ---
   const card = STATUS_CARDS[auction.cardId];
-  renderStatusCard(currentCardEl, card);
+  if (auction.cardId !== prevCardId) {
+    renderStatusCard(currentCardEl, card);
+    prevCardId = auction.cardId;
+  }
 
   // --- Auction type banner ---
   if (auction.auctionType === 'disgrace') {
@@ -267,6 +284,19 @@ function renderPlayingPhase(game, gameId) {
   }
   renderMyHand(myData.moneyCards || [], myColor, isMyTurn && !iHavePassed);
 
+  // --- Bids header: highest bid ---
+  if (bidsHighestEl) {
+    const currentHighest = auction.currentHighest || 0;
+    const leadName = auction.leadBidder ? players[auction.leadBidder]?.name : null;
+    if (currentHighest > 0) {
+      bidsHighestEl.textContent = `Highest: ${currentHighest}${leadName ? ` (${leadName})` : ''}`;
+      bidsHighestEl.className = 'bids-highest';
+    } else {
+      bidsHighestEl.textContent = auction.auctionType === 'disgrace' ? 'Bid to pressure others' : 'No bids yet';
+      bidsHighestEl.className = 'bids-highest no-bids';
+    }
+  }
+
   // Show/hide actions
   myActionsEl.classList.toggle('hidden', !isMyTurn || iHavePassed);
 
@@ -283,6 +313,25 @@ function renderPlayingPhase(game, gameId) {
     foldPassBtn.textContent = auction.auctionType === 'disgrace'
       ? 'Pass (take card, keep money)'
       : 'Fold (get money back)';
+
+    // Bid hint feedback
+    if (bidHintEl) {
+      if (stagedCards.length === 0) {
+        bidHintEl.textContent = currentHighest > 0
+          ? `Min bid to beat: ${currentHighest + 1}`
+          : 'Select money cards from your hand';
+        bidHintEl.className = 'bid-hint hint-need';
+      } else if (bidValid) {
+        bidHintEl.textContent = `✓ Valid bid`;
+        bidHintEl.className = 'bid-hint hint-valid';
+      } else {
+        bidHintEl.textContent = `Need ${currentHighest - stagedTotal + 1} more to beat ${currentHighest}`;
+        bidHintEl.className = 'bid-hint hint-error';
+      }
+    }
+  } else if (bidHintEl) {
+    bidHintEl.textContent = '';
+    bidHintEl.className = 'bid-hint';
   }
 
   // Auction history log
@@ -333,8 +382,10 @@ function toggleStagedCard(denom) {
   const idx = stagedCards.indexOf(denom);
   if (idx !== -1) {
     stagedCards.splice(idx, 1);
+    playSound('untick');
   } else {
     stagedCards.push(denom);
+    playSound('tick');
   }
   // Re-render (triggers via game listener on next update, but force local repaint)
   const { data: game } = getCurrentGame();
@@ -348,6 +399,7 @@ confirmBidBtn.addEventListener('click', async () => {
   const { id: playerId } = getLocalPlayer();
   confirmBidBtn.disabled = true;
   try {
+    playSound('bid');
     await placeBid(gameId, playerId, [...stagedCards]);
     stagedCards = [];
   } catch (err) {
@@ -361,6 +413,7 @@ foldPassBtn.addEventListener('click', async () => {
   const { id: playerId } = getLocalPlayer();
   foldPassBtn.disabled = true;
   try {
+    playSound('fold');
     await foldOrPass(gameId, playerId);
     stagedCards = [];
   } catch (err) {
@@ -461,12 +514,23 @@ function renderStatusCard(el, card) {
 // Finished Phase
 // ============================================================
 
+let finishedSoundPlayed = false;
+
 function renderFinishedPhase(game) {
   const players   = game.players || {};
   const gameState = game.gameState || {};
   const winnerId  = gameState.winner;
   const elimId    = gameState.eliminatedPlayer;
   const scores    = gameState.scores || {};
+
+  // Play win/lose sound once on entering finished phase
+  if (!finishedSoundPlayed) {
+    finishedSoundPlayed = true;
+    const { id: myId } = getLocalPlayer();
+    if (myId === winnerId) playSound('gameWin');
+    else if (myId === elimId) playSound('gameLose');
+    else playSound('winCard'); // runner-up — positive but not full fanfare
+  }
 
   // Winner banner
   const winnerData = players[winnerId];
