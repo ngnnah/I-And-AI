@@ -413,6 +413,36 @@ html, body {
 
 @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.5; } }
 
+/* ---------- Auction Log ---------- */
+.auction-log {
+  margin: 0 12px 8px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.72rem;
+}
+.auction-log-title {
+  color: var(--cream-muted);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+.auction-log-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: var(--cream-muted);
+}
+.auction-log-entry:last-child { border-bottom: none; }
+.auction-log-entry.log-disgrace { color: #c87070; }
+.log-emoji { font-size: 0.85rem; }
+.log-card-name { flex: 1; }
+.log-winner { color: var(--gold); }
+.log-bid { color: var(--cream-muted); }
+
 /* ---------- Auction Card ---------- */
 .auction-card-panel {
   padding: 16px 16px 8px;

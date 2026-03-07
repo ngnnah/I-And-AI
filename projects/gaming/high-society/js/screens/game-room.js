@@ -41,6 +41,9 @@ const myActionsEl     = document.getElementById('my-actions');
 const confirmBidBtn   = document.getElementById('confirm-bid-btn');
 const foldPassBtn     = document.getElementById('fold-pass-btn');
 
+// Auction log
+const auctionLogEl = document.getElementById('auction-log');
+
 // Finished phase
 const winnerBannerEl    = document.getElementById('winner-banner');
 const finalScoresEl     = document.getElementById('final-scores');
@@ -167,6 +170,11 @@ function renderPlayingPhase(game, gameId) {
   const isMyTurn  = auction.activeBidder === myId;
   const iHavePassed = passed.includes(myId);
 
+  // Clear stale staged cards when it's not our turn
+  if (!isMyTurn || iHavePassed) {
+    stagedCards = [];
+  }
+
   // --- Current card ---
   const card = STATUS_CARDS[auction.cardId];
   renderStatusCard(currentCardEl, card);
@@ -208,6 +216,7 @@ function renderPlayingPhase(game, gameId) {
     const cardCount  = (p.statusCards || []).length;
     const score      = calculateScore(p.statusCards || [], STATUS_CARDS);
     const passLabel  = pid === passed[0] && auction.auctionType === 'disgrace' ? 'took card' : 'folded';
+    const netMoney   = getMoneyTotal(p.moneyCards || []) - bidTotal;
 
     return `
       <div class="player-bid-slot
@@ -219,7 +228,7 @@ function renderPlayingPhase(game, gameId) {
         <div class="slot-name">${p.name}${isLocal ? ' <em>(you)</em>' : ''}</div>
         <div class="slot-bid-row">
           <span class="slot-total">${bidTotal > 0 ? bidTotal : '—'}</span>
-          <span class="slot-money">${getMoneyTotal(p.moneyCards || [])}💰</span>
+          <span class="slot-money">${netMoney}💰</span>
         </div>
         <div class="slot-score">${cardCount} card${cardCount !== 1 ? 's' : ''} · score ${score}</div>
         <div class="slot-status ${hasPassed ? 'slot-passed' : isActive ? 'slot-bidding' : ''}">
@@ -275,6 +284,9 @@ function renderPlayingPhase(game, gameId) {
       ? 'Pass (take card, keep money)'
       : 'Fold (get money back)';
   }
+
+  // Auction history log
+  renderAuctionLog(game.gameState?.auctionLog || []);
 
   // Pending Thief
   if (myData.pendingThief && myData.statusCards?.length > 0) {
@@ -356,6 +368,33 @@ foldPassBtn.addEventListener('click', async () => {
     foldPassBtn.disabled = false;
   }
 });
+
+// ---- Auction log ----
+function renderAuctionLog(log) {
+  if (!auctionLogEl) return;
+  if (log.length === 0) {
+    auctionLogEl.classList.add('hidden');
+    return;
+  }
+
+  auctionLogEl.classList.remove('hidden');
+  const recent = [...log].reverse().slice(0, 5);
+  auctionLogEl.innerHTML = `
+    <div class="auction-log-title">Recent Auctions</div>
+    ${recent.map(entry => {
+      const isDisgrace = entry.auctionType === 'disgrace';
+      return `
+        <div class="auction-log-entry ${isDisgrace ? 'log-disgrace' : 'log-luxury'}">
+          <span class="log-emoji">${entry.cardEmoji}</span>
+          <span class="log-card-name">${entry.cardName}</span>
+          <span class="log-winner">→ ${entry.winnerName}</span>
+          ${!isDisgrace && entry.bidAmount > 0 ? `<span class="log-bid">for ${entry.bidAmount}</span>` : ''}
+          ${isDisgrace ? '<span class="log-bid">passed</span>' : ''}
+        </div>
+      `;
+    }).join('')}
+  `;
+}
 
 // ---- Thief modal (inline) ----
 function renderThiefModal(game, myId) {

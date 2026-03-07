@@ -35,6 +35,7 @@ import {
   resolveDisgraceAuction,
   calculateScore,
   findEliminatedPlayer,
+  getAllScores,
   getWinner,
   validatePlayerName,
 } from '../js/game/game-logic.js';
@@ -365,5 +366,148 @@ describe('validatePlayerName', () => {
     assert.equal(validatePlayerName('Alice').valid, true);
     assert.equal(validatePlayerName('AB').valid, true);
     assert.equal(validatePlayerName('A'.repeat(20)).valid, true);
+  });
+});
+
+// ============================================================
+// getAllScores
+// ============================================================
+
+describe('getAllScores', () => {
+  it('computes scores for all active players', () => {
+    const players = {
+      alice: { isActive: true, statusCards: [9, 10] },    // 10 x2 = 20
+      bob:   { isActive: true, statusCards: [7, 8] },     // 8+9 = 17
+      carol: { isActive: false, statusCards: [9, 10] },   // inactive — excluded
+    };
+    const scores = getAllScores(players, MOCK_CARDS);
+    assert.equal(scores.alice, 20);
+    assert.equal(scores.bob, 17);
+    assert.equal(scores.carol, undefined);
+  });
+
+  it('returns 0 score for player with no cards', () => {
+    const players = {
+      alice: { isActive: true, statusCards: [] },
+    };
+    const scores = getAllScores(players, MOCK_CARDS);
+    assert.equal(scores.alice, 0);
+  });
+
+  it('handles all disgrace cards correctly', () => {
+    const players = {
+      alice: { isActive: true, statusCards: [13, 14, 15] }, // thief + scandale + passée
+      // score: 0 luxury × 1 = 0 − 5 = −5 → halved = 0 (min 0)
+    };
+    const scores = getAllScores(players, MOCK_CARDS);
+    assert.equal(scores.alice, 0);
+  });
+});
+
+// ============================================================
+// calculateScore — combined disgrace effects
+// ============================================================
+
+describe('calculateScore — combined disgrace effects', () => {
+  it('Scandale + Passée both applied: passée reduces first, then halved', () => {
+    // score = (1+2) × 1 = 3; − 5 passée = −2 → max 0; halved = 0
+    const score = calculateScore([0, 1, 14, 15], MOCK_CARDS);
+    assert.equal(score, 0);
+  });
+
+  it('Prestige + Passée: multiply then subtract', () => {
+    // luxury: 5 (id=4); prestige: x2 → 10; passée: −5 → 5
+    const score = calculateScore([4, 10, 15], MOCK_CARDS);
+    assert.equal(score, 5);
+  });
+
+  it('Two Passée cards subtract 10', () => {
+    // luxury sum: 1+2+3+4 = 10; prestige: ×1; passée ×2: 10 − 10 = 0
+    const score = calculateScore([0, 1, 2, 3, 15, 15], MOCK_CARDS);
+    assert.equal(score, 0);
+  });
+
+  it('Scandale halves a strong hand', () => {
+    // luxury: 10 (id=9); prestige ×2 = 20; scandale: floor(20/2) = 10
+    const score = calculateScore([9, 10, 14], MOCK_CARDS);
+    assert.equal(score, 10);
+  });
+});
+
+// ============================================================
+// Edge cases: all players fold / last player forced to win
+// ============================================================
+
+describe('resolveLuxuryAuction — edge cases', () => {
+  it('winner with no prior bid (zero-bid win) keeps full hand', () => {
+    const auction = {
+      leadBidder: 'alice',
+      bids: {},  // alice never placed a bid (all others folded)
+    };
+    const players = {
+      alice: { moneyCards: [1, 2, 4, 8] },
+    };
+    const result = resolveLuxuryAuction(auction, players);
+    assert.equal(result.winnerId, 'alice');
+    assert.deepEqual(result.moneyUpdates, {}); // no money changes
+  });
+});
+
+describe('resolveDisgraceAuction — edge cases', () => {
+  it('first passer with a bid keeps all their money', () => {
+    const auction = {
+      passed: ['alice', 'bob'],
+      bids: {
+        alice: [4],      // alice bid 4, then passed first → keeps money
+        bob:   [6, 8],   // bob bid, loses it
+      },
+    };
+    const players = {
+      alice: { moneyCards: [1, 2, 4, 10] },
+      bob:   { moneyCards: [3, 6, 8, 12] },
+    };
+    const result = resolveDisgraceAuction(auction, players);
+    assert.equal(result.winnerId, 'alice');
+    // Alice's money unchanged (not in moneyUpdates)
+    assert.equal(result.moneyUpdates.alice, undefined);
+    // Bob loses [6, 8]
+    assert.deepEqual(result.moneyUpdates.bob.sort((a,b)=>a-b), [3, 12]);
+  });
+
+  it('second passer loses their bid', () => {
+    const auction = {
+      passed: ['carol', 'dave'],
+      bids: { carol: [2], dave: [4] },
+    };
+    const players = {
+      carol: { moneyCards: [2, 10, 20] },
+      dave:  { moneyCards: [4, 12] },
+    };
+    const result = resolveDisgraceAuction(auction, players);
+    assert.equal(result.winnerId, 'carol');
+    assert.equal(result.moneyUpdates.carol, undefined); // kept money
+    assert.deepEqual(result.moneyUpdates.dave.sort((a,b)=>a-b), [12]); // dave lost 4
+  });
+});
+
+// ============================================================
+// getNextBidder — edge cases
+// ============================================================
+
+describe('getNextBidder — edge cases', () => {
+  it('wraps around when active bidder is last in order', () => {
+    const next = getNextBidder('carol', ['alice', 'bob', 'carol'], []);
+    assert.equal(next, 'alice');
+  });
+
+  it('skips passed players when wrapping', () => {
+    // alice passed, so skip her when wrapping from carol
+    const next = getNextBidder('carol', ['alice', 'bob', 'carol'], ['alice']);
+    assert.equal(next, 'bob');
+  });
+
+  it('returns only remaining player if all others passed', () => {
+    const next = getNextBidder('alice', ['alice', 'bob', 'carol'], ['bob', 'carol']);
+    assert.equal(next, 'alice'); // only alice remains, cycles to herself
   });
 });

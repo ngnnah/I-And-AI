@@ -10,6 +10,7 @@ import {
   validateBid,
   getNextBidder,
   getActiveBidderCount,
+  getBidTotal,
   resolveLuxuryAuction,
   resolveDisgraceAuction,
   calculateScore,
@@ -223,16 +224,9 @@ async function _resolveAuction(gameId, game, forcedWinner) {
     statusCards: winnerCards,
   };
 
-  // Handle Thief card: if winner has no luxury cards (after winning Thief), mark pendingThief
+  // Handle Thief card: always set pendingThief — player chooses which luxury to discard via modal
   if (wonCard.subtype === 'thief') {
-    const existingLuxury = winnerCards.filter(id => STATUS_CARDS[id]?.type === 'luxury');
-    if (existingLuxury.length === 0) {
-      playerUpdates[winnerId].pendingThief = true;
-    } else {
-      // Discard the first luxury card (auto-resolve)
-      const luxuryToDiscard = existingLuxury[0];
-      playerUpdates[winnerId].statusCards = winnerCards.filter(id => id !== luxuryToDiscard);
-    }
+    playerUpdates[winnerId].pendingThief = true;
   }
 
   // Handle pendingThief: if winner already had pendingThief and wins a luxury card
@@ -241,6 +235,22 @@ async function _resolveAuction(gameId, game, forcedWinner) {
     playerUpdates[winnerId].statusCards = winnerCards.filter(id => id !== wonCardId);
     playerUpdates[winnerId].pendingThief = false;
   }
+
+  // Append to auction log
+  const winnerBidAmount = auction.auctionType === 'luxury'
+    ? getBidTotal(auction.bids?.[winnerId] || [])
+    : 0;
+  const existingLog = gameState.auctionLog || [];
+  const logEntry = {
+    cardId: wonCardId,
+    cardName: wonCard.name,
+    cardEmoji: wonCard.emoji,
+    auctionType: auction.auctionType,
+    winnerId,
+    winnerName: players[winnerId]?.name || '?',
+    bidAmount: winnerBidAmount,
+    round: existingLog.length + 1,
+  };
 
   // Advance deck
   const nextIndex = (deck.currentIndex || 0) + 1;
@@ -287,6 +297,7 @@ async function _resolveAuction(gameId, game, forcedWinner) {
     updates['gameState/winner'] = winnerId2;
     updates['gameState/eliminatedPlayer'] = eliminatedId;
     updates['gameState/scores'] = scores;
+    updates['gameState/auctionLog'] = [...existingLog, logEntry];
     updates['auction'] = null;
 
     await updateGame(gameId, updates);
@@ -314,6 +325,7 @@ async function _resolveAuction(gameId, game, forcedWinner) {
     };
 
     updates['gameState/lastWinner'] = winnerId;
+    updates['gameState/auctionLog'] = [...existingLog, logEntry];
 
     await updateGame(gameId, { ...updates, ...nextAuctionUpdates });
   }
