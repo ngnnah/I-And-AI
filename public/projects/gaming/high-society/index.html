@@ -147,9 +147,18 @@
           <span id="my-money-total" class="my-money-total"></span>
         </div>
 
-        <!-- Staged bid (cards selected for next bid) -->
+        <!-- Cards already committed on the table (cannot take back) -->
+        <div id="committed-bid-area" class="committed-bid-area hidden">
+          <div class="committed-bid-label">On table 🔒</div>
+          <div class="committed-bid-row">
+            <div id="committed-bid-cards" class="money-cards-row"></div>
+            <div id="committed-bid-total" class="committed-bid-total"></div>
+          </div>
+        </div>
+
+        <!-- Staged bid (new cards being added this turn) -->
         <div id="staged-bid-area" class="staged-bid-area hidden">
-          <div class="staged-bid-label">Staging bid:</div>
+          <div class="staged-bid-label">Adding:</div>
           <div id="staged-bid-cards" class="money-cards-row"></div>
           <div id="staged-bid-total" class="staged-bid-total"></div>
         </div>

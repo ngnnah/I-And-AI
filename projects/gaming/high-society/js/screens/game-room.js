@@ -5,7 +5,7 @@
 import { listenToGame, leaveGame } from '../game/firebase-config.js';
 import { startGame, placeBid, foldOrPass, discardLuxuryCard } from '../game/firebase-sync.js';
 import { getLocalPlayer, getCurrentGame, updateCurrentGame, setCurrentGameId, clearCurrentGame, isLocalPlayerHost, isLocalPlayerActiveBidder, hasLocalPlayerPassed } from '../game/game-state.js';
-import { getBidTotal, calculateScore, getMoneyTotal } from '../game/game-logic.js';
+import { getBidTotal, calculateScore, getMoneyTotal, removeBidFromHand } from '../game/game-logic.js';
 import { STATUS_CARDS } from '../data/cards.js';
 import { navigateTo } from '../main.js';
 import { playSound } from '../game/sounds.js';
@@ -34,9 +34,12 @@ const playersBidsEl   = document.getElementById('players-bids');
 const turnIndicatorEl = document.getElementById('turn-indicator');
 const myPanel         = document.getElementById('my-panel');
 const myMoneyTotalEl  = document.getElementById('my-money-total');
-const stagedBidArea   = document.getElementById('staged-bid-area');
-const stagedBidCards  = document.getElementById('staged-bid-cards');
-const stagedBidTotal  = document.getElementById('staged-bid-total');
+const committedBidAreaEl  = document.getElementById('committed-bid-area');
+const committedBidCardsEl = document.getElementById('committed-bid-cards');
+const committedBidTotalEl = document.getElementById('committed-bid-total');
+const stagedBidArea       = document.getElementById('staged-bid-area');
+const stagedBidCards      = document.getElementById('staged-bid-cards');
+const stagedBidTotal      = document.getElementById('staged-bid-total');
 const myHandCardsEl   = document.getElementById('my-hand-cards');
 const myActionsEl     = document.getElementById('my-actions');
 const confirmBidBtn   = document.getElementById('confirm-bid-btn');
@@ -269,8 +272,10 @@ function renderPlayingPhase(game, gameId) {
   }
 
   // --- My identity + hand ---
-  const myColor = myData.color || 'crimson';
-  myMoneyTotalEl.textContent = `${getMoneyTotal(myData.moneyCards || [])}`;
+  const myColor    = myData.color || 'crimson';
+  const myBidCards = auction.bids?.[myId] || [];  // cards already on table (committed)
+  const myAvailableMoney = getMoneyTotal(myData.moneyCards || []) - getBidTotal(myBidCards);
+  myMoneyTotalEl.textContent = `${myAvailableMoney}`;
   const myIdentityEl = document.getElementById('my-identity');
   if (myIdentityEl) {
     const myCards = (myData.statusCards || []).map(id => STATUS_CARDS[id]).filter(Boolean);
@@ -282,7 +287,7 @@ function renderPlayingPhase(game, gameId) {
       ${myCards.length > 0 ? `<div class="my-cards-row">${myCards.map(c => `<span class="my-card-chip ${c.type !== 'luxury' ? 'chip-red' : ''}" title="${c.name}">${c.emoji}${c.value || ''}</span>`).join('')}</div>` : ''}
     `;
   }
-  renderMyHand(myData.moneyCards || [], myColor, isMyTurn && !iHavePassed);
+  renderMyHand(myData.moneyCards || [], myBidCards, myColor, isMyTurn && !iHavePassed);
 
   // --- Bids header: highest bid ---
   if (bidsHighestEl) {
@@ -301,14 +306,20 @@ function renderPlayingPhase(game, gameId) {
   myActionsEl.classList.toggle('hidden', !isMyTurn || iHavePassed);
 
   if (isMyTurn && !iHavePassed) {
-    const stagedTotal = getBidTotal(stagedCards);
+    const committedTotal = getBidTotal(myBidCards);
+    const stagedTotal    = getBidTotal(stagedCards);
+    const combinedTotal  = committedTotal + stagedTotal;
     const currentHighest = auction.currentHighest || 0;
-    const bidValid = stagedTotal > currentHighest;
+    const bidValid       = combinedTotal > currentHighest && stagedCards.length > 0;
 
-    confirmBidBtn.disabled  = !bidValid || stagedCards.length === 0;
-    confirmBidBtn.textContent = stagedCards.length > 0
-      ? `Bid ${stagedTotal}`
-      : 'Select cards to bid';
+    confirmBidBtn.disabled = !bidValid;
+    if (stagedCards.length > 0) {
+      confirmBidBtn.textContent = committedTotal > 0
+        ? `Raise to ${combinedTotal}`
+        : `Bid ${combinedTotal}`;
+    } else {
+      confirmBidBtn.textContent = committedTotal > 0 ? 'Add more cards' : 'Select cards to bid';
+    }
 
     foldPassBtn.textContent = auction.auctionType === 'disgrace'
       ? 'Pass (take card, keep money)'
@@ -317,15 +328,23 @@ function renderPlayingPhase(game, gameId) {
     // Bid hint feedback
     if (bidHintEl) {
       if (stagedCards.length === 0) {
-        bidHintEl.textContent = currentHighest > 0
-          ? `Min bid to beat: ${currentHighest + 1}`
-          : 'Select money cards from your hand';
-        bidHintEl.className = 'bid-hint hint-need';
+        if (committedTotal > 0) {
+          bidHintEl.textContent = `${committedTotal} on table — add more cards or fold`;
+          bidHintEl.className = 'bid-hint hint-need';
+        } else {
+          bidHintEl.textContent = currentHighest > 0
+            ? `Min bid to beat: ${currentHighest + 1}`
+            : 'Select money cards from your hand';
+          bidHintEl.className = 'bid-hint hint-need';
+        }
       } else if (bidValid) {
-        bidHintEl.textContent = `✓ Valid bid`;
+        bidHintEl.textContent = committedTotal > 0
+          ? `✓ Raising bid: ${committedTotal} + ${stagedTotal} = ${combinedTotal}`
+          : `✓ Bid ${combinedTotal}`;
         bidHintEl.className = 'bid-hint hint-valid';
       } else {
-        bidHintEl.textContent = `Need ${currentHighest - stagedTotal + 1} more to beat ${currentHighest}`;
+        const needed = currentHighest - combinedTotal + 1;
+        bidHintEl.textContent = `Need ${needed} more to beat ${currentHighest}`;
         bidHintEl.className = 'bid-hint hint-error';
       }
     }
@@ -343,10 +362,42 @@ function renderPlayingPhase(game, gameId) {
   }
 }
 
-function renderMyHand(moneyCards, myColor, interactive) {
-  const sortedHand = [...moneyCards].sort((a, b) => a - b);
+/**
+ * Render the local player's money hand.
+ * @param {number[]} moneyCards   - All money cards the player still holds
+ * @param {number[]} committedCards - Cards already committed on the table (locked in)
+ * @param {string}  myColor       - Player color for theming
+ * @param {boolean} interactive   - Whether it's currently the player's turn
+ */
+function renderMyHand(moneyCards, committedCards, myColor, interactive) {
+  // Available hand = full hand minus committed cards
+  const available = removeBidFromHand(moneyCards, committedCards);
 
-  myHandCardsEl.innerHTML = sortedHand.map(denom => {
+  // Ensure staged cards only reference available cards (guard against stale state)
+  const availableCopy = [...available];
+  stagedCards = stagedCards.filter(d => {
+    const idx = availableCopy.indexOf(d);
+    if (idx !== -1) { availableCopy.splice(idx, 1); return true; }
+    return false;
+  });
+
+  // --- Committed area (on table, locked) ---
+  if (committedBidAreaEl) {
+    if (committedCards.length > 0) {
+      committedBidAreaEl.classList.remove('hidden');
+      committedBidCardsEl.innerHTML = [...committedCards].sort((a, b) => a - b).map(d =>
+        `<div class="money-card color-${myColor} committed">${d}</div>`
+      ).join('');
+      committedBidTotalEl.textContent = `= ${getBidTotal(committedCards)}`;
+    } else {
+      committedBidAreaEl.classList.add('hidden');
+    }
+  }
+
+  // --- Interactive hand (available cards not yet committed) ---
+  const sortedAvailable = [...available].sort((a, b) => a - b);
+
+  myHandCardsEl.innerHTML = sortedAvailable.map(denom => {
     const isStaged = stagedCards.includes(denom);
     return `
       <div class="money-card color-${myColor} ${isStaged ? 'staged' : ''} ${!interactive ? 'disabled' : ''}"
@@ -362,11 +413,11 @@ function renderMyHand(moneyCards, myColor, interactive) {
     });
   }
 
-  // Staged area
+  // --- Staged area (new cards being added this turn) ---
   if (stagedCards.length > 0) {
     stagedBidArea.classList.remove('hidden');
     stagedBidCards.innerHTML = stagedCards.map(d =>
-      `<div class="money-card color-${myColor} staged" style="cursor:pointer" data-staged="${d}">${d}</div>`
+      `<div class="money-card color-${myColor} staged" data-staged="${d}">${d}</div>`
     ).join('');
     stagedBidTotal.textContent = `= ${getBidTotal(stagedCards)}`;
 

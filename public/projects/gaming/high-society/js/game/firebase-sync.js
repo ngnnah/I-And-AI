@@ -80,14 +80,14 @@ export async function startGame(gameId, players) {
 
 /**
  * Place a bid. Active bidder only.
- * For luxury/prestige: bid must exceed currentHighest.
- * For disgrace: bid is placed (to pressure others) — same validation.
+ * Bids are CUMULATIVE: new cards are ADDED to existing committed cards on the table.
+ * Cards already on the table cannot be taken back until the auction resolves.
  *
  * @param {string} gameId
  * @param {string} playerId
- * @param {number[]} bidCards - Money card denominations to bid
+ * @param {number[]} newCards - Additional money cards to add to current bid
  */
-export async function placeBid(gameId, playerId, bidCards) {
+export async function placeBid(gameId, playerId, newCards) {
   const snap = await get(ref(database, `hs-games/${gameId}`));
   if (!snap.exists()) throw new Error('Game not found');
 
@@ -97,17 +97,21 @@ export async function placeBid(gameId, playerId, bidCards) {
   if (auction.activeBidder !== playerId) throw new Error('Not your turn');
   if ((auction.passed || []).includes(playerId)) throw new Error('You have already passed');
 
-  const newTotal = bidCards.reduce((s, v) => s + v, 0);
-  const { valid, error } = validateBid(newTotal, auction.currentHighest || 0);
+  // Accumulate: new cards are added on top of already-committed cards
+  const existingBid   = auction.bids?.[playerId] || [];
+  const combinedBid   = [...existingBid, ...newCards];
+  const combinedTotal = getBidTotal(combinedBid);
+
+  const { valid, error } = validateBid(combinedTotal, auction.currentHighest || 0);
   if (!valid) throw new Error(error);
 
-  const turnOrder = game.gameState?.turnOrder || [];
-  const passed    = auction.passed || [];
+  const turnOrder  = game.gameState?.turnOrder || [];
+  const passed     = auction.passed || [];
   const nextBidder = getNextBidder(playerId, turnOrder, passed);
 
   const updates = {
-    [`auction/bids/${playerId}`]: bidCards,
-    'auction/currentHighest': newTotal,
+    [`auction/bids/${playerId}`]: combinedBid,
+    'auction/currentHighest': combinedTotal,
     'auction/leadBidder': playerId,
     'auction/activeBidder': nextBidder,
   };

@@ -643,18 +643,45 @@ html, body {
 .my-hand-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
 .my-money-total { font-size: 1rem; font-weight: bold; color: var(--gold); }
 
-.staged-bid-area {
-  background: var(--bg-card);
+/* Cards committed on the table — locked in, cannot retract */
+.committed-bid-area {
+  background: rgba(255,255,255,0.03);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 8px 10px;
+  padding: 7px 10px;
+}
+.committed-bid-label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 5px;
+}
+.committed-bid-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.committed-bid-total { font-size: 0.8rem; color: var(--cream-muted); margin-left: auto; }
+
+/* Cards in the committed area look muted + locked */
+.money-card.committed {
+  opacity: 0.55;
+  cursor: default;
+  transform: none !important;
+  border-color: rgba(255,255,255,0.08);
+  filter: saturate(0.5);
+}
+
+/* Staging area — new cards being added this turn */
+.staged-bid-area {
+  background: var(--bg-card);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 7px 10px;
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.staged-bid-label { font-size: 0.75rem; color: var(--text-muted); }
+.staged-bid-label { font-size: 0.75rem; color: var(--gold); }
 .staged-bid-total { font-size: 0.85rem; color: var(--cream-muted); margin-left: auto; }
 
 /* ---------- Money Cards ---------- */
