@@ -1,0 +1,9 @@
+{
+  "name": "high-society",
+  "version": "1.0.0",
+  "description": "Multiplayer bidding game by Reiner Knizia",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/**/*.test.js"
+  }
+}

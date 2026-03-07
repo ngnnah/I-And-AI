@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>High Society</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ==================== SCREEN: PLAYER SETUP ==================== -->
+  <div id="screen-player-setup" class="screen">
+    <div class="setup-card">
+      <div class="setup-logo">
+        <div class="setup-crest">♦</div>
+        <h1>High Society</h1>
+        <p class="setup-subtitle">A bidding game for 3–5 players</p>
+      </div>
+      <div class="setup-form">
+        <label for="player-name-input">Your Name</label>
+        <input
+          id="player-name-input"
+          type="text"
+          maxlength="20"
+          placeholder="Enter your name"
+          autocomplete="off"
+          autocapitalize="words"
+        />
+        <p id="setup-error" class="error-text hidden"></p>
+        <button id="setup-continue-btn" class="btn btn-primary">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN: LOBBY ==================== -->
+  <div id="screen-lobby" class="screen hidden">
+    <header class="lobby-header">
+      <h1 class="lobby-title">High Society</h1>
+      <div class="lobby-player-badge">
+        <span id="lobby-player-name"></span>
+        <button id="lobby-change-name-btn" class="btn-text">Change</button>
+      </div>
+    </header>
+
+    <div class="lobby-content">
+      <!-- Create Game -->
+      <section class="lobby-section">
+        <h2>Create Game</h2>
+        <button id="create-game-btn" class="btn btn-primary btn-wide">Create New Game</button>
+      </section>
+
+      <!-- Join by Code -->
+      <section class="lobby-section">
+        <h2>Join by Code</h2>
+        <div class="join-row">
+          <input
+            id="join-code-input"
+            type="text"
+            maxlength="6"
+            placeholder="ROOM CODE"
+            autocomplete="off"
+            autocapitalize="characters"
+            class="code-input"
+          />
+          <button id="join-code-btn" class="btn btn-secondary">Join</button>
+        </div>
+        <p id="join-error" class="error-text hidden"></p>
+      </section>
+
+      <!-- Active Games -->
+      <section class="lobby-section">
+        <h2>Active Games</h2>
+        <div id="lobby-games-list" class="games-list">
+          <p class="empty-state">No active games. Create one!</p>
+        </div>
+      </section>
+
+      <!-- Game History -->
+      <section class="lobby-section">
+        <h2>Recent Games</h2>
+        <div id="lobby-history-list" class="games-list">
+          <p class="empty-state">No games played yet.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN: GAME ROOM ==================== -->
+  <div id="screen-game-room" class="screen hidden">
+
+    <!-- Game header -->
+    <header class="game-header">
+      <button id="game-back-btn" class="btn-icon" title="Back to lobby">←</button>
+      <div class="game-header-info">
+        <span id="game-display-name" class="game-title"></span>
+        <span id="game-code-badge" class="game-code-badge"></span>
+      </div>
+      <div id="game-header-status" class="game-status-badge"></div>
+    </header>
+
+    <!-- ---- PHASE: LOBBY WAITING ---- -->
+    <div id="game-phase-lobby" class="game-phase">
+      <div class="waiting-room">
+        <h2>Waiting for Players</h2>
+        <p class="waiting-hint">Share the room code with friends (3–5 players needed)</p>
+        <div id="waiting-code" class="waiting-code-display"></div>
+        <div id="waiting-players" class="waiting-players"></div>
+        <button id="start-game-btn" class="btn btn-primary btn-wide hidden">Start Game</button>
+        <p id="start-game-hint" class="hint-text"></p>
+      </div>
+    </div>
+
+    <!-- ---- PHASE: PLAYING / BIDDING ---- -->
+    <div id="game-phase-playing" class="game-phase hidden">
+
+      <!-- Current card being auctioned -->
+      <div id="auction-card-panel" class="auction-card-panel">
+        <div id="current-card" class="status-card"></div>
+        <div id="auction-type-banner" class="auction-type-banner"></div>
+      </div>
+
+      <!-- All players' bid areas -->
+      <div id="all-bids-panel" class="all-bids-panel">
+        <div id="players-bids" class="players-bids"></div>
+      </div>
+
+      <!-- Turn indicator -->
+      <div id="turn-indicator" class="turn-indicator"></div>
+
+      <!-- Local player's hand + actions -->
+      <div id="my-panel" class="my-panel">
+        <div class="my-hand-header">
+          <span class="my-hand-label">Your Money</span>
+          <span id="my-money-total" class="my-money-total"></span>
+        </div>
+
+        <!-- Staged bid (cards selected for next bid) -->
+        <div id="staged-bid-area" class="staged-bid-area hidden">
+          <div class="staged-bid-label">Staging bid:</div>
+          <div id="staged-bid-cards" class="money-cards-row"></div>
+          <div id="staged-bid-total" class="staged-bid-total"></div>
+        </div>
+
+        <!-- Money card hand -->
+        <div id="my-hand-cards" class="money-cards-row"></div>
+
+        <!-- Action buttons -->
+        <div id="my-actions" class="my-actions hidden">
+          <button id="confirm-bid-btn" class="btn btn-primary" disabled>Confirm Bid</button>
+          <button id="fold-pass-btn" class="btn btn-danger"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- PHASE: FINISHED ---- -->
+    <div id="game-phase-finished" class="game-phase hidden">
+      <div class="results-panel">
+        <div id="winner-banner" class="winner-banner"></div>
+        <div id="final-scores" class="final-scores"></div>
+        <div id="final-collections" class="final-collections"></div>
+        <div class="results-actions">
+          <button id="back-to-lobby-btn" class="btn btn-secondary">Back to Lobby</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end screen-game-room -->
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
