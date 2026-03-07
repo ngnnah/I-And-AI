@@ -39,6 +39,7 @@
       <div class="lobby-player-badge">
         <span id="lobby-player-name"></span>
         <button id="lobby-change-name-btn" class="btn-text">Change</button>
+        <button id="lobby-help-btn" class="btn-icon help-btn" title="How to Play">?</button>
       </div>
     </header>
 
@@ -95,7 +96,10 @@
         <span id="game-display-name" class="game-title"></span>
         <span id="game-code-badge" class="game-code-badge"></span>
       </div>
-      <div id="game-header-status" class="game-status-badge"></div>
+      <div class="game-header-right">
+        <button id="game-help-btn" class="btn-icon help-btn" title="How to Play">?</button>
+        <div id="game-header-status" class="game-status-badge"></div>
+      </div>
     </header>
 
     <!-- ---- PHASE: LOBBY WAITING ---- -->
@@ -188,6 +192,177 @@
     </div>
 
   </div><!-- end screen-game-room -->
+
+  <!-- ==================== HOW TO PLAY MODAL ==================== -->
+  <div id="help-modal" class="help-modal hidden" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
+    <div class="help-modal-backdrop"></div>
+    <div class="help-modal-panel">
+      <div class="help-modal-header">
+        <h2 id="help-modal-title">How to Play</h2>
+        <button id="help-close-btn" class="btn-icon" title="Close">✕</button>
+      </div>
+      <nav class="help-tabs" role="tablist">
+        <button class="help-tab active" data-tab="overview" role="tab">Overview</button>
+        <button class="help-tab" data-tab="auctions" role="tab">Auctions</button>
+        <button class="help-tab" data-tab="scoring" role="tab">Scoring</button>
+        <button class="help-tab" data-tab="tips" role="tab">Tips</button>
+      </nav>
+      <div class="help-content">
+
+        <!-- TAB: Overview -->
+        <div class="help-tab-panel active" data-panel="overview">
+          <div class="help-section">
+            <p class="help-lead">Bid for luxury cards using your hand of money cards. The player with <strong>least money</strong> at game end is eliminated — then highest score wins.</p>
+          </div>
+          <div class="help-section">
+            <h3>Card Types</h3>
+            <div class="help-card-types">
+              <div class="help-card-type luxury-type">
+                <span class="help-card-icon">🏰</span>
+                <div>
+                  <strong>Luxury (10 cards)</strong>
+                  <p>Values 1–10. Add to your score. You want these.</p>
+                </div>
+              </div>
+              <div class="help-card-type prestige-type">
+                <span class="help-card-icon">👑</span>
+                <div>
+                  <strong>Prestige (3 cards)</strong>
+                  <p>Each one <em>doubles</em> your score. Incredibly powerful.</p>
+                </div>
+              </div>
+              <div class="help-card-type disgrace-type">
+                <span class="help-card-icon">💀</span>
+                <div>
+                  <strong>Disgrace (3 cards)</strong>
+                  <p><strong>Thief</strong> — discard a luxury you own<br>
+                     <strong>Scandale</strong> — halve your score<br>
+                     <strong>Passée</strong> — −5 points</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="help-section">
+            <h3>Money Cards</h3>
+            <p>You start with <strong>11 money cards</strong>: 1 · 2 · 3 · 4 · 6 · 8 · 10 · 12 · 15 · 20 · 25</p>
+            <p class="help-note">Money spent on wins is <strong>permanently gone</strong>. Folded money returns to your hand.</p>
+          </div>
+          <div class="help-section">
+            <h3>Game End</h3>
+            <p>The game ends when the <strong>4th red card</strong> (prestige or disgrace) is revealed — that card is not auctioned.</p>
+          </div>
+        </div>
+
+        <!-- TAB: Auctions -->
+        <div class="help-tab-panel" data-panel="auctions">
+          <div class="help-section">
+            <h3>🏰 Luxury / Prestige Auction</h3>
+            <p class="help-lead">You <strong>want</strong> this card.</p>
+            <ol class="help-steps">
+              <li>On your turn: <strong>raise</strong> (add money cards, total must beat current high) or <strong>fold</strong>.</li>
+              <li>Cards on the table <strong>cannot be taken back</strong> — your bid grows each round.</li>
+              <li>You can fold <strong>without adding new cards</strong> — never forced to raise.</li>
+              <li>Last player standing wins the card. Their bid money is gone. Everyone else gets their money back.</li>
+            </ol>
+            <div class="help-example">
+              <strong>Example:</strong> Alice bids 8, Bob bids 10, Alice raises to 14 (+6), Bob folds (gets 10 back). Alice wins; loses 8+6.
+            </div>
+          </div>
+          <div class="help-section">
+            <h3>💀 Disgrace Auction</h3>
+            <p class="help-lead">You <strong>don't want</strong> this card — it's a game of chicken.</p>
+            <ol class="help-steps">
+              <li>On your turn: <strong>bid</strong> (pressure others) or <strong>pass</strong> (take the card).</li>
+              <li>The <strong>first player to pass</strong> takes the disgrace card and <strong>gets all their money back</strong> — no financial loss.</li>
+              <li><strong>All players who bid</strong> lose their bid money permanently.</li>
+            </ol>
+            <div class="help-example">
+              <strong>Example:</strong> Alice bids 6, Bob bids 8, Charlie passes. Charlie takes Scandale (no money loss). Alice loses 6, Bob loses 8.
+            </div>
+          </div>
+          <div class="help-section">
+            <h3>Quick Reference</h3>
+            <table class="help-table">
+              <thead><tr><th>Auction</th><th>Winner</th><th>Winner's $</th><th>Others' $</th></tr></thead>
+              <tbody>
+                <tr><td>Luxury/Prestige</td><td>Last bidder</td><td>Lost</td><td>Returned</td></tr>
+                <tr><td>Disgrace</td><td>First to pass</td><td>Returned</td><td>Bidders lose</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB: Scoring -->
+        <div class="help-tab-panel" data-panel="scoring">
+          <div class="help-section">
+            <h3>Step 1 — Eliminate the poorest</h3>
+            <p>Count each player's remaining money. The player with the <strong>least money is eliminated</strong> — they cannot win regardless of their cards.</p>
+            <p class="help-note">Tiebreaker: earlier joiner is eliminated.</p>
+          </div>
+          <div class="help-section">
+            <h3>Step 2 — Calculate scores</h3>
+            <div class="help-formula">
+              Score = (sum of luxury values) × 2<sup>prestige count</sup><br>
+              − 5 per Passée · ÷ 2 if Scandale
+            </div>
+            <div class="help-examples">
+              <div class="help-example-row"><span>Luxuries 3+7+10, 0 prestige</span><strong>= 20</strong></div>
+              <div class="help-example-row"><span>Same + 1 prestige</span><strong>= 40</strong></div>
+              <div class="help-example-row"><span>Same + 2 prestige</span><strong>= 80</strong></div>
+              <div class="help-example-row"><span>80 + Scandale</span><strong>= 40</strong></div>
+              <div class="help-example-row"><span>80 + Passée</span><strong>= 75</strong></div>
+            </div>
+          </div>
+          <div class="help-section">
+            <h3>Step 3 — Winner</h3>
+            <p>Highest score wins. <strong>Tiebreaker:</strong> most money remaining.</p>
+          </div>
+        </div>
+
+        <!-- TAB: Tips -->
+        <div class="help-tab-panel" data-panel="tips">
+          <div class="help-section">
+            <ul class="help-tips-list">
+              <li>
+                <span class="tip-icon">👑</span>
+                <div><strong>Prestige cards are everything.</strong> 3 prestige cards turns 20 into 160. Fight hard for them.</div>
+              </li>
+              <li>
+                <span class="tip-icon">💸</span>
+                <div><strong>Don't hoard money.</strong> You just can't run out — the goal is highest score, not most cash.</div>
+              </li>
+              <li>
+                <span class="tip-icon">🎭</span>
+                <div><strong>Disgrace bluffs work.</strong> Bid high in disgrace auctions to make others pass before you.</div>
+              </li>
+              <li>
+                <span class="tip-icon">💀</span>
+                <div><strong>Scandale is brutal with prestige.</strong> Halving 160 = 80. Force it on whoever has the most prestige.</div>
+              </li>
+              <li>
+                <span class="tip-icon">👀</span>
+                <div><strong>Watch opponents' money.</strong> A player with little money must fold soon — they can't keep bidding.</div>
+              </li>
+              <li>
+                <span class="tip-icon">🃏</span>
+                <div><strong>Thief with no luxuries.</strong> The next luxury you win is immediately discarded — plan around this.</div>
+              </li>
+            </ul>
+          </div>
+          <div class="help-section">
+            <h3>In This App</h3>
+            <ul class="help-app-guide">
+              <li><strong>Tap a money card</strong> to stage it for your next bid.</li>
+              <li><strong>"On table 🔒"</strong> shows committed cards — cannot be taken back.</li>
+              <li><strong>Fold/Pass</strong> is always available on your turn — no card selection needed.</li>
+              <li>Your <strong>player color</strong> highlights when it's your turn.</li>
+            </ul>
+          </div>
+        </div>
+
+      </div><!-- .help-content -->
+    </div><!-- .help-modal-panel -->
+  </div><!-- #help-modal -->
 
   <script type="module" src="js/main.js"></script>
 </body>

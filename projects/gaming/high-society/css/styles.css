@@ -825,3 +825,330 @@ html, body {
   .card-emoji  { font-size: 3.5rem; }
   .card-value  { font-size: 2.5rem; }
 }
+
+/* ============================================================
+   Help Button
+   ============================================================ */
+
+.help-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--cream-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.help-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.game-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============================================================
+   How to Play Modal
+   ============================================================ */
+
+body.modal-open { overflow: hidden; }
+
+.help-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;      /* sheet slides up from bottom on mobile */
+  justify-content: center;
+}
+
+@media (min-width: 600px) {
+  .help-modal { align-items: center; }
+}
+
+.help-modal.hidden { display: none; }
+
+.help-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.help-modal-panel {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  width: 100%;
+  max-width: 560px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: help-slide-up 0.22s ease-out;
+}
+
+@media (min-width: 600px) {
+  .help-modal-panel {
+    border-radius: var(--radius-lg);
+    max-height: 80vh;
+  }
+}
+
+@keyframes help-slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.help-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.help-modal-header h2 {
+  font-size: 1.1rem;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+}
+
+/* Tabs */
+
+.help-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.help-tabs::-webkit-scrollbar { display: none; }
+
+.help-tab {
+  flex: 1;
+  min-width: 70px;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.help-tab.active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+
+.help-tab:hover:not(.active) { color: var(--cream-muted); }
+
+/* Content */
+
+.help-content {
+  overflow-y: auto;
+  flex: 1;
+  padding: 16px 20px 24px;
+}
+
+.help-tab-panel { display: none; }
+.help-tab-panel.active { display: block; }
+
+.help-section {
+  margin-bottom: 20px;
+}
+
+.help-section h3 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.help-lead {
+  font-size: 0.95rem;
+  color: var(--cream);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+p.help-note {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* Card types */
+
+.help-card-types { display: flex; flex-direction: column; gap: 10px; }
+
+.help-card-type {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  border-left: 3px solid var(--border);
+}
+
+.help-card-type.luxury-type  { border-left-color: var(--cream-muted); }
+.help-card-type.prestige-type { border-left-color: var(--red-light); }
+.help-card-type.disgrace-type { border-left-color: var(--red); }
+
+.help-card-icon { font-size: 1.4rem; flex-shrink: 0; line-height: 1; }
+
+.help-card-type strong {
+  display: block;
+  color: var(--cream);
+  font-size: 0.85rem;
+  margin-bottom: 2px;
+}
+
+.help-card-type p {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Steps */
+
+.help-steps {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.help-steps li {
+  font-size: 0.85rem;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+/* Example box */
+
+.help-example {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Table */
+
+.help-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.help-table th {
+  background: var(--bg-panel);
+  color: var(--cream-muted);
+  text-align: left;
+  padding: 6px 8px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+
+.help-table td {
+  padding: 6px 8px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.78rem;
+}
+
+/* Scoring formula */
+
+.help-formula {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--cream);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.help-examples { display: flex; flex-direction: column; gap: 4px; }
+
+.help-example-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.82rem;
+}
+
+.help-example-row span { color: var(--text-muted); }
+.help-example-row strong { color: var(--gold); }
+
+/* Tips */
+
+.help-tips-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.help-tips-list li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.tip-icon { font-size: 1.2rem; flex-shrink: 0; line-height: 1.3; }
+
+.help-tips-list strong {
+  display: block;
+  color: var(--cream);
+  font-size: 0.85rem;
+  margin-bottom: 2px;
+}
+
+.help-tips-list div {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.help-app-guide {
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.help-app-guide li {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.help-app-guide strong { color: var(--cream); }

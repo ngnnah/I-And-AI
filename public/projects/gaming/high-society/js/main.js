@@ -33,11 +33,13 @@ async function initializeApp() {
   console.log('Firebase:', database ? 'Connected' : 'Not connected');
 
   try {
-    await Promise.all([
+    const [,,,{ initHelp }] = await Promise.all([
       import('./screens/player-setup.js'),
       import('./screens/lobby.js'),
       import('./screens/game-room.js'),
+      import('./screens/help.js'),
     ]);
+    initHelp();
   } catch (error) {
     console.error('Failed to load screen modules:', error);
     alert('Failed to load game. Please refresh.');
