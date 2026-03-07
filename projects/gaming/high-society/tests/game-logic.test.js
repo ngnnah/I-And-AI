@@ -510,6 +510,24 @@ describe('getNextBidder — edge cases', () => {
     const next = getNextBidder('alice', ['alice', 'bob', 'carol'], ['bob', 'carol']);
     assert.equal(next, 'alice'); // only alice remains, cycles to herself
   });
+
+  // foldOrPass scenario: activeBidder IS in passed (just folded)
+  it('fold scenario: mid-order player folds, turn goes to next after them (not start)', () => {
+    // bob folds → passed=[bob]; next should be carol, NOT alice
+    const next = getNextBidder('bob', ['alice', 'bob', 'carol'], ['bob']);
+    assert.equal(next, 'carol');
+  });
+
+  it('fold scenario: last player folds, turn wraps to first non-passed', () => {
+    const next = getNextBidder('carol', ['alice', 'bob', 'carol'], ['carol']);
+    assert.equal(next, 'alice');
+  });
+
+  it('fold scenario: skips multiple passed players after fold', () => {
+    // bob folds, alice already passed → turn must skip both → goes to carol
+    const next = getNextBidder('bob', ['alice', 'bob', 'carol'], ['bob', 'alice']);
+    assert.equal(next, 'carol');
+  });
 });
 
 // ============================================================

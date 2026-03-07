@@ -287,7 +287,7 @@ function renderPlayingPhase(game, gameId) {
       ${myCards.length > 0 ? `<div class="my-cards-row">${myCards.map(c => `<span class="my-card-chip ${c.type !== 'luxury' ? 'chip-red' : ''}" title="${c.name}">${c.emoji}${c.value || ''}</span>`).join('')}</div>` : ''}
     `;
   }
-  renderMyHand(myData.moneyCards || [], myBidCards, myColor, isMyTurn && !iHavePassed);
+  renderMyHand(myData.moneyCards || [], myBidCards, myColor, isMyTurn && !iHavePassed, iHavePassed);
 
   // --- Bids header: highest bid ---
   if (bidsHighestEl) {
@@ -313,6 +313,7 @@ function renderPlayingPhase(game, gameId) {
     const bidValid       = combinedTotal > currentHighest && stagedCards.length > 0;
 
     confirmBidBtn.disabled = !bidValid;
+    foldPassBtn.disabled   = false; // always re-enable on each render (may have been left disabled)
     if (stagedCards.length > 0) {
       confirmBidBtn.textContent = committedTotal > 0
         ? `Raise to ${combinedTotal}`
@@ -327,19 +328,23 @@ function renderPlayingPhase(game, gameId) {
 
     // Bid hint feedback
     if (bidHintEl) {
+      const isDisgrace = auction.auctionType === 'disgrace';
       if (stagedCards.length === 0) {
         if (committedTotal > 0) {
-          bidHintEl.textContent = `${committedTotal} on table — add more cards or fold`;
+          bidHintEl.textContent = `${committedTotal} on table — add more or fold to withdraw`;
+          bidHintEl.className = 'bid-hint hint-need';
+        } else if (isDisgrace) {
+          bidHintEl.textContent = 'Bid to pressure others — or pass to take the card free';
           bidHintEl.className = 'bid-hint hint-need';
         } else {
           bidHintEl.textContent = currentHighest > 0
-            ? `Min bid to beat: ${currentHighest + 1}`
-            : 'Select money cards from your hand';
+            ? `Bid (min ${currentHighest + 1}) or fold to withdraw`
+            : 'Select cards to bid, or fold without bidding';
           bidHintEl.className = 'bid-hint hint-need';
         }
       } else if (bidValid) {
         bidHintEl.textContent = committedTotal > 0
-          ? `✓ Raising bid: ${committedTotal} + ${stagedTotal} = ${combinedTotal}`
+          ? `✓ Raising: ${committedTotal} + ${stagedTotal} = ${combinedTotal}`
           : `✓ Bid ${combinedTotal}`;
         bidHintEl.className = 'bid-hint hint-valid';
       } else {
@@ -364,12 +369,13 @@ function renderPlayingPhase(game, gameId) {
 
 /**
  * Render the local player's money hand.
- * @param {number[]} moneyCards   - All money cards the player still holds
- * @param {number[]} committedCards - Cards already committed on the table (locked in)
- * @param {string}  myColor       - Player color for theming
- * @param {boolean} interactive   - Whether it's currently the player's turn
+ * @param {number[]} moneyCards     - All money cards the player still holds
+ * @param {number[]} committedCards - Cards committed on the table this auction
+ * @param {string}  myColor         - Player color for theming
+ * @param {boolean} interactive     - Whether it's the player's turn to act
+ * @param {boolean} hasPassed       - Whether the player has already folded/passed
  */
-function renderMyHand(moneyCards, committedCards, myColor, interactive) {
+function renderMyHand(moneyCards, committedCards, myColor, interactive, hasPassed = false) {
   // Available hand = full hand minus committed cards
   const available = removeBidFromHand(moneyCards, committedCards);
 
@@ -381,14 +387,25 @@ function renderMyHand(moneyCards, committedCards, myColor, interactive) {
     return false;
   });
 
-  // --- Committed area (on table, locked) ---
+  // --- Committed area: cards on the table ---
+  // If player has passed (luxury), cards are conceptually returned — show as "returning"
   if (committedBidAreaEl) {
     if (committedCards.length > 0) {
       committedBidAreaEl.classList.remove('hidden');
-      committedBidCardsEl.innerHTML = [...committedCards].sort((a, b) => a - b).map(d =>
-        `<div class="money-card color-${myColor} committed">${d}</div>`
-      ).join('');
-      committedBidTotalEl.textContent = `= ${getBidTotal(committedCards)}`;
+      if (hasPassed) {
+        // Cards will be returned at auction resolution — show them greyed with "returned" label
+        committedBidAreaEl.querySelector('.committed-bid-label').textContent = 'Returning 🔓';
+        committedBidCardsEl.innerHTML = [...committedCards].sort((a, b) => a - b).map(d =>
+          `<div class="money-card color-${myColor} committed" style="opacity:0.3">${d}</div>`
+        ).join('');
+        committedBidTotalEl.textContent = `= ${getBidTotal(committedCards)} back to hand`;
+      } else {
+        committedBidAreaEl.querySelector('.committed-bid-label').textContent = 'On table 🔒';
+        committedBidCardsEl.innerHTML = [...committedCards].sort((a, b) => a - b).map(d =>
+          `<div class="money-card color-${myColor} committed">${d}</div>`
+        ).join('');
+        committedBidTotalEl.textContent = `= ${getBidTotal(committedCards)}`;
+      }
     } else {
       committedBidAreaEl.classList.add('hidden');
     }

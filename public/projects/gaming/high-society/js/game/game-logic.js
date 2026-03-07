@@ -88,16 +88,24 @@ export function validateBid(newBidTotal, currentHighest) {
 
 /**
  * Get the next bidder in turn order, skipping passed players.
- * @param {string} activeBidder - Current active player ID
- * @param {string[]} turnOrder  - All player IDs in order
+ * Works correctly whether activeBidder is in passed or not
+ * (e.g. when called after a fold where the folder is already in passed).
+ *
+ * @param {string} activeBidder - Current/just-acted player ID
+ * @param {string[]} turnOrder  - All player IDs in clockwise order
  * @param {string[]} passed     - Player IDs who have already passed/folded
  * @returns {string|null} Next player ID or null if none remain
  */
 export function getNextBidder(activeBidder, turnOrder, passed) {
-  const remaining = turnOrder.filter(id => !passed.includes(id));
-  if (remaining.length === 0) return null;
-  const idx = remaining.indexOf(activeBidder);
-  return remaining[(idx + 1) % remaining.length];
+  const n = turnOrder.length;
+  const startIdx = turnOrder.indexOf(activeBidder);
+  if (startIdx === -1) return null;
+
+  for (let i = 1; i <= n; i++) {
+    const candidate = turnOrder[(startIdx + i) % n];
+    if (!passed.includes(candidate)) return candidate;
+  }
+  return null; // all passed
 }
 
 /**
