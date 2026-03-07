@@ -230,6 +230,13 @@ html, body {
   margin-bottom: 10px;
 }
 
+.lobby-section-join {
+  background: var(--bg-card);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
 .join-row {
   display: flex;
   gap: 8px;
@@ -241,6 +248,14 @@ html, body {
   letter-spacing: 3px;
   font-size: 1.1rem;
   text-align: center;
+}
+
+.game-code-inline {
+  font-size: 0.7rem;
+  font-family: monospace;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  margin-left: 4px;
 }
 
 /* Game list items */

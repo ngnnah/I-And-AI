@@ -105,13 +105,14 @@ export async function joinGame(gameId, playerName, playerId) {
 
   const game = snapshot.val();
   if (game.status === 'finished') throw new Error('Game is already finished');
-  if (game.status === 'playing') throw new Error('Game is already in progress');
 
-  // Reactivate if already a player
+  // Reactivate if already a player (must come before status checks to allow rejoin)
   if (game.players && game.players[playerId]) {
     await update(ref(database, `hs-games/${gameId}/players/${playerId}`), { isActive: true });
     return;
   }
+
+  if (game.status === 'playing') throw new Error('Game is already in progress');
 
   const playerCount = Object.values(game.players || {}).filter(p => p.isActive).length;
   if (playerCount >= 5) throw new Error('Game is full (max 5 players)');

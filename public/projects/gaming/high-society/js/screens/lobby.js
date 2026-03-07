@@ -113,16 +113,18 @@ function renderGamesList(allGames) {
   }
 
   gamesListEl.innerHTML = entries.map(([gameId, game]) => {
-    const playerCount = Object.values(game.players || {}).filter(p => p.isActive).length;
+    const activePlayers = Object.values(game.players || {}).filter(p => p.isActive);
+    const playerNames = activePlayers.map(p => p.name).join(', ');
     const isMyGame = game.players && game.players[myId];
     const statusLabel = game.status === 'lobby' ? 'Waiting' : 'In Progress';
     const pillClass = game.status === 'lobby' ? 'pill-lobby' : 'pill-playing';
+    const actionHint = isMyGame ? 'Click to rejoin' : game.status === 'lobby' ? 'Click to join' : '';
 
     return `
       <div class="game-list-item" data-game-id="${gameId}">
         <div>
-          <div class="game-name">${game.displayName || gameId}</div>
-          <div class="game-meta">${playerCount} player${playerCount !== 1 ? 's' : ''} · ${gameId}${isMyGame ? ' · Your game' : ''}</div>
+          <div class="game-name">${game.displayName || gameId} <span class="game-code-inline">${gameId}</span></div>
+          <div class="game-meta">${playerNames || 'No players'}${actionHint ? ` · <em>${actionHint}</em>` : ''}</div>
         </div>
         <span class="game-status-pill ${pillClass}">${statusLabel}</span>
       </div>
