@@ -210,21 +210,36 @@ await set(ref(database, `games/${gameId}`), newData);
 
 ## Testing
 
-**What's tested (`tests/game-logic.test.js`):**
+### Unit Tests — 75 passing
+
+`tests/game-logic.test.js` covers all pure functions:
 
 - Score calculation (0–3 prestige cards, Scandale, Passée, Thief)
-- Luxury auction resolution (winner gets card, bid consumed; others refunded)
-- Disgrace auction resolution (first passer gets card + money back; bidders lose money)
-- Game end trigger (4th red card)
-- Elimination logic (least money; tie-break by joinedAt)
-- Bid validation (must exceed current highest)
-
-**What's skipped:** Firebase sync, UI rendering, CSS, animation timing
+- Luxury and disgrace auction resolution
+- Bid validation, turn order (including fold/pass scenarios)
+- Game end trigger, elimination and winner logic
 
 ```bash
-npm test               # Run all tests
-npm test -- game-logic # Run specific file
+npm test
 ```
+
+### E2E Tests — 26 passing (Playwright)
+
+`tests/ui.spec.js` tests the live GitHub Pages site with real Firebase:
+
+```bash
+npx playwright test tests/ui.spec.js --reporter=list
+```
+
+Covers:
+
+- Player setup validation, lobby navigation, game room phases
+- **Multi-player flow:** 3 isolated browser contexts join same room → host starts → all see bidding
+- **Bidding:** confirm bid with staged cards; fold without selecting any cards (key UX)
+- Accessibility: all buttons have accessible labels; error text is visible
+- Mobile: no horizontal scroll at 390px
+
+> **Gotcha:** Uses `page.reload({ waitUntil: 'networkidle' })` in setup. Without this, the HTML shows the setup screen before dynamic JS imports load, so click handlers aren't attached yet when tests interact.
 
 ---
 

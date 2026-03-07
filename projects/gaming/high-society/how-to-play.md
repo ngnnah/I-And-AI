@@ -84,13 +84,16 @@ You want to win this card to boost your score.
 
 1. The player who won the last auction (or the start player for the first round) opens bidding.
 2. On your turn, you must either:
-   - **Raise:** Play one or more money cards face-up in front of you, committing a bid total higher than the current highest.
-   - **Fold:** Take back all your bid cards and withdraw from this auction.
-3. Play continues clockwise until only one player hasn't folded.
-4. **That player wins the card** and permanently loses all their bid money (spent cards go out of the game).
-5. All other players get their bid money back.
+   - **Raise:** Add one or more money cards to your current bid, making it higher than the current highest total. Cards placed on the table **cannot be taken back** until the auction ends.
+   - **Fold:** Withdraw from this auction and take back **all** your bid cards (including any previously committed cards).
+3. You may fold on your turn **without adding any new cards** — you are never forced to raise.
+4. Play continues clockwise until only one player hasn't folded.
+5. **That player wins the card** and permanently loses all their bid money (spent cards go out of the game).
+6. All other players get their bid money back.
 
-**Example:** Alice bids 8 (plays her 8-card). Bob bids 10 (plays 10-card). Alice folds and retrieves her 8. Bob wins the card and his 10-card is gone.
+**Bids are cumulative:** Each raise adds to your committed cards — you cannot withdraw earlier cards. Your total bid grows each time you raise.
+
+**Example:** Alice bids 8 (plays her 8-card, on table). Bob bids 10. Alice raises to 14 (adds 6 to her 8 — both on table). Bob folds, retrieves his 10. Alice wins the card; her 8 and 6 are gone.
 
 ---
 
@@ -189,9 +192,11 @@ Eventually someone must pass on their turn. The last player in an auction always
 
 **Bid Area (middle):** Shows all players' current bids as colored money stacks. Grayed-out players have already folded/passed.
 
-**Your Hand (bottom):** Your money cards as clickable tiles. Click a card to stage it as part of your next bid. Click again to remove it.
+**Your Hand (bottom):** Your money cards as clickable tiles. Click a card to stage it for your next raise. Click again to remove it from the staged pile.
 
-**Staged Bid Panel:** Cards you've selected to bid. Tap "Confirm Bid" to lock it in (must exceed current highest). Tap "Pass/Fold" to withdraw.
+**On Table (locked):** Cards you've already committed in a previous raise are shown here — they cannot be taken back. Your total bid is the sum of committed + staged cards.
+
+**Staged Bid Panel:** New cards being added this turn. Tap "Confirm Bid" to lock in the raise (total must exceed current highest). Tap "Pass/Fold" to withdraw — you'll get all your committed cards back.
 
 ### Important Notes
 
