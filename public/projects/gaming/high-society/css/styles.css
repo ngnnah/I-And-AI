@@ -397,6 +397,22 @@ html, body {
   padding: 1px 6px;
 }
 
+/* ---------- Deck Info ---------- */
+.deck-info {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+}
+.deck-cards-left { color: var(--text-muted); }
+.deck-red        { color: var(--cream-muted); }
+.deck-red.deck-warning { color: #e8a030; font-weight: bold; }
+.deck-red.deck-danger  { color: var(--red-light); font-weight: bold; animation: pulse 1.2s infinite; }
+
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.5; } }
+
 /* ---------- Auction Card ---------- */
 .auction-card-panel {
   padding: 16px 16px 8px;
@@ -476,23 +492,29 @@ html, body {
   background: var(--bg-card);
   border: 2px solid var(--border);
   border-radius: var(--radius);
-  padding: 10px 10px 6px;
-  min-width: 80px;
+  padding: 0 0 6px;
+  min-width: 90px;
+  max-width: 110px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   transition: border-color 0.2s;
+  overflow: hidden;
 }
 
 .player-bid-slot.is-active-bidder { border-color: var(--gold); }
 .player-bid-slot.has-passed        { opacity: 0.45; }
 .player-bid-slot.is-local          { border-style: dashed; }
 
-.player-bid-slot .slot-name     { font-size: 0.7rem; color: var(--text-muted); text-align: center; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.player-bid-slot .slot-total    { font-size: 1.1rem; font-weight: bold; color: var(--cream); }
-.player-bid-slot .slot-money    { font-size: 0.7rem; color: var(--text-muted); }
-.player-bid-slot .slot-status   { font-size: 0.65rem; color: var(--text-muted); height: 16px; }
+.slot-color-bar  { width: 100%; height: 4px; flex-shrink: 0; }
+.player-bid-slot .slot-name  { font-size: 0.72rem; color: var(--cream-muted); text-align: center; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 6px; }
+.player-bid-slot .slot-name em { color: var(--gold); font-style: normal; }
+.slot-bid-row    { display: flex; align-items: baseline; gap: 6px; }
+.player-bid-slot .slot-total { font-size: 1.2rem; font-weight: bold; color: var(--cream); }
+.player-bid-slot .slot-money { font-size: 0.7rem; color: var(--text-muted); }
+.player-bid-slot .slot-score { font-size: 0.65rem; color: var(--text-muted); }
+.player-bid-slot .slot-status { font-size: 0.65rem; color: var(--text-muted); height: 16px; }
 .slot-passed  { color: var(--red-light) !important; }
 .slot-bidding { color: var(--gold) !important; }
 
@@ -528,6 +550,22 @@ html, body {
   align-items: baseline;
   margin-bottom: 4px;
 }
+
+.my-identity {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.my-color-dot   { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.my-name        { font-size: 0.95rem; color: var(--cream); font-weight: bold; }
+.my-score-badge { font-size: 0.75rem; color: var(--gold); background: rgba(201,162,39,.15); padding: 2px 8px; border-radius: 10px; border: 1px solid var(--gold); }
+.my-cards-row   { width: 100%; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.my-card-chip   { font-size: 0.8rem; padding: 2px 6px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px; }
+.my-card-chip.chip-red { border-color: var(--red); color: var(--red-light); }
 
 .my-hand-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
 .my-money-total { font-size: 1rem; font-weight: bold; color: var(--gold); }

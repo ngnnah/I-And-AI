@@ -182,15 +182,32 @@ function renderPlayingPhase(game, gameId) {
     auctionBannerEl.className   = 'auction-type-banner auction-luxury';
   }
 
+  // --- Deck progress ---
+  const deck = game.deck || {};
+  const totalCards = (deck.cardOrder || []).length || 16;
+  const cardsLeft  = totalCards - (deck.currentIndex || 0);
+  const redRevealed = deck.redCardsRevealed || 0;
+  const redDanger  = redRevealed >= 3 ? 'deck-danger' : redRevealed === 2 ? 'deck-warning' : '';
+  const deckInfoEl = document.getElementById('deck-info');
+  if (deckInfoEl) {
+    deckInfoEl.innerHTML = `
+      <span class="deck-cards-left">${cardsLeft} card${cardsLeft !== 1 ? 's' : ''} left</span>
+      <span class="deck-red ${redDanger}">${redRevealed}/3 red revealed${redRevealed >= 3 ? ' — NEXT RED ENDS GAME' : ''}</span>
+    `;
+  }
+
   // --- All players' bids ---
   playersBidsEl.innerHTML = turnOrder.map(pid => {
     const p = players[pid];
     if (!p) return '';
-    const bidCards  = auction.bids?.[pid] || [];
-    const bidTotal  = getBidTotal(bidCards);
-    const hasPassed = passed.includes(pid);
-    const isActive  = auction.activeBidder === pid;
-    const isLocal   = pid === myId;
+    const bidCards   = auction.bids?.[pid] || [];
+    const bidTotal   = getBidTotal(bidCards);
+    const hasPassed  = passed.includes(pid);
+    const isActive   = auction.activeBidder === pid;
+    const isLocal    = pid === myId;
+    const cardCount  = (p.statusCards || []).length;
+    const score      = calculateScore(p.statusCards || [], STATUS_CARDS);
+    const passLabel  = pid === passed[0] && auction.auctionType === 'disgrace' ? 'took card' : 'folded';
 
     return `
       <div class="player-bid-slot
@@ -198,11 +215,15 @@ function renderPlayingPhase(game, gameId) {
         ${hasPassed ? 'has-passed' : ''}
         ${isLocal ? 'is-local' : ''}
       ">
-        <div class="slot-name">${p.name}</div>
-        <div class="slot-total">${bidTotal > 0 ? bidTotal : '—'}</div>
-        <div class="slot-money">${getMoneyTotal(p.moneyCards || [])} left</div>
+        <div class="slot-color-bar" style="background:var(--color-${p.color})"></div>
+        <div class="slot-name">${p.name}${isLocal ? ' <em>(you)</em>' : ''}</div>
+        <div class="slot-bid-row">
+          <span class="slot-total">${bidTotal > 0 ? bidTotal : '—'}</span>
+          <span class="slot-money">${getMoneyTotal(p.moneyCards || [])}💰</span>
+        </div>
+        <div class="slot-score">${cardCount} card${cardCount !== 1 ? 's' : ''} · score ${score}</div>
         <div class="slot-status ${hasPassed ? 'slot-passed' : isActive ? 'slot-bidding' : ''}">
-          ${hasPassed ? (pid === (passed[0]) && auction.auctionType === 'disgrace' ? 'took card' : 'folded') : isActive ? 'bidding...' : ''}
+          ${hasPassed ? passLabel : isActive ? 'bidding...' : ''}
         </div>
       </div>
     `;
@@ -221,9 +242,21 @@ function renderPlayingPhase(game, gameId) {
     turnIndicatorEl.className   = 'turn-indicator';
   }
 
-  // --- My hand and actions ---
-  myMoneyTotalEl.textContent = `Total: ${getMoneyTotal(myData.moneyCards || [])}`;
-  renderMyHand(myData.moneyCards || [], isMyTurn && !iHavePassed);
+  // --- My identity + hand ---
+  const myColor = myData.color || 'crimson';
+  myMoneyTotalEl.textContent = `${getMoneyTotal(myData.moneyCards || [])}`;
+  const myIdentityEl = document.getElementById('my-identity');
+  if (myIdentityEl) {
+    const myCards = (myData.statusCards || []).map(id => STATUS_CARDS[id]).filter(Boolean);
+    const myScore = calculateScore(myData.statusCards || [], STATUS_CARDS);
+    myIdentityEl.innerHTML = `
+      <span class="my-color-dot" style="background:var(--color-${myColor})"></span>
+      <span class="my-name">${myData.name || getLocalPlayer().name}</span>
+      <span class="my-score-badge">score ${myScore}</span>
+      ${myCards.length > 0 ? `<div class="my-cards-row">${myCards.map(c => `<span class="my-card-chip ${c.type !== 'luxury' ? 'chip-red' : ''}" title="${c.name}">${c.emoji}${c.value || ''}</span>`).join('')}</div>` : ''}
+    `;
+  }
+  renderMyHand(myData.moneyCards || [], myColor, isMyTurn && !iHavePassed);
 
   // Show/hide actions
   myActionsEl.classList.toggle('hidden', !isMyTurn || iHavePassed);
@@ -249,14 +282,11 @@ function renderPlayingPhase(game, gameId) {
   }
 }
 
-function renderMyHand(moneyCards, interactive) {
-  // Show cards in hand, mark any staged ones
+function renderMyHand(moneyCards, myColor, interactive) {
   const sortedHand = [...moneyCards].sort((a, b) => a - b);
 
   myHandCardsEl.innerHTML = sortedHand.map(denom => {
     const isStaged = stagedCards.includes(denom);
-    const myColor  = getLocalPlayer().color || 'crimson';
-    // (color is stored in game state, use what we have)
     return `
       <div class="money-card color-${myColor} ${isStaged ? 'staged' : ''} ${!interactive ? 'disabled' : ''}"
            data-denom="${denom}">
@@ -274,7 +304,6 @@ function renderMyHand(moneyCards, interactive) {
   // Staged area
   if (stagedCards.length > 0) {
     stagedBidArea.classList.remove('hidden');
-    const myColor = getLocalPlayer().color || 'crimson';
     stagedBidCards.innerHTML = stagedCards.map(d =>
       `<div class="money-card color-${myColor} staged" style="cursor:pointer" data-staged="${d}">${d}</div>`
     ).join('');
