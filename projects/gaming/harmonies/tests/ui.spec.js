@@ -70,6 +70,20 @@ test("Help button opens a How to Play modal with stacking and scoring", async ({
   await expect(modal).not.toBeVisible();
 });
 
+test("New Game starts fresh (does not resume the old board)", async ({ page }) => {
+  await freshGame(page);
+  for (let i = 0; i < 3; i++) await placeOneToken(page);
+  expect(await page.locator("#hex-grid-container .hex:not(.empty)").count()).toBe(3);
+
+  page.once("dialog", (d) => d.accept()); // confirm "start a new game?"
+  await page.locator("#new-game-btn").click();
+  await page.waitForLoadState("networkidle");
+
+  // Board must be empty and NOT show the "Resumed" message.
+  expect(await page.locator("#hex-grid-container .hex:not(.empty)").count()).toBe(0);
+  await expect(page.locator("#game-message")).not.toContainText("Resumed");
+});
+
 test("board persists across a reload (touch-and-go)", async ({ page }) => {
   await freshGame(page);
   for (let i = 0; i < 3; i++) await placeOneToken(page);

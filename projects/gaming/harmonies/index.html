@@ -1003,7 +1003,12 @@
     const SAVE_KEY = 'harmonies_solo_game';
 
     // Persist the full game state so closing/refreshing the tab never loses progress.
+    // Set true while starting a new game so the beforeunload handler doesn't
+    // re-save the old board right after we've cleared it.
+    let suppressSave = false;
+
     function saveGame() {
+      if (suppressSave) return;
       try {
         localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
       } catch (e) {
@@ -1717,6 +1722,7 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       // New game button
       document.getElementById('new-game-btn').addEventListener('click', () => {
         if (confirm('Start a new game? Current progress will be lost.')) {
+          suppressSave = true; // prevent beforeunload from re-saving the old board
           clearSavedGame();
           location.reload();
         }
