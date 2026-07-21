@@ -297,7 +297,12 @@ function scoreWaterIslands(hexGrid) {
 
 /**
  * 6. ANIMALS SCORING
- * Score topmost uncovered number on each completed Animal card
+ * Score the topmost uncovered number on each Animal card. Cubes start on the
+ * card covering every value; completing the habitat removes a cube (bottom-up),
+ * so the MORE cubes you place on your board, the HIGHER the exposed value.
+ *
+ * The `scoring` arrays are stored top-to-bottom (descending), so the value for
+ * having placed N cubes is indexed from the END of the array.
  * @param {Array} placedAnimals - Array of placed animal cubes
  * @param {Array} animalCards - Array of available animal cards
  * @returns {number} Total animal score
@@ -323,9 +328,11 @@ export function scoreAnimalsModule(placedAnimals, animalCards) {
     const placementCount = animalsByCard[cardId].length;
     const pointsArray = card.scoring || card.pointsPerPlacement || [0];
 
-    // Score is the value at the placement index
-    if (placementCount > 0 && placementCount <= pointsArray.length) {
-      score += pointsArray[placementCount - 1];
+    // More cubes placed = higher value. Index from the end of the (descending)
+    // array so N placements expose the Nth-from-bottom value.
+    if (placementCount > 0 && pointsArray.length > 0) {
+      const idx = Math.max(0, pointsArray.length - placementCount);
+      score += pointsArray[idx];
     }
   }
 

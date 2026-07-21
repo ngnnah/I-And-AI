@@ -150,6 +150,56 @@ export function mirrorHex(q, r) {
 }
 
 /**
+ * Transform a single pattern hex by an optional mirror then N 60° rotations,
+ * preserving all non-coordinate fields (terrain, isPlacementHex, height, ...).
+ */
+function transformPatternHex(hex, rotations, mirror) {
+  let { q, r } = hex;
+  if (mirror) {
+    ({ q, r } = mirrorHex(q, r));
+  }
+  for (let i = 0; i < rotations; i++) {
+    ({ q, r } = rotateHex(q, r));
+  }
+  // Normalize negative zero (-0) that rotation/mirror math can produce,
+  // so coordinates compare and stringify cleanly ("0", not "-0").
+  return { ...hex, q: q + 0, r: r + 0 };
+}
+
+/**
+ * Generate every distinct orientation of an animal habitat pattern.
+ * Harmonies patterns match in any of 6 rotations and mirrored, so this
+ * returns up to 12 unique orientations (symmetric patterns collapse).
+ * Each orientation is a new array of hex objects with transformed {q, r}
+ * and the original terrain / isPlacementHex / height fields intact.
+ *
+ * @param {Array<{q:number, r:number}>} pattern - Pattern hexes
+ * @returns {Array<Array<Object>>} Unique orientations
+ */
+export function getPatternOrientations(pattern) {
+  const seen = new Set();
+  const orientations = [];
+
+  for (const mirror of [false, true]) {
+    for (let rot = 0; rot < 6; rot++) {
+      const transformed = pattern.map((hex) => transformPatternHex(hex, rot, mirror));
+      // Fingerprint by relative shape + per-hex requirements so symmetric
+      // patterns (and mirror==rotation duplicates) are only kept once.
+      const key = transformed
+        .map((h) => `${h.q},${h.r}:${h.terrain}:${h.isPlacementHex ? 1 : 0}:${h.height ?? ""}`)
+        .sort()
+        .join("|");
+      if (!seen.has(key)) {
+        seen.add(key);
+        orientations.push(transformed);
+      }
+    }
+  }
+
+  return orientations;
+}
+
+/**
  * Create an empty hex object
  */
 export function createHex(q, r) {

@@ -17,9 +17,11 @@ export function hasAnimalCube(hex, placedAnimals) {
   if (!hex || !placedAnimals) return false;
 
   const hexKey = `${hex.q}_${hex.r}`;
-  return placedAnimals.some((animal) =>
-    animal.hexCoords?.some((coord) => `${coord.q}_${coord.r}` === hexKey)
-  );
+  return placedAnimals.some((animal) => {
+    // Live game stores { cardId, hexKey }; older callers pass { hexCoords: [...] }
+    if (animal.hexKey) return animal.hexKey === hexKey;
+    return animal.hexCoords?.some((coord) => `${coord.q}_${coord.r}` === hexKey);
+  });
 }
 
 /**

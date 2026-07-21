@@ -180,7 +180,7 @@ On your turn, you perform **one mandatory action** and up to **two optional acti
 - Gray → Gray → Gray (3-high mountain)
 - Brown → Red (building on trunk)
 - Gray → Red (building on rock)
-- Red (alone on ground - building)
+- Red (alone on ground - legal, but scores 0 until built upon)
 
 **Invalid Stacks:**
 
@@ -249,7 +249,7 @@ Trees are made from brown trunk tokens and green leaf tokens.
 | 2 Brown (trunk only) | 0      |
 | 1 Green (on ground)  | 1      |
 | 1 Brown + 1 Green    | 3      |
-| 2 Brown + 1 Green    | 5      |
+| 2 Brown + 1 Green    | 7      |
 
 **Key Points:**
 
@@ -261,9 +261,9 @@ Trees are made from brown trunk tokens and green leaf tokens.
 
 - 2 brown trunks = 0 pts
 - 1 lone green = 1 pt
-- 3 two-high trees (brown+green) = 9 pts
-- 2 three-high trees (brown+brown+green) = 10 pts
-- **Total: 20 points**
+- 3 two-high trees (brown+green) @ 3 = 9 pts
+- 2 three-high trees (brown+brown+green) @ 7 = 14 pts
+- **Total: 24 points**
 
 ### 2. Mountains (Gray Tokens)
 
@@ -319,10 +319,11 @@ Fields are groups of 2 or more yellow tokens connected together.
 
 ### 4. Buildings (Red Tokens)
 
-Buildings are red tokens (alone or stacked on brown/gray). They score based on **neighbor diversity**.
+A building is a **red token stacked on another token** (red on brown, gray, or red). They score based on **neighbor diversity**.
 
 **Scoring:**
 
+- A building must be a **stack of 2** (red on top of one other token). A lone red token on the ground is a legal placement but **scores 0** — it is not yet a building.
 - **5 points per building** IF surrounded by **3 or more different colors**
 - 0 points if less than 3 different colors
 - Only the **top token** of each stack counts as the color
@@ -332,6 +333,7 @@ Buildings are red tokens (alone or stacked on brown/gray). They score based on *
 
 - "Surrounded" = adjacent hexes (up to 6 neighbors)
 - Must have at least 3 different top colors among neighbors
+- A single red token must be built upon (stacked) before it counts as a building
 - Buildings in isolated areas rarely score
 
 **Example:**
@@ -627,7 +629,7 @@ The number of suns obtained depends primarily on your score, but is also influen
 
 ### Scoring Quick Check
 
-- Trees: 0/0/1/3/5 pts (brown/brown/green/brown+green/2brown+green)
+- Trees: 0/0/1/3/7 pts (brown/brown/green/brown+green/2brown+green)
 - Mountains: 1/3/7 pts IF adjacent, else 0
 - Fields: 5 pts per 2+ cluster
 - Buildings: 5 pts IF 3+ neighbor colors
@@ -652,7 +654,7 @@ The number of suns obtained depends primarily on your score, but is also influen
    - Max 4 cards at once - don't hoard, commit to patterns
 
 3. **Stacking Strategy:**
-   - Trees (brown + green) are most flexible for scoring (0/0/1/3/5 points)
+   - Trees (brown + green) are most flexible for scoring (0/0/1/3/7 points)
    - Mountains need clustering but score highly (7 pts per cluster)
    - Buildings are risky but rewarding (5 pts if surrounded by 3+ colors)
 

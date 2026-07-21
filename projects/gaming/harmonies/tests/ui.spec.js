@@ -1,0 +1,52 @@
+import { test, expect } from "@playwright/test";
+
+// Start each test from a clean, fully-loaded game.
+async function freshGame(page) {
+  await page.goto("/index.html");
+  await page.evaluate(() => localStorage.clear());
+  await page.reload({ waitUntil: "networkidle" });
+  await expect(page.locator("#score-total-sidebar")).toBeVisible();
+  // Tokens are rendered once the module has booted.
+  await expect(page.locator('.token[data-space="0"] >> visible=true').first()).toBeVisible();
+}
+
+// Place one token from space 0 onto the first empty board hex.
+async function placeOneToken(page) {
+  await page.locator('.token[data-space="0"] >> visible=true').first().click();
+  await page.locator("#hex-grid-container .hex.empty").first().click();
+}
+
+test("loads without console errors", async ({ page }) => {
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await freshGame(page);
+  expect(errors, `page errors: ${errors.join("; ")}`).toEqual([]);
+});
+
+test("can place 3 tokens and end a turn", async ({ page }) => {
+  await freshGame(page);
+  const filledBefore = await page.locator("#hex-grid-container .hex:not(.empty)").count();
+
+  for (let i = 0; i < 3; i++) await placeOneToken(page);
+
+  const filledAfter = await page.locator("#hex-grid-container .hex:not(.empty)").count();
+  expect(filledAfter).toBe(filledBefore + 3);
+
+  await page.locator("#end-turn-btn").click();
+  // A fresh set of tokens should be available for the next turn.
+  await expect(page.locator('.token[data-space="0"] >> visible=true').first()).toBeVisible();
+});
+
+test("board persists across a reload (touch-and-go)", async ({ page }) => {
+  await freshGame(page);
+  for (let i = 0; i < 3; i++) await placeOneToken(page);
+  const filled = await page.locator("#hex-grid-container .hex:not(.empty)").count();
+  expect(filled).toBe(3);
+
+  // Reload WITHOUT clearing storage — the auto-saved board must come back.
+  await page.reload({ waitUntil: "networkidle" });
+  await expect(page.locator("#score-total-sidebar")).toBeVisible();
+  const filledAfterReload = await page.locator("#hex-grid-container .hex:not(.empty)").count();
+  expect(filledAfterReload).toBe(3);
+  await expect(page.locator("#game-message")).toContainText("Resumed");
+});

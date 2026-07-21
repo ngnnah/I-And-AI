@@ -889,6 +889,7 @@
     // Import existing game logic
     import { canPlaceToken, calculateTerrain } from './js/game/token-manager.js';
     import { calculateTotalScore } from './js/game/scoring-engine.js';
+    import { getPatternOrientations } from './js/game/hex-grid.js';
     import { INITIAL_POUCH } from './js/data/tokens-config.js';
     import { ANIMAL_CARDS } from './js/data/animal-cards.js';
     
@@ -940,22 +941,79 @@
       }
     };
     
+    // ── Touch-and-go persistence (single auto-saved board per browser) ──
+    const SAVE_KEY = 'harmonies_solo_game';
+
+    // Persist the full game state so closing/refreshing the tab never loses progress.
+    function saveGame() {
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
+      } catch (e) {
+        console.warn('Could not save game:', e);
+      }
+    }
+
+    // Restore a saved game into gameState. Returns true if a save was loaded.
+    function loadGame() {
+      let saved;
+      try {
+        saved = localStorage.getItem(SAVE_KEY);
+      } catch (e) {
+        return false;
+      }
+      if (!saved) return false;
+      try {
+        const state = JSON.parse(saved);
+        Object.assign(gameState, state);
+        // Transient UI selections shouldn't survive a reload
+        gameState.selectedToken = null;
+        gameState.selectedSpace = null;
+        gameState.selectedAnimalCard = null;
+        gameState.discardMode = false;
+        return true;
+      } catch (e) {
+        console.warn('Saved game was corrupt, starting fresh:', e);
+        clearSavedGame();
+        return false;
+      }
+    }
+
+    function clearSavedGame() {
+      try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* ignore */ }
+    }
+
+    // Re-render every panel from restored gameState (board, tokens, cards, score).
+    function restoreUIFromState() {
+      Object.values(gameState.hexBoard).forEach(hexData => {
+        const hexEl = document.querySelector(`.hex[data-q="${hexData.q}"][data-r="${hexData.r}"]`);
+        if (hexEl) updateHexDisplay(hexEl, hexData);
+      });
+      for (let i = 0; i < 3; i++) updateTokenSpaceUI(i);
+      updateMobileTokenGrid();
+      displayAvailableAnimalCards();
+      displayPlayerAnimalCards();
+      updateScore();
+
+      // If the saved game had already ended, reflect that in the UI
+      if (gameState.gameEnded) {
+        const endBtn = document.getElementById('end-turn-btn');
+        if (endBtn) {
+          endBtn.disabled = true;
+          endBtn.textContent = '🏁 Game Complete';
+        }
+      }
+    }
+
     // Initialize game
     function initGame() {
       console.log('🎮 Harmonies v5.0 Initializing...');
-      
+
       // Create initial hex grid (23 hexes - Side A board)
       createInitialHexGrid();
-      
-      // Generate initial token supply
-      refreshTokenSupply();
-      
+
       // Setup event listeners
       setupEventListeners();
-      
-      // Initial score
-      updateScore();
-      
+
       // Handle window resize for responsive hex positioning
       let resizeTimer;
       window.addEventListener('resize', () => {
@@ -964,12 +1022,24 @@
           repositionAllHexes();
         }, 250);
       });
-      
-      // Select 3 random animal cards for solo mode
-      selectAnimalCards();
-      
-      showMessage('🎮 Game ready! Click any token below, then click a hex to place it.', 'success');
-      console.log('✅ Game ready! 23-hex board initialized with 3 available animal cards.');
+
+      // Safety net: persist on tab close/refresh
+      window.addEventListener('beforeunload', saveGame);
+
+      if (loadGame()) {
+        // Resume the auto-saved board
+        restoreUIFromState();
+        showMessage('↩️ Resumed your saved game. Pick up where you left off!', 'info');
+        console.log('✅ Resumed saved game.');
+      } else {
+        // Fresh game
+        refreshTokenSupply();
+        updateScore();
+        selectAnimalCards();
+        saveGame();
+        showMessage('🎮 Game ready! Click any token below, then click a hex to place it.', 'success');
+        console.log('✅ Game ready! 23-hex board initialized with 3 available animal cards.');
+      }
     }
     
     // Select 3 random animal cards for available pool
@@ -1240,26 +1310,32 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       };
     }
     
-    // Draw random tokens from pouch
+    // Draw random tokens from pouch, weighted by how many of each color remain
+    // (a true bag draw: a color with 20 left is far likelier than one with 1 left).
     function drawTokens(count) {
       const colors = [];
-      const available = Object.entries(gameState.pouch).filter(([_, count]) => count > 0);
-      
-      if (available.length === 0) return colors;
-      
+
       for (let i = 0; i < count; i++) {
-        if (available.length === 0) break;
-        
-        const randomIndex = Math.floor(Math.random() * available.length);
-        const [color, _] = available[randomIndex];
-        colors.push(color);
-        
-        gameState.pouch[color]--;
-        if (gameState.pouch[color] === 0) {
-          available.splice(randomIndex, 1);
+        const total = Object.values(gameState.pouch).reduce((sum, n) => sum + n, 0);
+        if (total === 0) break;
+
+        // Pick a token by weight = remaining count of each color
+        let pick = Math.floor(Math.random() * total);
+        let chosen = null;
+        for (const [color, n] of Object.entries(gameState.pouch)) {
+          if (n <= 0) continue;
+          pick -= n;
+          if (pick < 0) {
+            chosen = color;
+            break;
+          }
         }
+        if (!chosen) break;
+
+        colors.push(chosen);
+        gameState.pouch[chosen]--;
       }
-      
+
       return colors;
     }
     
@@ -1561,8 +1637,11 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       if (pouchCounter) pouchCounter.textContent = tokensLeft;
       const mobilePouchCounter = document.getElementById('pouch-counter-mobile');
       if (mobilePouchCounter) mobilePouchCounter.textContent = tokensLeft;
+
+      // Auto-save after every scored change (placements, animal cubes, refills)
+      saveGame();
     }
-    
+
     // Show game message
     function showMessage(text, type = 'info') {
       const msgEl = document.getElementById('game-message');
@@ -1580,6 +1659,7 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       // New game button
       document.getElementById('new-game-btn').addEventListener('click', () => {
         if (confirm('Start a new game? Current progress will be lost.')) {
+          clearSavedGame();
           location.reload();
         }
       });
@@ -1706,7 +1786,8 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       
       displayAvailableAnimalCards();
       displayPlayerAnimalCards();
-      
+      saveGame();
+
       showMessage(`🎯 ${card.name} taken! Click it to place animal cubes.`, 'success');
     }
     
@@ -1744,6 +1825,7 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       gameState.discardedCardThisTurn = true;
 
       displayAvailableAnimalCards();
+      saveGame();
 
       showMessage(`🗑️ ${card.name} discarded and replaced!`, 'success');
     }
@@ -1998,8 +2080,8 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
     
     // Handle token placement via click
     function handleTokenPlacementClick(hexEl, hexData, q, r, hexKey) {
-      // Validate placement
-      const validation = canPlaceToken(hexData, gameState.selectedToken.color);
+      // Validate placement (pass placedAnimals so cubes block further stacking)
+      const validation = canPlaceToken(hexData, gameState.selectedToken.color, gameState.placedAnimals);
 
       if (!validation.valid) {
         showMessage(`❌ ${validation.reason}`, 'error');
@@ -2131,7 +2213,8 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       displayPlayerAnimalCards(); // Refresh to update placement counts
       
       const newCount = placementCount + 1;
-      const points = card.scoring[newCount - 1];
+      // More cubes = higher value; index from the end of the (descending) array.
+      const points = card.scoring[Math.max(0, card.scoring.length - newCount)];
       showMessage(`🐾 ${card.name} placed! Score: ${points} pts (${newCount}/${card.maxPlacements})`, 'success');
       
       // Clear highlights and deselect card after placement
@@ -2140,89 +2223,94 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       updateSelectedAnimalCardUI();
     }
     
-    // Check if hex and neighbors match animal card pattern
+    // Check if the clicked hex can anchor the animal pattern in ANY orientation.
+    // Harmonies habitats match in any of 6 rotations and mirrored, so we test
+    // every distinct orientation and accept if one fits fully on the board.
     function checkAnimalPattern(hexKey, pattern) {
       const hexData = gameState.hexBoard[hexKey];
       if (!hexData || !hexData.terrain) {
         return { valid: false, reason: 'No terrain' };
       }
-      
+
       // Parse clicked hex coordinates
       const [clickedQ, clickedR] = hexKey.split('_').map(Number);
-      
-      // Find the placement hex in pattern (where cube will be placed)
-      const placementHex = pattern.find(p => p.isPlacementHex);
-      if (!placementHex) {
-        console.error('Pattern missing placement hex:', pattern);
-        return { valid: false, reason: 'Invalid pattern configuration' };
-      }
-      
-      // Calculate offset: clicked hex should become the placement hex
-      const offsetQ = clickedQ - placementHex.q;
-      const offsetR = clickedR - placementHex.r;
-      
-      // Check all hexes in pattern
-      for (const patternHex of pattern) {
-        // Calculate actual board position for this pattern hex
-        const actualQ = patternHex.q + offsetQ;
-        const actualR = patternHex.r + offsetR;
-        const actualKey = `${actualQ}_${actualR}`;
-        
-        // Get hex data from board
-        const actualHexData = gameState.hexBoard[actualKey];
-        
-        // Check if hex exists on board
-        if (!actualHexData) {
-          return { 
-            valid: false, 
-            reason: `Pattern extends beyond board at (${actualQ},${actualR})` 
-          };
+
+      let lastReason = 'Pattern does not match here';
+
+      for (const orientation of getPatternOrientations(pattern)) {
+        // Find the placement hex in THIS orientation (where the cube will go)
+        const placementHex = orientation.find(p => p.isPlacementHex);
+        if (!placementHex) {
+          lastReason = 'Invalid pattern configuration';
+          continue;
         }
-        
-        // Check terrain type matches (allow some flexibility)
-        if (!terrainMatches(actualHexData.terrain, patternHex.terrain)) {
-          return { 
-            valid: false, 
-            reason: `Need ${patternHex.terrain} at (${actualQ},${actualR}), found ${actualHexData.terrain || 'empty'}` 
-          };
+
+        // Offset so the placement hex lands on the clicked hex
+        const offsetQ = clickedQ - placementHex.q;
+        const offsetR = clickedR - placementHex.r;
+
+        let ok = true;
+        for (const patternHex of orientation) {
+          const actualQ = patternHex.q + offsetQ;
+          const actualR = patternHex.r + offsetR;
+          const actualHexData = gameState.hexBoard[`${actualQ}_${actualR}`];
+
+          if (!actualHexData) {
+            ok = false;
+            lastReason = `Pattern extends beyond board at (${actualQ},${actualR})`;
+            break;
+          }
+          if (!hexMatchesPattern(actualHexData, patternHex)) {
+            ok = false;
+            lastReason = `Need ${describePatternHex(patternHex)} at (${actualQ},${actualR}), found ${actualHexData.terrain || 'empty'}`;
+            break;
+          }
         }
+
+        if (ok) return { valid: true };
       }
-      
-      return { valid: true };
+
+      return { valid: false, reason: lastReason };
     }
-    
-    // Helper: Check if actual terrain matches required terrain (with flexibility)
+
+    // Describe a required pattern hex for error messages (includes height if set)
+    function describePatternHex(patternHex) {
+      return patternHex.height != null
+        ? `${patternHex.terrain} (Ht ${patternHex.height})`
+        : patternHex.terrain;
+    }
+
+    // Check if a board hex satisfies a pattern hex's terrain AND height requirement.
+    function hexMatchesPattern(actualHexData, patternHex) {
+      if (!terrainMatches(actualHexData.terrain, patternHex.terrain)) {
+        return false;
+      }
+      // Enforce exact stack height when the card specifies one (e.g. Mountain Ht 2/3)
+      if (patternHex.height != null) {
+        const actualHeight = actualHexData.stack ? actualHexData.stack.length : 0;
+        if (actualHeight !== patternHex.height) return false;
+      }
+      return true;
+    }
+
+    // Helper: Check if actual terrain matches required terrain type.
+    // Height is enforced separately in hexMatchesPattern. Terrain TYPE must
+    // match exactly, except a "tree" satisfies "green"/"trunk" requirements
+    // (a completed tree has both a green crown and a brown trunk).
     function terrainMatches(actualTerrain, requiredTerrain) {
       if (!actualTerrain || actualTerrain === 'empty') {
         return false;
       }
-      
-      // Exact match
+
+      // Exact match (this is what "mountain" vs "rock" now correctly requires)
       if (actualTerrain === requiredTerrain) {
         return true;
       }
-      
-      // Flexible matching rules:
-      // - "green" in pattern matches both "green" (single) and "tree" (brown+green)
-      // - "rock" in pattern matches both "rock" (single grey) and "mountain" (2+ grey)
-      // - "trunk" in pattern matches "tree" (since tree includes trunk)
-      
-      if (requiredTerrain === 'green' && actualTerrain === 'tree') {
-        return true; // Trees have green tops
-      }
-      
-      if (requiredTerrain === 'rock' && actualTerrain === 'mountain') {
-        return true; // Mountains are made of rock/grey
-      }
-      
-      if (requiredTerrain === 'mountain' && actualTerrain === 'rock') {
-        return true; // Single grey can count as incomplete mountain
-      }
-      
-      if (requiredTerrain === 'trunk' && actualTerrain === 'tree') {
-        return true; // Trees have trunks
-      }
-      
+
+      // A completed tree (brown+green) also fulfils a green-crown or trunk requirement
+      if (requiredTerrain === 'green' && actualTerrain === 'tree') return true;
+      if (requiredTerrain === 'trunk' && actualTerrain === 'tree') return true;
+
       return false;
     }
     
@@ -2275,8 +2363,11 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
         s.classList.remove('selected');
       });
       gameState.selectedSpace = null;
+
+      // Persist the completed turn (new supply, reset flags)
+      saveGame();
     }
-    
+
     // Check if game should end (solo mode rules)
     function checkGameEnd() {
       // Condition 1: Cannot draw enough tokens to refill all 3 spaces (need 9 tokens)
@@ -2297,7 +2388,8 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       
       // Set game ended flag to disable gameplay
       gameState.gameEnded = true;
-      
+      saveGame();
+
       const suns = calculateSuns(gameState.score.total);
       const sunEmoji = '☀️'.repeat(suns);
       

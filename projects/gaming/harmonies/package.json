@@ -1,0 +1,13 @@
+{
+  "name": "harmonies",
+  "version": "6.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Harmonies solo board game (static HTML/JS). ESM so pure logic modules can be unit-tested with node --test.",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1"
+  }
+}

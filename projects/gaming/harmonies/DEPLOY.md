@@ -1,33 +1,29 @@
 # Harmonies Deployment Guide
 
-**Current Version:** v6.0.0 - Enhanced Animal System  
-**Last Updated:** 2026-02-17
+**Current Version:** v6.1.0
+**Deploy target:** GitHub Pages from the repo `public/` directory
 
-## ⚠️ CRITICAL: Do NOT Deploy Markdown Files to Public!
+## ⚠️ CRITICAL: Do NOT deploy docs or build artifacts to public!
 
-**Markdown files (.md) are for development/documentation ONLY and should NEVER be synced to `public/`.**
+**Only `index.html` and the `js/` directory should be deployed.** Markdown docs, tests, and
+Node/Playwright build files stay in source only.
 
-This includes:
-- `README.md`
-- `PROGRESS.md`
-- `HANDOFF.md`
-- `DEPLOY.md`
-- `game-rules.md`
-
-**Only `index.html` and `js/` directory should be deployed to public.**
+This means excluding: `*.md` (README, PROGRESS, DEPLOY, game-rules), `tests/`, `node_modules/`,
+`package.json`, `package-lock.json`, `playwright.config.js`, `playwright-report/`, `test-results/`,
+and `archive/`.
 
 ---
 
 ## File Structure
 
-- **Main game**: `index.html` (v6.0.0 - 1923 lines, fully playable with 32 animal cards)
+- **Main game**: `index.html` (~2,400 lines, 32 animal cards)
 - **Public URL**: https://ngnnah.github.io/I-And-AI/projects/gaming/harmonies/
-- **Data**: `js/data/animal-cards.js` (32 normal cards)
+- **Data**: `js/data/animal-cards.js` (32 cards)
 - **Game Logic**: `js/game/*.js` (hex-grid, token-manager, scoring-engine)
 
 ## Sync to Public Directory
 
-**ALWAYS use this exact command** (includes `--exclude='*.md'`):
+Run from the repo root. **ALWAYS keep every `--exclude` below** (especially `--exclude='*.md'`):
 
 ```bash
 rsync -av --delete \
@@ -36,6 +32,9 @@ rsync -av --delete \
   --exclude='tests' \
   --exclude='test-results' \
   --exclude='playwright-report' \
+  --exclude='playwright.config.js' \
+  --exclude='package.json' \
+  --exclude='package-lock.json' \
   --exclude='archive' \
   --exclude='public' \
   --exclude='*.md' \
@@ -48,7 +47,7 @@ rsync -av --delete \
 
 ```bash
 git add public/
-git commit -m "deploy: Harmonies v6.0.0 - Enhanced Animal System"
+git commit -m "deploy: Harmonies v6.1.0 - correct mechanics + auto-save"
 git push origin main
 ```
 
