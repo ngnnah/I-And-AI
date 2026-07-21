@@ -883,7 +883,67 @@
       </div>
     </div>
   </div>
-  
+
+  <!-- How to Play / Help modal (reuses .pattern-modal styles) -->
+  <div id="help-modal" class="pattern-modal" onclick="if(event.target===this)closeHelp()">
+    <div class="pattern-modal-content" style="max-width:min(560px,92vw);">
+      <div class="flex justify-between items-start mb-3">
+        <h3 class="text-base md:text-lg font-bold text-slate-800 flex-1 pr-2">📖 How to Play Harmonies</h3>
+        <button onclick="closeHelp()" class="text-3xl text-slate-600 hover:text-slate-900 font-bold w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 flex-shrink-0" aria-label="Close">&times;</button>
+      </div>
+
+      <div class="text-xs md:text-sm text-slate-700 space-y-4">
+        <section>
+          <h4 class="font-bold text-slate-800 mb-1">🎯 Your turn</h4>
+          <ol class="list-decimal list-inside space-y-0.5">
+            <li>Click a token, then click a hex to place it. Do this <strong>3 times</strong> (all from one space — the other two spaces are discarded after your first pick).</li>
+            <li>Optionally take <strong>1 animal card</strong> per turn (max 4 in hand), or discard &amp; replace one.</li>
+            <li>Place an animal cube when its habitat pattern is built on your board (patterns match in <strong>any rotation or mirror</strong>).</li>
+            <li>Click <strong>End Turn</strong> to refill and continue.</li>
+          </ol>
+          <p class="mt-1 text-slate-500">Your board <strong>auto-saves</strong> — close the tab and come back anytime.</p>
+        </section>
+
+        <section>
+          <h4 class="font-bold text-slate-800 mb-1">🧱 Stacking tokens</h4>
+          <table class="w-full border-collapse">
+            <thead>
+              <tr class="text-left border-b border-slate-200 text-slate-500">
+                <th class="py-1 pr-2">Token</th><th class="py-1 pr-2">Place on</th><th class="py-1">Max</th>
+              </tr>
+            </thead>
+            <tbody class="align-top">
+              <tr class="border-b border-slate-100"><td class="py-1 pr-2">🌼 Yellow (field)</td><td class="py-1 pr-2">Ground only</td><td class="py-1">1</td></tr>
+              <tr class="border-b border-slate-100"><td class="py-1 pr-2">💧 Blue (water)</td><td class="py-1 pr-2">Ground only</td><td class="py-1">1</td></tr>
+              <tr class="border-b border-slate-100"><td class="py-1 pr-2">🪵 Brown (trunk)</td><td class="py-1 pr-2">Brown</td><td class="py-1">2</td></tr>
+              <tr class="border-b border-slate-100"><td class="py-1 pr-2">🌿 Green (leaves)</td><td class="py-1 pr-2">1–2 brown</td><td class="py-1">3</td></tr>
+              <tr class="border-b border-slate-100"><td class="py-1 pr-2">⛰️ Gray (mountain)</td><td class="py-1 pr-2">Gray</td><td class="py-1">3</td></tr>
+              <tr><td class="py-1 pr-2">🏠 Red (building)</td><td class="py-1 pr-2">Gray/brown/red, or alone</td><td class="py-1">2</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h4 class="font-bold text-slate-800 mb-1">⭐ Scoring</h4>
+          <ul class="space-y-0.5">
+            <li>🌲 <strong>Trees</strong> — bush 1, tree 3, tall tree (2 brown+green) <strong>7</strong></li>
+            <li>⛰️ <strong>Mountains</strong> — gray height 1/2/3 = 1/3/7, but <strong>0 if not next to another mountain</strong></li>
+            <li>🌼 <strong>Fields</strong> — 5 per connected group of 2+ (a lone yellow = 0)</li>
+            <li>🏠 <strong>Buildings</strong> — a <strong>stacked</strong> red scores 5 if next to 3+ different colors (a lone red = 0)</li>
+            <li>💧 <strong>Water</strong> — longest river of 2/3/4/5/6 = 2/5/8/11/15 (+4 each beyond 6)</li>
+            <li>🐾 <strong>Animals</strong> — the more cubes you place, the more points</li>
+          </ul>
+          <p class="mt-1 text-slate-500">Total points earn ☀️ suns: 40+ =1, 70+ =2, 90+ =3, 110+ =4, 130+ =5, 140+ =6, 150+ =7, 160+ =8.</p>
+        </section>
+
+        <section>
+          <h4 class="font-bold text-slate-800 mb-1">🏁 Game ends</h4>
+          <p>When the pouch has fewer than 9 tokens, or 2 or fewer empty hexes remain. Aim for the most suns!</p>
+        </section>
+      </div>
+    </div>
+  </div>
+
   <!-- Game Logic Scripts (ES6 Modules) -->
   <script type="module">
     // Import existing game logic
@@ -1664,10 +1724,8 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
         }
       });
       
-      // Help button
-      document.getElementById('help-btn').addEventListener('click', () => {
-        showMessage('Select a token space (click), drag tokens to hexes, then end your turn!', 'info');
-      });
+      // Help button — open the How to Play modal
+      document.getElementById('help-btn').addEventListener('click', openHelp);
       
       // End turn button
       document.getElementById('end-turn-btn').addEventListener('click', handleEndTurn);
@@ -1971,7 +2029,17 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       }
     };
 
-    // Close modal on background click
+    // How to Play modal
+    window.openHelp = function() {
+      const modal = document.getElementById('help-modal');
+      if (modal) modal.classList.add('active');
+    };
+    window.closeHelp = function() {
+      const modal = document.getElementById('help-modal');
+      if (modal) modal.classList.remove('active');
+    };
+
+    // Close modal on background click + Escape key
     document.addEventListener('DOMContentLoaded', () => {
       const modal = document.getElementById('pattern-modal');
       if (modal) {
@@ -1981,6 +2049,12 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
           }
         });
       }
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closePatternHelper();
+          closeHelp();
+        }
+      });
     });
 
     // Render pattern visualization using mini hexes

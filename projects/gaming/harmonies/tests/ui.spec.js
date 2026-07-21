@@ -37,6 +37,23 @@ test("can place 3 tokens and end a turn", async ({ page }) => {
   await expect(page.locator('.token[data-space="0"] >> visible=true').first()).toBeVisible();
 });
 
+test("Help button opens a How to Play modal with stacking and scoring", async ({ page }) => {
+  await freshGame(page);
+  await page.locator("#help-btn").click();
+
+  const modal = page.locator("#help-modal");
+  await expect(modal).toBeVisible();
+  await expect(modal).toContainText("How to Play");
+  await expect(modal).toContainText("Stacking tokens");
+  await expect(modal).toContainText("Scoring");
+  await expect(modal).toContainText("tall tree"); // the 7-point rule
+  await expect(modal).toContainText("suns");
+
+  // Closes via the × button
+  await modal.getByRole("button", { name: "Close" }).click();
+  await expect(modal).not.toBeVisible();
+});
+
 test("board persists across a reload (touch-and-go)", async ({ page }) => {
   await freshGame(page);
   for (let i = 0; i < 3; i++) await placeOneToken(page);
