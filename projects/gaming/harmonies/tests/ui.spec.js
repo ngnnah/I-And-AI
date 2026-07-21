@@ -23,6 +23,22 @@ test("loads without console errors", async ({ page }) => {
   expect(errors, `page errors: ${errors.join("; ")}`).toEqual([]);
 });
 
+test("End Turn button is docked under the board (inside <main>)", async ({ page }) => {
+  await freshGame(page);
+  await expect(page.locator("main #end-turn-btn")).toBeVisible();
+  // The old full-width bottom bar is gone; the hint mentions the shortcut.
+  await expect(page.locator("main")).toContainText("Backspace");
+});
+
+test("Backspace ends the turn (keyboard shortcut)", async ({ page }) => {
+  await freshGame(page);
+  for (let i = 0; i < 3; i++) await placeOneToken(page);
+  await page.keyboard.press("Backspace");
+  await expect(page.locator("#game-message")).toContainText("Turn complete");
+  // Still on the same page (Backspace did not navigate the browser back)
+  await expect(page).toHaveURL(/index\.html/);
+});
+
 test("can place 3 tokens and end a turn", async ({ page }) => {
   await freshGame(page);
   const filledBefore = await page.locator("#hex-grid-container .hex:not(.empty)").count();

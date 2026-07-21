@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Harmonies v5.0 - Board Game</title>
+  <title>Harmonies - Board Game</title>
   <link rel="icon" type="image/png" href="assets/favicon.jpg">
   
   <!-- Tailwind CSS CDN -->
@@ -662,7 +662,7 @@
       <div class="flex flex-wrap items-center justify-between gap-4">
         <!-- Title -->
         <div>
-          <h1 class="text-3xl font-bold text-slate-800">🎮 Harmonies v5.0</h1>
+          <h1 class="text-3xl font-bold text-slate-800">🎮 Harmonies</h1>
           <p class="text-sm text-slate-600">Build landscapes, attract animals, score points!</p>
         </div>
         
@@ -810,24 +810,22 @@
               </div>
             </div>
           </div>
+
+          <!-- Game Messages / Status Banner -->
+          <div id="game-message" class="mt-4 mb-3 p-2 md:p-3 rounded-lg text-center font-semibold text-sm md:text-base bg-blue-100 text-blue-800">
+            🎮 Click any token below, then click a hex to place it!
+          </div>
+
+          <!-- End Turn Button (directly under the board) -->
+          <button id="end-turn-btn" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold disabled:bg-slate-400 disabled:cursor-not-allowed">
+            ✓ End Turn
+          </button>
+          <div class="text-xs text-slate-400 text-center mt-2">
+            Place all 3 tokens, then End Turn (or press Backspace)
+          </div>
         </div>
       </main>
 
-    </div>
-
-    <!-- End Turn Button (All Devices) -->
-    <div class="mt-4">
-      <!-- Game Messages / Status Banner -->
-      <div id="game-message" class="mb-3 p-2 md:p-3 rounded-lg text-center font-semibold text-sm md:text-base bg-blue-100 text-blue-800">
-        🎮 Click any token below, then click a hex to place it!
-      </div>
-      
-      <button id="end-turn-btn" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold disabled:bg-slate-400 disabled:cursor-not-allowed">
-        ✓ End Turn
-      </button>
-      <div class="text-xs text-slate-300 text-center mt-2">
-        Place all 3 tokens before ending turn
-      </div>
     </div>
 
     <!-- Mobile-only: Your Animal Cards (horizontal) -->
@@ -857,7 +855,7 @@
         <strong>How to play:</strong> Click a token → Click a hex to place it → End turn when all 3 placed → Score points!
       </p>
       <p class="text-xs text-slate-500 mt-2">
-        v5.0 HTML/CSS Implementation • <a href="https://github.com/ngnnah/I-And-AI" class="text-blue-600 hover:underline">GitHub</a>
+        Solo edition • <a href="https://github.com/ngnnah/I-And-AI" class="text-blue-600 hover:underline">GitHub</a>
       </p>
     </footer>
     
@@ -1066,7 +1064,7 @@
 
     // Initialize game
     function initGame() {
-      console.log('🎮 Harmonies v5.0 Initializing...');
+      console.log('🎮 Harmonies v6.1 initializing...');
 
       // Create initial hex grid (23 hexes - Side A board)
       createInitialHexGrid();
@@ -2053,6 +2051,18 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
         if (e.key === 'Escape') {
           closePatternHelper();
           closeHelp();
+          return;
+        }
+        // Backspace = End Turn (ignore when typing in a field or a modal is open)
+        if (e.key === 'Backspace') {
+          const tag = (e.target.tagName || '').toLowerCase();
+          if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+          const helpOpen = document.getElementById('help-modal')?.classList.contains('active');
+          const patternOpen = document.getElementById('pattern-modal')?.classList.contains('active');
+          if (helpOpen || patternOpen) return;
+          e.preventDefault(); // stop the browser's "navigate back" behavior
+          const btn = document.getElementById('end-turn-btn');
+          if (btn && !btn.disabled) handleEndTurn();
         }
       });
     });
