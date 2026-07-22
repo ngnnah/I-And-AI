@@ -54,6 +54,28 @@ token stacking rules.
 
 ---
 
+## Firebase scoreboard (optional)
+
+A lightweight shared scoreboard (NOT multiplayer): finished games push their final
+score to a `scores` node in the `harmonies-game` Realtime Database, and the sidebar
+shows the 10 most recent games (name + score + suns). An editable player-name field
+in the header (saved in `localStorage`) tags each score.
+
+- Wired directly in `index.html` via **dynamic import** of the Firebase v10 modular
+  SDK, so if the CDN/DB is unreachable the game still runs (scoreboard shows "offline").
+- Config needs only `databaseURL` (no auth).
+- **Required DB rules** (the old time-limited rules expired 2026-03-17). Paste in
+  Firebase console → Realtime Database → Rules:
+  ```json
+  {
+    "rules": {
+      "scores": { ".read": true, ".write": true, ".indexOn": ["ts"] }
+    }
+  }
+  ```
+  Open read/write is acceptable for a personal 2-player game (only non-sensitive
+  scores are stored); tighten later if desired.
+
 ## Not doing (by design)
 
 - **No multiplayer / networking.** Solo-only is intentional: two people play their own boards on

@@ -664,6 +664,12 @@
         <div>
           <h1 class="text-3xl font-bold text-slate-800">🎮 Harmonies</h1>
           <p class="text-sm text-slate-600">Build landscapes, attract animals, score points!</p>
+          <div class="mt-2 flex items-center gap-1.5 text-sm">
+            <span title="Your name — saved on this device, tagged on your scores">👤</span>
+            <input id="player-name-input" type="text" maxlength="24" placeholder="Enter your name"
+              class="border-b border-slate-300 focus:border-blue-500 outline-none text-slate-700 bg-transparent px-1 py-0.5 w-40"
+              aria-label="Your player name" />
+          </div>
         </div>
         
         <!-- Controls -->
@@ -706,6 +712,14 @@
       </div>
       <div class="total-score">
         <strong>🪙 <span id="pouch-counter-mobile">120</span> | Total: <span id="score-total-mobile">0</span> <span id="sun-display-mobile" class="ml-1"></span></strong>
+      </div>
+    </div>
+
+    <!-- Mobile-only: Recent Games -->
+    <div class="md:hidden bg-white rounded-lg shadow-lg p-3 mb-4">
+      <h2 class="text-base font-bold text-slate-800 mb-2">🏆 Recent Games</h2>
+      <div id="recent-games-list-mobile">
+        <p class="text-xs text-slate-400 text-center py-2">Loading…</p>
       </div>
     </div>
 
@@ -775,6 +789,15 @@
                 <span id="score-total-sidebar">0</span> <span id="sun-display"></span>
               </span>
             </div>
+          </div>
+        </div>
+
+        <!-- Recent Games (shared scoreboard) -->
+        <div class="bg-white rounded-lg shadow-lg p-4">
+          <h2 class="text-lg font-bold text-slate-800 mb-2">🏆 Recent Games</h2>
+          <p class="text-xs text-slate-500 mb-2">Final scores from you &amp; others</p>
+          <div id="recent-games-list">
+            <p class="text-xs text-slate-400 text-center py-2">Loading…</p>
           </div>
         </div>
       </aside>
@@ -1067,6 +1090,105 @@
       }
     }
 
+    // ── Player name + Firebase scoreboard (optional, degrades gracefully) ──
+    const NAME_KEY = 'harmonies_player_name';
+    const FIREBASE_DB_URL = 'https://harmonies-game-default-rtdb.asia-southeast1.firebasedatabase.app';
+    let fbdb = null, fbApi = null;
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function getPlayerName() {
+      return (localStorage.getItem(NAME_KEY) || '').trim() || 'Anonymous';
+    }
+
+    function initPlayerNameField() {
+      const input = document.getElementById('player-name-input');
+      if (!input) return;
+      input.value = localStorage.getItem(NAME_KEY) || '';
+      input.addEventListener('input', () => {
+        localStorage.setItem(NAME_KEY, input.value);
+      });
+    }
+
+    // Load Firebase lazily via dynamic import so the game still works if the CDN
+    // is blocked/offline or the DB rules have expired.
+    async function initFirebase() {
+      try {
+        const [appMod, dbMod] = await Promise.all([
+          import('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js'),
+          import('https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js'),
+        ]);
+        const app = appMod.initializeApp({ databaseURL: FIREBASE_DB_URL });
+        fbdb = dbMod.getDatabase(app);
+        fbApi = dbMod;
+        listenRecentGames();
+        console.log('🔥 Firebase scoreboard connected');
+      } catch (e) {
+        console.warn('Scoreboard unavailable (Firebase not loaded):', e);
+        renderRecentGames(null); // show offline note
+      }
+    }
+
+    // Save a finished game's score to the shared scoreboard.
+    function saveScore() {
+      if (!fbdb || !fbApi) return;
+      try {
+        const { ref, push, serverTimestamp } = fbApi;
+        push(ref(fbdb, 'scores'), {
+          name: getPlayerName(),
+          score: gameState.score.total,
+          suns: calculateSuns(gameState.score.total),
+          ts: serverTimestamp(),
+        });
+      } catch (e) {
+        console.warn('Could not save score:', e);
+      }
+    }
+
+    // Live-listen to the 10 most recent games.
+    function listenRecentGames() {
+      if (!fbdb || !fbApi) return;
+      try {
+        const { ref, query, orderByChild, limitToLast, onValue } = fbApi;
+        const q = query(ref(fbdb, 'scores'), orderByChild('ts'), limitToLast(10));
+        onValue(q, (snap) => {
+          const items = [];
+          snap.forEach((child) => items.push(child.val()));
+          items.reverse(); // newest first
+          renderRecentGames(items);
+        }, (err) => {
+          console.warn('Scoreboard read failed (check DB rules):', err);
+          renderRecentGames(null);
+        });
+      } catch (e) {
+        console.warn('Scoreboard listen failed:', e);
+      }
+    }
+
+    function renderRecentGames(items) {
+      let html;
+      if (items === null) {
+        html = '<p class="text-xs text-slate-400 text-center py-2">Scoreboard offline.</p>';
+      } else if (!items.length) {
+        html = '<p class="text-xs text-slate-400 text-center py-2">No games yet — finish a game to record a score!</p>';
+      } else {
+        html = items.map((g) => {
+          const suns = '☀️'.repeat(Math.max(0, g.suns || 0));
+          return `<div class="flex justify-between items-center text-sm py-1 border-b border-slate-100 last:border-0">
+            <span class="truncate mr-2 text-slate-700">${escapeHtml(g.name || 'Anonymous')}</span>
+            <span class="font-bold text-purple-900 whitespace-nowrap">${Number(g.score) || 0}<span class="text-xs ml-1">${suns}</span></span>
+          </div>`;
+        }).join('');
+      }
+      ['recent-games-list', 'recent-games-list-mobile'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = html;
+      });
+    }
+
     // Initialize game
     function initGame() {
       console.log('🎮 Harmonies v6.1 initializing...');
@@ -1088,6 +1210,10 @@
 
       // Safety net: persist on tab close/refresh
       window.addEventListener('beforeunload', saveGame);
+
+      // Player name + shared scoreboard (optional)
+      initPlayerNameField();
+      initFirebase();
 
       if (loadGame()) {
         // Resume the auto-saved board
@@ -2529,6 +2655,7 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       // Set game ended flag to disable gameplay
       gameState.gameEnded = true;
       saveGame();
+      saveScore(); // record final score to the shared scoreboard
 
       const suns = calculateSuns(gameState.score.total);
       const sunEmoji = '☀️'.repeat(suns);
