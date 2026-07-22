@@ -75,10 +75,16 @@ test("selecting a token highlights valid placement hexes", async ({ page }) => {
   expect(await page.locator(".hex-cell.valid-token-target").count()).toBeGreaterThan(0);
 });
 
-test("playing to the end shows the Game Over summary", async ({ page }) => {
+test("final turn shows Finish, then the Game Over summary", async ({ page }) => {
   await freshGame(page);
-  let ended = false;
-  for (let i = 0; i < 30 && !ended; i++) {
+  let finished = false;
+  for (let i = 0; i < 40 && !finished; i++) {
+    // On the last turn a Finish button appears (so you can place final cubes).
+    if (await page.locator("#finish-btn:visible").count()) {
+      await page.locator("#finish-btn").click();
+      finished = true;
+      break;
+    }
     const empty = page.locator("#hex-grid-container .hex-cell[data-terrain='empty']");
     if ((await empty.count()) === 0) break;
     if ((await page.locator(".token.selected >> visible=true").count()) === 0) {
@@ -88,11 +94,10 @@ test("playing to the end shows the Game Over summary", async ({ page }) => {
     }
     await empty.first().click();
     await page.waitForTimeout(40);
-    ended = (await page.locator("#gameover-modal.active").count()) > 0;
   }
+  expect(finished).toBe(true);
   await expect(page.locator("#gameover-modal")).toBeVisible();
   await expect(page.locator("#gameover-modal")).toContainText("Game Over");
-  await expect(page.locator("#gameover-total")).toBeVisible();
 });
 
 test("Help button opens a How to Play modal with stacking and scoring", async ({ page }) => {

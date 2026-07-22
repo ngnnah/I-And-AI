@@ -909,6 +909,11 @@
           <div id="game-message" class="mt-4 p-2 md:p-3 rounded-lg text-center font-semibold text-sm bg-blue-100 text-blue-800">
             🎮 Click any token, then click a hex to place it!
           </div>
+
+          <!-- Finish button — only appears on the final turn so you can place last cubes first -->
+          <button id="finish-btn" class="hidden w-full mt-3 px-4 py-3 bg-amber-500 text-white rounded-lg font-extrabold shadow hover:bg-amber-600 transition">
+            🏁 Finish Game &amp; Score
+          </button>
         </div>
 
         <!-- Score breakdown (6 colored cells) — desktop/tablet; mobile uses the top grid -->
@@ -1108,6 +1113,7 @@
       turnNumber: 1,
       tokensPlaced: 0,
       tokensToPlace: 3,
+      finishing: false, // final turn: tokens done, waiting for last cubes + Finish
       hexBoard: {},
       tokenSupply: [[], [], []],
       pouch: { ...INITIAL_POUCH },
@@ -1187,6 +1193,13 @@
       displayAvailableAnimalCards();
       displayPlayerAnimalCards();
       updateScore();
+      renderTurnStatus();
+      // If we were resumed mid-"finish" (final turn, before scoring), bring the button back.
+      if (gameState.finishing && !gameState.gameEnded) {
+        const btn = document.getElementById('finish-btn');
+        if (btn) btn.classList.remove('hidden');
+        showMessage('🏁 Last turn! Place any final animal cubes, then press Finish.', 'info');
+      }
     }
 
     // ── Player name + Firebase scoreboard (optional, degrades gracefully) ──
@@ -1355,7 +1368,7 @@
         return;
       }
       
-      const canTake = !gameState.takenCardThisTurn && !gameState.discardedCardThisTurn && gameState.playerAnimalCards.length < 4;
+      const canTake = !gameState.takenCardThisTurn && !gameState.discardedCardThisTurn && activeHandCount() < 4;
       const canDiscard = !gameState.takenCardThisTurn && !gameState.discardedCardThisTurn; // Can discard if didn't take or discard
       
       // Show/hide discard buttons based on mode and availability
@@ -1827,6 +1840,12 @@
     function selectToken(color, space, index) {
       gameState.selectedSpace = space;
       gameState.selectedToken = { color, space, index };
+      // Selecting a token cancels any animal-card selection.
+      if (gameState.selectedAnimalCard) {
+        gameState.selectedAnimalCard = null;
+        clearValidPlacementHighlights();
+        updateSelectedAnimalCardUI();
+      }
       updateTokenSelection();
       updateMobileTokenSelection();
     }
@@ -2000,6 +2019,15 @@
       saveGame();
     }
 
+    // Cubes placed for a card, and count of ACTIVE (uncompleted) cards in hand.
+    // A completed card (all cubes placed) moves aside and frees a hand slot.
+    function placedCountFor(cardId) {
+      return gameState.placedAnimals.filter(p => p.cardId === cardId).length;
+    }
+    function activeHandCount() {
+      return gameState.playerAnimalCards.filter(c => placedCountFor(c.id) < c.maxPlacements).length;
+    }
+
     // Update the turn tracker (turn #, token-progress dots, card availability).
     function renderTurnStatus() {
       const tn = document.getElementById('turn-number');
@@ -2012,7 +2040,7 @@
         let text, cls;
         if (gameState.takenCardThisTurn) { text = '🎴 card taken'; cls = 'bg-slate-100 text-slate-500'; }
         else if (gameState.discardedCardThisTurn) { text = '⟳ card swapped'; cls = 'bg-slate-100 text-slate-500'; }
-        else if (gameState.playerAnimalCards.length >= 4) { text = '🎴 hand full (4)'; cls = 'bg-amber-100 text-amber-700'; }
+        else if (activeHandCount() >= 4) { text = '🎴 hand full (4)'; cls = 'bg-amber-100 text-amber-700'; }
         else { text = '🎴 card available'; cls = 'bg-green-100 text-green-700'; }
         st.textContent = text;
         st.className = `text-xs font-semibold px-2 py-0.5 rounded-full ${cls}`;
@@ -2044,6 +2072,12 @@
       
       // Help button — open the How to Play modal
       document.getElementById('help-btn').addEventListener('click', openHelp);
+
+      // Finish button (only shown on the final turn)
+      document.getElementById('finish-btn')?.addEventListener('click', () => {
+        document.getElementById('finish-btn')?.classList.add('hidden');
+        endGame();
+      });
 
       // Discard mode button
       document.getElementById('discard-mode-btn').addEventListener('click', () => {
@@ -2127,7 +2161,7 @@
         return;
       }
 
-      if (gameState.playerAnimalCards.length >= 4) {
+      if (activeHandCount() >= 4) {
         showMessage('❌ Maximum 4 animal cards! Complete some animals first.', 'error');
         return;
       }
@@ -2230,10 +2264,13 @@
         showMessage('Animal card deselected.', 'info');
       } else {
         gameState.selectedAnimalCard = cardId;
-        const description = card.description || card.pattern.map(p => p.terrain).join('+');
-        showMessage(`🐾 ${card.name} selected! Click any green highlighted hex to place`, 'success');
+        // Selecting a card cancels any token selection, so you can place a cube
+        // at any time (even between token placements).
+        gameState.selectedToken = null;
+        updateTokenSelection();
+        showMessage(`🐾 ${card.name} selected! Click a highlighted hex to place its cube.`, 'success');
       }
-      
+
       updateSelectedAnimalCardUI();
     }
     
@@ -2704,19 +2741,19 @@
       console.log(`🎲 End of turn - Tokens in pouch: ${tokensInPouch}`);
       
       if (tokensInPouch < 9) {
-        console.log('🏁 Game ending - insufficient tokens in pouch');
-        endGame();
+        console.log('🏁 Last turn - insufficient tokens to refill');
+        enterFinish();
         return;
       }
-      
+
       // Check if board is almost full
       const filledHexes = Object.values(gameState.hexBoard).filter(hex => hex.stack.length > 0).length;
       const emptyHexes = 23 - filledHexes;
       console.log(`🎲 Filled hexes: ${filledHexes}, Empty: ${emptyHexes}`);
-      
+
       if (emptyHexes <= 2) {
-        console.log(`🏁 Game ending - only ${emptyHexes} empty spaces (cannot place 3 tokens next turn)`);
-        endGame();
+        console.log(`🏁 Last turn - only ${emptyHexes} empty spaces`);
+        enterFinish();
         return;
       }
       
@@ -2735,6 +2772,17 @@
       gameState.selectedSpace = null;
 
       // Persist the completed turn (new supply, reset flags)
+      saveGame();
+    }
+
+    // Final turn: tokens are all placed and the bag/board can't support another
+    // turn. Don't end yet — let the player place any last animal cubes, then Finish.
+    function enterFinish() {
+      gameState.finishing = true;
+      const btn = document.getElementById('finish-btn');
+      if (btn) { btn.classList.remove('hidden'); btn.textContent = '🏁 Finish Game & Score'; }
+      showMessage('🏁 Last turn! Place any final animal cubes, then press Finish.', 'info');
+      renderTurnStatus();
       saveGame();
     }
 
@@ -2758,6 +2806,8 @@
       
       // Set game ended flag to disable gameplay
       gameState.gameEnded = true;
+      gameState.finishing = false;
+      document.getElementById('finish-btn')?.classList.add('hidden');
       saveGame();
       saveScore(); // record final score to the shared scoreboard
 
