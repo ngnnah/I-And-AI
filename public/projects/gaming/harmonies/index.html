@@ -87,13 +87,16 @@
     /* Selected/anchor hex — warm gold inset ring. */
     .hex-cell.selected .hex-fill { box-shadow: inset 0 0 0 3px rgba(245, 166, 35, 0.95); }
 
-    /* Hexes where the currently-selected token can be placed (guidance). */
+    /* Hexes where the currently-selected token can be placed — a turquoise
+       dot overlay marks each eligible hex. */
     .hex-cell.valid-token-target .hex-fill::after {
-      content: ""; position: absolute; inset: 0; clip-path: inherit;
-      box-shadow: inset 0 0 0 3px rgba(37, 99, 235, 0.85);
-      animation: token-target-pulse 1.6s ease-in-out infinite;
+      content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      width: 46%; aspect-ratio: 1; border-radius: 50%;
+      background: rgba(45, 212, 191, 0.9);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 1px 3px rgba(0, 0, 0, 0.35);
+      animation: token-target-pulse 1.4s ease-in-out infinite;
     }
-    @keyframes token-target-pulse { 0%,100% { opacity: .45; } 50% { opacity: .9; } }
+    @keyframes token-target-pulse { 0%,100% { opacity: .6; transform: translate(-50%,-50%) scale(.9); } 50% { opacity: 1; transform: translate(-50%,-50%) scale(1.05); } }
 
     /* Pop when a token lands. */
     @keyframes hexPop { 0% { transform: scale(.72); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
