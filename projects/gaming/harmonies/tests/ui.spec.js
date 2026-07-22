@@ -10,9 +10,12 @@ async function freshGame(page) {
   await expect(page.locator('.token[data-space="0"] >> visible=true').first()).toBeVisible();
 }
 
-// Place one token from space 0 onto the first empty board hex.
+// Place one token onto the first empty board hex. After the first placement the
+// next token is auto-selected, so only click a token when none is selected.
 async function placeOneToken(page) {
-  await page.locator('.token[data-space="0"] >> visible=true').first().click();
+  if ((await page.locator(".token.selected >> visible=true").count()) === 0) {
+    await page.locator('.token[data-space="0"] >> visible=true').first().click();
+  }
   await page.locator("#hex-grid-container .hex.empty").first().click();
 }
 
@@ -51,6 +54,26 @@ test("can place 3 tokens and end a turn", async ({ page }) => {
   await page.locator("#end-turn-btn").click();
   // A fresh set of tokens should be available for the next turn.
   await expect(page.locator('.token[data-space="0"] >> visible=true').first()).toBeVisible();
+});
+
+test("placing a token auto-selects the next one, arrows switch it", async ({ page }) => {
+  await freshGame(page);
+  // Place the first token (this commits the active space).
+  await page.locator('.token[data-space="0"] >> visible=true').first().click();
+  await page.locator("#hex-grid-container .hex.empty").first().click();
+
+  // The next token in that space should now be pre-selected.
+  const selected = page.locator(".token.selected >> visible=true");
+  await expect(selected.first()).toBeVisible();
+  const idxBefore = await selected.first().getAttribute("data-index");
+
+  // Right arrow moves the selection to the other remaining token.
+  await page.keyboard.press("ArrowRight");
+  const idxAfter = await page.locator(".token.selected >> visible=true").first().getAttribute("data-index");
+  expect(idxAfter).not.toBe(idxBefore);
+
+  // Exactly one logical token is selected (desktop copy).
+  await expect(page.locator(".token.selected >> visible=true")).toHaveCount(1);
 });
 
 test("Help button opens a How to Play modal with stacking and scoring", async ({ page }) => {

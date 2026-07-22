@@ -1533,27 +1533,60 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       showMessage(`${COLOR_NAMES[tokenData.color]} token selected! Click a hex to place it.`, 'success');
     }
 
-    // Update visual selection state of tokens
+    // Update visual selection state of tokens (by data attributes, so it works
+    // for click, keyboard, and auto-selection — and highlights desktop + mobile).
     function updateTokenSelection() {
-      document.querySelectorAll('.token').forEach(t => {
-        t.classList.remove('selected');
-      });
-
-      // No hex highlights needed for click-only mode
-
-      if (gameState.selectedToken && gameState.selectedToken.element) {
-        gameState.selectedToken.element.classList.add('selected');
-
-        // Highlight valid hexes for placement
-        document.querySelectorAll('.hex').forEach(hexEl => {
-          const q = parseInt(hexEl.dataset.q);
-          const r = parseInt(hexEl.dataset.r);
-          const hexKey = `${q}_${r}`;
-          const hexData = gameState.hexBoard[hexKey];
-
-          // No visual highlights needed for click-only mode
-        });
+      document.querySelectorAll('.token').forEach(t => t.classList.remove('selected'));
+      if (gameState.selectedToken) {
+        const { space, index } = gameState.selectedToken;
+        document.querySelectorAll(`.token[data-space="${space}"][data-index="${index}"]`)
+          .forEach(t => t.classList.add('selected'));
       }
+    }
+
+    // ── Keyboard / auto token selection ──
+
+    // Every currently-selectable token, in order. After the first placement only
+    // the chosen space still has tokens, so this naturally narrows to that space.
+    function getSelectableTokens() {
+      const list = [];
+      for (let s = 0; s < 3; s++) {
+        (gameState.tokenSupply[s] || []).forEach((color, index) => list.push({ color, space: s, index }));
+      }
+      return list;
+    }
+
+    // Select a specific token programmatically and refresh both highlights.
+    function selectToken(color, space, index, announce = true) {
+      gameState.selectedSpace = space;
+      gameState.selectedToken = { color, space, index };
+      updateTokenSelection();
+      updateMobileTokenSelection();
+      if (announce) {
+        showMessage(`${COLOR_NAMES[color]} selected — click a hex to place it (← / → to switch).`, 'success');
+      }
+    }
+
+    // Cycle the selected token with the arrow keys (dir = +1 right, -1 left).
+    function cycleTokenSelection(dir) {
+      if (gameState.gameEnded) return;
+      const list = getSelectableTokens();
+      if (!list.length) return;
+      const sel = gameState.selectedToken;
+      let cur = sel ? list.findIndex(t => t.space === sel.space && t.index === sel.index) : -1;
+      if (cur === -1) cur = dir > 0 ? -1 : 0;
+      const next = (cur + dir + list.length) % list.length;
+      const t = list[next];
+      selectToken(t.color, t.space, t.index);
+    }
+
+    // After placing a token, pre-select the next one in the active space so the
+    // player can immediately click another hex without re-selecting.
+    function autoSelectNextToken() {
+      const s = gameState.selectedSpace;
+      if (s == null) return;
+      const supply = gameState.tokenSupply[s] || [];
+      if (supply.length > 0) selectToken(supply[0], s, 0, false);
     }
 
     // Update token space UI (both desktop and mobile)
@@ -2043,35 +2076,49 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       if (modal) modal.classList.remove('active');
     };
 
-    // Close modal on background click + Escape key
+    // Keyboard shortcuts. Attached directly (not gated on DOMContentLoaded) so it
+    // is always active; it looks up elements lazily when a key is pressed.
+    // Use capture phase so we intercept before any browser default.
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closePatternHelper();
+        closeHelp();
+        return;
+      }
+      // Ignore shortcuts while typing in a field
+      const tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+
+      const helpOpen = document.getElementById('help-modal')?.classList.contains('active');
+      const patternOpen = document.getElementById('pattern-modal')?.classList.contains('active');
+      const modalOpen = helpOpen || patternOpen;
+
+      // Backspace = End Turn. Always swallow it so it can never trigger the
+      // browser's default back-navigation/scroll.
+      if (e.key === 'Backspace') {
+        e.preventDefault();
+        if (modalOpen) return;
+        const btn = document.getElementById('end-turn-btn');
+        if (btn && !btn.disabled) handleEndTurn();
+        return;
+      }
+
+      // Left / Right arrows = cycle the selected token to place.
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        if (modalOpen) return;
+        e.preventDefault();
+        cycleTokenSelection(e.key === 'ArrowRight' ? 1 : -1);
+      }
+    }, true);
+
+    // Close the pattern modal on background click
     document.addEventListener('DOMContentLoaded', () => {
       const modal = document.getElementById('pattern-modal');
       if (modal) {
         modal.addEventListener('click', (e) => {
-          if (e.target === modal) {
-            closePatternHelper();
-          }
+          if (e.target === modal) closePatternHelper();
         });
       }
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          closePatternHelper();
-          closeHelp();
-          return;
-        }
-        // Backspace = End Turn. Always swallow it (except when typing in a field)
-        // so it can never trigger the browser's default back-navigation/scroll.
-        if (e.key === 'Backspace') {
-          const tag = (e.target.tagName || '').toLowerCase();
-          if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
-          e.preventDefault();
-          const helpOpen = document.getElementById('help-modal')?.classList.contains('active');
-          const patternOpen = document.getElementById('pattern-modal')?.classList.contains('active');
-          if (helpOpen || patternOpen) return; // a modal is open: just swallow the key
-          const btn = document.getElementById('end-turn-btn');
-          if (btn && !btn.disabled) handleEndTurn();
-        }
-      });
     });
 
     // Render pattern visualization using mini hexes
@@ -2228,10 +2275,12 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
 
       // Check if all tokens placed
       if (gameState.tokensPlaced >= gameState.tokensToPlace) {
-        showMessage(`✓ All tokens placed! Click "End Turn" to continue.`, 'success');
+        showMessage(`✓ All tokens placed! Press Backspace or click "End Turn" to continue.`, 'success');
       } else {
+        // Pre-select the next token so the player can just click another hex.
+        autoSelectNextToken();
         const remaining = gameState.tokensToPlace - gameState.tokensPlaced;
-        showMessage(`✓ Token placed! ${remaining} more to place. Click another token, then click a hex.`, 'success');
+        showMessage(`✓ Placed! ${remaining} more. Next token auto-selected — click a hex, or use ← / → to switch.`, 'success');
       }
     }
 
