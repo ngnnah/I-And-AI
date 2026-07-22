@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Harmonies - Board Game</title>
-  <link rel="icon" type="image/png" href="assets/favicon.jpg">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/favicon.png">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -182,7 +183,7 @@
     .animal-card {
       background: white;
       border-radius: 8px;
-      padding: 12px;
+      padding: 6px 8px;
       width: 180px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
@@ -198,51 +199,68 @@
       -ms-user-select: none;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
+      /* Subtle Japanese shippō (七宝, overlapping circles) pattern over a deep gradient */
+      background-color: #0f172a;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%2256%22 height%3D%2256%22 viewBox%3D%220 0 56 56%22%3E%3Cg fill%3D%22none%22 stroke%3D%22rgba(255%2C255%2C255%2C0.06)%22 stroke-width%3D%221.4%22%3E%3Ccircle cx%3D%220%22 cy%3D%220%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%2256%22 cy%3D%220%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%220%22 cy%3D%2256%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%2256%22 cy%3D%2256%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%2228%22 cy%3D%2228%22 r%3D%2228%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),
+        linear-gradient(135deg, #1e3a5f 0%, #0f172a 60%, #131c31 100%);
+      background-attachment: fixed;
+      background-size: 56px 56px, cover;
+    }
+
+    /* Board: soft washi-paper feel with a faint asanoha-style grid */
+    #hex-grid-container {
+      background-color: #eef7f1;
+      background-image:
+        linear-gradient(135deg, rgba(126,211,33,0.10) 0%, rgba(74,144,226,0.12) 100%),
+        radial-gradient(rgba(15,23,42,0.05) 1px, transparent 1px);
+      background-size: cover, 22px 22px;
+    }
+
+    /* Frosted panels so the pattern subtly shows through */
+    .panel-card {
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(2px);
     }
 
     /* Token Supply Rows (Desktop & Mobile) */
     .token-supply-rows {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
-      margin-top: 1rem;
+      gap: 0.6rem;
+      margin-top: 0.25rem;
     }
 
+    /* Neutral by default; only the ACTIVE (selected) space is highlighted. */
     .token-row {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      border: 3px solid #cbd5e1;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 0.6rem;
+      min-height: 66px;
+      border-radius: 0.6rem;
+      background: #f1f5f9;
+      border: 2px solid #e2e8f0;
+      transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .token-row[data-space="0"] {
-      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-      border-color: #f59e0b;
+    .token-row.active-space {
+      background: #eef2ff;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
     }
 
-    .token-row[data-space="1"] {
-      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-      border-color: #3b82f6;
-    }
-
-    .token-row[data-space="2"] {
-      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-      border-color: #10b981;
-    }
-
-    .token-row-label {
-      font-weight: 700;
-      font-size: 0.875rem;
-      color: #475569;
-      min-width: 65px;
+    /* An emptied (discarded / used-up) space reads as inactive and faded. */
+    .token-row.empty-space {
+      opacity: 0.5;
     }
 
     .token-row-tokens {
       display: flex;
-      gap: 0.75rem;
-      flex: 1;
+      gap: 0.6rem;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
     /* Pattern Helper Modal */
@@ -602,13 +620,14 @@
       }
 
       .token {
-        width: 100% !important;
-        max-width: 70px !important;
+        width: 54px !important;
+        height: 54px !important;
+        max-width: 54px !important;
         aspect-ratio: 1 !important;
-        height: auto !important;
-        font-size: 32px !important;
-        border-radius: 8px !important;
+        font-size: 30px !important;
+        border-radius: 10px !important;
         border-width: 3px !important;
+        flex: 0 0 auto !important;
       }
 
       .token.selected {
@@ -664,40 +683,39 @@
     }
   </style>
 </head>
-<body class="bg-gradient-to-br from-slate-800 to-slate-900 min-h-screen">
+<body class="min-h-screen">
   
   <!-- Game Container -->
   <div class="container mx-auto px-4 py-6 max-w-7xl">
     
     <!-- Header -->
-    <header class="bg-white rounded-lg shadow-lg p-4 mb-6">
-      <div class="flex flex-wrap items-center justify-between gap-4">
-        <!-- Title -->
-        <div>
-          <h1 class="text-3xl font-bold text-slate-800">🎮 Harmonies</h1>
-          <p class="text-sm text-slate-600">Build landscapes, attract animals, score points!</p>
+    <header class="panel-card rounded-xl shadow-lg px-4 py-2.5 mb-4">
+      <div class="flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-4">
+        <!-- On mobile: title + buttons share one row. On desktop: md:contents flattens
+             this so title and buttons become direct flex items of the header row. -->
+        <div class="flex items-center justify-between gap-2 md:contents">
+          <div class="flex items-baseline gap-2">
+            <h1 class="text-2xl font-extrabold bg-gradient-to-r from-emerald-600 via-sky-600 to-indigo-600 bg-clip-text text-transparent">🎮 Harmonies</h1>
+            <p class="hidden lg:block text-xs text-slate-500">Build landscapes, attract animals, score points!</p>
+          </div>
+          <div class="flex gap-2 md:order-3">
+            <button id="new-game-btn" class="px-3 py-1.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition">
+              🎲 New Game
+            </button>
+            <button id="help-btn" class="px-3 py-1.5 bg-slate-600 text-white text-sm font-semibold rounded-lg hover:bg-slate-700 transition">
+              ❓ Help
+            </button>
+          </div>
         </div>
-        
-        <!-- Controls -->
-        <div class="flex gap-2">
-          <button id="new-game-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-            🎲 New Game
-          </button>
-          <button id="help-btn" class="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition">
-            ❓ Help
-          </button>
-        </div>
-      </div>
 
-      <!-- Big, fun, centered player-name field -->
-      <div class="w-full mt-4 flex justify-center">
-        <label class="flex items-center gap-3 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border-2 border-indigo-200 rounded-full pl-5 pr-5 py-2.5 shadow-sm focus-within:border-indigo-400 focus-within:shadow-md transition cursor-text">
-          <span class="text-2xl select-none">🎮</span>
+        <!-- Player name (its own full-width row on mobile; inline on desktop) -->
+        <label class="md:order-2 flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-200 rounded-full px-3 py-1 shadow-sm focus-within:border-indigo-400 transition cursor-text">
+          <span class="text-lg select-none">🎮</span>
           <input id="player-name-input" type="text" maxlength="24"
             placeholder="Who's playing? ✨"
-            class="text-center text-xl md:text-2xl font-extrabold tracking-tight text-indigo-700 placeholder:text-indigo-300 placeholder:font-semibold bg-transparent outline-none w-52 md:w-72"
+            class="text-center text-base font-bold text-indigo-700 placeholder:text-indigo-300 placeholder:font-medium bg-transparent outline-none w-full md:w-44"
             aria-label="Your player name" />
-          <span class="text-2xl select-none">🌿</span>
+          <span class="text-lg select-none">🌿</span>
         </label>
       </div>
     </header>
@@ -734,7 +752,7 @@
     </div>
 
     <!-- Mobile-only: Recent Games -->
-    <div class="md:hidden bg-white rounded-lg shadow-lg p-3 mb-4">
+    <div class="md:hidden panel-card rounded-xl shadow-lg p-3 mb-4">
       <h2 class="text-base font-bold text-slate-800 mb-2">🏆 Recent Games</h2>
       <div id="recent-games-list-mobile">
         <p class="text-xs text-slate-400 text-center py-2">Loading…</p>
@@ -747,7 +765,7 @@
       <!-- Left Sidebar: Animal Cards (desktop only) -->
       <aside class="hidden lg:block lg:col-span-1 space-y-4 desktop-only">
         <!-- Your Animal Cards (Cards you've taken) -->
-        <div class="bg-white rounded-lg shadow-lg p-4">
+        <div class="panel-card rounded-xl shadow-lg p-4">
           <h2 class="text-lg font-bold text-slate-800 mb-2">🎯 Your Animal Cards</h2>
           <p class="text-xs text-slate-500 mb-3">Max 4 cards - Click to select for placement</p>
           <div id="player-animal-cards" class="space-y-2 min-h-[100px]">
@@ -756,7 +774,7 @@
         </div>
         
         <!-- Available Animal Cards (Cards to take) -->
-        <div class="bg-white rounded-lg shadow-lg p-4">
+        <div class="panel-card rounded-xl shadow-lg p-4">
           <h2 class="text-lg font-bold text-slate-800 mb-2">🃏 Available Cards</h2>
           <p class="text-xs text-slate-500 mb-3">Click to take a card (once per turn)</p>
           <div id="available-animal-cards" class="space-y-2">
@@ -773,8 +791,55 @@
           </div>
         </div>
         
-        <!-- Score Breakdown -->
-        <div class="bg-white rounded-lg shadow-lg p-4">
+        <!-- Recent Games (shared scoreboard) -->
+        <div class="panel-card rounded-xl shadow-lg p-4">
+          <h2 class="text-lg font-bold text-slate-800 mb-2">🏆 Recent Games</h2>
+          <p class="text-xs text-slate-500 mb-2">Final scores from you &amp; others</p>
+          <div id="recent-games-list">
+            <p class="text-xs text-slate-400 text-center py-2">Loading…</p>
+          </div>
+        </div>
+      </aside>
+      
+      <!-- Center: Hex Grid + Token Supply -->
+      <!-- Center: the board -->
+      <main class="lg:col-span-2">
+        <div class="panel-card rounded-xl shadow-lg p-4 md:p-6">
+          <h2 class="text-lg font-bold text-slate-800 mb-3 text-center landscape-heading">🗺️ Your Landscape</h2>
+          <div id="hex-grid-container" class="hex-grid rounded-lg border-4 border-slate-300">
+            <!-- Hexes will be inserted here -->
+          </div>
+        </div>
+      </main>
+
+      <!-- Right: token spaces + End Turn (fills the space beside the board) -->
+      <section class="lg:col-span-1 space-y-4">
+        <div class="panel-card rounded-xl shadow-lg p-4">
+          <h2 class="text-lg font-bold text-slate-800 mb-3">🎴 Token Spaces</h2>
+
+          <!-- Token Supply (3 rows) -->
+          <div class="token-supply-rows">
+            <div class="token-row" data-space="0"><div class="token-row-tokens"></div></div>
+            <div class="token-row" data-space="1"><div class="token-row-tokens"></div></div>
+            <div class="token-row" data-space="2"><div class="token-row-tokens"></div></div>
+          </div>
+
+          <!-- Game Messages / Status Banner -->
+          <div id="game-message" class="mt-4 mb-3 p-2 md:p-3 rounded-lg text-center font-semibold text-sm bg-blue-100 text-blue-800">
+            🎮 Click any token, then click a hex to place it!
+          </div>
+
+          <!-- End Turn Button -->
+          <button id="end-turn-btn" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold disabled:bg-slate-400 disabled:cursor-not-allowed">
+            ✓ End Turn
+          </button>
+          <div class="text-xs text-slate-400 text-center mt-2">
+            Place all 3 tokens, then End Turn (or press N)
+          </div>
+        </div>
+
+        <!-- Score Breakdown (under the token spaces) -->
+        <div class="panel-card rounded-xl shadow-lg p-4">
           <h2 class="text-lg font-bold text-slate-800 mb-3">📊 Score Breakdown</h2>
           <div class="space-y-2 text-sm">
             <div class="flex justify-between">
@@ -809,68 +874,12 @@
             </div>
           </div>
         </div>
-
-        <!-- Recent Games (shared scoreboard) -->
-        <div class="bg-white rounded-lg shadow-lg p-4">
-          <h2 class="text-lg font-bold text-slate-800 mb-2">🏆 Recent Games</h2>
-          <p class="text-xs text-slate-500 mb-2">Final scores from you &amp; others</p>
-          <div id="recent-games-list">
-            <p class="text-xs text-slate-400 text-center py-2">Loading…</p>
-          </div>
-        </div>
-      </aside>
-      
-      <!-- Center: Hex Grid + Token Supply -->
-      <main class="lg:col-span-2">
-        <div class="bg-white rounded-lg shadow-lg p-4 md:p-6">
-          <h2 class="text-lg font-bold text-slate-800 mb-3 text-center landscape-heading">🗺️ Your Landscape</h2>
-
-          <!-- Hex Grid Container -->
-          <div id="hex-grid-container" class="hex-grid bg-gradient-to-br from-green-50 to-blue-50 rounded-lg border-4 border-slate-300 mb-4">
-            <!-- Hexes will be inserted here -->
-          </div>
-
-          <!-- Token Supply (3 horizontal rows) -->
-          <div class="token-supply-rows">
-            <div class="token-row" data-space="0">
-              <div class="token-row-label">Space 1</div>
-              <div class="token-row-tokens">
-                <!-- 3 tokens horizontal -->
-              </div>
-            </div>
-            <div class="token-row" data-space="1">
-              <div class="token-row-label">Space 2</div>
-              <div class="token-row-tokens">
-                <!-- 3 tokens horizontal -->
-              </div>
-            </div>
-            <div class="token-row" data-space="2">
-              <div class="token-row-label">Space 3</div>
-              <div class="token-row-tokens">
-                <!-- 3 tokens horizontal -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Game Messages / Status Banner -->
-          <div id="game-message" class="mt-4 mb-3 p-2 md:p-3 rounded-lg text-center font-semibold text-sm md:text-base bg-blue-100 text-blue-800">
-            🎮 Click any token below, then click a hex to place it!
-          </div>
-
-          <!-- End Turn Button (directly under the board) -->
-          <button id="end-turn-btn" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold disabled:bg-slate-400 disabled:cursor-not-allowed">
-            ✓ End Turn
-          </button>
-          <div class="text-xs text-slate-400 text-center mt-2">
-            Place all 3 tokens, then End Turn (or press N)
-          </div>
-        </div>
-      </main>
+      </section>
 
     </div>
 
     <!-- Mobile-only: Your Animal Cards (horizontal) -->
-    <div class="md:hidden bg-white rounded-lg shadow-lg p-3 mt-2">
+    <div class="md:hidden panel-card rounded-xl shadow-lg p-3 mt-2">
       <h2 class="section-header font-bold text-slate-800">🎯 Your Cards</h2>
       <div id="player-animal-cards-mobile" class="animal-cards-horizontal">
         <!-- Cards will be rendered here -->
@@ -878,7 +887,7 @@
     </div>
 
     <!-- Mobile-only: Available Cards + Discard Button -->
-    <div class="md:hidden bg-white rounded-lg shadow-lg p-3 mt-2">
+    <div class="md:hidden panel-card rounded-xl shadow-lg p-3 mt-2">
       <div class="flex justify-between items-center mb-2">
         <h2 class="section-header font-bold text-slate-800">🃏 Available</h2>
         <button id="discard-mode-btn-mobile" class="px-2 py-1 bg-yellow-500 text-white rounded text-xs hover:bg-yellow-600 transition">
@@ -891,7 +900,7 @@
     </div>
 
     <!-- Footer Info -->
-    <footer class="mt-6 bg-white rounded-lg shadow-lg p-4 text-center">
+    <footer class="mt-6 panel-card rounded-xl shadow-lg p-4 text-center">
       <p class="text-sm text-slate-600">
         <strong>How to play:</strong> Click a token → Click a hex to place it → End turn when all 3 placed → Score points!
       </p>
@@ -1321,19 +1330,21 @@
         }
         
         return `
-          <div class="available-card bg-white rounded-lg p-2 shadow border-2 transition ${borderClass} ${cursorClass}" 
+          <div class="available-card bg-white rounded-lg px-2 py-1.5 shadow border-2 transition ${borderClass} ${cursorClass}"
                data-card-id="${card.id}"
                data-card-idx="${idx}"
                data-discard-mode="${gameState.discardMode}">
-            <div class="text-2xl text-center mb-1">${getAnimalEmoji(card.animal)}</div>
-            <div class="text-xs font-semibold text-slate-700 text-center">${card.name}</div>
-            <div class="text-[10px] text-center mt-1 leading-tight">
+            <div class="flex items-center justify-center gap-1.5">
+              <span class="text-xl leading-none">${getAnimalEmoji(card.animal)}</span>
+              <span class="text-xs font-semibold text-slate-700">${card.name}</span>
+            </div>
+            <div class="text-[10px] text-center leading-tight mt-0.5">
               ${getCompactPattern(card.pattern, card.id)}
             </div>
-            <div class="text-xs text-slate-500 text-center mt-1">
-              ${card.scoring.join('→')} pts
+            <div class="flex items-center justify-center gap-2 text-xs mt-0.5">
+              <span class="text-slate-500">${card.scoring.join('→')} pts</span>
+              ${actionText.replace(/<div class="([^"]*)">/, '<span class="$1">').replace('</div>', '</span>')}
             </div>
-            ${actionText}
           </div>
         `;
       }).join('');
@@ -1370,18 +1381,20 @@
 const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementCount] : null;
         
         return `
-          <div class="player-card bg-white rounded-lg p-2 shadow border-2 border-slate-300 cursor-pointer hover:border-blue-400 transition" 
+          <div class="player-card bg-white rounded-lg px-2 py-1.5 shadow border-2 border-slate-300 cursor-pointer hover:border-blue-400 transition"
                data-card-id="${card.id}"
                data-card-idx="${idx}">
-            <div class="text-2xl text-center mb-1">${getAnimalEmoji(card.animal)}</div>
-            <div class="text-xs font-semibold text-slate-700 text-center">${card.name}</div>
-            <div class="text-[10px] text-center mt-1 leading-tight">
+            <div class="flex items-center justify-center gap-1.5">
+              <span class="text-xl leading-none">${getAnimalEmoji(card.animal)}</span>
+              <span class="text-xs font-semibold text-slate-700">${card.name}</span>
+            </div>
+            <div class="text-[10px] text-center leading-tight mt-0.5">
               ${getCompactPattern(card.pattern, card.id)}
             </div>
-            <div class="text-xs text-slate-500 text-center mt-1">
-              ${placementCount}/${card.maxPlacements} placed
+            <div class="flex items-center justify-center gap-2 text-xs mt-0.5">
+              <span class="text-slate-500">${placementCount}/${card.maxPlacements}</span>
+              ${nextPoints ? `<span class="font-bold text-green-600">Next: +${nextPoints}</span>` : '<span class="text-slate-400">Complete!</span>'}
             </div>
-            ${nextPoints ? `<div class="text-xs font-bold text-green-600 text-center">Next: +${nextPoints} pts</div>` : '<div class="text-xs text-slate-400 text-center">Complete!</div>'}
           </div>
         `;
       }).join('');
@@ -1681,10 +1694,14 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
     // for click, keyboard, and auto-selection — and highlights desktop + mobile).
     function updateTokenSelection() {
       document.querySelectorAll('.token').forEach(t => t.classList.remove('selected'));
+      document.querySelectorAll('.token-row').forEach(r => r.classList.remove('active-space'));
       if (gameState.selectedToken) {
         const { space, index } = gameState.selectedToken;
         document.querySelectorAll(`.token[data-space="${space}"][data-index="${index}"]`)
           .forEach(t => t.classList.add('selected'));
+        // Binary space highlight: mark the space we're placing from as active.
+        document.querySelectorAll(`.token-row[data-space="${space}"]`)
+          .forEach(r => r.classList.add('active-space'));
       }
     }
 
@@ -1743,10 +1760,15 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
         gameState.selectedToken = null;
       }
 
+      const isEmpty = (gameState.tokenSupply[spaceIndex] || []).length === 0;
+
       spaces.forEach(space => {
         // Find token container - could be .token-row-tokens (new) or .flex (legacy)
         const tokensContainer = space.querySelector('.token-row-tokens') || space.querySelector('.flex');
         if (!tokensContainer) return;
+
+        // Fade a space once it's been emptied (discarded / used up)
+        space.classList.toggle('empty-space', isEmpty);
 
         tokensContainer.innerHTML = '';
 

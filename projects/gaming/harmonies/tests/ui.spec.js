@@ -26,11 +26,13 @@ test("loads without console errors", async ({ page }) => {
   expect(errors, `page errors: ${errors.join("; ")}`).toEqual([]);
 });
 
-test("End Turn button is docked under the board (inside <main>)", async ({ page }) => {
+test("End Turn button sits in the token panel beside the board", async ({ page }) => {
   await freshGame(page);
-  await expect(page.locator("main #end-turn-btn")).toBeVisible();
-  // The old full-width bottom bar is gone; the hint mentions the shortcut.
-  await expect(page.locator("main")).toContainText("press N");
+  const panel = page.locator("section", { has: page.locator("#end-turn-btn") });
+  await expect(panel.locator("#end-turn-btn")).toBeVisible();
+  // The token spaces live in the same panel as End Turn (moved out of the board).
+  await expect(panel.locator('.token-row[data-space="0"]')).toBeVisible();
+  await expect(panel).toContainText("press N");
 });
 
 test("N key ends the turn (keyboard shortcut)", async ({ page }) => {
