@@ -283,15 +283,19 @@
       content: ""; position: absolute; inset: 1.5px; clip-path: inherit;
       background: var(--terrain, #e3ece6); z-index: -1;
     }
-    /* the cube hex: warm gold grout so it stands out */
-    .mini-cell.cube .mini-fill { background: #d97706; }
+    /* the cube hex: bright amber ring so it clearly reads as the target hex */
+    .mini-cell.cube .mini-fill { background: #f59e0b; }
+    .mini-cell.cube .mini-fill::before { inset: 3px; }
+    /* the animal cube: a crisp dark rounded square with a white outline */
     .mini-cell .cube-dot {
-      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-      z-index: 2; filter: drop-shadow(0 1px 1px rgba(0,0,0,.5));
+      position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      width: 42%; aspect-ratio: 1; border-radius: 22%;
+      background: #1f2937; border: 2px solid #fff;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.55); z-index: 3;
     }
     .mini-cell .ht-badge {
-      position: absolute; bottom: 0; right: 1px; z-index: 3;
-      font-weight: 800; color: #fff; text-shadow: 0 0 2px rgba(0,0,0,.9); line-height: 1;
+      position: absolute; bottom: -1px; right: 0; z-index: 3;
+      font-weight: 800; color: #fff; text-shadow: 0 0 2px #000, 0 0 2px #000; line-height: 1;
     }
 
     /* Playful gradient top bar */
@@ -794,13 +798,11 @@
         </div>
 
         <!-- Player name (its own full-width row on mobile; inline on desktop) -->
-        <label class="md:order-2 flex items-center justify-center gap-2 bg-white/95 border border-white/70 rounded-full px-3 py-1 shadow-md focus-within:ring-2 focus-within:ring-white/70 transition cursor-text">
-          <span class="text-lg select-none">👤</span>
+        <label class="md:order-2 flex items-center justify-center bg-white/95 border border-white/70 rounded-full px-4 py-1 shadow-md focus-within:ring-2 focus-within:ring-white/70 transition cursor-text">
           <input id="player-name-input" type="text" maxlength="24"
-            placeholder="Who's playing? ✨"
-            class="text-center text-base font-extrabold text-indigo-700 placeholder:text-indigo-300 placeholder:font-medium bg-transparent outline-none w-full md:w-44"
+            placeholder="Who's playing?"
+            class="text-center text-base font-extrabold text-indigo-700 placeholder:text-indigo-300 placeholder:font-medium bg-transparent outline-none w-full md:w-48"
             aria-label="Your player name" />
-          <span class="text-lg select-none" aria-hidden="true">🏡🌊🌸</span>
         </label>
       </div>
     </header>
@@ -924,17 +926,16 @@
       </div>
     </div>
 
-    <!-- Recent Games (shared scoreboard) — full width at the bottom -->
-    <div class="panel-card rounded-xl shadow-lg p-4 mt-4">
-      <h2 class="text-lg font-bold text-slate-800 mb-2">🏆 Recent Games</h2>
-      <p class="text-xs text-slate-500 mb-2">Final scores from you &amp; others</p>
+    <!-- Recent Games (shared scoreboard) — centered at the bottom -->
+    <div class="panel-card rounded-xl shadow-lg p-4 mt-4 max-w-md mx-auto">
+      <h2 class="text-lg font-bold text-slate-800 mb-2 text-center">🏆 Recent Games</h2>
       <div id="recent-games-list">
         <p class="text-xs text-slate-400 text-center py-2">Loading…</p>
       </div>
     </div>
 
     <!-- Footer Info -->
-    <footer class="mt-4 panel-card rounded-xl shadow-lg p-4 text-center">
+    <footer class="mt-4 panel-card rounded-xl shadow-lg p-3 text-center max-w-2xl mx-auto">
       <p class="text-sm text-slate-600">
         <strong>How to play:</strong> Click a token → Click a hex → your turn ends automatically when all 3 are placed → Score points!
       </p>
@@ -1368,7 +1369,7 @@
               ${getCompactPattern(card.pattern, card.id)}
             </div>
             <div class="flex items-center justify-center gap-2 text-xs mt-0.5">
-              <span class="text-slate-500" title="Points for building the habitat 1, 2, 3… times">${[...card.scoring].reverse().join('→')} pts</span>
+              <span class="text-slate-500" title="Points for building the habitat 1, 2, 3… times (more builds = more points)">🐾 ${[...card.scoring].reverse().join(' · ')} pts</span>
               ${actionText.replace(/<div class="([^"]*)">/, '<span class="$1">').replace('</div>', '</span>')}
             </div>
           </div>
@@ -1404,13 +1405,24 @@
 
       const cardsHTML = gameState.playerAnimalCards.map((card, idx) => {
         const placementCount = gameState.placedAnimals.filter(p => p.cardId === card.id).length;
-        // More cubes = more points; the value for the NEXT cube is indexed from the end.
-        const nextPoints = placementCount < card.maxPlacements
-          ? card.scoring[card.scoring.length - (placementCount + 1)]
-          : null;
-        
+        const done = placementCount >= card.maxPlacements;
+        // Cube-progress track: one pill per habitat, showing its point value.
+        // Placed = filled green, next = green ring, future = grey.
+        const track = Array.from({ length: card.maxPlacements }, (_, i) => {
+          const n = i + 1;
+          const pts = card.scoring[card.scoring.length - n];
+          const isDone = n <= placementCount;
+          const isNext = n === placementCount + 1;
+          const cls = isDone
+            ? 'bg-green-500 text-white'
+            : isNext
+              ? 'bg-white text-green-700 ring-2 ring-green-500'
+              : 'bg-slate-100 text-slate-400';
+          return `<span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full text-[10px] font-bold ${cls}">${pts}</span>`;
+        }).join('');
+
         return `
-          <div class="player-card bg-white rounded-lg px-2 py-1.5 shadow border-2 border-slate-300 cursor-pointer hover:border-blue-400 transition"
+          <div class="player-card bg-white rounded-lg px-2 py-1.5 shadow border-2 ${done ? 'border-green-400' : 'border-slate-300'} cursor-pointer hover:border-blue-400 transition"
                data-card-id="${card.id}"
                data-card-idx="${idx}">
             <div class="flex items-center justify-center gap-1.5">
@@ -1420,9 +1432,8 @@
             <div class="text-[10px] text-center leading-tight mt-0.5">
               ${getCompactPattern(card.pattern, card.id)}
             </div>
-            <div class="flex items-center justify-center gap-2 text-xs mt-0.5">
-              <span class="text-slate-500">${placementCount}/${card.maxPlacements}</span>
-              ${nextPoints ? `<span class="font-bold text-green-600">Next: +${nextPoints}</span>` : '<span class="text-slate-400">Complete!</span>'}
+            <div class="flex items-center justify-center gap-1 mt-1" title="🐾 placed ${placementCount}/${card.maxPlacements} — each habitat scores the shown points">
+              <span class="text-xs mr-0.5">🐾</span>${track}
             </div>
           </div>
         `;
@@ -2208,18 +2219,24 @@
       // Show scoring as "habitats built → points" (ascending; more builds = more points)
       const placementCount = gameState.placedAnimals.filter(p => p.cardId === card.id).length;
       const max = card.maxPlacements;
-      const rows = [];
+      const cells = [];
       for (let n = 1; n <= max; n++) {
-        const pts = card.scoring[card.scoring.length - n]; // value for the n-th cube
+        const pts = card.scoring[card.scoring.length - n]; // points for the n-th build
         const done = n <= placementCount;
         const next = n === placementCount + 1;
-        const cls = done ? 'text-slate-400 line-through' : next ? 'text-green-600 font-bold' : 'text-slate-600';
-        rows.push(`<span class="${cls}">${n}→${pts}</span>`);
+        const box = done ? 'bg-slate-100 opacity-60' : next ? 'bg-green-100 ring-2 ring-green-500' : 'bg-slate-50';
+        const numCls = next ? 'text-green-700' : 'text-slate-700';
+        cells.push(`
+          <div class="flex flex-col items-center rounded-lg px-2 py-1 ${box}">
+            <span class="text-[11px] text-slate-500 whitespace-nowrap">build ${n}×</span>
+            <span class="text-xl font-extrabold ${numCls}">${pts}</span>
+            <span class="text-[9px] text-slate-400 -mt-0.5">points</span>
+          </div>`);
       }
       scoring.innerHTML = `
-        <p class="text-sm font-semibold text-slate-700">Build the habitat more times for more points:</p>
-        <p class="text-base mt-1 flex justify-center gap-3">${rows.join('')}</p>
-        <p class="text-xs text-slate-500 mt-1">habitats built → points · you've placed ${placementCount}/${max}</p>
+        <p class="text-sm font-semibold text-slate-700 mb-2">The more times you build this habitat, the more points:</p>
+        <div class="flex justify-center gap-2 flex-wrap">${cells.join('')}</div>
+        <p class="text-xs text-slate-500 mt-2">You've built it ${placementCount} of ${max} times.</p>
       `;
 
       // Show modal
