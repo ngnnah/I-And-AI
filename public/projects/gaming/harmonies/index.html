@@ -14,7 +14,7 @@
     /* Custom hex styles */
     /* Single source of truth for hex size (JS reads --hex-w back). */
     :root {
-      --hex-w: 88px;
+      --hex-w: 96px;
       --hex-h: calc(var(--hex-w) * 0.8660254); /* flat-top height = √3/2 · width */
       --hex-gap: 2px;                           /* grout / outline thickness */
     }
@@ -208,8 +208,8 @@
     .hex-grid {
       position: relative;
       width: 100%;
-      max-width: 640px;
-      height: 500px;
+      max-width: 700px;
+      height: 560px;
       margin: 0 auto;
       overflow: hidden;
     }
@@ -846,19 +846,17 @@
       <!-- Left Sidebar: Animal Cards (desktop only) -->
       <aside class="hidden lg:block lg:col-span-1 space-y-4 desktop-only">
         <!-- Your Animal Cards (Cards you've taken) -->
-        <div class="panel-card rounded-xl shadow-lg p-4">
-          <h2 class="text-lg font-bold text-slate-800 mb-2">🎯 Your Animal Cards</h2>
-          <p class="text-xs text-slate-500 mb-3">Max 4 cards - Click to select for placement</p>
-          <div id="player-animal-cards" class="space-y-2 min-h-[100px]">
+        <div class="panel-card rounded-xl shadow-lg p-3">
+          <h2 class="text-base font-bold text-slate-800">🎯 Your Cards <span class="text-xs font-normal text-slate-400">· max 4</span></h2>
+          <div id="player-animal-cards" class="space-y-1.5 mt-2">
             <!-- Your taken animal cards appear here -->
           </div>
         </div>
-        
+
         <!-- Available Animal Cards (Cards to take) -->
-        <div class="panel-card rounded-xl shadow-lg p-4">
-          <h2 class="text-lg font-bold text-slate-800 mb-2">🃏 Available Cards</h2>
-          <p class="text-xs text-slate-500 mb-3">Click to take a card (once per turn)</p>
-          <div id="available-animal-cards" class="space-y-2">
+        <div class="panel-card rounded-xl shadow-lg p-3">
+          <h2 class="text-base font-bold text-slate-800">🃏 Available <span class="text-xs font-normal text-slate-400">· take 1/turn</span></h2>
+          <div id="available-animal-cards" class="space-y-1.5 mt-2">
             <!-- Available cards to take -->
           </div>
           <div id="discard-button-container" class="mt-3 hidden">
@@ -1406,7 +1404,7 @@
         }
         
         return `
-          <div class="available-card bg-white rounded-lg px-2 py-1.5 shadow border-2 transition ${borderClass} ${cursorClass}"
+          <div class="available-card bg-white rounded-lg px-2 py-1 shadow border-2 transition ${borderClass} ${cursorClass}"
                data-card-id="${card.id}"
                data-card-idx="${idx}"
                data-discard-mode="${gameState.discardMode}">
@@ -1471,7 +1469,7 @@
         }).join('');
 
         return `
-          <div class="player-card bg-white rounded-lg px-2 py-1.5 shadow border-2 ${done ? 'border-green-400' : 'border-slate-300'} cursor-pointer hover:border-blue-400 transition"
+          <div class="player-card bg-white rounded-lg px-2 py-1 shadow border-2 ${done ? 'border-green-400' : 'border-slate-300'} cursor-pointer hover:border-blue-400 transition"
                data-card-id="${card.id}"
                data-card-idx="${idx}">
             <div class="flex items-center justify-center gap-1.5">
@@ -1555,7 +1553,7 @@
 
     // Compact inline pattern preview shown on each card.
     function getCompactPattern(pattern, cardId) {
-      return renderMiniPattern(pattern, 26, { clickable: true, cardId });
+      return renderMiniPattern(pattern, 22, { clickable: true, cardId });
     }
     
     // Reposition all hexes (for window resize)
