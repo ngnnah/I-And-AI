@@ -223,6 +223,40 @@
       backdrop-filter: blur(2px);
     }
 
+    /* Playful gradient top bar */
+    .header-bar {
+      background: linear-gradient(120deg, #059669 0%, #0ea5e9 42%, #6366f1 78%, #8b5cf6 100%);
+      background-size: 200% 200%;
+      animation: headerShift 18s ease infinite;
+    }
+    @keyframes headerShift {
+      0%, 100% { background-position: 0% 50%; }
+      50%      { background-position: 100% 50%; }
+    }
+    /* Faint terrain/animal emoji drifting across the header */
+    .header-emojis {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      font-size: 2.5rem;
+      line-height: 1;
+      white-space: nowrap;
+      opacity: 0.14;
+      filter: grayscale(0.1);
+      pointer-events: none;
+      overflow: hidden;
+      animation: emojiDrift 40s linear infinite;
+    }
+    @keyframes emojiDrift {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-33%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .header-bar, .header-emojis { animation: none; }
+    }
+
     /* Token Supply Rows (Desktop & Mobile) */
     .token-supply-rows {
       display: flex;
@@ -689,31 +723,32 @@
   <div class="container mx-auto px-4 py-6 max-w-7xl">
     
     <!-- Header -->
-    <header class="panel-card rounded-xl shadow-lg px-4 py-2.5 mb-4">
-      <div class="flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-4">
-        <!-- On mobile: title + buttons share one row. On desktop: md:contents flattens
-             this so title and buttons become direct flex items of the header row. -->
+    <header class="header-bar rounded-xl shadow-lg px-4 py-3 mb-4 text-white relative overflow-hidden">
+      <!-- decorative terrain emoji drifting in the background -->
+      <div class="header-emojis" aria-hidden="true">🌲 ⛰️ 💧 🌼 🏠 🌿 🐻 🦊 🦉 🐟 🦆 🌲 ⛰️ 💧 🌼 🏠</div>
+
+      <div class="relative flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-4">
         <div class="flex items-center justify-between gap-2 md:contents">
           <div class="flex items-baseline gap-2">
-            <h1 class="text-2xl font-extrabold bg-gradient-to-r from-emerald-600 via-sky-600 to-indigo-600 bg-clip-text text-transparent">🎮 Harmonies</h1>
-            <p class="hidden lg:block text-xs text-slate-500">Build landscapes, attract animals, score points!</p>
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight drop-shadow-sm">🎮 Harmonies</h1>
+            <p class="hidden lg:block text-xs text-white/85">Build landscapes, attract animals, score points!</p>
           </div>
           <div class="flex gap-2 md:order-3">
-            <button id="new-game-btn" class="px-3 py-1.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition">
+            <button id="new-game-btn" class="px-3 py-1.5 bg-white/20 hover:bg-white/35 text-white text-sm font-semibold rounded-lg border border-white/40 backdrop-blur-sm transition">
               🎲 New Game
             </button>
-            <button id="help-btn" class="px-3 py-1.5 bg-slate-600 text-white text-sm font-semibold rounded-lg hover:bg-slate-700 transition">
+            <button id="help-btn" class="px-3 py-1.5 bg-white/20 hover:bg-white/35 text-white text-sm font-semibold rounded-lg border border-white/40 backdrop-blur-sm transition">
               ❓ Help
             </button>
           </div>
         </div>
 
         <!-- Player name (its own full-width row on mobile; inline on desktop) -->
-        <label class="md:order-2 flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-200 rounded-full px-3 py-1 shadow-sm focus-within:border-indigo-400 transition cursor-text">
+        <label class="md:order-2 flex items-center justify-center gap-2 bg-white/95 border border-white/70 rounded-full px-3 py-1 shadow-md focus-within:ring-2 focus-within:ring-white/70 transition cursor-text">
           <span class="text-lg select-none">🎮</span>
           <input id="player-name-input" type="text" maxlength="24"
             placeholder="Who's playing? ✨"
-            class="text-center text-base font-bold text-indigo-700 placeholder:text-indigo-300 placeholder:font-medium bg-transparent outline-none w-full md:w-44"
+            class="text-center text-base font-extrabold text-indigo-700 placeholder:text-indigo-300 placeholder:font-medium bg-transparent outline-none w-full md:w-44"
             aria-label="Your player name" />
           <span class="text-lg select-none">🌿</span>
         </label>
