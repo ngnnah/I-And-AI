@@ -63,8 +63,8 @@
     }
 
     .hex-cell:hover {
-      transform: translateY(-2px) scale(1.03);
-      filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.3));
+      transform: translateY(-1px) scale(1.015);
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.22));
       z-index: 10;
     }
 
@@ -91,16 +91,15 @@
        dot overlay marks each eligible hex. */
     .hex-cell.valid-token-target .hex-fill::after {
       content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-      width: 46%; aspect-ratio: 1; border-radius: 50%;
-      background: rgba(45, 212, 191, 0.4);
-      box-shadow: inset 0 0 0 2px rgba(13, 148, 136, 0.95), 0 0 0 1.5px rgba(255, 255, 255, 0.7);
-      animation: token-target-pulse 1.4s ease-in-out infinite;
+      width: 42%; aspect-ratio: 1; border-radius: 50%;
+      background: rgba(153, 226, 210, 0.22);          /* soft, airy mint */
+      box-shadow: inset 0 0 0 1.5px rgba(94, 194, 176, 0.55);
+      /* calm: no pulse */
     }
-    @keyframes token-target-pulse { 0%,100% { opacity: .6; transform: translate(-50%,-50%) scale(.9); } 50% { opacity: 1; transform: translate(-50%,-50%) scale(1.05); } }
 
-    /* Pop when a token lands. */
-    @keyframes hexPop { 0% { transform: scale(.72); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
-    .hex-cell.just-placed .hex-fill { animation: hexPop .28s ease; }
+    /* Gentle settle when a token lands (soft grow-in, no bounce). */
+    @keyframes hexPop { 0% { transform: scale(.9); opacity: .5; } 100% { transform: scale(1); opacity: 1; } }
+    .hex-cell.just-placed .hex-fill { animation: hexPop .4s ease-out; }
 
     /* Stack-height badge — anchored on the flat BOTTOM edge (inside silhouette). */
     .stack-count {
@@ -238,8 +237,8 @@
       /* Subtle Japanese shippō (七宝, overlapping circles) pattern over a deep gradient */
       background-color: #0f172a;
       background-image:
-        url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%2256%22 height%3D%2256%22 viewBox%3D%220 0 56 56%22%3E%3Cg fill%3D%22none%22 stroke%3D%22rgba(255%2C255%2C255%2C0.06)%22 stroke-width%3D%221.4%22%3E%3Ccircle cx%3D%220%22 cy%3D%220%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%2256%22 cy%3D%220%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%220%22 cy%3D%2256%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%2256%22 cy%3D%2256%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%2228%22 cy%3D%2228%22 r%3D%2228%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),
-        linear-gradient(135deg, #1e3a5f 0%, #0f172a 60%, #131c31 100%);
+        url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%2256%22 height%3D%2256%22 viewBox%3D%220 0 56 56%22%3E%3Cg fill%3D%22none%22 stroke%3D%22rgba(255%2C255%2C255%2C0.05)%22 stroke-width%3D%221.4%22%3E%3Ccircle cx%3D%220%22 cy%3D%220%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%2256%22 cy%3D%220%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%220%22 cy%3D%2256%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%2256%22 cy%3D%2256%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%2228%22 cy%3D%2228%22 r%3D%2228%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),
+        linear-gradient(160deg, #2f4a49 0%, #263a41 55%, #20303a 100%);
       background-attachment: fixed;
       background-size: 56px 56px, cover;
     }
@@ -322,38 +321,24 @@
       box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55);
     }
 
-    /* Playful gradient top bar */
+    /* Calm, soft gradient top bar (muted sage → sky → dusty lavender, no motion) */
     .header-bar {
-      background: linear-gradient(120deg, #059669 0%, #0ea5e9 42%, #6366f1 78%, #8b5cf6 100%);
-      background-size: 200% 200%;
-      animation: headerShift 18s ease infinite;
+      background: linear-gradient(120deg, #7bab9c 0%, #8fb6cf 55%, #a6acd0 100%);
     }
-    @keyframes headerShift {
-      0%, 100% { background-position: 0% 50%; }
-      50%      { background-position: 100% 50%; }
-    }
-    /* Faint terrain/animal emoji drifting across the header */
+    /* Faint, still terrain/animal emoji watermark across the header */
     .header-emojis {
       position: absolute;
       inset: 0;
       display: flex;
       align-items: center;
-      gap: 1.5rem;
-      font-size: 2.5rem;
+      gap: 1.6rem;
+      font-size: 2.4rem;
       line-height: 1;
       white-space: nowrap;
-      opacity: 0.14;
-      filter: grayscale(0.1);
+      opacity: 0.08;
+      filter: grayscale(0.35);
       pointer-events: none;
       overflow: hidden;
-      animation: emojiDrift 40s linear infinite;
-    }
-    @keyframes emojiDrift {
-      from { transform: translateX(0); }
-      to   { transform: translateX(-33%); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .header-bar, .header-emojis { animation: none; }
     }
 
     /* Token Supply Rows (Desktop & Mobile) */
@@ -2347,9 +2332,10 @@
         o.start(t); o.stop(t + dur);
       } catch (e) { /* audio unavailable */ }
     }
-    const sfxPlace = () => playTone(320, 0.07, 'triangle', 0.045);
-    const sfxAnimal = () => { playTone(523, 0.09, 'sine', 0.06); setTimeout(() => playTone(784, 0.13, 'sine', 0.06), 90); };
-    const sfxWin = () => { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 0.16, 'sine', 0.07), i * 120)); };
+    // Gentle, quiet, mellow feedback — soft sine tones.
+    const sfxPlace = () => playTone(294, 0.18, 'sine', 0.028);
+    const sfxAnimal = () => { playTone(440, 0.2, 'sine', 0.035); setTimeout(() => playTone(587, 0.28, 'sine', 0.03), 130); };
+    const sfxWin = () => { [392, 523, 659].forEach((f, i) => setTimeout(() => playTone(f, 0.4, 'sine', 0.04), i * 200)); };
 
     // Keyboard shortcuts. Attached directly (not gated on DOMContentLoaded) so it
     // is always active; it looks up elements lazily when a key is pressed.
