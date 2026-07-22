@@ -1033,7 +1033,7 @@
               <tr class="border-b border-slate-100"><td class="py-1 pr-2">🪵 Brown (trunk)</td><td class="py-1 pr-2">Brown</td><td class="py-1">2</td></tr>
               <tr class="border-b border-slate-100"><td class="py-1 pr-2">🍃 Green (leaves)</td><td class="py-1 pr-2">1–2 brown</td><td class="py-1">3</td></tr>
               <tr class="border-b border-slate-100"><td class="py-1 pr-2">⛰️ Gray (mountain)</td><td class="py-1 pr-2">Gray</td><td class="py-1">3</td></tr>
-              <tr><td class="py-1 pr-2">🏡 Red (building)</td><td class="py-1 pr-2">Gray/brown/red, or alone</td><td class="py-1">2</td></tr>
+              <tr><td class="py-1 pr-2">🧱 Red (brick → 🏡 building when stacked)</td><td class="py-1 pr-2">Gray/brown/red, or alone</td><td class="py-1">2</td></tr>
             </tbody>
           </table>
         </section>
@@ -1087,7 +1087,7 @@
       yellow: '🌼',
       brown: '🪵',
       green: '🍃',
-      red: '🏡',
+      red: '🧱',
       gray: '⛰️'
     };
 
@@ -1518,7 +1518,7 @@
     };
     const TERRAIN_EMOJI_MINI = {
       water: '🌊', blue: '🌊', field: '🌼', yellow: '🌼', tree: '🌳', green: '🍃',
-      mountain: '⛰️', gray: '⛰️', rock: '🪨', building: '🏡', red: '🏡', trunk: '🪵', brown: '🪵',
+      mountain: '⛰️', gray: '⛰️', rock: '🪨', building: '🏡', red: '🧱', trunk: '🪵', brown: '🪵',
     };
     // Bold dark paw with a white outline — high contrast on any terrain color.
     const PAW_SVG = `<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="#1e293b" stroke="#ffffff" stroke-width="6" stroke-linejoin="round">`
@@ -1906,14 +1906,17 @@
 
       const topColor = stack[stack.length - 1].color;
       cell.dataset.terrain = topColor;
-      // A leaf on a trunk (green on 1-2 brown) is a full tree → show 🌳.
-      // A leaf on the ground stays a bush → 🍃.
+      // A leaf on a trunk (green on 1-2 brown) is a full tree → 🌳 (leaf alone = bush 🍃).
+      // A brick on another token is a building → 🏡 (brick alone stays 🧱).
+      const isBuilding = topColor === 'red' && stack.length > 1;
       let emoji = TOKEN_EMOJI[topColor];
       if (topColor === 'green' && stack.length > 1) emoji = '🌳';
+      if (isBuilding) emoji = '🏡';
       if (fill) fill.textContent = emoji;
 
-      // Stack-height badge on the flat bottom edge
-      if (stack.length > 1) {
+      // Stack-height badge (skip for buildings — a building isn't a "height", it's
+      // just a brick on a token, so the number would be misleading).
+      if (stack.length > 1 && !isBuilding) {
         const badge = document.createElement('div');
         badge.className = 'hex-overlay stack-count';
         badge.textContent = String(stack.length);
