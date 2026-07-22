@@ -119,26 +119,34 @@ On your turn, you perform **one mandatory action** and up to **two optional acti
 
 #### 2. Take One Animal Card (OPTIONAL - Max Once Per Turn)
 
-- Choose one of the face-up Animal Cards
-- Place it above your Personal Board
-- You can have **maximum 4 Animal Cards** above your board at once
-- Cannot take a card if you already have 4 cards
-- Look at the number in the top right corner of the card
-- Take that many Animal Cubes and place **one cube on each space** along the right edge
+- Choose one of the face-up Animal Cards and place it above your Personal Board
+- You can have at most **4 _uncompleted_ Animal Cards** above your board. A card with all its cubes placed is **completed** — it moves aside, no longer counts toward the 4, and **frees a slot** so you can take another
+- If your 4 slots are full of uncompleted cards, you must finish one before taking a new card
+- **Discard & replace (only if you didn't take a card this turn):** you may instead discard one of the face-up cards in the central display and replace it with the top of the deck. You cannot discard a card from your own hand
 
-#### 3. Place Animal Cube(s) (OPTIONAL - Multiple Times)
+#### 3. Place Animal Cube(s) (OPTIONAL - No Per-Turn Limit)
 
-- Can be done multiple times during your turn
-- Match patterns shown on your Animal Cards (see Animal Cards section)
-- When you match a pattern, take the **bottom-most cube** from that card
-- Place it on the corresponding hex as shown in the pattern
-- Once all cubes are placed from a card, move it to the side of your board (frees up a card slot)
+- Can be done **as many times as you like** in a turn — any time a habitat is complete (before, between, or after placing tokens)
+- Match the pattern on one of your Animal Cards (see Animal Cards section) — patterns match in **any rotation or mirror**
+- Place a cube on the indicated hex; you score the value of the topmost uncovered space (more cubes placed = more points)
+- Once all cubes are placed from a card, it is completed and frees a hand slot
 
 ### End of Turn
 
 1. **Refill Central Board:** Draw 3 tokens from pouch, fill the space you took from
 2. **Refill Animal Cards:** If fewer than 5 face up, flip more until 5 are visible
 3. **Next Player's Turn**
+
+### Digital version (this implementation)
+
+This solo build streamlines the turn while staying faithful to the rules:
+
+- **Auto-advance:** your turn ends automatically once you place your **3rd token** (the board is discarded and refilled) — there is no manual "End Turn". Since there's no undo, placing tokens is already the commitment.
+- **Placing cubes** is never turn-gated: select a held card at any time (it cancels the current token selection) and place cubes whenever a habitat is complete.
+- **Final turn:** when the bag can't refill (fewer than 9 tokens) or the board is nearly full (≤2 empty hexes), the game does **not** end instantly — a **🏁 Finish Game** button appears so you can place any last cubes, then score.
+- **Visuals:** a leaf 🍃 on a trunk 🪵 shows as a tree 🌳; a brick 🧱 on a token shows as a building 🏡. Height is shown as a small number on stacks (buildings show none).
+- **Heights are enforced exactly** (see Pattern Matching Rules).
+- Games auto-save to the browser, and finished scores post to a shared Recent-Games board.
 
 ---
 
@@ -180,7 +188,7 @@ On your turn, you perform **one mandatory action** and up to **two optional acti
 - Gray → Gray → Gray (3-high mountain)
 - Brown → Red (building on trunk)
 - Gray → Red (building on rock)
-- Red (alone on ground - legal, but scores 0 until built upon)
+- Red (alone on ground = a brick 🧱 — legal, but scores 0; becomes a building 🏡 only when stacked on another token)
 
 **Invalid Stacks:**
 
@@ -209,9 +217,10 @@ Each Animal Card shows:
 ### Pattern Matching Rules
 
 1. **Any Orientation:** Patterns can be matched in any rotation or mirrored
-2. **Exact Height:** For trees and mountains, the height must exactly match the pattern
-3. **Buildings Flexible:** Red tokens in patterns mean "any type of building"
-   - Can be red alone, red on brown, or red on gray
+2. **Exact Height (not minimum):** For trees and mountains the height must match the card **exactly** — a taller stack does **not** satisfy a shorter requirement.
+   - A **single gray = a rock (height 1)**, which is distinct from a **mountain (2+ gray)**. Cards asking for a rock, a Ht-2 mountain, or a Ht-3 mountain are all different, so height can't be treated as a minimum.
+   - Trees: bush (green alone, Ht 1) / tree (green on 1 brown, Ht 2) / tall tree (green on 2 brown, Ht 3) — matched exactly.
+3. **Buildings:** A "building" in a pattern means a **red token stacked on another token** (red on brown/gray/red). A lone red on the ground is a **brick**, not a building, and does **not** satisfy a building requirement. Buildings have **no height requirement** (any building counts).
 4. **No Cube Conflict:** The hex where you'll place the cube must not already have a cube
 5. **Same Token Multiple Use:** The same hex can be part of multiple animal patterns
    - But only one Animal Cube can be placed on each hex
