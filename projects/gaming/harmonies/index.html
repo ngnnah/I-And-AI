@@ -244,6 +244,32 @@
       backdrop-filter: blur(2px);
     }
 
+    /* 6-cell colored score breakdown */
+    .score-cells {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+    .score-cell {
+      border-radius: 0.65rem;
+      padding: 0.4rem 0.25rem;
+      text-align: center;
+      line-height: 1;
+    }
+    .score-cell .sc-emoji { display: block; font-size: 1.05rem; margin-bottom: 2px; }
+    .score-cell .sc-num { font-size: 1.5rem; font-weight: 800; }
+    .sc-trees   { background: #dcfce7; } .sc-trees   .sc-num { color: #15803d; }
+    .sc-mtn     { background: #e5e7eb; } .sc-mtn     .sc-num { color: #374151; }
+    .sc-fields  { background: #fef9c3; } .sc-fields  .sc-num { color: #a16207; }
+    .sc-build   { background: #fee2e2; } .sc-build   .sc-num { color: #b91c1c; }
+    .sc-rivers  { background: #dbeafe; } .sc-rivers  .sc-num { color: #1d4ed8; }
+    .sc-animals { background: #f3e8ff; } .sc-animals .sc-num { color: #7e22ce; }
+    .score-total-line {
+      display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+      margin-top: 0.6rem; font-weight: 800; color: #1e293b;
+    }
+    .score-total-line .big { font-size: 1.6rem; color: #6b21a8; }
+
     /* Playful gradient top bar */
     .header-bar {
       background: linear-gradient(120deg, #059669 0%, #0ea5e9 42%, #6366f1 78%, #8b5cf6 100%);
@@ -306,9 +332,10 @@
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
     }
 
-    /* An emptied (discarded / used-up) space reads as inactive and faded. */
+    /* An emptied space (the 2 unchosen spaces mid-turn) is hidden until the
+       next turn refills all three. */
     .token-row.empty-space {
-      opacity: 0.5;
+      display: none;
     }
 
     .token-row-tokens {
@@ -730,7 +757,7 @@
         <div class="flex items-center justify-between gap-2 md:contents">
           <div class="flex items-center gap-2.5">
             <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight drop-shadow-sm">🏔️ Harmonies</h1>
-            <p class="hidden md:block text-sm font-bold text-white bg-black/25 rounded-full px-3 py-1 shadow-sm ring-1 ring-white/30">🌿 Build landscapes, attract animals, score points!</p>
+            <p class="hidden md:block text-sm font-bold text-white bg-black/25 rounded-full px-3 py-1 shadow-sm ring-1 ring-white/30">Build landscapes, attract animals, score points!</p>
           </div>
           <div class="flex gap-2 md:order-3">
             <button id="new-game-btn" class="px-4 py-2 bg-white text-emerald-700 text-sm font-extrabold rounded-lg shadow-md hover:bg-emerald-50 hover:scale-105 active:scale-95 transition">
@@ -749,47 +776,24 @@
             placeholder="Who's playing? ✨"
             class="text-center text-base font-extrabold text-indigo-700 placeholder:text-indigo-300 placeholder:font-medium bg-transparent outline-none w-full md:w-44"
             aria-label="Your player name" />
-          <span class="text-lg select-none">🌿</span>
+          <span class="text-lg select-none" aria-hidden="true">🗻🌊🌸</span>
         </label>
       </div>
     </header>
 
-    <!-- Mobile-only score breakdown grid (portrait) -->
-    <div class="md:hidden score-breakdown-grid">
-      <div>
-        <span>🌲</span>
-        <span id="score-trees-mobile">0</span>
-      </div>
-      <div>
-        <span>⛰️</span>
-        <span id="score-mountains-mobile">0</span>
-      </div>
-      <div>
-        <span>🌼</span>
-        <span id="score-fields-mobile">0</span>
-      </div>
-      <div>
-        <span>🏠</span>
-        <span id="score-buildings-mobile">0</span>
-      </div>
-      <div>
-        <span>💧</span>
-        <span id="score-rivers-mobile">0</span>
-      </div>
-      <div>
-        <span>🐾</span>
-        <span id="score-animals-mobile">0</span>
-      </div>
-      <div class="total-score">
-        <strong>🪙 <span id="pouch-counter-mobile">120</span> | Total: <span id="score-total-mobile">0</span> <span id="sun-display-mobile" class="ml-1"></span></strong>
-      </div>
-    </div>
-
-    <!-- Mobile-only: Recent Games -->
+    <!-- Mobile-only score breakdown (6 colored cells) -->
     <div class="md:hidden panel-card rounded-xl shadow-lg p-3 mb-4">
-      <h2 class="text-base font-bold text-slate-800 mb-2">🏆 Recent Games</h2>
-      <div id="recent-games-list-mobile">
-        <p class="text-xs text-slate-400 text-center py-2">Loading…</p>
+      <div class="score-cells">
+        <div class="score-cell sc-trees"><span class="sc-emoji">🌲</span><span class="sc-num" id="score-trees-mobile">0</span></div>
+        <div class="score-cell sc-mtn"><span class="sc-emoji">⛰️</span><span class="sc-num" id="score-mountains-mobile">0</span></div>
+        <div class="score-cell sc-fields"><span class="sc-emoji">🌼</span><span class="sc-num" id="score-fields-mobile">0</span></div>
+        <div class="score-cell sc-build"><span class="sc-emoji">🏠</span><span class="sc-num" id="score-buildings-mobile">0</span></div>
+        <div class="score-cell sc-rivers"><span class="sc-emoji">💧</span><span class="sc-num" id="score-rivers-mobile">0</span></div>
+        <div class="score-cell sc-animals"><span class="sc-emoji">🐾</span><span class="sc-num" id="score-animals-mobile">0</span></div>
+      </div>
+      <div class="score-total-line">
+        <span>🏆 <span class="big" id="score-total-mobile">0</span> <span id="sun-display-mobile"></span></span>
+        <span class="text-xs font-semibold text-slate-500">🎒 <span id="pouch-counter-mobile" class="text-blue-700">120</span> left</span>
       </div>
     </div>
 
@@ -825,14 +829,6 @@
           </div>
         </div>
         
-        <!-- Recent Games (shared scoreboard) -->
-        <div class="panel-card rounded-xl shadow-lg p-4">
-          <h2 class="text-lg font-bold text-slate-800 mb-2">🏆 Recent Games</h2>
-          <p class="text-xs text-slate-500 mb-2">Final scores from you &amp; others</p>
-          <div id="recent-games-list">
-            <p class="text-xs text-slate-400 text-center py-2">Loading…</p>
-          </div>
-        </div>
       </aside>
       
       <!-- Center: Hex Grid + Token Supply -->
@@ -859,53 +855,24 @@
           </div>
 
           <!-- Game Messages / Status Banner -->
-          <div id="game-message" class="mt-4 mb-3 p-2 md:p-3 rounded-lg text-center font-semibold text-sm bg-blue-100 text-blue-800">
+          <div id="game-message" class="mt-4 p-2 md:p-3 rounded-lg text-center font-semibold text-sm bg-blue-100 text-blue-800">
             🎮 Click any token, then click a hex to place it!
-          </div>
-
-          <!-- End Turn Button -->
-          <button id="end-turn-btn" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold disabled:bg-slate-400 disabled:cursor-not-allowed">
-            ✓ End Turn
-          </button>
-          <div class="text-xs text-slate-400 text-center mt-2">
-            Place all 3 tokens, then End Turn (or press N)
           </div>
         </div>
 
-        <!-- Score Breakdown (under the token spaces) -->
+        <!-- Score breakdown (6 colored cells) -->
         <div class="panel-card rounded-xl shadow-lg p-4">
-          <h2 class="text-lg font-bold text-slate-800 mb-3">📊 Score Breakdown</h2>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between">
-              <span class="text-slate-600">🌲 Trees:</span>
-              <span id="score-trees" class="font-bold text-green-700">0</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-600">⛰️ Mountains:</span>
-              <span id="score-mountains" class="font-bold text-gray-700">0</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-600">🌼 Fields:</span>
-              <span id="score-fields" class="font-bold text-yellow-700">0</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-600">🏠 Buildings:</span>
-              <span id="score-buildings" class="font-bold text-red-700">0</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-600">💧 Rivers:</span>
-              <span id="score-rivers" class="font-bold text-blue-700">0</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-600">🐾 Animals:</span>
-              <span id="score-animals" class="font-bold text-purple-700">0</span>
-            </div>
-            <div class="border-t border-slate-300 pt-2 mt-2 flex justify-between">
-              <span class="text-slate-800 font-bold">🪙 <span id="pouch-counter" class="text-blue-700">120</span> | Total:</span>
-              <span class="font-bold text-purple-900 text-lg">
-                <span id="score-total-sidebar">0</span> <span id="sun-display"></span>
-              </span>
-            </div>
+          <div class="score-cells">
+            <div class="score-cell sc-trees"><span class="sc-emoji">🌲</span><span class="sc-num" id="score-trees">0</span></div>
+            <div class="score-cell sc-mtn"><span class="sc-emoji">⛰️</span><span class="sc-num" id="score-mountains">0</span></div>
+            <div class="score-cell sc-fields"><span class="sc-emoji">🌼</span><span class="sc-num" id="score-fields">0</span></div>
+            <div class="score-cell sc-build"><span class="sc-emoji">🏠</span><span class="sc-num" id="score-buildings">0</span></div>
+            <div class="score-cell sc-rivers"><span class="sc-emoji">💧</span><span class="sc-num" id="score-rivers">0</span></div>
+            <div class="score-cell sc-animals"><span class="sc-emoji">🐾</span><span class="sc-num" id="score-animals">0</span></div>
+          </div>
+          <div class="score-total-line">
+            <span>🏆 <span class="big" id="score-total-sidebar">0</span> <span id="sun-display"></span></span>
+            <span class="text-xs font-semibold text-slate-500">🎒 <span id="pouch-counter" class="text-blue-700">120</span> left</span>
           </div>
         </div>
       </section>
@@ -933,10 +900,19 @@
       </div>
     </div>
 
+    <!-- Recent Games (shared scoreboard) — full width at the bottom -->
+    <div class="panel-card rounded-xl shadow-lg p-4 mt-4">
+      <h2 class="text-lg font-bold text-slate-800 mb-2">🏆 Recent Games</h2>
+      <p class="text-xs text-slate-500 mb-2">Final scores from you &amp; others</p>
+      <div id="recent-games-list">
+        <p class="text-xs text-slate-400 text-center py-2">Loading…</p>
+      </div>
+    </div>
+
     <!-- Footer Info -->
-    <footer class="mt-6 panel-card rounded-xl shadow-lg p-4 text-center">
+    <footer class="mt-4 panel-card rounded-xl shadow-lg p-4 text-center">
       <p class="text-sm text-slate-600">
-        <strong>How to play:</strong> Click a token → Click a hex to place it → End turn when all 3 placed → Score points!
+        <strong>How to play:</strong> Click a token → Click a hex → your turn ends automatically when all 3 are placed → Score points!
       </p>
       <p class="text-xs text-slate-500 mt-2">
         Solo edition • <a href="https://github.com/ngnnah/I-And-AI" class="text-blue-600 hover:underline">GitHub</a>
@@ -981,7 +957,7 @@
             <li>Click a token, then click a hex to place it. Do this <strong>3 times</strong> (all from one space — the other two spaces are discarded after your first pick). The next token auto-selects; use <strong>← / →</strong> to switch which one.</li>
             <li>Optionally take <strong>1 animal card</strong> per turn (max 4 in hand), or discard &amp; replace one.</li>
             <li>Place an animal cube when its habitat pattern is built on your board (patterns match in <strong>any rotation or mirror</strong>).</li>
-            <li>Click <strong>End Turn</strong> (or press <strong>N</strong> / <strong>Enter</strong>) to refill and continue.</li>
+            <li>Your turn <strong>ends automatically</strong> once all 3 tokens are placed — new tokens are drawn for the next turn.</li>
           </ol>
           <p class="mt-1 text-slate-500">Your board <strong>auto-saves</strong> — close the tab and come back anytime.</p>
         </section>
@@ -1140,15 +1116,6 @@
       displayAvailableAnimalCards();
       displayPlayerAnimalCards();
       updateScore();
-
-      // If the saved game had already ended, reflect that in the UI
-      if (gameState.gameEnded) {
-        const endBtn = document.getElementById('end-turn-btn');
-        if (endBtn) {
-          endBtn.disabled = true;
-          endBtn.textContent = '🏁 Game Complete';
-        }
-      }
     }
 
     // ── Player name + Firebase scoreboard (optional, degrades gracefully) ──
@@ -1640,14 +1607,12 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
           gameState.selectedToken.index === tokenData.index) {
         gameState.selectedToken = null;
         updateMobileTokenSelection();
-        showMessage('Token deselected. Tap a token to select it.', 'info');
         return;
       }
 
-      // Select new token
+      // Select new token (the highlight ring is the feedback)
       gameState.selectedToken = tokenData;
       updateMobileTokenSelection();
-      showMessage(`${COLOR_NAMES[tokenData.color]} selected! Tap a hex to place it.`, 'success');
     }
 
     // Update mobile token selection visual
@@ -1702,14 +1667,12 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
           gameState.selectedToken.index === tokenData.index) {
         gameState.selectedToken = null;
         updateTokenSelection();
-        showMessage('Token deselected. Click another token to select it.', 'info');
         return;
       }
 
-      // Select new token
+      // Select new token (the highlight ring is the feedback)
       gameState.selectedToken = tokenData;
       updateTokenSelection();
-      showMessage(`${COLOR_NAMES[tokenData.color]} token selected! Click a hex to place it.`, 'success');
     }
 
     // Update visual selection state of tokens (by data attributes, so it works
@@ -1740,14 +1703,12 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
     }
 
     // Select a specific token programmatically and refresh both highlights.
-    function selectToken(color, space, index, announce = true) {
+    // (No status message — the highlight ring is the feedback.)
+    function selectToken(color, space, index) {
       gameState.selectedSpace = space;
       gameState.selectedToken = { color, space, index };
       updateTokenSelection();
       updateMobileTokenSelection();
-      if (announce) {
-        showMessage(`${COLOR_NAMES[color]} selected — click a hex to place it (← / → to switch).`, 'success');
-      }
     }
 
     // Cycle the selected token with the arrow keys (dir = +1 right, -1 left).
@@ -1865,30 +1826,22 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
         total: result.total
       };
       
-      // Update UI
-      document.getElementById('score-trees').textContent = gameState.score.trees;
-      document.getElementById('score-mountains').textContent = gameState.score.mountains;
-      document.getElementById('score-fields').textContent = gameState.score.fields;
-      document.getElementById('score-buildings').textContent = gameState.score.buildings;
-      document.getElementById('score-rivers').textContent = gameState.score.water;
-      document.getElementById('score-animals').textContent = gameState.score.animals;
-      document.getElementById('score-total-sidebar').textContent = gameState.score.total;
-
-      // Update mobile score breakdown
-      const mobileTreesEl = document.getElementById('score-trees-mobile');
-      if (mobileTreesEl) mobileTreesEl.textContent = gameState.score.trees;
-      const mobileMountainsEl = document.getElementById('score-mountains-mobile');
-      if (mobileMountainsEl) mobileMountainsEl.textContent = gameState.score.mountains;
-      const mobileFieldsEl = document.getElementById('score-fields-mobile');
-      if (mobileFieldsEl) mobileFieldsEl.textContent = gameState.score.fields;
-      const mobileBuildingsEl = document.getElementById('score-buildings-mobile');
-      if (mobileBuildingsEl) mobileBuildingsEl.textContent = gameState.score.buildings;
-      const mobileRiversEl = document.getElementById('score-rivers-mobile');
-      if (mobileRiversEl) mobileRiversEl.textContent = gameState.score.water;
-      const mobileAnimalsEl = document.getElementById('score-animals-mobile');
-      if (mobileAnimalsEl) mobileAnimalsEl.textContent = gameState.score.animals;
-      const mobileTotalEl = document.getElementById('score-total-mobile');
-      if (mobileTotalEl) mobileTotalEl.textContent = gameState.score.total;
+      // Update any score element that exists (desktop compact chip + mobile grid).
+      const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      setText('score-trees', gameState.score.trees);
+      setText('score-mountains', gameState.score.mountains);
+      setText('score-fields', gameState.score.fields);
+      setText('score-buildings', gameState.score.buildings);
+      setText('score-rivers', gameState.score.water);
+      setText('score-animals', gameState.score.animals);
+      setText('score-total-sidebar', gameState.score.total);
+      setText('score-trees-mobile', gameState.score.trees);
+      setText('score-mountains-mobile', gameState.score.mountains);
+      setText('score-fields-mobile', gameState.score.fields);
+      setText('score-buildings-mobile', gameState.score.buildings);
+      setText('score-rivers-mobile', gameState.score.water);
+      setText('score-animals-mobile', gameState.score.animals);
+      setText('score-total-mobile', gameState.score.total);
 
       // Update sun display
       const suns = calculateSuns(gameState.score.total);
@@ -1942,10 +1895,7 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       
       // Help button — open the How to Play modal
       document.getElementById('help-btn').addEventListener('click', openHelp);
-      
-      // End turn button
-      document.getElementById('end-turn-btn').addEventListener('click', handleEndTurn);
-      
+
       // Discard mode button
       document.getElementById('discard-mode-btn').addEventListener('click', () => {
         if (gameState.takenCardThisTurn) {
@@ -2009,8 +1959,6 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       // Clear token selection when changing spaces
       gameState.selectedToken = null;
       updateTokenSelection();
-
-      showMessage(`Space ${parseInt(spaceId) + 1} selected! Click a token, then click a hex to place it.`, 'success');
     }
     
     // Handle taking an animal card from available pool
@@ -2272,18 +2220,6 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       const patternOpen = document.getElementById('pattern-modal')?.classList.contains('active');
       const modalOpen = helpOpen || patternOpen;
 
-      // N or Enter = End Turn (plain keys with no browser default).
-      if (e.key === 'n' || e.key === 'N' || e.key === 'Enter') {
-        if (modalOpen) return;
-        // If Enter is pressed on a focused button/link, let the native click
-        // handle it so End Turn doesn't fire twice.
-        if (e.key === 'Enter' && (tag === 'button' || tag === 'a')) return;
-        e.preventDefault();
-        const btn = document.getElementById('end-turn-btn');
-        if (btn && !btn.disabled) handleEndTurn();
-        return;
-      }
-
       // Left / Right arrows = cycle the selected token to place.
       if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
         if (modalOpen) return;
@@ -2454,14 +2390,13 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
         showMessage(`⚠️ Only ${emptyHexes} empty space${emptyHexes !== 1 ? 's' : ''} left! Finish placing your tokens.`, 'info');
       }
 
-      // Check if all tokens placed
+      // Check if all tokens placed — turn ends automatically (no undo, so no
+      // reason for a manual End Turn step). New tokens are drawn right away.
       if (gameState.tokensPlaced >= gameState.tokensToPlace) {
-        showMessage(`✓ All tokens placed! Press N or click "End Turn" to continue.`, 'success');
+        handleEndTurn();
       } else {
         // Pre-select the next token so the player can just click another hex.
         autoSelectNextToken();
-        const remaining = gameState.tokensToPlace - gameState.tokensPlaced;
-        showMessage(`✓ Placed! ${remaining} more. Next token auto-selected — click a hex, or use ← / → to switch.`, 'success');
       }
     }
 
@@ -2721,10 +2656,7 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
         `🎉 Game Over! Final Score: ${gameState.score.total} points = ${sunEmoji} ${suns} sun${suns !== 1 ? 's' : ''}!`,
         'success'
       );
-      
-      document.getElementById('end-turn-btn').disabled = true;
-      document.getElementById('end-turn-btn').textContent = '🏁 Game Complete';
-      
+
       // Show detailed sun breakdown after a short delay
       setTimeout(() => {
         const tokensLeft = Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0);

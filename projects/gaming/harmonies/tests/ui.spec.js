@@ -26,24 +26,14 @@ test("loads without console errors", async ({ page }) => {
   expect(errors, `page errors: ${errors.join("; ")}`).toEqual([]);
 });
 
-test("End Turn button sits in the token panel beside the board", async ({ page }) => {
+test("there is no manual End Turn button (turn auto-advances)", async ({ page }) => {
   await freshGame(page);
-  const panel = page.locator("section", { has: page.locator("#end-turn-btn") });
-  await expect(panel.locator("#end-turn-btn")).toBeVisible();
-  // The token spaces live in the same panel as End Turn (moved out of the board).
-  await expect(panel.locator('.token-row[data-space="0"]')).toBeVisible();
-  await expect(panel).toContainText("press N");
+  await expect(page.locator("#end-turn-btn")).toHaveCount(0);
+  // The token spaces still live in the right-hand panel.
+  await expect(page.locator('.token-row[data-space="0"]')).toBeVisible();
 });
 
-test("N key ends the turn (keyboard shortcut)", async ({ page }) => {
-  await freshGame(page);
-  for (let i = 0; i < 3; i++) await placeOneToken(page);
-  await page.keyboard.press("n");
-  await expect(page.locator("#game-message")).toContainText("Turn complete");
-  await expect(page).toHaveURL(/index\.html/);
-});
-
-test("can place 3 tokens and end a turn", async ({ page }) => {
+test("placing all 3 tokens auto-ends the turn and draws new tokens", async ({ page }) => {
   await freshGame(page);
   const filledBefore = await page.locator("#hex-grid-container .hex-cell:not([data-terrain='empty'])").count();
 
@@ -52,8 +42,8 @@ test("can place 3 tokens and end a turn", async ({ page }) => {
   const filledAfter = await page.locator("#hex-grid-container .hex-cell:not([data-terrain='empty'])").count();
   expect(filledAfter).toBe(filledBefore + 3);
 
-  await page.locator("#end-turn-btn").click();
-  // A fresh set of tokens should be available for the next turn.
+  // Turn ended automatically → status message + a fresh set of tokens.
+  await expect(page.locator("#game-message")).toContainText("Turn complete");
   await expect(page.locator('.token[data-space="0"] >> visible=true').first()).toBeVisible();
 });
 
