@@ -87,6 +87,18 @@
     /* Selected/anchor hex — warm gold inset ring. */
     .hex-cell.selected .hex-fill { box-shadow: inset 0 0 0 3px rgba(245, 166, 35, 0.95); }
 
+    /* Hexes where the currently-selected token can be placed (guidance). */
+    .hex-cell.valid-token-target .hex-fill::after {
+      content: ""; position: absolute; inset: 0; clip-path: inherit;
+      box-shadow: inset 0 0 0 3px rgba(37, 99, 235, 0.85);
+      animation: token-target-pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes token-target-pulse { 0%,100% { opacity: .45; } 50% { opacity: .9; } }
+
+    /* Pop when a token lands. */
+    @keyframes hexPop { 0% { transform: scale(.72); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+    .hex-cell.just-placed .hex-fill { animation: hexPop .28s ease; }
+
     /* Stack-height badge — anchored on the flat BOTTOM edge (inside silhouette). */
     .stack-count {
       position: absolute;
@@ -286,16 +298,25 @@
     /* the cube hex: bright amber ring so it clearly reads as the target hex */
     .mini-cell.cube .mini-fill { background: #f59e0b; }
     .mini-cell.cube .mini-fill::before { inset: 3px; }
-    /* the animal cube: a crisp dark rounded square with a white outline */
+    /* the animal cube: a bold dark paw badge at the top-right corner; the
+       terrain token underneath stays fully visible (amber ring marks the hex). */
     .mini-cell .cube-dot {
-      position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-      width: 42%; aspect-ratio: 1; border-radius: 22%;
-      background: #1f2937; border: 2px solid #fff;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.55); z-index: 3;
+      position: absolute; top: -4px; right: -3px;
+      width: 54%; height: 54%; display: flex; align-items: center; justify-content: center;
+      z-index: 4; pointer-events: none;
     }
+    .mini-cell .cube-dot svg {
+      width: 100%; height: 100%;
+      filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.5));
+    }
+    /* height badge — plain number in a dark pill at bottom-center (matches the
+       board's stack badge style, minus the "×"), only for stacks taller than 1 */
     .mini-cell .ht-badge {
-      position: absolute; bottom: -1px; right: 0; z-index: 3;
-      font-weight: 800; color: #fff; text-shadow: 0 0 2px #000, 0 0 2px #000; line-height: 1;
+      position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
+      z-index: 3; min-width: 14px; padding: 0 3px; border-radius: 8px;
+      background: rgba(15, 23, 42, 0.92); color: #fff;
+      font-weight: 800; line-height: 1.35; text-align: center;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55);
     }
 
     /* Playful gradient top bar */
@@ -1026,6 +1047,19 @@
     </div>
   </div>
 
+  <!-- Game Over summary modal -->
+  <div id="gameover-modal" class="pattern-modal" onclick="if(event.target===this)closeGameOver()">
+    <div class="pattern-modal-content" style="max-width:min(440px,92vw);text-align:center;">
+      <h3 class="text-2xl font-extrabold text-slate-800">🎉 Game Over!</h3>
+      <p id="gameover-reason" class="text-xs text-slate-500 mt-1 mb-2"></p>
+      <div id="gameover-suns" class="text-4xl leading-none mb-1"></div>
+      <div class="mb-3"><span id="gameover-total" class="text-5xl font-extrabold text-purple-800">0</span> <span class="text-slate-500 font-semibold">points</span></div>
+      <div id="gameover-cells" class="score-cells mb-4"></div>
+      <button onclick="playAgain()" class="w-full px-4 py-3 bg-green-600 text-white rounded-lg font-extrabold shadow hover:bg-green-700 transition">🎲 Play Again</button>
+      <button onclick="closeGameOver()" class="w-full mt-2 px-4 py-1.5 text-slate-500 text-sm hover:text-slate-700">Close &amp; view board</button>
+    </div>
+  </div>
+
   <!-- Game Logic Scripts (ES6 Modules) -->
   <script type="module">
     // Import existing game logic
@@ -1473,6 +1507,11 @@
       water: '💧', blue: '💧', field: '🌼', yellow: '🌼', tree: '🌳', green: '🌿',
       mountain: '⛰️', gray: '⛰️', rock: '🪨', building: '🏠', red: '🏠', trunk: '🪵', brown: '🪵',
     };
+    // Bold dark paw with a white outline — high contrast on any terrain color.
+    const PAW_SVG = `<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="#1e293b" stroke="#ffffff" stroke-width="6" stroke-linejoin="round">`
+      + `<ellipse cx="50" cy="66" rx="24" ry="19"/><ellipse cx="24" cy="40" rx="10" ry="12"/>`
+      + `<ellipse cx="42" cy="27" rx="10" ry="13"/><ellipse cx="60" cy="27" rx="10" ry="13"/>`
+      + `<ellipse cx="77" cy="40" rx="10" ry="12"/></g></svg>`;
 
     // Render a pattern as a mini honeycomb (positioned flat-top hexes). The cube
     // hex gets a gold outline + a 🐾 marker (where your animal goes).
@@ -1487,8 +1526,9 @@
         const left = x - minX, top = y - minY;
         const fill = TERRAIN_FILL[h.terrain] || '#e3ece6';
         const emoji = TERRAIN_EMOJI_MINI[h.terrain] || '';
-        const ht = h.height ? `<span class="ht-badge" style="font-size:${Math.round(hexW*0.28)}px">${h.height}</span>` : '';
-        const cube = h.isPlacementHex ? `<span class="cube-dot" style="font-size:${Math.round(hexW*0.5)}px">🐾</span>` : '';
+        const ht = (h.height && h.height > 1)
+          ? `<span class="ht-badge" style="font-size:${Math.round(hexW * 0.36)}px">${h.height}</span>` : '';
+        const cube = h.isPlacementHex ? `<span class="cube-dot">${PAW_SVG}</span>` : '';
         return `<div class="mini-cell ${h.isPlacementHex ? 'cube' : ''}" style="left:${left}px;top:${top}px;width:${hexW}px;height:${H}px;--terrain:${fill}">`
              + `<div class="mini-fill" style="font-size:${emojiSize}px">${emoji}</div>${cube}${ht}</div>`;
       }).join('');
@@ -1739,13 +1779,21 @@
     function updateTokenSelection() {
       document.querySelectorAll('.token').forEach(t => t.classList.remove('selected'));
       document.querySelectorAll('.token-row').forEach(r => r.classList.remove('active-space'));
+      document.querySelectorAll('.hex-cell.valid-token-target').forEach(c => c.classList.remove('valid-token-target'));
       if (gameState.selectedToken) {
-        const { space, index } = gameState.selectedToken;
+        const { space, index, color } = gameState.selectedToken;
         document.querySelectorAll(`.token[data-space="${space}"][data-index="${index}"]`)
           .forEach(t => t.classList.add('selected'));
         // Binary space highlight: mark the space we're placing from as active.
         document.querySelectorAll(`.token-row[data-space="${space}"]`)
           .forEach(r => r.classList.add('active-space'));
+        // Guide the player: highlight every hex where this token can go.
+        Object.values(gameState.hexBoard).forEach(hex => {
+          if (canPlaceToken(hex, color, gameState.placedAnimals).valid) {
+            const el = document.querySelector(`.hex-cell[data-q="${hex.q}"][data-r="${hex.r}"]`);
+            if (el) el.classList.add('valid-token-target');
+          }
+        });
       }
     }
 
@@ -1851,7 +1899,7 @@
       if (stack.length > 1) {
         const badge = document.createElement('div');
         badge.className = 'hex-overlay stack-count';
-        badge.textContent = '×' + stack.length;
+        badge.textContent = String(stack.length);
         cell.appendChild(badge);
       }
 
@@ -2272,6 +2320,33 @@
       const modal = document.getElementById('help-modal');
       if (modal) modal.classList.remove('active');
     };
+    window.closeGameOver = function() {
+      const modal = document.getElementById('gameover-modal');
+      if (modal) modal.classList.remove('active');
+    };
+    window.playAgain = function() {
+      suppressSave = true;      // don't let beforeunload re-save the finished game
+      clearSavedGame();
+      location.reload();
+    };
+
+    // ── Subtle sound feedback (WebAudio, no assets) ──
+    let _audioCtx = null;
+    function playTone(freq, dur = 0.08, type = 'triangle', vol = 0.05) {
+      try {
+        _audioCtx = _audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        const o = _audioCtx.createOscillator(), g = _audioCtx.createGain();
+        o.type = type; o.frequency.value = freq;
+        o.connect(g); g.connect(_audioCtx.destination);
+        const t = _audioCtx.currentTime;
+        g.gain.setValueAtTime(vol, t);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.start(t); o.stop(t + dur);
+      } catch (e) { /* audio unavailable */ }
+    }
+    const sfxPlace = () => playTone(320, 0.07, 'triangle', 0.045);
+    const sfxAnimal = () => { playTone(523, 0.09, 'sine', 0.06); setTimeout(() => playTone(784, 0.13, 'sine', 0.06), 90); };
+    const sfxWin = () => { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 0.16, 'sine', 0.07), i * 120)); };
 
     // Keyboard shortcuts. Attached directly (not gated on DOMContentLoaded) so it
     // is always active; it looks up elements lazily when a key is pressed.
@@ -2280,6 +2355,7 @@
       if (e.key === 'Escape') {
         closePatternHelper();
         closeHelp();
+        closeGameOver();
         return;
       }
       // Ignore shortcuts while typing in a field
@@ -2288,7 +2364,8 @@
 
       const helpOpen = document.getElementById('help-modal')?.classList.contains('active');
       const patternOpen = document.getElementById('pattern-modal')?.classList.contains('active');
-      const modalOpen = helpOpen || patternOpen;
+      const gameoverOpen = document.getElementById('gameover-modal')?.classList.contains('active');
+      const modalOpen = helpOpen || patternOpen || gameoverOpen;
 
       // Left / Right arrows = cycle the selected token to place.
       if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
@@ -2333,8 +2410,12 @@
       hexData.stack.push({ color });
       hexData.terrain = calculateTerrain(hexData.stack);
 
-      // Update hex display
+      // Update hex display + a little pop and click
       updateHexDisplay(hexEl, hexData);
+      hexEl.classList.remove('just-placed');
+      void hexEl.offsetWidth; // restart animation
+      hexEl.classList.add('just-placed');
+      sfxPlace();
 
       // Remove token from supply
       const { space, index } = gameState.selectedToken;
@@ -2447,9 +2528,13 @@
       });
       
       updateHexDisplay(hexEl, hexData);
+      hexEl.classList.remove('just-placed');
+      void hexEl.offsetWidth;
+      hexEl.classList.add('just-placed');
+      sfxAnimal();
       updateScore();
       displayPlayerAnimalCards(); // Refresh to update placement counts
-      
+
       const newCount = placementCount + 1;
       // More cubes = higher value; index from the end of the (descending) array.
       const points = card.scoring[Math.max(0, card.scoring.length - newCount)];
@@ -2639,24 +2724,32 @@
         'success'
       );
 
-      // Show detailed sun breakdown after a short delay
-      setTimeout(() => {
-        const tokensLeft = Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0);
-        const filledHexes = Object.values(gameState.hexBoard).filter(hex => hex.stack.length > 0).length;
-        const emptyHexes = 23 - filledHexes;
-        
-        let endReason = '';
-        if (tokensLeft < 9) {
-          endReason = `Pouch exhausted (${tokensLeft} tokens left, need 9 to refill)`;
-        } else if (emptyHexes <= 2) {
-          endReason = `Only ${emptyHexes} empty space${emptyHexes !== 1 ? 's' : ''} left (can't place 3 tokens next turn)`;
-        }
-        
-        showMessage(
-          `${sunEmoji} ${suns} suns! ${endReason}. Using Side A would add +1 sun!`,
-          'info'
-        );
-      }, 2000);
+      // End reason
+      const tokensLeft = Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0);
+      const filledHexes = Object.values(gameState.hexBoard).filter(hex => hex.stack.length > 0).length;
+      const emptyHexes = 23 - filledHexes;
+      const endReason = tokensLeft < 9
+        ? `The bag ran low (${tokensLeft} tokens left).`
+        : emptyHexes <= 2
+          ? `The board is nearly full (${emptyHexes} space${emptyHexes !== 1 ? 's' : ''} left).`
+          : 'Board complete.';
+
+      // Populate + show the Game Over summary
+      const s = gameState.score;
+      const cellData = [
+        ['sc-trees', '🌲', s.trees], ['sc-mtn', '⛰️', s.mountains], ['sc-fields', '🌼', s.fields],
+        ['sc-build', '🏠', s.buildings], ['sc-rivers', '💧', s.water], ['sc-animals', '🐾', s.animals],
+      ];
+      const setHtml = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+      const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      setTxt('gameover-reason', endReason);
+      setTxt('gameover-suns', suns > 0 ? sunEmoji : '🌙');
+      setTxt('gameover-total', gameState.score.total);
+      setHtml('gameover-cells', cellData.map(([cls, emoji, val]) =>
+        `<div class="score-cell ${cls}"><span class="sc-emoji">${emoji}</span><span class="sc-num">${val}</span></div>`).join(''));
+      const goModal = document.getElementById('gameover-modal');
+      if (goModal) goModal.classList.add('active');
+      sfxWin();
     }
     
     // Calculate suns based on score (official Harmonies solo mode)

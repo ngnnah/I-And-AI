@@ -67,6 +67,34 @@ test("placing a token auto-selects the next one, arrows switch it", async ({ pag
   await expect(page.locator(".token.selected >> visible=true")).toHaveCount(1);
 });
 
+test("selecting a token highlights valid placement hexes", async ({ page }) => {
+  await freshGame(page);
+  expect(await page.locator(".hex-cell.valid-token-target").count()).toBe(0);
+  await page.locator('.token[data-space="0"] >> visible=true').first().click();
+  // On an empty board every hex accepts the first token.
+  expect(await page.locator(".hex-cell.valid-token-target").count()).toBeGreaterThan(0);
+});
+
+test("playing to the end shows the Game Over summary", async ({ page }) => {
+  await freshGame(page);
+  let ended = false;
+  for (let i = 0; i < 30 && !ended; i++) {
+    const empty = page.locator("#hex-grid-container .hex-cell[data-terrain='empty']");
+    if ((await empty.count()) === 0) break;
+    if ((await page.locator(".token.selected >> visible=true").count()) === 0) {
+      const t = page.locator('.token[data-space="0"] >> visible=true').first();
+      if ((await t.count()) === 0) break;
+      await t.click();
+    }
+    await empty.first().click();
+    await page.waitForTimeout(40);
+    ended = (await page.locator("#gameover-modal.active").count()) > 0;
+  }
+  await expect(page.locator("#gameover-modal")).toBeVisible();
+  await expect(page.locator("#gameover-modal")).toContainText("Game Over");
+  await expect(page.locator("#gameover-total")).toBeVisible();
+});
+
 test("Help button opens a How to Play modal with stacking and scoring", async ({ page }) => {
   await freshGame(page);
   await page.locator("#help-btn").click();
