@@ -796,7 +796,7 @@
     <!-- Header -->
     <header class="header-bar rounded-xl shadow-lg px-4 py-3 mb-4 text-white relative overflow-hidden">
       <!-- decorative terrain emoji drifting edge-to-edge behind the header -->
-      <div class="header-emojis" aria-hidden="true">🌲 ⛰️ 💧 🌼 🏠 🌿 🐻 🦊 🦉 🐟 🦆 🦎 🦩 🦜 🐺 🐧 🦇 🐨 🦙 🌲 ⛰️ 💧 🌼 🏠 🌿 🐻 🦊 🦉 🐟 🦆 🦎 🦩 🦜 🐺 🐧 🦇 🐨 🦙</div>
+      <div class="header-emojis" aria-hidden="true">🌲 ⛰️ 🌊 🌼 🏡 🍃 🐻 🦊 🦉 🐟 🦆 🦎 🦩 🦜 🐺 🐧 🦇 🐨 🦙 🌲 ⛰️ 🌊 🌼 🏡 🍃 🐻 🦊 🦉 🐟 🦆 🦎 🦩 🦜 🐺 🐧 🦇 🐨 🦙</div>
 
       <div class="relative flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-4">
         <div class="flex items-center justify-between gap-2 md:contents">
@@ -830,8 +830,8 @@
         <div class="score-cell sc-trees"><span class="sc-emoji">🌲</span><span class="sc-num" id="score-trees-mobile">0</span></div>
         <div class="score-cell sc-mtn"><span class="sc-emoji">⛰️</span><span class="sc-num" id="score-mountains-mobile">0</span></div>
         <div class="score-cell sc-fields"><span class="sc-emoji">🌼</span><span class="sc-num" id="score-fields-mobile">0</span></div>
-        <div class="score-cell sc-build"><span class="sc-emoji">🏠</span><span class="sc-num" id="score-buildings-mobile">0</span></div>
-        <div class="score-cell sc-rivers"><span class="sc-emoji">💧</span><span class="sc-num" id="score-rivers-mobile">0</span></div>
+        <div class="score-cell sc-build"><span class="sc-emoji">🏡</span><span class="sc-num" id="score-buildings-mobile">0</span></div>
+        <div class="score-cell sc-rivers"><span class="sc-emoji">🌊</span><span class="sc-num" id="score-rivers-mobile">0</span></div>
         <div class="score-cell sc-animals"><span class="sc-emoji">🐾</span><span class="sc-num" id="score-animals-mobile">0</span></div>
       </div>
       <div class="score-total-line">
@@ -919,8 +919,8 @@
             <div class="score-cell sc-trees"><span class="sc-emoji">🌲</span><span class="sc-num" id="score-trees">0</span></div>
             <div class="score-cell sc-mtn"><span class="sc-emoji">⛰️</span><span class="sc-num" id="score-mountains">0</span></div>
             <div class="score-cell sc-fields"><span class="sc-emoji">🌼</span><span class="sc-num" id="score-fields">0</span></div>
-            <div class="score-cell sc-build"><span class="sc-emoji">🏠</span><span class="sc-num" id="score-buildings">0</span></div>
-            <div class="score-cell sc-rivers"><span class="sc-emoji">💧</span><span class="sc-num" id="score-rivers">0</span></div>
+            <div class="score-cell sc-build"><span class="sc-emoji">🏡</span><span class="sc-num" id="score-buildings">0</span></div>
+            <div class="score-cell sc-rivers"><span class="sc-emoji">🌊</span><span class="sc-num" id="score-rivers">0</span></div>
             <div class="score-cell sc-animals"><span class="sc-emoji">🐾</span><span class="sc-num" id="score-animals">0</span></div>
           </div>
           <div class="score-total-line">
@@ -1023,11 +1023,11 @@
             </thead>
             <tbody class="align-top">
               <tr class="border-b border-slate-100"><td class="py-1 pr-2">🌼 Yellow (field)</td><td class="py-1 pr-2">Ground only</td><td class="py-1">1</td></tr>
-              <tr class="border-b border-slate-100"><td class="py-1 pr-2">💧 Blue (water)</td><td class="py-1 pr-2">Ground only</td><td class="py-1">1</td></tr>
+              <tr class="border-b border-slate-100"><td class="py-1 pr-2">🌊 Blue (water)</td><td class="py-1 pr-2">Ground only</td><td class="py-1">1</td></tr>
               <tr class="border-b border-slate-100"><td class="py-1 pr-2">🪵 Brown (trunk)</td><td class="py-1 pr-2">Brown</td><td class="py-1">2</td></tr>
-              <tr class="border-b border-slate-100"><td class="py-1 pr-2">🌿 Green (leaves)</td><td class="py-1 pr-2">1–2 brown</td><td class="py-1">3</td></tr>
+              <tr class="border-b border-slate-100"><td class="py-1 pr-2">🍃 Green (leaves)</td><td class="py-1 pr-2">1–2 brown</td><td class="py-1">3</td></tr>
               <tr class="border-b border-slate-100"><td class="py-1 pr-2">⛰️ Gray (mountain)</td><td class="py-1 pr-2">Gray</td><td class="py-1">3</td></tr>
-              <tr><td class="py-1 pr-2">🏠 Red (building)</td><td class="py-1 pr-2">Gray/brown/red, or alone</td><td class="py-1">2</td></tr>
+              <tr><td class="py-1 pr-2">🏡 Red (building)</td><td class="py-1 pr-2">Gray/brown/red, or alone</td><td class="py-1">2</td></tr>
             </tbody>
           </table>
         </section>
@@ -1038,8 +1038,8 @@
             <li>🌲 <strong>Trees</strong> — bush 1, tree 3, tall tree (2 brown+green) <strong>7</strong></li>
             <li>⛰️ <strong>Mountains</strong> — gray height 1/2/3 = 1/3/7, but <strong>0 if not next to another mountain</strong></li>
             <li>🌼 <strong>Fields</strong> — 5 per connected group of 2+ (a lone yellow = 0)</li>
-            <li>🏠 <strong>Buildings</strong> — a <strong>stacked</strong> red scores 5 if next to 3+ different colors (a lone red = 0)</li>
-            <li>💧 <strong>Water</strong> — longest river of 2/3/4/5/6 = 2/5/8/11/15 (+4 each beyond 6)</li>
+            <li>🏡 <strong>Buildings</strong> — a <strong>stacked</strong> red scores 5 if next to 3+ different colors (a lone red = 0)</li>
+            <li>🌊 <strong>Water</strong> — longest river of 2/3/4/5/6 = 2/5/8/11/15 (+4 each beyond 6)</li>
             <li>🐾 <strong>Animals</strong> — the more cubes you place, the more points</li>
           </ul>
           <p class="mt-1 text-slate-500">Total points earn ☀️ suns: 40+ =1, 70+ =2, 90+ =3, 110+ =4, 130+ =5, 140+ =6, 150+ =7, 160+ =8.</p>
@@ -1077,11 +1077,11 @@
     
     // Token emoji mapping
     const TOKEN_EMOJI = {
-      blue: '💧',
+      blue: '🌊',
       yellow: '🌼',
       brown: '🪵',
-      green: '🌿',
-      red: '🏠',
+      green: '🍃',
+      red: '🏡',
       gray: '⛰️'
     };
 
@@ -1511,8 +1511,8 @@
       trunk: 'linear-gradient(135deg,#8B4513,#654321)', brown: 'linear-gradient(135deg,#8B4513,#654321)',
     };
     const TERRAIN_EMOJI_MINI = {
-      water: '💧', blue: '💧', field: '🌼', yellow: '🌼', tree: '🌳', green: '🌿',
-      mountain: '⛰️', gray: '⛰️', rock: '🪨', building: '🏠', red: '🏠', trunk: '🪵', brown: '🪵',
+      water: '🌊', blue: '🌊', field: '🌼', yellow: '🌼', tree: '🌳', green: '🍃',
+      mountain: '⛰️', gray: '⛰️', rock: '🪨', building: '🏡', red: '🏡', trunk: '🪵', brown: '🪵',
     };
     // Bold dark paw with a white outline — high contrast on any terrain color.
     const PAW_SVG = `<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="#1e293b" stroke="#ffffff" stroke-width="6" stroke-linejoin="round">`
@@ -2772,7 +2772,7 @@
       const s = gameState.score;
       const cellData = [
         ['sc-trees', '🌲', s.trees], ['sc-mtn', '⛰️', s.mountains], ['sc-fields', '🌼', s.fields],
-        ['sc-build', '🏠', s.buildings], ['sc-rivers', '💧', s.water], ['sc-animals', '🐾', s.animals],
+        ['sc-build', '🏡', s.buildings], ['sc-rivers', '🌊', s.water], ['sc-animals', '🐾', s.animals],
       ];
       const setHtml = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
       const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
