@@ -270,6 +270,30 @@
     }
     .score-total-line .big { font-size: 1.6rem; color: #6b21a8; }
 
+    /* Mini hex layout for animal-card habitat previews */
+    .mini-board { position: relative; margin: 4px auto 2px; }
+    .mini-cell { position: absolute; filter: drop-shadow(0 1px 1px rgba(0,0,0,.2)); }
+    .mini-fill {
+      position: absolute; inset: 0;
+      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+      background: rgba(15, 23, 42, 0.35);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mini-fill::before {
+      content: ""; position: absolute; inset: 1.5px; clip-path: inherit;
+      background: var(--terrain, #e3ece6); z-index: -1;
+    }
+    /* the cube hex: warm gold grout so it stands out */
+    .mini-cell.cube .mini-fill { background: #d97706; }
+    .mini-cell .cube-dot {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      z-index: 2; filter: drop-shadow(0 1px 1px rgba(0,0,0,.5));
+    }
+    .mini-cell .ht-badge {
+      position: absolute; bottom: 0; right: 1px; z-index: 3;
+      font-weight: 800; color: #fff; text-shadow: 0 0 2px rgba(0,0,0,.9); line-height: 1;
+    }
+
     /* Playful gradient top bar */
     .header-bar {
       background: linear-gradient(120deg, #059669 0%, #0ea5e9 42%, #6366f1 78%, #8b5cf6 100%);
@@ -776,7 +800,7 @@
             placeholder="Who's playing? ✨"
             class="text-center text-base font-extrabold text-indigo-700 placeholder:text-indigo-300 placeholder:font-medium bg-transparent outline-none w-full md:w-44"
             aria-label="Your player name" />
-          <span class="text-lg select-none" aria-hidden="true">🗻🌊🌸</span>
+          <span class="text-lg select-none" aria-hidden="true">🏡🌊🌸</span>
         </label>
       </div>
     </header>
@@ -933,8 +957,7 @@
         <!-- Hex pattern will be rendered here -->
       </div>
       <div class="mt-3 text-center">
-        <p class="text-xs text-slate-500">🎯 = Place your animal cube here</p>
-        <p class="text-xs text-slate-500 mt-1">Pattern must match on the board</p>
+        <p class="text-xs text-slate-500">🐾 = where your animal goes (build this shape on your board, in any rotation)</p>
       </div>
       <div id="pattern-modal-scoring" class="mt-3 text-center">
         <!-- Scoring info will be rendered here -->
@@ -1345,7 +1368,7 @@
               ${getCompactPattern(card.pattern, card.id)}
             </div>
             <div class="flex items-center justify-center gap-2 text-xs mt-0.5">
-              <span class="text-slate-500">${card.scoring.join('→')} pts</span>
+              <span class="text-slate-500" title="Points for building the habitat 1, 2, 3… times">${[...card.scoring].reverse().join('→')} pts</span>
               ${actionText.replace(/<div class="([^"]*)">/, '<span class="$1">').replace('</div>', '</span>')}
             </div>
           </div>
@@ -1381,7 +1404,10 @@
 
       const cardsHTML = gameState.playerAnimalCards.map((card, idx) => {
         const placementCount = gameState.placedAnimals.filter(p => p.cardId === card.id).length;
-const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementCount] : null;
+        // More cubes = more points; the value for the NEXT cube is indexed from the end.
+        const nextPoints = placementCount < card.maxPlacements
+          ? card.scoring[card.scoring.length - (placementCount + 1)]
+          : null;
         
         return `
           <div class="player-card bg-white rounded-lg px-2 py-1.5 shadow border-2 border-slate-300 cursor-pointer hover:border-blue-400 transition"
@@ -1422,26 +1448,48 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       return animal || '🐾';
     }
 
-    // Generate compact inline pattern preview
-    function getCompactPattern(pattern, cardId) {
-      // Terrain to mini emoji
-      const terrainEmoji = {
-        'water': '💧', 'blue': '💧',
-        'field': '🌼', 'yellow': '🌼',
-        'tree': '🌿', 'green': '🌿',
-        'mountain': '⛰️', 'gray': '⛰️', 'rock': '⛰️',
-        'building': '🏠', 'red': '🏠',
-        'trunk': '🪵', 'brown': '🪵'
-      };
+    // Terrain → fill color (gradients match the board tokens)
+    const TERRAIN_FILL = {
+      water: 'linear-gradient(135deg,#4A90E2,#357ABD)', blue: 'linear-gradient(135deg,#4A90E2,#357ABD)',
+      field: 'linear-gradient(135deg,#F5A623,#E09000)', yellow: 'linear-gradient(135deg,#F5A623,#E09000)',
+      tree: 'linear-gradient(135deg,#7ED321,#5FA518)', green: 'linear-gradient(135deg,#7ED321,#5FA518)',
+      mountain: 'linear-gradient(135deg,#7F8C8D,#5D6D6E)', gray: 'linear-gradient(135deg,#7F8C8D,#5D6D6E)',
+      rock: 'linear-gradient(135deg,#9aa4a5,#6f7d7e)',
+      building: 'linear-gradient(135deg,#D0021B,#A00116)', red: 'linear-gradient(135deg,#D0021B,#A00116)',
+      trunk: 'linear-gradient(135deg,#8B4513,#654321)', brown: 'linear-gradient(135deg,#8B4513,#654321)',
+    };
+    const TERRAIN_EMOJI_MINI = {
+      water: '💧', blue: '💧', field: '🌼', yellow: '🌼', tree: '🌳', green: '🌿',
+      mountain: '⛰️', gray: '⛰️', rock: '🪨', building: '🏠', red: '🏠', trunk: '🪵', brown: '🪵',
+    };
 
-      // Create mini pattern display with click handler that stops propagation
-      const patternHTML = pattern.map(hex => {
-        const emoji = terrainEmoji[hex.terrain] || '❓';
-        const marker = hex.isPlacementHex ? '🎯' : '';
-        return `<span style="font-size: 10px; line-height: 1;" title="${hex.terrain}">${emoji}${marker}</span>`;
+    // Render a pattern as a mini honeycomb (positioned flat-top hexes). The cube
+    // hex gets a gold outline + a 🐾 marker (where your animal goes).
+    function renderMiniPattern(pattern, hexW, { clickable = false, cardId = '' } = {}) {
+      const H = hexW * 0.8660254;
+      const pts = pattern.map(h => ({ h, x: h.q * hexW * 0.75, y: h.r * H + h.q * H * 0.5 }));
+      const minX = Math.min(...pts.map(p => p.x)), minY = Math.min(...pts.map(p => p.y));
+      const maxX = Math.max(...pts.map(p => p.x)), maxY = Math.max(...pts.map(p => p.y));
+      const boardW = (maxX - minX) + hexW, boardH = (maxY - minY) + H;
+      const emojiSize = Math.round(hexW * 0.42);
+      const cells = pts.map(({ h, x, y }) => {
+        const left = x - minX, top = y - minY;
+        const fill = TERRAIN_FILL[h.terrain] || '#e3ece6';
+        const emoji = TERRAIN_EMOJI_MINI[h.terrain] || '';
+        const ht = h.height ? `<span class="ht-badge" style="font-size:${Math.round(hexW*0.28)}px">${h.height}</span>` : '';
+        const cube = h.isPlacementHex ? `<span class="cube-dot" style="font-size:${Math.round(hexW*0.5)}px">🐾</span>` : '';
+        return `<div class="mini-cell ${h.isPlacementHex ? 'cube' : ''}" style="left:${left}px;top:${top}px;width:${hexW}px;height:${H}px;--terrain:${fill}">`
+             + `<div class="mini-fill" style="font-size:${emojiSize}px">${emoji}</div>${cube}${ht}</div>`;
       }).join('');
+      const attrs = clickable
+        ? ` onclick="event.stopPropagation(); openPatternHelperById('${cardId}')" title="Tap for full pattern" style="width:${boardW}px;height:${boardH}px;cursor:pointer"`
+        : ` style="width:${boardW}px;height:${boardH}px"`;
+      return `<div class="mini-board"${attrs}>${cells}</div>`;
+    }
 
-      return `<span class="pattern-compact" onclick="event.stopPropagation(); openPatternHelperById('${cardId}')" title="Tap to see full pattern">${patternHTML}</span>`;
+    // Compact inline pattern preview shown on each card.
+    function getCompactPattern(pattern, cardId) {
+      return renderMiniPattern(pattern, 26, { clickable: true, cardId });
     }
     
     // Reposition all hexes (for window resize)
@@ -2157,16 +2205,21 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       // Render pattern visualization
       renderPatternVisualization(card.pattern, grid);
 
-      // Show scoring
+      // Show scoring as "habitats built → points" (ascending; more builds = more points)
       const placementCount = gameState.placedAnimals.filter(p => p.cardId === card.id).length;
-      const scoringText = card.scoring.map((pts, idx) => {
-        const placed = idx < placementCount;
-        const current = idx === placementCount;
-        return `<span class="${placed ? 'text-slate-400' : current ? 'text-green-600 font-bold' : 'text-slate-600'}">${pts}pts</span>`;
-      }).join(' → ');
+      const max = card.maxPlacements;
+      const rows = [];
+      for (let n = 1; n <= max; n++) {
+        const pts = card.scoring[card.scoring.length - n]; // value for the n-th cube
+        const done = n <= placementCount;
+        const next = n === placementCount + 1;
+        const cls = done ? 'text-slate-400 line-through' : next ? 'text-green-600 font-bold' : 'text-slate-600';
+        rows.push(`<span class="${cls}">${n}→${pts}</span>`);
+      }
       scoring.innerHTML = `
-        <p class="text-sm font-semibold text-slate-700">Scoring: ${scoringText}</p>
-        <p class="text-xs text-slate-500 mt-1">Placed: ${placementCount}/${card.maxPlacements}</p>
+        <p class="text-sm font-semibold text-slate-700">Build the habitat more times for more points:</p>
+        <p class="text-base mt-1 flex justify-center gap-3">${rows.join('')}</p>
+        <p class="text-xs text-slate-500 mt-1">habitats built → points · you've placed ${placementCount}/${max}</p>
       `;
 
       // Show modal
@@ -2238,99 +2291,11 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       }
     });
 
-    // Render pattern visualization using mini hexes
+    // Render the full pattern in the modal (same clean mini-honeycomb, larger).
     function renderPatternVisualization(pattern, container) {
-      container.innerHTML = '';
-
-      // Pattern hex positioning (similar to hexToPixel but for mini hexes)
-      const hexWidth = 60;
-      const hexHeight = 52;
-
-      // Find pattern bounds to center it
-      const minQ = Math.min(...pattern.map(p => p.q));
-      const maxQ = Math.max(...pattern.map(p => p.q));
-      const minR = Math.min(...pattern.map(p => p.r));
-      const maxR = Math.max(...pattern.map(p => p.r));
-      
-      const centerQ = (minQ + maxQ) / 2;
-      const centerR = (minR + maxR) / 2;
-
-      // Terrain to color mapping
-      const terrainToColor = {
-        'water': 'blue', 'blue': 'blue',
-        'field': 'yellow', 'yellow': 'yellow',
-        'tree': 'green', 'green': 'green',
-        'mountain': 'gray', 'gray': 'gray', 'rock': 'gray',
-        'building': 'red', 'red': 'red',
-        'trunk': 'brown', 'brown': 'brown'
-      };
-
-      const terrainToEmoji = {
-        'water': '💧', 'blue': '💧',
-        'field': '🌼', 'yellow': '🌼',
-        'tree': '🌿', 'green': '🌿',
-        'mountain': '⛰️', 'gray': '⛰️', 'rock': '⛰️',
-        'building': '🏠', 'red': '🏠',
-        'trunk': '🪵', 'brown': '🪵'
-      };
-
-      const terrainToName = {
-        'water': 'Water', 'blue': 'Water',
-        'field': 'Field', 'yellow': 'Field',
-        'tree': 'Tree', 'green': 'Tree/Green',
-        'mountain': 'Mountain', 'gray': 'Mountain', 'rock': 'Rock/Mountain',
-        'building': 'Building', 'red': 'Building',
-        'trunk': 'Trunk', 'brown': 'Trunk'
-      };
-
-      pattern.forEach(hex => {
-        // Calculate position (relative to center)
-        const offsetQ = hex.q - centerQ;
-        const offsetR = hex.r - centerR;
-        
-        const x = offsetQ * hexWidth * 0.75;
-        const y = offsetR * hexHeight + offsetQ * hexHeight * 0.5;
-
-        // Create hex wrapper (for positioning indicator outside clip-path)
-        const hexWrapper = document.createElement('div');
-        hexWrapper.style.position = 'absolute';
-        hexWrapper.style.left = `calc(50% + ${x}px)`;
-        hexWrapper.style.top = `calc(50% + ${y}px)`;
-        hexWrapper.style.transform = 'translate(-50%, -50%)';
-        hexWrapper.style.width = `${hexWidth}px`;
-        hexWrapper.style.height = `${hexHeight}px`;
-
-        // Create hex element
-        const hexEl = document.createElement('div');
-        const color = terrainToColor[hex.terrain] || 'gray';
-        hexEl.className = `pattern-hex ${color}`;
-        if (hex.isPlacementHex) {
-          hexEl.classList.add('placement');
-        }
-        
-        hexEl.style.position = 'relative';
-        hexEl.style.left = '0';
-        hexEl.style.top = '0';
-        hexEl.style.transform = 'none';
-        
-        // Add emoji inside hex
-        const emoji = terrainToEmoji[hex.terrain] || '❓';
-        hexEl.innerHTML = `
-          <span style="font-size: 24px; line-height: 1; position: relative; z-index: 1;">${emoji}</span>
-          <div class="pattern-label">${terrainToName[hex.terrain] || hex.terrain}</div>
-        `;
-
-        // Add placement indicator outside hex if needed
-        if (hex.isPlacementHex) {
-          const indicator = document.createElement('div');
-          indicator.className = 'pattern-placement-indicator';
-          indicator.textContent = '🎯';
-          hexWrapper.appendChild(indicator);
-        }
-
-        hexWrapper.appendChild(hexEl);
-        container.appendChild(hexWrapper);
-      });
+      container.style.display = 'flex';
+      container.style.justifyContent = 'center';
+      container.innerHTML = renderMiniPattern(pattern, 58, { clickable: false });
     }
     
     // Handle token placement via click
