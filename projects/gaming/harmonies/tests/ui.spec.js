@@ -16,7 +16,7 @@ async function placeOneToken(page) {
   if ((await page.locator(".token.selected >> visible=true").count()) === 0) {
     await page.locator('.token[data-space="0"] >> visible=true').first().click();
   }
-  await page.locator("#hex-grid-container .hex.empty").first().click();
+  await page.locator("#hex-grid-container .hex-cell[data-terrain='empty']").first().click();
 }
 
 test("loads without console errors", async ({ page }) => {
@@ -45,11 +45,11 @@ test("N key ends the turn (keyboard shortcut)", async ({ page }) => {
 
 test("can place 3 tokens and end a turn", async ({ page }) => {
   await freshGame(page);
-  const filledBefore = await page.locator("#hex-grid-container .hex:not(.empty)").count();
+  const filledBefore = await page.locator("#hex-grid-container .hex-cell:not([data-terrain='empty'])").count();
 
   for (let i = 0; i < 3; i++) await placeOneToken(page);
 
-  const filledAfter = await page.locator("#hex-grid-container .hex:not(.empty)").count();
+  const filledAfter = await page.locator("#hex-grid-container .hex-cell:not([data-terrain='empty'])").count();
   expect(filledAfter).toBe(filledBefore + 3);
 
   await page.locator("#end-turn-btn").click();
@@ -61,7 +61,7 @@ test("placing a token auto-selects the next one, arrows switch it", async ({ pag
   await freshGame(page);
   // Place the first token (this commits the active space).
   await page.locator('.token[data-space="0"] >> visible=true').first().click();
-  await page.locator("#hex-grid-container .hex.empty").first().click();
+  await page.locator("#hex-grid-container .hex-cell[data-terrain='empty']").first().click();
 
   // The next token in that space should now be pre-selected.
   const selected = page.locator(".token.selected >> visible=true");
@@ -97,27 +97,27 @@ test("Help button opens a How to Play modal with stacking and scoring", async ({
 test("New Game starts fresh (does not resume the old board)", async ({ page }) => {
   await freshGame(page);
   for (let i = 0; i < 3; i++) await placeOneToken(page);
-  expect(await page.locator("#hex-grid-container .hex:not(.empty)").count()).toBe(3);
+  expect(await page.locator("#hex-grid-container .hex-cell:not([data-terrain='empty'])").count()).toBe(3);
 
   page.once("dialog", (d) => d.accept()); // confirm "start a new game?"
   await page.locator("#new-game-btn").click();
   await page.waitForLoadState("networkidle");
 
   // Board must be empty and NOT show the "Resumed" message.
-  expect(await page.locator("#hex-grid-container .hex:not(.empty)").count()).toBe(0);
+  expect(await page.locator("#hex-grid-container .hex-cell:not([data-terrain='empty'])").count()).toBe(0);
   await expect(page.locator("#game-message")).not.toContainText("Resumed");
 });
 
 test("board persists across a reload (touch-and-go)", async ({ page }) => {
   await freshGame(page);
   for (let i = 0; i < 3; i++) await placeOneToken(page);
-  const filled = await page.locator("#hex-grid-container .hex:not(.empty)").count();
+  const filled = await page.locator("#hex-grid-container .hex-cell:not([data-terrain='empty'])").count();
   expect(filled).toBe(3);
 
   // Reload WITHOUT clearing storage — the auto-saved board must come back.
   await page.reload({ waitUntil: "networkidle" });
   await expect(page.locator("#score-total-sidebar")).toBeVisible();
-  const filledAfterReload = await page.locator("#hex-grid-container .hex:not(.empty)").count();
+  const filledAfterReload = await page.locator("#hex-grid-container .hex-cell:not([data-terrain='empty'])").count();
   expect(filledAfterReload).toBe(3);
   await expect(page.locator("#game-message")).toContainText("Resumed");
 });

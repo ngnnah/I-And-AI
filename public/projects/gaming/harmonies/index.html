@@ -12,94 +12,115 @@
   
   <style>
     /* Custom hex styles */
-    .hex {
-      width: 80px;
-      height: 69px; /* 80 × sqrt(3)/2 = 69.28 */
-      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-      transition: all 0.2s ease;
-      cursor: pointer;
+    /* Single source of truth for hex size (JS reads --hex-w back). */
+    :root {
+      --hex-w: 78px;
+      --hex-h: calc(var(--hex-w) * 0.8660254); /* flat-top height = √3/2 · width */
+      --hex-gap: 2px;                           /* grout / outline thickness */
+    }
+
+    /* Flat-topped hex: an UNCLIPPED cell (holds overlays + shadow) wrapping a
+       CLIPPED fill. The fill's inset ::before is the terrain surface, leaving a
+       clean continuous "grout" outline (a border on a clip-path fragments). */
+    .hex-cell {
       position: absolute;
+      width: var(--hex-w);
+      height: var(--hex-h);
+      cursor: pointer;
+      transition: transform .12s ease, filter .12s ease;
+      filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.22));
+    }
+    .hex-fill {
+      position: absolute;
+      inset: 0;
+      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+      background: rgba(15, 23, 42, 0.22); /* grout */
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 36px;
-      font-weight: bold;
-      color: white;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-      border: 3px solid rgba(0, 0, 0, 0.5);
-      box-sizing: border-box;
+      font-size: calc(var(--hex-w) * 0.42);
       line-height: 1;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
     }
-    
-    .hex:hover {
-      transform: scale(1.05);
-      border-color: rgba(255, 255, 255, 0.8);
+    .hex-fill::before {
+      content: "";
+      position: absolute;
+      inset: var(--hex-gap);
+      clip-path: inherit;
+      background: var(--terrain, #e3ece6);
+      z-index: -1;
+    }
+    .hex-cell[data-terrain="empty"]  { --terrain: #e3ece6; }
+    .hex-cell[data-terrain="blue"]   { --terrain: linear-gradient(135deg,#4A90E2,#357ABD); }
+    .hex-cell[data-terrain="yellow"] { --terrain: linear-gradient(135deg,#F5A623,#E09000); }
+    .hex-cell[data-terrain="brown"]  { --terrain: linear-gradient(135deg,#8B4513,#654321); }
+    .hex-cell[data-terrain="green"]  { --terrain: linear-gradient(135deg,#7ED321,#5FA518); }
+    .hex-cell[data-terrain="red"]    { --terrain: linear-gradient(135deg,#D0021B,#A00116); }
+    .hex-cell[data-terrain="gray"]   { --terrain: linear-gradient(135deg,#7F8C8D,#5D6D6E); }
+    .hex-cell[data-terrain="empty"] .hex-fill::before {
+      background: radial-gradient(120% 90% at 50% 15%, rgba(255,255,255,.55), transparent 60%), #e3ece6;
+    }
+
+    .hex-cell:hover {
+      transform: translateY(-2px) scale(1.03);
+      filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.3));
       z-index: 10;
     }
-    
-    /* Invalid placement feedback */
-    .hex.dropzone-invalid {
-      border-color: #ff5252;
-      box-shadow: 0 0 0 3px rgba(255, 82, 82, 0.3);
-    }
 
-    /* Valid animal placement highlight */
-    .hex.valid-animal-placement {
-      border-color: #10b981;
-      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.4), 0 0 20px rgba(16, 185, 129, 0.3);
-      animation: pulse-glow 1.5s ease-in-out infinite;
-      z-index: 5;
+    /* Valid animal-placement target — overlay + inset ring (clip-safe). */
+    .hex-cell.valid-animal-placement .hex-fill::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      clip-path: inherit;
+      background: rgba(16, 185, 129, 0.35);
+      box-shadow: inset 0 0 0 3px rgba(16, 185, 129, 0.95);
+      animation: valid-pulse 1.4s ease-in-out infinite;
     }
+    @keyframes valid-pulse { 0%,100% { opacity: .5; } 50% { opacity: .9; } }
 
-    @keyframes pulse-glow {
-      0%, 100% { 
-        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.4), 0 0 20px rgba(16, 185, 129, 0.3);
-      }
-      50% { 
-        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.6), 0 0 30px rgba(16, 185, 129, 0.5);
-      }
-    }
-    
-    /* Terrain colors */
-    .hex.empty {
-      background: #d5dbdb;
-      color: #2c3e50;
-    }
-    
-    .hex.blue {
-      background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
-    }
-    
-    .hex.yellow {
-      background: linear-gradient(135deg, #F5A623 0%, #E09000 100%);
-    }
-    
-    .hex.brown {
-      background: linear-gradient(135deg, #8B4513 0%, #654321 100%);
-    }
-    
-    .hex.green {
-      background: linear-gradient(135deg, #7ED321 0%, #5FA518 100%);
-    }
-    
-    .hex.red {
-      background: linear-gradient(135deg, #D0021B 0%, #A00116 100%);
-    }
-    
-    .hex.gray {
-      background: linear-gradient(135deg, #7F8C8D 0%, #5D6D6E 100%);
-    }
-    
-    /* Stack count overlay - responsive sizing */
+    /* Invalid flash — flash the fill (a clipped box-shadow would be invisible). */
+    .hex-cell.dropzone-invalid .hex-fill { animation: shake-red .45s ease; }
+    @keyframes shake-red { 0%,100% { background: rgba(15,23,42,.22); } 50% { background: #ff5252; } }
+
+    /* Selected/anchor hex — warm gold inset ring. */
+    .hex-cell.selected .hex-fill { box-shadow: inset 0 0 0 3px rgba(245, 166, 35, 0.95); }
+
+    /* Stack-height badge — anchored on the flat BOTTOM edge (inside silhouette). */
     .stack-count {
       position: absolute;
-      bottom: 0;
-      right: 0;
-      font-size: 18px;
-      font-weight: bold;
+      bottom: calc(var(--hex-h) * 0.05);
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9px;
+      background: rgba(15, 23, 42, 0.9);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
       line-height: 1;
-      text-shadow: 0 0 3px rgba(0,0,0,0.8);
+      box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.6);
       pointer-events: none;
+    }
+    /* Animal cube — anchored on the flat TOP edge. */
+    .animal-cube {
+      position: absolute;
+      top: calc(var(--hex-h) * 0.02);
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: calc(var(--hex-w) * 0.3);
+      line-height: 1;
+      pointer-events: none;
+      filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hex-cell.valid-animal-placement .hex-fill::after { animation: none; }
     }
     
     /* Token styles */
@@ -460,20 +481,11 @@
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .hex-grid {
-        height: 450px;
+        height: 420px;
         max-width: 95vw;
       }
 
-      .hex {
-        width: 56px;
-        height: 48px; /* 56 × sqrt(3)/2 */
-        font-size: 24px;
-        border: 2px solid rgba(0, 0, 0, 0.5);
-      }
-      
-      .stack-count {
-        font-size: 14px;
-      }
+      :root { --hex-w: 62px; }
 
       .token {
         width: 44px; /* Larger touch target (min 44px recommended) */
@@ -499,18 +511,10 @@
     }
 
     @media (max-width: 480px) {
-      .hex {
-        width: 48px;
-        height: 42px;
-        font-size: 20px;
-      }
-      
-      .stack-count {
-        font-size: 11px;
-      }
+      :root { --hex-w: 52px; }
 
       .hex-grid {
-        height: 380px;
+        height: 360px;
       }
 
       /* Compact header on small mobile */
@@ -631,12 +635,7 @@
         position: relative !important;
       }
 
-      .hex {
-        width: 42px !important;
-        height: 36px !important;
-        font-size: 24px !important;
-        border-width: 2px !important;
-      }
+      :root { --hex-w: 46px; }
 
       /* Mobile token row adjustments */
       .token-row {
@@ -1133,7 +1132,7 @@
     // Re-render every panel from restored gameState (board, tokens, cards, score).
     function restoreUIFromState() {
       Object.values(gameState.hexBoard).forEach(hexData => {
-        const hexEl = document.querySelector(`.hex[data-q="${hexData.q}"][data-r="${hexData.r}"]`);
+        const hexEl = document.querySelector(`.hex-cell[data-q="${hexData.q}"][data-r="${hexData.r}"]`);
         if (hexEl) updateHexDisplay(hexEl, hexData);
       });
       for (let i = 0; i < 3; i++) updateTokenSpaceUI(i);
@@ -1480,7 +1479,7 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
     
     // Reposition all hexes (for window resize)
     function repositionAllHexes() {
-      document.querySelectorAll('.hex').forEach(hexEl => {
+      document.querySelectorAll('.hex-cell').forEach(hexEl => {
         const q = parseInt(hexEl.dataset.q);
         const r = parseInt(hexEl.dataset.r);
         const pos = hexToPixel(q, r);
@@ -1512,59 +1511,45 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
       }
     }
     
-    // Create a hex element
+    // Create a hex element: an unclipped .hex-cell wrapping a clipped .hex-fill.
     function createHexElement(q, r) {
-      const hex = document.createElement('div');
-      hex.className = 'hex empty';
-      hex.dataset.q = q;
-      hex.dataset.r = r;
-      
-      // Calculate pixel position
+      const cell = document.createElement('div');
+      cell.className = 'hex-cell';
+      cell.dataset.q = q;
+      cell.dataset.r = r;
+      cell.dataset.terrain = 'empty';
+
+      const fill = document.createElement('div');
+      fill.className = 'hex-fill';
+      cell.appendChild(fill);
+
       const pos = hexToPixel(q, r);
-      hex.style.left = pos.x + 'px';
-      hex.style.top = pos.y + 'px';
-      
-      // Store in game state
-      gameState.hexBoard[`${q}_${r}`] = {
-        q, r,
-        terrain: null,
-        stack: []
-      };
-      
-      // Click handler for token and animal placement
-      hex.addEventListener('click', handleHexClickForAnimal);
-      
-      return hex;
+      cell.style.left = pos.x + 'px';
+      cell.style.top = pos.y + 'px';
+
+      gameState.hexBoard[`${q}_${r}`] = { q, r, terrain: null, stack: [] };
+      cell.addEventListener('click', handleHexClickForAnimal);
+      return cell;
     }
     
-    // Convert axial coordinates to pixel position
+    // Read the current hex size from the single CSS source of truth (--hex-w),
+    // so rendered size and layout spacing can never disagree across breakpoints.
+    function getHexMetrics() {
+      const w = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hex-w')) || 78;
+      return { w, h: w * Math.sqrt(3) / 2 };
+    }
+
+    // Convert axial coordinates to pixel position (flat-topped hexes, centered).
     function hexToPixel(q, r) {
-      // Detect hex size based on container width
       const container = document.getElementById('hex-grid-container');
       const containerWidth = container ? container.clientWidth : 800;
       const containerHeight = container ? container.clientHeight : 600;
-      const isPortraitMobile = containerWidth < 400;
-      const isMobile = containerWidth < 500;
+      const { w, h } = getHexMetrics();
 
-      // Hex dimensions - MUST match CSS hex sizes!
-      const hexWidth = isPortraitMobile ? 42 : (isMobile ? 60 : 80);
-      const hexHeight = isPortraitMobile ? 36 : (isMobile ? 52 : 69);
-
-      // Flat-topped hex positioning (standard axial coordinate formulas)
-      // Horizontal: Each column shifts right by 3/4 of width
-      // Vertical: Each row shifts down by full height, plus half-height per column
-      const x = q * hexWidth * 0.75;
-      const y = r * hexHeight + q * hexHeight * 0.5;
-
-      // Center the grid in container
-      // Account for hex dimensions since they're positioned by top-left corner
-      const centerX = containerWidth / 2 - hexWidth / 2;
-      const centerY = containerHeight / 2 - hexHeight / 2;
-
-      return {
-        x: x + centerX,
-        y: y + centerY
-      };
+      // Column step = 0.75·W; row step = H with a 0.5·H per-column shear.
+      const x = q * w * 0.75 + containerWidth / 2 - w / 2;
+      const y = r * h + q * h * 0.5 + containerHeight / 2 - h / 2;
+      return { x, y };
     }
     
     // Draw random tokens from pouch, weighted by how many of each color remain
@@ -1826,48 +1811,39 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
     }
     
     // Update hex visual display
-    function updateHexDisplay(hexEl, hexData) {
-      const { stack, terrain } = hexData;
-      
-      if (stack.length === 0) {
-        hexEl.className = 'hex empty';
-        hexEl.innerHTML = '';
+    function updateHexDisplay(cell, hexData) {
+      const { stack } = hexData;
+      const fill = cell.querySelector('.hex-fill');
+      // Clear previous overlays (badges/cubes live on the unclipped cell)
+      cell.querySelectorAll('.hex-overlay').forEach(n => n.remove());
+
+      if (!stack || stack.length === 0) {
+        cell.dataset.terrain = 'empty';
+        if (fill) fill.textContent = '';
         return;
       }
-      
-      // Show top token color
+
       const topColor = stack[stack.length - 1].color;
-      hexEl.className = `hex ${topColor}`;
-      
-      // Show stack height and emoji
-      const emoji = TOKEN_EMOJI[topColor];
-      const stackCount = stack.length;
-      
-      // Check if hex has animal cube
-      const hexKey = `${hexData.q}_${hexData.r}`;
-      const animalPlacement = gameState.placedAnimals.find(p => p.hexKey === hexKey);
-      
-      if (animalPlacement) {
-        // Find the animal card to get the animal type
-        const animalCard = gameState.playerAnimalCards.find(c => c.id === animalPlacement.cardId);
-        const animalEmoji = animalCard ? getAnimalEmoji(animalCard.animal) : '🐾';
-        
-        // Show token + animal cube + stack count overlay
-        hexEl.innerHTML = `
-          <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-            <span style="line-height: 1;">${emoji}</span>
-            ${stackCount > 1 ? `<span style="position: absolute; bottom: 0; right: 4px; font-size: 11px; font-weight: bold; line-height: 1; text-shadow: 0 0 3px rgba(0,0,0,0.8);">×${stackCount}</span>` : ''}
-            <span style="position: absolute; top: 2px; right: 2px; font-size: 0.9em; line-height: 1;" title="${animalCard ? animalCard.name : 'Animal'}">${animalEmoji}</span>
-          </div>
-        `;
-      } else {
-        // Wrap in span with overlay count
-        hexEl.innerHTML = `
-          <div style="position: relative; display: inline-block;">
-            <span style="line-height: 1;">${emoji}</span>
-            ${stackCount > 1 ? `<span class="stack-count">×${stackCount}</span>` : ''}
-          </div>
-        `;
+      cell.dataset.terrain = topColor;
+      if (fill) fill.textContent = TOKEN_EMOJI[topColor];
+
+      // Stack-height badge on the flat bottom edge
+      if (stack.length > 1) {
+        const badge = document.createElement('div');
+        badge.className = 'hex-overlay stack-count';
+        badge.textContent = '×' + stack.length;
+        cell.appendChild(badge);
+      }
+
+      // Animal cube on the flat top edge
+      const ap = gameState.placedAnimals.find(p => p.hexKey === `${hexData.q}_${hexData.r}`);
+      if (ap) {
+        const card = gameState.playerAnimalCards.find(c => c.id === ap.cardId);
+        const cube = document.createElement('div');
+        cube.className = 'hex-overlay animal-cube';
+        cube.textContent = card ? getAnimalEmoji(card.animal) : '🐾';
+        cube.title = card ? card.name : 'Animal';
+        cell.appendChild(cube);
       }
     }
     
@@ -2187,7 +2163,7 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
 
     // Clear valid placement highlights from all hexes
     function clearValidPlacementHighlights() {
-      document.querySelectorAll('.hex.valid-animal-placement').forEach(hexEl => {
+      document.querySelectorAll('.hex-cell.valid-animal-placement').forEach(hexEl => {
         hexEl.classList.remove('valid-animal-placement');
       });
     }
@@ -2208,7 +2184,7 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
         const result = checkAnimalPattern(hexKey, card.pattern);
         if (result.valid) {
           // Find the hex element and add highlight class
-          const hexEl = document.querySelector(`.hex[data-q="${hexData.q}"][data-r="${hexData.r}"]`);
+          const hexEl = document.querySelector(`.hex-cell[data-q="${hexData.q}"][data-r="${hexData.r}"]`);
           if (hexEl) {
             hexEl.classList.add('valid-animal-placement');
           }
