@@ -42,8 +42,8 @@ test("placing all 3 tokens auto-ends the turn and draws new tokens", async ({ pa
   const filledAfter = await page.locator("#hex-grid-container .hex-cell:not([data-terrain='empty'])").count();
   expect(filledAfter).toBe(filledBefore + 3);
 
-  // Turn ended automatically → status message + a fresh set of tokens.
-  await expect(page.locator("#game-message")).toContainText("Turn complete");
+  // Turn ended automatically → advanced to Turn 2 + a fresh set of tokens.
+  await expect(page.locator("#turn-number")).toHaveText("2");
   await expect(page.locator('.token[data-space="0"] >> visible=true').first()).toBeVisible();
 });
 

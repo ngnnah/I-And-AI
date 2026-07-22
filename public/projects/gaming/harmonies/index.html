@@ -258,6 +258,14 @@
       backdrop-filter: blur(2px);
     }
 
+    /* Turn tracker "place 3" dots */
+    .turn-dot {
+      width: 13px; height: 13px; border-radius: 50%;
+      border: 2px solid #cbd5e1; display: inline-block;
+      transition: background .2s ease, border-color .2s ease;
+    }
+    .turn-dot.filled { background: #34d399; border-color: #10b981; }
+
     /* 6-cell colored score breakdown */
     .score-cells {
       display: grid;
@@ -880,7 +888,17 @@
       <!-- Right: token spaces + End Turn (fills the space beside the board) -->
       <section class="lg:col-span-1 space-y-4">
         <div class="panel-card rounded-xl shadow-lg p-4">
-          <h2 class="text-lg font-bold text-slate-800 mb-3">🎴 Token Spaces</h2>
+          <!-- Turn tracker: number + "place 3" progress + card availability -->
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-lg font-bold text-slate-800">🌿 Turn <span id="turn-number">1</span></h2>
+            <span id="turn-card-status" class="text-xs font-semibold px-2 py-0.5 rounded-full"></span>
+          </div>
+          <div class="flex items-center justify-center gap-2 mb-3">
+            <span class="text-xs text-slate-500">Place 3 tokens:</span>
+            <span class="turn-dot" data-i="0"></span>
+            <span class="turn-dot" data-i="1"></span>
+            <span class="turn-dot" data-i="2"></span>
+          </div>
 
           <!-- Token Supply (3 rows) -->
           <div class="token-supply-rows">
@@ -1081,6 +1099,7 @@
     const gameState = {
       selectedSpace: null,
       selectedToken: null, // {color, space, index} for click-to-place
+      turnNumber: 1,
       tokensPlaced: 0,
       tokensToPlace: 3,
       hexBoard: {},
@@ -1961,8 +1980,30 @@
       const mobilePouchCounter = document.getElementById('pouch-counter-mobile');
       if (mobilePouchCounter) mobilePouchCounter.textContent = tokensLeft;
 
+      // Keep the turn tracker in sync (token dots, card status)
+      renderTurnStatus();
+
       // Auto-save after every scored change (placements, animal cubes, refills)
       saveGame();
+    }
+
+    // Update the turn tracker (turn #, token-progress dots, card availability).
+    function renderTurnStatus() {
+      const tn = document.getElementById('turn-number');
+      if (tn) tn.textContent = gameState.turnNumber || 1;
+      document.querySelectorAll('.turn-dot').forEach((d, i) => {
+        d.classList.toggle('filled', i < gameState.tokensPlaced);
+      });
+      const st = document.getElementById('turn-card-status');
+      if (st) {
+        let text, cls;
+        if (gameState.takenCardThisTurn) { text = '🎴 card taken'; cls = 'bg-slate-100 text-slate-500'; }
+        else if (gameState.discardedCardThisTurn) { text = '⟳ card swapped'; cls = 'bg-slate-100 text-slate-500'; }
+        else if (gameState.playerAnimalCards.length >= 4) { text = '🎴 hand full (4)'; cls = 'bg-amber-100 text-amber-700'; }
+        else { text = '🎴 card available'; cls = 'bg-green-100 text-green-700'; }
+        st.textContent = text;
+        st.className = `text-xs font-semibold px-2 py-0.5 rounded-full ${cls}`;
+      }
     }
 
     // Show game message
@@ -2103,6 +2144,7 @@
       
       displayAvailableAnimalCards();
       displayPlayerAnimalCards();
+      renderTurnStatus();
       saveGame();
 
       showMessage(`🎯 ${card.name} taken! Click it to place animal cubes.`, 'success');
@@ -2142,6 +2184,7 @@
       gameState.discardedCardThisTurn = true;
 
       displayAvailableAnimalCards();
+      renderTurnStatus();
       saveGame();
 
       showMessage(`🗑️ ${card.name} discarded and replaced!`, 'success');
@@ -2666,10 +2709,12 @@
       
       // Refresh token supply (we know we have enough tokens)
       refreshTokenSupply();
+      gameState.turnNumber = (gameState.turnNumber || 1) + 1;
+      renderTurnStatus();
       console.log(`✅ Turn complete - Pouch now has: ${Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0)} tokens`);
-      
-      showMessage(`✓ Turn complete! Select a space and place more tokens.`, 'success');
-      
+
+      showMessage(`🌿 Turn ${gameState.turnNumber} — take a card if you like, then place 3 tokens.`, 'info');
+
       // Deselect space
       document.querySelectorAll('.token-space').forEach(s => {
         s.classList.remove('selected');
