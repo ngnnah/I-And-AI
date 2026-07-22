@@ -890,7 +890,7 @@
         <div class="panel-card rounded-xl shadow-lg p-4">
           <!-- Turn tracker: number + "place 3" progress + card availability -->
           <div class="flex items-center justify-between mb-2">
-            <h2 class="text-lg font-bold text-slate-800">🌿 Turn <span id="turn-number">1</span></h2>
+            <h2 class="text-lg font-bold text-slate-800">🔄 Turn <span id="turn-number">1</span></h2>
             <span id="turn-card-status" class="text-xs font-semibold px-2 py-0.5 rounded-full"></span>
           </div>
           <div class="flex items-center justify-center gap-2 mb-3">
@@ -2713,7 +2713,7 @@
       renderTurnStatus();
       console.log(`✅ Turn complete - Pouch now has: ${Object.values(gameState.pouch).reduce((sum, count) => sum + count, 0)} tokens`);
 
-      showMessage(`🌿 Turn ${gameState.turnNumber} — take a card if you like, then place 3 tokens.`, 'info');
+      showMessage(`🔄 Turn ${gameState.turnNumber} — take a card if you like, then place 3 tokens.`, 'info');
 
       // Deselect space
       document.querySelectorAll('.token-space').forEach(s => {
