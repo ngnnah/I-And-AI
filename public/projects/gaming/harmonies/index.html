@@ -2059,14 +2059,15 @@ const nextPoints = placementCount < card.maxPlacements ? card.scoring[placementC
           closeHelp();
           return;
         }
-        // Backspace = End Turn (ignore when typing in a field or a modal is open)
+        // Backspace = End Turn. Always swallow it (except when typing in a field)
+        // so it can never trigger the browser's default back-navigation/scroll.
         if (e.key === 'Backspace') {
           const tag = (e.target.tagName || '').toLowerCase();
           if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+          e.preventDefault();
           const helpOpen = document.getElementById('help-modal')?.classList.contains('active');
           const patternOpen = document.getElementById('pattern-modal')?.classList.contains('active');
-          if (helpOpen || patternOpen) return;
-          e.preventDefault(); // stop the browser's "navigate back" behavior
+          if (helpOpen || patternOpen) return; // a modal is open: just swallow the key
           const btn = document.getElementById('end-turn-btn');
           if (btn && !btn.disabled) handleEndTurn();
         }
