@@ -1900,7 +1900,11 @@
 
       const topColor = stack[stack.length - 1].color;
       cell.dataset.terrain = topColor;
-      if (fill) fill.textContent = TOKEN_EMOJI[topColor];
+      // A leaf on a trunk (green on 1-2 brown) is a full tree → show 🌳.
+      // A leaf on the ground stays a bush → 🍃.
+      let emoji = TOKEN_EMOJI[topColor];
+      if (topColor === 'green' && stack.length > 1) emoji = '🌳';
+      if (fill) fill.textContent = emoji;
 
       // Stack-height badge on the flat bottom edge
       if (stack.length > 1) {
