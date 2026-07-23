@@ -108,7 +108,9 @@ project-name/
 │   └── gaming/
 │       ├── nanja-monja/
 │       ├── codenames/
-│       └── ito/
+│       ├── ito/
+│       ├── high-society/
+│       └── harmonies/    # solo game; has its own CLAUDE.md
 ├── public/            # GitHub Pages deployment (sync from projects/)
 │   ├── index.html     # Landing page
 │   └── projects/      # Deployed copies
@@ -243,6 +245,11 @@ uv run pytest         # Python utilities
 - Firebase Realtime sync, optimistic UI, room codes
 - Structure: `firebase-config.js`, `firebase-sync.js`, `game-state.js`, `game-logic.js`
 
+**Solo / local Games** (Harmonies, High Society)
+
+- Single-file static app + pure-logic ES modules, `localStorage` persistence, no server
+- Harmonies has its own `CLAUDE.md` — read it before working there
+
 **GitHub TODO App**
 
 - Static app using GitHub Contents API, PAT storage
@@ -314,8 +321,10 @@ Best practices:
 | `/commit`          | create git commits                      |
 | `/data-pipeline`   | generate ETL/ELT pipelines              |
 | `/datetime`        | time, timezone, date calculations       |
+| `/deploy`          | sync project to public/ + push (Pages)  |
 | `/ics`             | create calendar events from bookings    |
 | `/pdf`             | read and analyze PDFs                   |
+| `/playwright`      | run Playwright E2E tests on a web app   |
 | `/pr`              | create GitHub pull requests             |
 | `/review`          | code review for bugs, security          |
 | `/seasons`         | Japanese micro-season awareness         |

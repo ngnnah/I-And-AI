@@ -44,11 +44,11 @@ python3 -m http.server 8001
 | Token   | Can place on            | Max height | Notes                                  |
 | ------- | ----------------------- | ---------- | -------------------------------------- |
 | Yellow 🌼 | Ground only             | 1          | Fields — no stacking                   |
-| Blue 💧  | Ground only             | 1          | Water — no stacking                    |
+| Blue 🌊  | Ground only             | 1          | Water — no stacking                    |
 | Brown 🪵 | Brown only              | 2          | Tree trunks                            |
-| Green 🌿 | 1–2 Brown               | 3          | Tree crown — needs a trunk underneath  |
+| Green 🍃 | 1–2 Brown               | 3          | Tree crown — trunk + leaf renders as 🌳 |
 | Gray ⛰️  | Gray only               | 3          | Mountains                              |
-| Red 🏠   | Gray/Brown/Red, or alone| 2          | Buildings — never the 3rd token        |
+| Red 🧱   | Gray/Brown/Red, or alone| 2          | Brick alone; stacked renders as 🏡      |
 
 ### Scoring
 
@@ -73,41 +73,23 @@ Full rules and strategy: **[game-rules.md](./game-rules.md)**.
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Architecture & testing
 
-Self-contained static app — no build step. `index.html` holds the UI and game flow inline and
-imports pure-logic ES modules from `js/`:
-
-- `index.html` — game UI, turn flow, pattern matching, persistence (~2,400 lines)
-- `js/game/scoring-engine.js` — all 6 scoring categories
-- `js/game/token-manager.js` — placement validation, stacking rules, terrain derivation
-- `js/game/hex-grid.js` — axial hex math + `getPatternOrientations` (rotation/mirror for patterns)
-- `js/data/tokens-config.js` — pouch distribution (120 tokens) and stacking rules
-- `js/data/animal-cards.js` — 32 animal cards with habitat patterns
-
-State lives in one in-memory `gameState` object that is serialized to `localStorage`
-(key `harmonies_solo_game`) on every scored change.
-
----
-
-## 🧪 Testing
+Self-contained static app, no build step — `index.html` holds the UI/game-flow inline and imports
+pure-logic ES modules from `js/`. Run `npm test` (node, no deps) for logic and `npx playwright test`
+for browser smoke tests. Full architecture, design system, gotchas, and deploy steps are in
+**[CLAUDE.md](./CLAUDE.md)**.
 
 ```bash
-npm test                       # pure-logic unit tests (node --test, no deps)
-npx playwright test            # browser smoke tests (solo flow + persistence)
+cd projects/gaming/harmonies && python3 -m http.server 8001   # play locally at localhost:8001
 ```
-
-Unit tests cover scoring (incl. the real tree=7 and building rules), animal-score direction,
-pattern rotation/mirror, and the cube-blocks-stacking rule. Playwright verifies the page loads
-error-free, a 3-token turn works, and the board survives a reload.
 
 ---
 
 ## 📚 Docs
 
-- **[game-rules.md](./game-rules.md)** — full rules + solo variant + strategy
-- **[PROGRESS.md](./PROGRESS.md)** — status, changelog, and roadmap
-- **[DEPLOY.md](./DEPLOY.md)** — GitHub Pages deploy steps
+- **[game-rules.md](./game-rules.md)** — full rules + solo variant + strategy (for players)
+- **[CLAUDE.md](./CLAUDE.md)** — how to work on the code (architecture, design system, deploy, status)
 - **[archive/](./archive/)** — earlier Phaser prototype and planning notes
 
 ---
