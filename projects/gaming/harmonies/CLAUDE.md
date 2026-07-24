@@ -14,7 +14,7 @@ each on their own device. Live: https://ngnnah.github.io/I-And-AI/projects/gamin
 - **Out of scope — don't build without asking:** multiplayer/networking, Side B (islands) board,
   Nature Spirit cards.
 - **Current focus: 🎨 original art + design/layout + UI/UX.** Keep the calm aesthetic —
-  soft/translucent, light colors, minimal motion, subtle over flashy.
+  soft/translucent, light colors, minimal motion, subtle over flashy. **Next-steps backlog: `PLAN.md`.**
 
 ## Architecture (no build step)
 
