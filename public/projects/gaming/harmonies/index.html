@@ -329,6 +329,68 @@
       box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55);
     }
 
+    /* ── Sound popover ─────────────────────────────────────────────────────────
+       Anchored under the header 🔊 button. Translucent and low-contrast to match
+       the calm aesthetic; it should read as a note pinned to the header, not a dialog. */
+    .sound-wrap { position: relative; }
+    .sound-panel {
+      position: absolute;
+      top: calc(100% + 0.5rem);
+      right: 0;
+      z-index: 40;
+      width: 16.5rem;
+      padding: 0.85rem 0.9rem;
+      border-radius: 0.85rem;
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(4px);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: #334155;
+      text-align: left;
+      /* Hidden by default; `visibility` keeps it out of the tab order when closed. */
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-4px);
+      transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+    }
+    .sound-wrap.open .sound-panel { opacity: 1; visibility: visible; transform: translateY(0); }
+    /* On narrow screens the button sits near the right edge, so anchoring the panel to
+       it would push the panel off-screen. Pin it to the viewport instead and let JS
+       supply the vertical offset (--sound-panel-top), since the header wraps to a
+       variable height on mobile. */
+    @media (max-width: 480px) {
+      .sound-panel {
+        position: fixed;
+        top: var(--sound-panel-top, 5rem);
+        left: 0.75rem;
+        right: 0.75rem;
+        width: auto;
+      }
+    }
+    .sound-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; cursor: pointer; }
+    .sound-label { font-size: 0.82rem; font-weight: 700; }
+    .sound-heading {
+      font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 0.35rem;
+    }
+    .sound-divider { height: 1px; background: rgba(148, 163, 184, 0.28); margin: 0.7rem 0; }
+    .sound-scene {
+      display: flex; align-items: center; gap: 0.55rem;
+      padding: 0.3rem 0.4rem; border-radius: 0.5rem; cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .sound-scene:hover { background: rgba(148, 163, 184, 0.14); }
+    .sound-scene input { accent-color: #7bab9c; flex: none; }
+    .sound-scene-emoji { font-size: 1rem; line-height: 1; flex: none; }
+    .sound-scene-text { display: flex; flex-direction: column; min-width: 0; }
+    .sound-scene-name { font-size: 0.8rem; font-weight: 700; line-height: 1.25; }
+    .sound-scene-blurb { font-size: 0.68rem; color: #94a3b8; line-height: 1.3; }
+    .sound-switch { width: 2.1rem; height: 1.1rem; accent-color: #7bab9c; cursor: pointer; }
+    .sound-range { width: 8.5rem; accent-color: #7bab9c; cursor: pointer; }
+    @media (prefers-reduced-motion: reduce) {
+      .sound-panel { transition: none; }
+    }
+
     /* Calm, soft gradient top bar (muted sage → sky → dusty lavender, no motion) */
     .header-bar {
       background: linear-gradient(120deg, #7bab9c 0%, #8fb6cf 55%, #a6acd0 100%);
@@ -346,7 +408,10 @@
       opacity: 0.08;
       filter: grayscale(0.35);
       pointer-events: none;
+      /* Self-clipping (incl. the header's rounded corners) so the header itself
+         doesn't need overflow-hidden, which would clip the sound popover. */
       overflow: hidden;
+      border-radius: inherit;
     }
 
     /* Token Supply Rows (Desktop & Mobile) */
@@ -789,12 +854,128 @@
   </style>
 </head>
 <body class="min-h-screen">
-  
+
+  <!-- ============================ ORIGINAL TOKEN ART ============================
+       One <symbol> per terrain, referenced by <use> from BOTH the board
+       (updateHexDisplay) and the animal-card mini-patterns (renderMiniPattern), so
+       the two can never diverge. No discs — the hex/chip gradient carries the
+       terrain colour. Authored against assets/token-lab.html; iterate there.
+       Nine terrains, not six: rock (1 gray) is distinct from mountain (2+ gray),
+       and tree/building are the stacked composites of leaves/brick. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+
+    <!-- water (blue) — three stacked waves -->
+    <symbol id="tok-water" viewBox="0 0 100 100">
+      <g fill="none" stroke="#EAF6FF" stroke-width="10" stroke-linecap="round">
+        <path d="M20 36 C29 28 37 44 50 36 C63 28 71 42 80 36"/>
+        <path d="M20 52 C29 44 37 60 50 52 C63 44 71 58 80 52"/>
+        <path d="M20 68 C29 60 37 76 50 68 C63 60 71 74 80 68"/>
+      </g>
+    </symbol>
+
+    <!-- field (yellow) — one bold daisy + two buds -->
+    <symbol id="tok-field" viewBox="0 0 100 100">
+      <g stroke="#8A5A00" stroke-width="4.5" stroke-linecap="round" fill="none">
+        <path d="M50 88 V50"/>
+        <path d="M50 74 C38 72 32 64 31 55"/>
+        <path d="M50 66 C62 64 68 58 69 50"/>
+      </g>
+      <g fill="#FFF3C4" stroke="#8A5A00" stroke-width="3.4">
+        <ellipse cx="50" cy="18" rx="8" ry="10"/>
+        <ellipse cx="69" cy="29" rx="8" ry="10" transform="rotate(60 69 29)"/>
+        <ellipse cx="69" cy="51" rx="8" ry="10" transform="rotate(120 69 51)"/>
+        <ellipse cx="50" cy="62" rx="8" ry="10"/>
+        <ellipse cx="31" cy="51" rx="8" ry="10" transform="rotate(60 31 51)"/>
+        <ellipse cx="31" cy="29" rx="8" ry="10" transform="rotate(120 31 29)"/>
+      </g>
+      <circle cx="50" cy="40" r="11" fill="#E8A21A" stroke="#8A5A00" stroke-width="3.6"/>
+    </symbol>
+
+    <!-- leaves (green, single) — tilted so it doesn't read as a plain teardrop -->
+    <symbol id="tok-leaf" viewBox="0 0 100 100">
+      <path d="M26 80 C34 72 40 66 46 60"
+            fill="none" stroke="#2F6B18" stroke-width="5" stroke-linecap="round"/>
+      <path d="M78 20 C80 46 62 70 40 66 C34 44 52 22 78 20 Z"
+            fill="#DFF3C4" stroke="#2F6B18" stroke-width="4.5" stroke-linejoin="round"/>
+      <path d="M76 22 C62 36 50 52 41 65"
+            fill="none" stroke="#2F6B18" stroke-width="4" stroke-linecap="round"/>
+      <g stroke="#2F6B18" stroke-width="3" stroke-linecap="round" fill="none">
+        <path d="M66 32 C64 42 60 46 52 48"/>
+        <path d="M56 47 C55 56 52 59 46 61"/>
+      </g>
+    </symbol>
+
+    <!-- tree (green stacked on brown) — lobed canopy, not a lollipop circle -->
+    <symbol id="tok-tree" viewBox="0 0 100 100">
+      <path d="M50 62 V92" fill="none" stroke="#5A3418" stroke-width="10" stroke-linecap="round"/>
+      <path d="M50 8 C62 8 70 15 72 24 C83 27 88 38 83 47 C87 57 78 68 66 67
+               C60 74 40 74 34 67 C22 68 13 57 17 47 C12 38 17 27 28 24
+               C30 15 38 8 50 8 Z"
+            fill="#8FD14F" stroke="#2F6B18" stroke-width="4.5" stroke-linejoin="round"/>
+    </symbol>
+
+    <!-- trunk (brown) — cut log with rings -->
+    <symbol id="tok-trunk" viewBox="0 0 100 100">
+      <path d="M30 38 H70 V68 A20 9 0 0 1 30 68 Z"
+            fill="#A9683A" stroke="#3E2410" stroke-width="4.5" stroke-linejoin="round"/>
+      <ellipse cx="50" cy="38" rx="20" ry="9" fill="#C68B5C" stroke="#3E2410" stroke-width="4.5"/>
+      <g fill="none" stroke="#8A552C" stroke-width="3">
+        <ellipse cx="50" cy="38" rx="12" ry="5"/>
+        <ellipse cx="50" cy="38" rx="5" ry="2.1"/>
+      </g>
+    </symbol>
+
+    <!-- brick (red, alone) — brick courses -->
+    <symbol id="tok-brick" viewBox="0 0 100 100">
+      <rect x="18" y="30" width="64" height="40" rx="4"
+            fill="#E8604F" stroke="#6E1008" stroke-width="4.5"/>
+      <g stroke="#6E1008" stroke-width="4" stroke-linecap="round">
+        <path d="M18 43.3 H82"/><path d="M18 56.6 H82"/>
+        <path d="M50 30 V43.3"/><path d="M34 43.3 V56.6"/>
+        <path d="M66 43.3 V56.6"/><path d="M50 56.6 V70"/>
+      </g>
+    </symbol>
+
+    <!-- building (red stacked on anything) — gabled house -->
+    <symbol id="tok-house" viewBox="0 0 100 100">
+      <path d="M50 15 L87 47 H13 Z"
+            fill="#C6362A" stroke="#6E1008" stroke-width="4.5" stroke-linejoin="round"/>
+      <rect x="26" y="47" width="48" height="36" rx="3"
+            fill="#FFF0E2" stroke="#6E1008" stroke-width="4.5"/>
+      <rect x="42" y="59" width="16" height="24" rx="2"
+            fill="#C08552" stroke="#6E1008" stroke-width="4"/>
+    </symbol>
+
+    <!-- mountain (2+ gray) — snow-capped peak -->
+    <symbol id="tok-mountain" viewBox="0 0 100 100">
+      <path d="M50 19 L85 77 H15 Z"
+            fill="#B9C4C5" stroke="#3F4E4F" stroke-width="4.5" stroke-linejoin="round"/>
+      <path d="M50 19 L65 44 L57 48 L50 41 L43 48 L35 44 Z"
+            fill="#FFFFFF" stroke="#3F4E4F" stroke-width="3.4" stroke-linejoin="round"/>
+    </symbol>
+
+    <!-- rock (1 gray) — a faceted boulder. Deliberately angular and squat so it stays
+         distinguishable from the tall triangular mountain, even at 22px. -->
+    <symbol id="tok-rock" viewBox="0 0 100 100">
+      <path d="M28 76 L14 54 L28 32 L54 24 L78 40 L82 62 L60 80 Z"
+            fill="#CDD6D7" stroke="#3F4E4F" stroke-width="4.5" stroke-linejoin="round"/>
+      <g fill="none" stroke="#8C9A9B" stroke-width="3.6" stroke-linejoin="round">
+        <path d="M28 32 L52 46 L54 24"/>
+        <path d="M52 46 L82 62"/>
+        <path d="M52 46 L38 77"/>
+      </g>
+    </symbol>
+
+  </defs></svg>
+  <!-- ========================== end original token art ========================== -->
+
   <!-- Game Container -->
   <div class="container mx-auto px-4 py-6 max-w-7xl">
     
     <!-- Header -->
-    <header class="header-bar rounded-xl shadow-lg px-4 py-3 mb-4 text-white relative overflow-hidden">
+    <!-- No `overflow-hidden` here: it would clip the sound popover. The emoji
+         watermark clips itself (see .header-emojis). -->
+    <header class="header-bar rounded-xl shadow-lg px-4 py-3 mb-4 text-white relative">
       <!-- decorative terrain emoji drifting edge-to-edge behind the header -->
       <div class="header-emojis" aria-hidden="true">🌲 ⛰️ 🌊 🌼 🏡 🍃 🐻 🦊 🦉 🐟 🦆 🦎 🦩 🦜 🐺 🐧 🦇 🐨 🦙 🌲 ⛰️ 🌊 🌼 🏡 🍃 🐻 🦊 🦉 🐟 🦆 🦎 🦩 🦜 🐺 🐧 🦇 🐨 🦙</div>
 
@@ -808,6 +989,14 @@
             <button id="new-game-btn" class="px-4 py-2 bg-white text-emerald-700 text-sm font-extrabold rounded-lg shadow-md hover:bg-emerald-50 hover:scale-105 active:scale-95 transition">
               🎲 New Game
             </button>
+            <!-- Sound: a quiet icon button whose popover holds SFX / ambience / volume -->
+            <div id="sound-wrap" class="sound-wrap">
+              <button id="sound-btn" class="px-3 py-2 bg-white text-slate-600 text-sm font-extrabold rounded-lg shadow-md hover:bg-slate-50 hover:scale-105 active:scale-95 transition"
+                      aria-label="Sound settings" aria-expanded="false" aria-controls="sound-panel">
+                🔊
+              </button>
+              <div id="sound-panel" class="sound-panel" role="group" aria-label="Sound settings"></div>
+            </div>
             <button id="help-btn" class="px-4 py-2 bg-white text-indigo-700 text-sm font-extrabold rounded-lg shadow-md hover:bg-indigo-50 hover:scale-105 active:scale-95 transition">
               ❓ Help
             </button>
@@ -1085,8 +1274,62 @@
     import { getPatternOrientations } from './js/game/hex-grid.js';
     import { INITIAL_POUCH } from './js/data/tokens-config.js';
     import { ANIMAL_CARDS } from './js/data/animal-cards.js';
-    
-    // Token emoji mapping
+    import { createSoundEngine } from './js/audio/sound-engine.js';
+    import { SCENES, SCENE_ORDER } from './js/audio/ambience-scenes.js';
+
+    // ── Sound ──────────────────────────────────────────────────────────────────
+    // All synthesis lives in js/audio/; this only owns prefs + the popover UI.
+    // SFX default ON (as before); ambience defaults OFF — background audio that
+    // starts uninvited is jarring, and browsers block it before a gesture anyway.
+    const SOUND_KEY = 'harmonies_sound_prefs';
+    const SOUND_DEFAULTS = { sfx: true, scene: null, volume: 0.6 };
+
+    function loadSoundPrefs() {
+      try {
+        const raw = localStorage.getItem(SOUND_KEY);
+        if (!raw) return { ...SOUND_DEFAULTS };
+        const p = JSON.parse(raw) || {};
+        return {
+          sfx: p.sfx !== false,
+          scene: SCENES[p.scene] ? p.scene : null,   // ignore stale/unknown scene ids
+          volume: Number.isFinite(p.volume) ? Math.min(1, Math.max(0, p.volume)) : SOUND_DEFAULTS.volume,
+        };
+      } catch (e) {
+        return { ...SOUND_DEFAULTS };   // private mode / corrupt JSON
+      }
+    }
+
+    const soundPrefs = loadSoundPrefs();
+    const sound = createSoundEngine({});
+    sound.setSfxEnabled(soundPrefs.sfx);
+    sound.setVolume(soundPrefs.volume);
+
+    function saveSoundPrefs() {
+      try { localStorage.setItem(SOUND_KEY, JSON.stringify(soundPrefs)); } catch (e) { /* ignore */ }
+    }
+
+    // A remembered scene can't start until the user interacts, so arm it and let the
+    // first gesture light it up.
+    let soundUnlocked = false;
+    function unlockSound() {
+      if (soundUnlocked) return;
+      soundUnlocked = true;
+      sound.unlock();
+      if (soundPrefs.scene) sound.setScene(soundPrefs.scene);
+    }
+    document.addEventListener('pointerdown', unlockSound, { once: true });
+    document.addEventListener('keydown', unlockSound, { once: true });
+
+    // Don't burn battery or play into a backgrounded tab (this game lives on phones).
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) sound.suspend();
+      else if (soundUnlocked) sound.wake();
+    });
+
+
+    // Token emoji mapping. Kept as the accessible label / title text and as the
+    // fallback if the SVG symbol sheet ever fails to parse — the original art is
+    // TOKEN_SYMBOL below.
     const TOKEN_EMOJI = {
       blue: '🌊',
       yellow: '🌼',
@@ -1095,6 +1338,25 @@
       red: '🧱',
       gray: '⛰️'
     };
+
+    // Token colour → <symbol> id in the sheet at the top of <body>. Single source of
+    // truth for the ART; TERRAIN_SYMBOL_MINI maps the mini-pattern's terrain keys onto
+    // the SAME symbols so board and cards can never drift apart.
+    const TOKEN_SYMBOL = {
+      blue: 'tok-water',
+      yellow: 'tok-field',
+      brown: 'tok-trunk',
+      green: 'tok-leaf',
+      red: 'tok-brick',
+      gray: 'tok-mountain'
+    };
+
+    // Build one <use> reference. `size` is a CSS length for the square glyph box.
+    function tokenGlyph(symbolId, size = '64%') {
+      if (!symbolId) return '';
+      return `<svg class="tok-glyph" viewBox="0 0 100 100" aria-hidden="true"`
+           + ` style="width:${size};height:${size}"><use href="#${symbolId}"/></svg>`;
+    }
 
     // Color names for display
     const COLOR_NAMES = {
@@ -1679,6 +1941,7 @@
         gameState.tokenSupply[i] = drawTokens(3);
         updateTokenSpaceUI(i);
       }
+      sound.cue('pouchRefill');   // faint granular shuffle of new tokens
 
       // Also update mobile 3×3 grid
       updateMobileTokenGrid();
@@ -1840,6 +2103,7 @@
     function selectToken(color, space, index) {
       gameState.selectedSpace = space;
       gameState.selectedToken = { color, space, index };
+      sound.cue('tokenSelect');
       // Selecting a token cancels any animal-card selection.
       if (gameState.selectedAnimalCard) {
         gameState.selectedAnimalCard = null;
@@ -2056,6 +2320,9 @@
         type === 'error' ? 'bg-red-100 text-red-800' :
         'bg-blue-100 text-blue-800'
       }`;
+      // Every blocked action funnels through here, so one hook covers all of them.
+      // Deliberately a soft thud, never a buzzer — mistakes should inform, not punish.
+      if (type === 'error') sound.cue('error');
       // Message stays visible (no auto-hide)
     }
     
@@ -2072,6 +2339,16 @@
       
       // Help button — open the How to Play modal
       document.getElementById('help-btn').addEventListener('click', openHelp);
+
+      // Sound settings popover
+      buildSoundPanel();
+      document.getElementById('sound-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation();          // don't let the outside-click handler close it again
+        toggleSoundPanel();
+      });
+      // Clicks inside the panel must not dismiss it.
+      document.getElementById('sound-panel')?.addEventListener('click', (e) => e.stopPropagation());
+      document.addEventListener('click', () => toggleSoundPanel(false));
 
       // Finish button (only shown on the final turn)
       document.getElementById('finish-btn')?.addEventListener('click', () => {
@@ -2411,24 +2688,85 @@
       location.reload();
     };
 
-    // ── Subtle sound feedback (WebAudio, no assets) ──
-    let _audioCtx = null;
-    function playTone(freq, dur = 0.08, type = 'triangle', vol = 0.05) {
-      try {
-        _audioCtx = _audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-        const o = _audioCtx.createOscillator(), g = _audioCtx.createGain();
-        o.type = type; o.frequency.value = freq;
-        o.connect(g); g.connect(_audioCtx.destination);
-        const t = _audioCtx.currentTime;
-        g.gain.setValueAtTime(vol, t);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-        o.start(t); o.stop(t + dur);
-      } catch (e) { /* audio unavailable */ }
+    // ── Sound panel (the 🔊 popover in the header) ──
+    // Cues themselves are synthesized in js/audio/; this is purely the control surface.
+    function buildSoundPanel() {
+      const panel = document.getElementById('sound-panel');
+      if (!panel) return;
+
+      const scenes = SCENE_ORDER.map(id => {
+        const s = SCENES[id];
+        return `
+          <label class="sound-scene">
+            <input type="radio" name="ambience" value="${s.id}" ${soundPrefs.scene === s.id ? 'checked' : ''}>
+            <span class="sound-scene-emoji" aria-hidden="true">${s.emoji}</span>
+            <span class="sound-scene-text">
+              <span class="sound-scene-name">${s.name}</span>
+              <span class="sound-scene-blurb">${s.blurb}</span>
+            </span>
+          </label>`;
+      }).join('');
+
+      panel.innerHTML = `
+        <label class="sound-row">
+          <span class="sound-label">Sound effects</span>
+          <input type="checkbox" id="sfx-toggle" class="sound-switch" ${soundPrefs.sfx ? 'checked' : ''}>
+        </label>
+        <div class="sound-divider"></div>
+        <p class="sound-heading">Ambience</p>
+        <div id="ambience-scenes">
+          <label class="sound-scene">
+            <input type="radio" name="ambience" value="" ${soundPrefs.scene ? '' : 'checked'}>
+            <span class="sound-scene-emoji" aria-hidden="true">🔇</span>
+            <span class="sound-scene-text"><span class="sound-scene-name">Off</span></span>
+          </label>
+          ${scenes}
+        </div>
+        <div class="sound-divider"></div>
+        <label class="sound-row">
+          <span class="sound-label">Volume</span>
+          <input type="range" id="sound-volume" class="sound-range"
+                 min="0" max="1" step="0.05" value="${soundPrefs.volume}" aria-label="Overall volume">
+        </label>`;
+
+      panel.querySelector('#sfx-toggle').addEventListener('change', (e) => {
+        soundPrefs.sfx = e.target.checked;
+        sound.setSfxEnabled(soundPrefs.sfx);
+        saveSoundPrefs();
+        if (soundPrefs.sfx) sound.cue('tokenSelect');   // confirm it's back, quietly
+      });
+
+      panel.querySelectorAll('input[name="ambience"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          soundPrefs.scene = e.target.value || null;
+          saveSoundPrefs();
+          unlockSound();
+          sound.setScene(soundPrefs.scene);
+        });
+      });
+
+      panel.querySelector('#sound-volume').addEventListener('input', (e) => {
+        soundPrefs.volume = parseFloat(e.target.value);
+        sound.setVolume(soundPrefs.volume);
+      });
+      // Only persist when the drag finishes — no need to write on every pixel.
+      panel.querySelector('#sound-volume').addEventListener('change', saveSoundPrefs);
     }
-    // Gentle, quiet, mellow feedback — soft sine tones.
-    const sfxPlace = () => playTone(294, 0.18, 'sine', 0.028);
-    const sfxAnimal = () => { playTone(440, 0.2, 'sine', 0.035); setTimeout(() => playTone(587, 0.28, 'sine', 0.03), 130); };
-    const sfxWin = () => { [392, 523, 659].forEach((f, i) => setTimeout(() => playTone(f, 0.4, 'sine', 0.04), i * 200)); };
+
+    function toggleSoundPanel(force) {
+      const wrap = document.getElementById('sound-wrap');
+      const btn = document.getElementById('sound-btn');
+      const panel = document.getElementById('sound-panel');
+      if (!wrap || !btn) return;
+      const open = force !== undefined ? force : !wrap.classList.contains('open');
+      // Narrow screens pin the panel to the viewport (position: fixed), so it needs to
+      // be told where the button ended up — the header wraps to a variable height.
+      if (open && panel) {
+        panel.style.setProperty('--sound-panel-top', `${Math.round(btn.getBoundingClientRect().bottom + 8)}px`);
+      }
+      wrap.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', String(open));
+    }
 
     // Keyboard shortcuts. Attached directly (not gated on DOMContentLoaded) so it
     // is always active; it looks up elements lazily when a key is pressed.
@@ -2438,6 +2776,7 @@
         closePatternHelper();
         closeHelp();
         closeGameOver();
+        toggleSoundPanel(false);
         return;
       }
       // Ignore shortcuts while typing in a field
@@ -2497,7 +2836,9 @@
       hexEl.classList.remove('just-placed');
       void hexEl.offsetWidth; // restart animation
       hexEl.classList.add('just-placed');
-      sfxPlace();
+      // Per-colour voice, pitch climbing the pentatonic ladder with stack height —
+      // so you hear both what you placed and how high it now stands.
+      sound.placement(color, hexData.stack.length);
 
       // Remove token from supply
       const { space, index } = gameState.selectedToken;
@@ -2613,11 +2954,13 @@
       hexEl.classList.remove('just-placed');
       void hexEl.offsetWidth;
       hexEl.classList.add('just-placed');
-      sfxAnimal();
       updateScore();
       displayPlayerAnimalCards(); // Refresh to update placement counts
 
       const newCount = placementCount + 1;
+      // Finishing a card is the reward moment — give it the warm resolve, and leave
+      // the plain soft tick for the cubes along the way.
+      sound.cue(newCount >= card.maxPlacements ? 'cardComplete' : 'cubePlace');
       // More cubes = higher value; index from the end of the (descending) array.
       const points = card.scoring[Math.max(0, card.scoring.length - newCount)];
       showMessage(`🐾 ${card.name} placed! Score: ${points} pts (${newCount}/${card.maxPlacements})`, 'success');
@@ -2726,6 +3069,8 @@
         return;
       }
       
+      sound.cue('turnEnd');   // soft exhale — marks the rhythm without adding chrome
+
       // Reset tokens placed counter
       gameState.tokensPlaced = 0;
       gameState.takenCardThisTurn = false; // Reset card taking flag
@@ -2781,6 +3126,7 @@
       gameState.finishing = true;
       const btn = document.getElementById('finish-btn');
       if (btn) { btn.classList.remove('hidden'); btn.textContent = '🏁 Finish Game & Score'; }
+      sound.cue('finishBell');   // low resonant bell — the game is closing
       showMessage('🏁 Last turn! Place any final animal cubes, then press Finish.', 'info');
       renderTurnStatus();
       saveGame();
@@ -2846,7 +3192,7 @@
         `<div class="score-cell ${cls}"><span class="sc-emoji">${emoji}</span><span class="sc-num">${val}</span></div>`).join(''));
       const goModal = document.getElementById('gameover-modal');
       if (goModal) goModal.classList.add('active');
-      sfxWin();
+      sound.cue('gameOver');
     }
     
     // Calculate suns based on score (official Harmonies solo mode)
