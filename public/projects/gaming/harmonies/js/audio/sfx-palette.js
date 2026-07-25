@@ -58,12 +58,15 @@ export const VOICES = {
   },
 
   // 🧱 brick — dry muted clack: a low noise transient with just a hint of pitch.
+  // Deliberately the shortest voice, which costs it energy against the others; the
+  // amplitudes are raised to compensate so it stays as *present* as its siblings
+  // without becoming a longer, wetter sound. Q kept low so the band passes real energy.
   red: {
     base: 2,
     label: "brick",
     build: (freq) => [
-      { type: "noise", color: "brown", filter: "bandpass", cutoff: 620, q: 1.1, dur: 0.05, vol: 0.03 },
-      { type: "tone", wave: "triangle", freq, dur: 0.06, vol: 0.018 },
+      { type: "noise", color: "brown", filter: "bandpass", cutoff: 620, q: 0.7, dur: 0.06, vol: 0.045 },
+      { type: "tone", wave: "triangle", freq, dur: 0.08, vol: 0.03 },
     ],
   },
 
@@ -100,6 +103,11 @@ export const VOICES = {
 
   // 🍃 leaves — airy rustle. Noise, so the ladder note steers the bandpass centre
   // (scaled up by bandMul into the range where foliage actually lives) rather than a tone.
+  //
+  // Keep Q LOW and the source WHITE. A narrow bandpass (Q>1) over pink noise passes
+  // almost no energy up here, which made this voice ~8x quieter than its siblings and
+  // effectively inaudible. `tests/ui.spec.js` measures cross-voice balance to catch
+  // that class of regression — verify there, not by eye.
   green: {
     base: 10,
     bandMul: 4,
@@ -107,12 +115,12 @@ export const VOICES = {
     build: (freq, { bandMul = 4 } = {}) => [
       {
         type: "noise",
-        color: "pink",
+        color: "white",
         filter: "bandpass",
         cutoff: freq * bandMul,
-        q: 1.4,
-        dur: 0.2,
-        vol: 0.03,
+        q: 0.55,
+        dur: 0.22,
+        vol: 0.045,
         attack: 0.03,
       },
     ],
