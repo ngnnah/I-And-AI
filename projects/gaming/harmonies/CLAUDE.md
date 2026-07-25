@@ -28,6 +28,9 @@ Static app. `index.html` (~2,870 lines) holds all UI/turn-flow/rendering/persist
 | `js/game/hex-grid.js` | axial hex math + `getPatternOrientations` (6 rotations × mirror) |
 | `js/data/tokens-config.js` | pouch distribution (120 tokens) + stacking rules |
 | `js/data/animal-cards.js` | 32 animal cards (pattern, cube location, scoring) |
+| `js/audio/sfx-palette.js` | **pure** — token-colour voices, pentatonic pitches, event cues |
+| `js/audio/ambience-scenes.js` | **pure** — 3 ambience scenes as declarative layer specs |
+| `js/audio/sound-engine.js` | the ONLY file touching `AudioContext`; renders those specs |
 
 Rules: keep logic in `js/` pure, DOM/rendering in `index.html`, no bundler. State = one in-memory
 `gameState` serialized to `localStorage` (`harmonies_solo_game`) after every scored change.
@@ -51,6 +54,31 @@ Rules: keep logic in `js/` pure, DOM/rendering in `index.html`, no bundler. Stat
 - **Branding:** one custom SVG `assets/harmonies-icon.svg` (Fuji + sun + sakura + Hokusai wave), used
   as favicon/header/apple-touch. New art → `assets/`, self-contained SVG or inline data URIs.
 
+## Sound system
+
+Fully procedural WebAudio — **no audio files, zero asset bytes**. Controls live in the header 🔊
+popover; prefs persist in `localStorage` (`harmonies_sound_prefs`). SFX default **on**, ambience
+default **off** (uninvited background audio is jarring, and browsers block it pre-gesture anyway).
+
+- **Placement is an instrument.** Every pitch comes from the D-major-pentatonic `LADDER` in
+  `sfx-palette.js` — a pentatonic scale has no semitone clashes, so ~90 placements a game never
+  sound sour. **Don't add off-ladder frequencies;** `tests/sound.test.js` fails if you do.
+  Pitch = `LADDER[base + 3*(height-1)]`, so stacking climbs. Cues key off **token colour**, not
+  derived terrain, and each colour has its own timbre so colours stay distinguishable when pitches
+  overlap.
+- **Ambience scenes** are lists of `noiseBed` / `drone` / `randomEvent` layer specs. `gain` is
+  *relative* (0–1, must sum ≤ 1 per scene); the engine multiplies by `AMBIENCE_CAP` (0.18) so
+  ambience can never climb over the game.
+- **The main bug risk:** `randomEvent` layers are self-rescheduling `setTimeout` chains. They're held
+  in a registry, cancelled on scene change, and guarded by a `generation` counter — a leak would
+  silently stack scenes on top of each other. Covered by a dedicated test.
+- Audio failure is always silent, never fatal: the engine latches `dead` on first error so a broken
+  context isn't retried ~90 times a game. Context suspends on `visibilitychange` (phone battery).
+- **Audition by ear:** `dev-sound-lab.html` (dev-only, excluded from deploy by `--exclude='dev-*'`)
+  plays every voice/cue/scene in isolation. Use it before/after touching the palette — automated
+  tests confirm a signal exists and stays under the cap, but only your ears judge *calm*.
+- Known limitation, don't chase: iOS Safari honours the hardware mute switch for WebAudio.
+
 ## Gotchas
 
 - Animal scoring arrays are **descending**, scored `pointsArray[length - count]` → more cubes = more
@@ -61,25 +89,31 @@ Rules: keep logic in `js/` pure, DOM/rendering in `index.html`, no bundler. Stat
   `arr.push(...)` as the arrow expression.
 - "New Game" sets `suppressSave` so `beforeunload` doesn't re-save the cleared board.
 - 4-card hand limit counts **uncompleted** cards (`activeHandCount()`); completing one frees a slot.
+- The `<header>` must **not** have `overflow-hidden` — it clips the sound popover. The emoji
+  watermark self-clips via `.header-emojis { overflow:hidden; border-radius:inherit }` instead.
+- `showMessage(..., 'error')` is the single hook for the error cue — every blocked action funnels
+  through it, so don't add per-site error sounds.
 
 ## Workflow
 
 ```bash
 # run (ES modules need http, not file://)
 cd projects/gaming/harmonies && python3 -m http.server 8001   # → localhost:8001
-npm test                    # node --test, no deps — pure-logic units
-npx playwright test         # browser smoke: load, 3-token turn, persistence, Finish
+                                                              # → /dev-sound-lab.html to audition audio
+npm test                    # node --test, no deps — pure-logic units (incl. sound palette/scenes)
+npx playwright test         # browser smoke + OfflineAudioContext render checks
 ```
 Playwright: `page.reload({ waitUntil:'networkidle' })` after clearing localStorage so modules load
 before clicks (see `/playwright` skill). Test logic + critical flows; skip CSS/animation detail.
 
 **Deploy** (GitHub Pages from `public/`). From repo root, rsync source → `public/` **excluding `*.md`**
-(docs must not go public), then commit `public/` + push (rebuilds ~1 min). Verify `.md` files 404.
+(docs must not go public) **and `dev-*`** (dev-only tools like the sound lab), then commit `public/` +
+push (rebuilds ~1 min). Verify `.md` and `dev-*` files 404.
 ```bash
 rsync -av --delete --exclude='.git' --exclude='node_modules' --exclude='tests' \
   --exclude='test-results' --exclude='playwright-report' --exclude='playwright.config.js' \
   --exclude='package.json' --exclude='package-lock.json' --exclude='archive' \
-  --exclude='public' --exclude='*.md' \
+  --exclude='public' --exclude='*.md' --exclude='dev-*' \
   projects/gaming/harmonies/ public/projects/gaming/harmonies/
 ```
 

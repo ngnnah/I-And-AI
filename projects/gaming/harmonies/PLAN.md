@@ -7,7 +7,8 @@ the code touchpoints — this doc assumes it. Delete or trim items here as they 
 ## Guiding principles (don't drift from these)
 
 - **Calm & harmonious above all** — soft/translucent, light colors, minimal motion, subtle > flashy.
-  When a change makes the screen busier or louder, it's probably wrong.
+  When a change makes the screen busier or louder, it's probably wrong. This now applies literally:
+  SFX volumes are capped in test (`< 0.05` per part) and ambience is capped at 0.18.
 - **Mechanics are frozen.** Visual/interaction work only; don't alter rules or scoring.
 - **No build step, self-contained.** New art = SVG or inline data URIs in `assets/`. No pipeline.
 - **One source of truth for size:** `--hex-w`. Never hard-code hex px elsewhere.
@@ -53,14 +54,47 @@ Replace emoji with original art. Touchpoints:
 - Ensure the mini-pattern uses the same token art as #1.
 
 ### 4. Micro-interactions & feedback (keep subtle)
-- Placement/complete/error feedback: gentle, brief. There's a `playTone`/`sfxWin` sound system
-  (`index.html:2431`) — consider a mute toggle + soft ambient cues, but default to restraint.
-- Turn-boundary clarity (start → place 3 → optional card → end) without adding chrome.
+- ✅ **Sound shipped** (2026-07-25). Procedural WebAudio, zero asset bytes: per-token-colour
+  placement voices on a D-pentatonic ladder (pitch climbs with stack height), 9 event cues, and 3
+  crossfaded ambience scenes behind the header 🔊 popover. SFX on / ambience off by default. See the
+  Sound system section in `CLAUDE.md` and `docs/superpowers/specs/2026-07-25-harmonies-sound-design.md`.
+  Audition with `dev-sound-lab.html`. **Open: tune by ear** — the mix was verified for
+  signal + headroom by test, not for taste.
+- Turn-boundary clarity (start → place 3 → optional card → end) without adding chrome. Sound now
+  marks it (soft exhale + pouch shuffle); the *visual* side is still open.
+- Possible follow-ons if the sound lands well: a distinct cue when a card enters/leaves hand, and
+  making the ambience react faintly to the board (more water tokens → more lapping).
 
 ### 5. Branding & polish (Tier C tail)
 - Header scene, favicon set, and `assets/harmonies-icon.svg` cohesion.
 - Optional: PWA/installable (manifest + service worker) so it opens like an app on phones. Nice for
   touch-and-go; confirm with owner before building — it's scope beyond pure art.
+  **Also the only real fix for the iOS storage-eviction risk below.**
+
+## Non-art backlog (validated 2026-07-25, neither urgent)
+
+Investigated Firebase anonymous auth as a per-device identity for saved games. **Verdict: don't
+build it.** Tab-close/refresh/browser-restart persistence already works via the localStorage save
+(`saveGame()`/`loadGame()`), covered by the resume test in `tests/ui.spec.js`. An anonymous `uid`
+lives in that same browser storage, so it adds a network dependency for zero durability gain, gives
+no cross-device resume, and Firebase auto-deletes unlinked anonymous accounts after 30 days. Two
+findings from that investigation are worth remembering:
+
+- **The `scores` node is world-writable.** DB rules are `".read": true, ".write": true` and the
+  client authenticates with nothing, so anyone reading the live page's source can push junk or wipe
+  every score. Blast radius is small (re-finish a couple of games). The real fix if it ever gets
+  vandalized: anonymous auth + rules requiring `auth != null`. This is the *one* thing anon auth is
+  actually good for — a vandalism fix, not a save fix.
+- **iOS Safari evicts all script-writable storage after 7 days *of Safari use* without a first-party
+  interaction** (localStorage *and* the IndexedDB Firebase would use). Note "days of Safari use", not
+  calendar days — idle phone days don't count — and any tap/click on the page resets the counter to a
+  fresh 7, which playing a turn inherently does. **A touch-and-go cadence of every 2–3 days is safe
+  with wide margin.** The risk is only real for multi-week abandonment while the phone stays in daily
+  use. Firebase cannot help either way. Home-screen PWA install is exempt (it gets its own use
+  counter) → see item 5 above.
+
+Cross-device resume ("start on laptop, finish on phone") is out of reach for anon auth entirely —
+it would need a shareable sync code or a real Google sign-in. Not requested; don't build on spec.
 
 ## Start-of-session checklist
 

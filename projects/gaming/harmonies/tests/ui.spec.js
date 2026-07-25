@@ -131,6 +131,156 @@ test("New Game starts fresh (does not resume the old board)", async ({ page }) =
   await expect(page.locator("#game-message")).not.toContainText("Resumed");
 });
 
+// ── Sound panel ───────────────────────────────────────────────────────────────
+// These assert state and the absence of errors. They CANNOT assert that anything is
+// audible — headless Chromium has no output device. Judging the sound itself is done
+// by ear in dev-sound-lab.html; the cue/scene data is covered by tests/sound.test.js.
+
+test("sound panel opens, defaults to SFX on + ambience off", async ({ page }) => {
+  await freshGame(page);
+  const panel = page.locator("#sound-panel");
+  await expect(panel).not.toBeVisible();
+
+  await page.locator("#sound-btn").click();
+  await expect(panel).toBeVisible();
+  await expect(page.locator("#sound-btn")).toHaveAttribute("aria-expanded", "true");
+
+  // Defaults: effects on, ambience off — background audio must never start uninvited.
+  await expect(page.locator("#sfx-toggle")).toBeChecked();
+  await expect(page.locator('#ambience-scenes input[value=""]')).toBeChecked();
+  await expect(panel).toContainText("Cabin by the Lake");
+  await expect(panel).toContainText("Summer Night");
+  await expect(panel).toContainText("Morning Forest");
+
+  // Escape closes it.
+  await page.keyboard.press("Escape");
+  await expect(panel).not.toBeVisible();
+});
+
+test("sound preferences persist across a reload", async ({ page }) => {
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await freshGame(page);
+
+  await page.locator("#sound-btn").click();
+  await page.locator("#sfx-toggle").uncheck();
+  await page.locator('#ambience-scenes input[value="summer"]').check();
+  await page.locator("#sound-volume").fill("0.25");
+  await page.locator("#sound-volume").dispatchEvent("change"); // commit the slider
+
+  await page.reload({ waitUntil: "networkidle" });
+  await page.locator("#sound-btn").click();
+  await expect(page.locator("#sfx-toggle")).not.toBeChecked();
+  await expect(page.locator('#ambience-scenes input[value="summer"]')).toBeChecked();
+  await expect(page.locator("#sound-volume")).toHaveValue("0.25");
+
+  expect(errors, `page errors: ${errors.join("; ")}`).toEqual([]);
+});
+
+test("a corrupt sound-prefs entry falls back to defaults instead of breaking the game", async ({ page }) => {
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/index.html");
+  await page.evaluate(() => {
+    localStorage.clear();
+    localStorage.setItem("harmonies_sound_prefs", "{ this is not json");
+  });
+  await page.reload({ waitUntil: "networkidle" });
+
+  // The game still boots, and the panel shows the defaults.
+  await expect(page.locator("#score-total-sidebar")).toBeVisible();
+  await page.locator("#sound-btn").click();
+  await expect(page.locator("#sfx-toggle")).toBeChecked();
+  await expect(page.locator('#ambience-scenes input[value=""]')).toBeChecked();
+  expect(errors, `page errors: ${errors.join("; ")}`).toEqual([]);
+});
+
+test("playing a full turn with ambience on raises no errors", async ({ page }) => {
+  // Guards the integration: cue call sites, the scene graph, and the crossfade all
+  // running together during real play.
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await freshGame(page);
+
+  await page.locator("#sound-btn").click();
+  await page.locator('#ambience-scenes input[value="cabin"]').check();
+  await page.keyboard.press("Escape");
+
+  for (let i = 0; i < 3; i++) await placeOneToken(page);
+  await expect(page.locator("#turn-number")).toHaveText("2");
+
+  // Crossfade to another scene mid-game, then off.
+  await page.locator("#sound-btn").click();
+  await page.locator('#ambience-scenes input[value="morning"]').check();
+  await page.locator('#ambience-scenes input[value=""]').check();
+
+  expect(errors, `page errors: ${errors.join("; ")}`).toEqual([]);
+});
+
+// Render the engine's output into an OfflineAudioContext and measure it. Headless has
+// no speakers, but it can still do the real DSP — so this proves the cues actually
+// produce a signal rather than merely wiring up nodes without throwing.
+async function renderPeak(page, action, seconds = 1) {
+  return page.evaluate(async ({ action, seconds }) => {
+    const { createSoundEngine } = await import("/js/audio/sound-engine.js");
+    const rate = 44100;
+    const offline = new OfflineAudioContext(1, rate * seconds, rate);
+    const engine = createSoundEngine({ contextFactory: () => offline });
+
+    if (action.kind === "placement") engine.placement(action.color, action.height);
+    else if (action.kind === "cue") engine.cue(action.name);
+    else if (action.kind === "scene") engine.setScene(action.name);
+    else if (action.kind === "muted") { engine.setSfxEnabled(false); engine.cue("gameOver"); }
+
+    const data = (await offline.startRendering()).getChannelData(0);
+    let peak = 0;
+    for (let i = 0; i < data.length; i++) {
+      const v = Math.abs(data[i]);
+      if (v > peak) peak = v;
+    }
+    return peak;
+  }, { action, seconds });
+}
+
+test("every placement voice renders an audible, calm signal", async ({ page }) => {
+  await freshGame(page);
+  for (const color of ["blue", "yellow", "brown", "green", "red", "gray"]) {
+    for (const height of [1, 3]) {
+      const peak = await renderPeak(page, { kind: "placement", color, height });
+      expect(peak, `${color} h${height} was silent`).toBeGreaterThan(0.0005);
+      // Calm means calm: nothing may approach clipping.
+      expect(peak, `${color} h${height} is too loud (${peak})`).toBeLessThan(0.2);
+    }
+  }
+});
+
+test("every event cue renders an audible signal", async ({ page }) => {
+  await freshGame(page);
+  const cues = ["tokenSelect", "cubePlace", "cardComplete", "error", "turnEnd", "pouchRefill", "finishBell", "gameOver"];
+  for (const name of cues) {
+    const peak = await renderPeak(page, { kind: "cue", name }, 2);
+    expect(peak, `cue "${name}" was silent`).toBeGreaterThan(0.0005);
+    expect(peak, `cue "${name}" is too loud (${peak})`).toBeLessThan(0.2);
+  }
+});
+
+test("muting really produces digital silence, not just quieter audio", async ({ page }) => {
+  await freshGame(page);
+  expect(await renderPeak(page, { kind: "muted" })).toBe(0);
+});
+
+test("every ambience scene renders a signal under the gain cap", async ({ page }) => {
+  await freshGame(page);
+  for (const name of ["cabin", "summer", "morning"]) {
+    const peak = await renderPeak(page, { kind: "scene", name }, 2);
+    expect(peak, `scene "${name}" was silent`).toBeGreaterThan(0.0005);
+    // Ambience must always sit under the game — this is the audible proof of the cap.
+    expect(peak, `scene "${name}" breaches the ambience cap (${peak})`).toBeLessThan(0.12);
+  }
+  // Ambience off must render silence.
+  expect(await renderPeak(page, { kind: "scene", name: null })).toBe(0);
+});
+
 test("board persists across a reload (touch-and-go)", async ({ page }) => {
   await freshGame(page);
   for (let i = 0; i < 3; i++) await placeOneToken(page);

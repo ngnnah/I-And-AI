@@ -85,16 +85,20 @@ All pitches come from **D E F# A B**. A pentatonic scale has no semitone clashes
 placements can ever sound dissonant together — this is what makes a ~90-move game listenable rather
 than grating. Existing `sfxPlace` is already 294 Hz (D4), so this continues the current palette.
 
-| Terrain | Timbre | Base | Height 1 → 2 → 3 (+2 scale degrees each) |
-| --- | --- | --- | --- |
-| ⛰️ mountain | deep sine, slow attack | D3 | D3 → A3 → D4 |
-| 🧱 brick | dry muted clack, short decay | F#3 | F#3 → D4 → F#4 |
-| 🪵 trunk | hollow wood knock | A3 | A3 → F#4 → A4 |
-| 🌼 field | light bell (sine + fifth) | D4 | D4 → A4 → D5 |
-| 🌊 water | droplet (fast upward pitch blip) | A4 | A4 → F#5 → A5 |
-| 🍃 leaves | airy bandpassed noise burst | D5 | filter centre shifts instead of tone |
+Cues are keyed by **token colour** (what the player actually places, matching the `TOKEN_EMOJI` set)
+rather than derived terrain. Pitch = `LADDER[base + 3 × (height − 1)]`, clamped. Three ladder
+degrees is roughly a fifth, so stacking reads as an open, rising step.
 
-Pitches overlap across terrains, but **timbre keeps them distinguishable** — so you hear both *what*
+| Colour | Terrain | Timbre | Base | Height 1 → 2 → 3 |
+| --- | --- | --- | --- | --- |
+| gray ⛰️ | mountain | deep sine, slow attack | D3 | D3 → A3 → E4 |
+| red 🧱 | brick | dry muted clack, short decay | F#3 | F#3 → B3 → F#4 |
+| brown 🪵 | trunk | hollow wood knock | A3 | A3 → E4 → B4 |
+| yellow 🌼 | field | light bell (sine + fifth) | D4 | D4 (ground only) |
+| blue 🌊 | water | droplet (fast upward pitch blip) | A4 | A4 (ground only) |
+| green 🍃 | leaves | airy bandpassed noise burst | D5 | ladder note × 4 steers the filter centre, not a tone |
+
+Pitches overlap across colours, but **timbre keeps them distinguishable** — so you hear both *what*
 you placed and *how high* it now stands.
 
 ### Ambience scenes
@@ -158,8 +162,12 @@ be LFO-modulated), `randomEvent` (a cue fired on Poisson-ish random intervals).
   - every scene layer has a known type, and layer gains respect the ambience cap.
 - `sound-engine` tested against a **fake AudioContext**, asserting that a scene change cancels the
   previous scene's timers and that a context failure latches `dead` without throwing.
-- Playwright (`tests/ui.spec.js`) — panel opens; SFX toggle and scene choice survive a reload; no
-  uncaught errors. It **cannot** assert audible sound; this limit is stated rather than implied.
+- Playwright (`tests/ui.spec.js`) — panel opens; SFX toggle and scene choice survive a reload; a
+  corrupt prefs entry falls back to defaults; a full turn with ambience running raises no errors.
+- Playwright **offline render** — the cues are rendered through an `OfflineAudioContext` and the
+  peak sample measured. Headless has no speakers but it still does the real DSP, so this proves
+  each voice/cue/scene actually produces a signal (not merely that nodes were wired up without
+  throwing), that mute yields *exact* digital silence, and that no scene breaches the gain cap.
 - **Manual audition:** a standalone `sound-lab.html` (scratchpad, not shipped) plays every cue and
   scene in isolation with live controls, so the sound can be judged by ear and rejected before it
   touches the game. For audio this is the verification that actually counts.

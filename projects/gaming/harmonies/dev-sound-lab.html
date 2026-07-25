@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harmonies — Sound Lab (dev only)</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      max-width: 46rem; margin: 0 auto; padding: 2rem 1.25rem 4rem;
+      background: #f8fafc; color: #1e293b; line-height: 1.5;
+    }
+    @media (prefers-color-scheme: dark) { body { background: #0f172a; color: #e2e8f0; } }
+    h1 { font-size: 1.4rem; margin: 0 0 0.25rem; }
+    .sub { color: #64748b; font-size: 0.85rem; margin: 0 0 1.5rem; }
+    h2 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;
+         color: #94a3b8; margin: 2rem 0 0.6rem; }
+    .grid { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+    button {
+      font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      padding: 0.5rem 0.8rem; border-radius: 0.55rem;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(255, 255, 255, 0.85); color: inherit;
+      transition: transform 0.1s ease, background 0.15s ease;
+    }
+    @media (prefers-color-scheme: dark) { button { background: rgba(255, 255, 255, 0.08); } }
+    button:hover { background: rgba(123, 171, 156, 0.22); }
+    button:active { transform: scale(0.96); }
+    button.on { background: #7bab9c; color: #fff; border-color: #7bab9c; }
+    .ladder { display: grid; grid-template-columns: 6.5rem repeat(4, 1fr); gap: 0.35rem; align-items: center; }
+    .ladder .name { font-size: 0.82rem; font-weight: 700; }
+    .ladder .hz { font-size: 0.66rem; color: #94a3b8; font-weight: 500; display: block; }
+    label.slider { display: flex; align-items: center; gap: 0.75rem; font-size: 0.85rem; font-weight: 600; }
+    input[type=range] { flex: 1; accent-color: #7bab9c; }
+    code { font-size: 0.78rem; background: rgba(148, 163, 184, 0.2); padding: 0.1rem 0.35rem; border-radius: 0.25rem; }
+    .note { font-size: 0.78rem; color: #64748b; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+  <h1>🎵 Harmonies Sound Lab</h1>
+  <p class="sub">
+    Dev-only audition harness — not part of the game and not deployed.
+    Serve the project (<code>python3 -m http.server 8001</code>) and open
+    <code>/dev-sound-lab.html</code>. Every sound here is the exact spec the game uses.
+  </p>
+
+  <h2>Placement — per-colour voice × stack height</h2>
+  <p class="note">
+    Columns are stack height. Pitch climbs the D-major-pentatonic ladder, so nothing can clash.
+    Listen for whether each colour is distinguishable by <em>timbre</em>, not just pitch.
+  </p>
+  <div class="ladder" id="placement"></div>
+
+  <h2>Event cues</h2>
+  <div class="grid" id="cues"></div>
+
+  <h2>Ambience scenes</h2>
+  <p class="note">
+    Give each one ~30s. Cabin's loon and Summer's leaf-stir are rare on purpose.
+    Switching should crossfade, never stack — if it gets muddier over time, timers are leaking.
+  </p>
+  <div class="grid" id="scenes"></div>
+
+  <h2>Master volume</h2>
+  <label class="slider">
+    <input type="range" id="vol" min="0" max="1" step="0.05" value="0.6">
+    <span id="volval">0.60</span>
+  </label>
+
+  <script type="module">
+    import { createSoundEngine } from './js/audio/sound-engine.js';
+    import { EVENT_CUES, VOICES, cueForPlacement } from './js/audio/sfx-palette.js';
+    import { SCENES, SCENE_ORDER } from './js/audio/ambience-scenes.js';
+
+    const sound = createSoundEngine({});
+    const EMOJI = { blue: '🌊', yellow: '🌼', brown: '🪵', green: '🍃', red: '🧱', gray: '⛰️' };
+
+    // Placement grid: one row per colour, one button per stack height.
+    const placement = document.getElementById('placement');
+    for (const [color, voice] of Object.entries(VOICES)) {
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.innerHTML = `${EMOJI[color]} ${voice.label}<span class="hz">${color}</span>`;
+      placement.appendChild(name);
+      for (let h = 1; h <= 4; h++) {
+        const { freq } = cueForPlacement(color, h);
+        const b = document.createElement('button');
+        b.innerHTML = `h${h}<span class="hz">${freq.toFixed(0)} Hz</span>`;
+        b.onclick = () => { sound.unlock(); sound.placement(color, h); };
+        placement.appendChild(b);
+      }
+    }
+
+    const cues = document.getElementById('cues');
+    for (const name of Object.keys(EVENT_CUES)) {
+      const b = document.createElement('button');
+      b.textContent = name;
+      b.onclick = () => { sound.unlock(); sound.cue(name); };
+      cues.appendChild(b);
+    }
+
+    // Scene picker, including an explicit Off so the fade-out can be heard.
+    const scenes = document.getElementById('scenes');
+    const sceneBtns = [];
+    const addScene = (id, label) => {
+      const b = document.createElement('button');
+      b.textContent = label;
+      b.onclick = () => {
+        sound.unlock();
+        sound.setScene(id);
+        sceneBtns.forEach(x => x.classList.toggle('on', x === b && id !== null));
+      };
+      sceneBtns.push(b);
+      scenes.appendChild(b);
+    };
+    addScene(null, '🔇 Off');
+    for (const id of SCENE_ORDER) addScene(id, `${SCENES[id].emoji} ${SCENES[id].name}`);
+
+    const vol = document.getElementById('vol');
+    vol.oninput = () => {
+      sound.setVolume(parseFloat(vol.value));
+      document.getElementById('volval').textContent = parseFloat(vol.value).toFixed(2);
+    };
+  </script>
+</body>
+</html>
