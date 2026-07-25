@@ -132,8 +132,9 @@ be LFO-modulated), `randomEvent` (a cue fired on Poisson-ish random intervals).
 
 ## Calm-preserving constraints
 
-- Ambience sums into a bus **hard-capped at 0.18 gain** — it cannot overpower SFX or itself no
-  matter what the layer math does.
+- Ambience sums into a bus **hard-capped at 0.06 gain** — it cannot overpower SFX or itself no
+  matter what the layer math does. This number was *calibrated by measurement*: the first pass used
+  0.18, at which the ambient beds measured ~2.6x the RMS of the placement cues and masked them.
 - 800 ms crossfade on scene change; 400 ms fade-in on enable; 600 ms fade-out on disable.
 - **AudioContext suspends on `visibilitychange`** when the tab hides. Essential for phone play — no
   battery drain, no ghost audio from a backgrounded tab.
@@ -160,6 +161,9 @@ be LFO-modulated), `randomEvent` (a cue fired on Poisson-ish random intervals).
   - every emitted pitch is a member of the pentatonic set (guards off-scale regressions);
   - unknown terrain falls back safely instead of throwing;
   - every scene layer has a known type, and layer gains respect the ambience cap.
+- **Mix balance** (Playwright, offline render): RMS of ambience vs cues must stay in 0.05-0.9x, and
+  no placement voice may be >4x quieter than its siblings. Peak alone cannot catch either problem,
+  since ambience is continuous while cues are brief.
 - `sound-engine` tested against a **fake AudioContext**, asserting that a scene change cancels the
   previous scene's timers and that a context failure latches `dead` without throwing.
 - Playwright (`tests/ui.spec.js`) — panel opens; SFX toggle and scene choice survive a reload; a

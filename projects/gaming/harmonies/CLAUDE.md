@@ -67,8 +67,15 @@ default **off** (uninvited background audio is jarring, and browsers block it pr
   derived terrain, and each colour has its own timbre so colours stay distinguishable when pitches
   overlap.
 - **Ambience scenes** are lists of `noiseBed` / `drone` / `randomEvent` layer specs. `gain` is
-  *relative* (0–1, must sum ≤ 1 per scene); the engine multiplies by `AMBIENCE_CAP` (0.18) so
+  *relative* (0–1, must sum ≤ 1 per scene); the engine multiplies by `AMBIENCE_CAP` (**0.06**) so
   ambience can never climb over the game.
+- **The mix is calibrated by measurement, not by guess.** Two Playwright tests render SFX and
+  ambience through an `OfflineAudioContext` and compare **RMS**, asserting (a) ambience sits at
+  0.05–0.9× the cues — above ~1.0 the bed masks them, which is what a naive cap did at 0.18 — and
+  (b) no single placement voice is >4× quieter than its siblings. Peak alone can't catch either:
+  ambience is continuous while cues are brief, so equal peaks still leave cues masked.
+  **Beware narrow bandpass over pink noise** — at Q>1 it passes almost no energy, which is how the
+  🍃 leaves voice ended up ~8× too quiet. Keep Q low (≲0.7) on noise voices.
 - **The main bug risk:** `randomEvent` layers are self-rescheduling `setTimeout` chains. They're held
   in a registry, cancelled on scene change, and guarded by a `generation` counter — a leak would
   silently stack scenes on top of each other. Covered by a dedicated test.

@@ -281,6 +281,64 @@ test("every ambience scene renders a signal under the gain cap", async ({ page }
   expect(await renderPeak(page, { kind: "scene", name: null })).toBe(0);
 });
 
+// Peak alone can't catch a bad mix: ambience is continuous while cues are brief, so
+// equal peaks still leave the cues masked. These measure RMS (perceived loudness) and
+// assert the two balance relationships that actually matter.
+async function mixProfile(page) {
+  return page.evaluate(async () => {
+    const { createSoundEngine } = await import("/js/audio/sound-engine.js");
+    const rms = async (fn, secs, activeSecs) => {
+      const off = new OfflineAudioContext(1, 44100 * secs, 44100);
+      fn(createSoundEngine({ contextFactory: () => off }));
+      const d = (await off.startRendering()).getChannelData(0);
+      const n = Math.min(d.length, Math.floor(44100 * (activeSecs || secs)));
+      let sum = 0;
+      for (let i = 0; i < n; i++) sum += d[i] * d[i];
+      return Math.sqrt(sum / n);
+    };
+    const sfx = {}, amb = {};
+    for (const c of ["blue", "yellow", "brown", "green", "red", "gray"]) {
+      sfx[c] = await rms((e) => e.placement(c, 1), 1, 0.35);
+    }
+    for (const s of ["cabin", "summer", "morning"]) {
+      amb[s] = await rms((e) => e.setScene(s), 3);   // beds only; timers don't run offline
+    }
+    return { sfx, amb };
+  });
+}
+
+test("ambience stays underneath the game, not on top of it", async ({ page }) => {
+  await freshGame(page);
+  const { sfx, amb } = await mixProfile(page);
+  const avg = (o) => Object.values(o).reduce((a, b) => a + b, 0) / Object.values(o).length;
+  const ratio = avg(amb) / avg(sfx);
+  console.log(`ambience/SFX RMS ratio = ${ratio.toFixed(2)} (sfx ${avg(sfx).toFixed(5)}, amb ${avg(amb).toFixed(5)})`);
+
+  // The bed must be audibly below the cues. Above ~1.0 the cues start getting masked,
+  // which is exactly the bug this test was written for.
+  expect(ratio, `ambience is too loud relative to cues (${ratio.toFixed(2)}x)`).toBeLessThan(0.9);
+  expect(ratio, `ambience is so quiet it may as well be off (${ratio.toFixed(2)}x)`).toBeGreaterThan(0.05);
+
+  // Switching scenes should change the *place*, not the volume.
+  const vals = Object.values(amb);
+  const spread = Math.max(...vals) / Math.min(...vals);
+  expect(spread, `scene loudness spread is ${spread.toFixed(2)}x — switching feels like a volume change`).toBeLessThan(2.2);
+});
+
+test("no placement voice is drowned out by its siblings", async ({ page }) => {
+  await freshGame(page);
+  const { sfx } = await mixProfile(page);
+  const vals = Object.values(sfx);
+  const spread = Math.max(...vals) / Math.min(...vals);
+  const quietest = Object.entries(sfx).sort((a, b) => a[1] - b[1])[0];
+  console.log(`voice RMS: ${Object.entries(sfx).map(([k, v]) => `${k}=${v.toFixed(5)}`).join(" ")}`);
+
+  // The 🍃 leaves voice was once ~8x quieter than the rest (a narrow bandpass over pink
+  // noise passes almost nothing) — inaudible in practice. Six voices only work as an
+  // instrument if you can actually hear all six.
+  expect(spread, `voice loudness spread is ${spread.toFixed(1)}x; quietest is "${quietest[0]}"`).toBeLessThan(4);
+});
+
 test("board persists across a reload (touch-and-go)", async ({ page }) => {
   await freshGame(page);
   for (let i = 0; i < 3; i++) await placeOneToken(page);

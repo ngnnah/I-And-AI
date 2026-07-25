@@ -24,8 +24,15 @@
  * Keeping the ranges here as data (and the RNG in the engine) keeps this module pure.
  */
 
-/** Hard ceiling on the ambience bus. Ambience must always sit under the game. */
-export const AMBIENCE_CAP = 0.18;
+/**
+ * Hard ceiling on the ambience bus. Ambience must always sit UNDER the game.
+ *
+ * Calibrated by measurement, not by guess: at 0.18 the ambient beds measured ~2.6x the
+ * RMS of the placement cues, so the cues were being masked by the very thing meant to
+ * sit behind them. `tests/ui.spec.js` renders both through an OfflineAudioContext and
+ * asserts the ratio stays right, so raising this again will fail the suite.
+ */
+export const AMBIENCE_CAP = 0.06;
 
 /** Crossfade / fade timings in seconds. */
 export const FADES = { crossfade: 0.8, in: 0.4, out: 0.6 };
@@ -38,13 +45,16 @@ export const SCENES = {
     blurb: "Bonfire crackle, water lapping, a distant loon",
     layers: [
       // The fire's body: brown noise rolled off low, so it sits under everything.
+      // Bed gains here are held near summer/morning's — measured at 0.3 this scene came
+      // out 3x louder than the other two, which made scene-switching feel like a
+      // volume change rather than a change of place.
       {
         type: "noiseBed",
         color: "brown",
         filter: "lowpass",
         cutoff: 400,
         q: 0.7,
-        gain: 0.3,
+        gain: 0.17,
         lfo: { rate: 0.07, depth: 0.35, target: "gain" }, // fire breathing
       },
       // The crackle. Very short bandpassed bursts at tight random intervals — this,
@@ -73,7 +83,7 @@ export const SCENES = {
         filter: "bandpass",
         cutoff: 620,
         q: 0.8,
-        gain: 0.22,
+        gain: 0.15,
         lfo: { rate: 0.1, depth: 0.5, target: "cutoff" },
       },
       // Night wind over the water.
@@ -83,7 +93,7 @@ export const SCENES = {
         filter: "lowpass",
         cutoff: 240,
         q: 0.6,
-        gain: 0.14,
+        gain: 0.1,
         lfo: { rate: 0.05, depth: 0.6, target: "cutoff" },
       },
       // A loon, rarely. The one thing that makes the scene feel like a *place*.
