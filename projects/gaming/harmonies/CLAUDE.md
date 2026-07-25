@@ -97,6 +97,22 @@ default **off** (uninvited background audio is jarring, and browsers block it pr
   ambience is continuous while cues are brief, so equal peaks still leave cues masked.
   **Beware narrow bandpass over pink noise** — at Q>1 it passes almost no energy, which is how the
   🍃 leaves voice ended up ~8× too quiet. Keep Q low (≲0.7) on noise voices.
+- **Loudness has exactly one knob: `OUTPUT_TRIM` in `sound-engine.js`** (currently 7), applied at
+  the master on top of the user's 0–1 volume. Per-part `vol` values are *relative weights* tuned
+  against each other — rescaling them destroys the measured SFX/ambience and cross-voice balance.
+  Change the trim, not the palette. A clipping test asserts the worst realistic case (ambience +
+  placement + cue together) stays under 0.8.
+- **📱 Phone is the primary platform, and phone speakers roll off hard below ~500 Hz.** This bit
+  hard: a bare D3 (147 Hz) sine mountain voice kept only **3%** of its energy through a phone
+  speaker, so the loudest laptop voice was the quietest phone voice — the mix was *inverted* where
+  the game is actually played. Deep voices therefore carry explicit upper partials (for `gray`,
+  3× D3 = A4 and 4× = D5, so the harmonic series lands in-scale for free); the ear infers the
+  missing fundamental and it still reads as deep. `tests/ui.spec.js` renders every cue through a
+  500 Hz highpass and asserts ≥30% of its energy survives, plus a phone-side balance spread <4×.
+  **When a cue is too quiet on a phone, add upper harmonics — don't just raise `vol`.** For the
+  error cue the fix was the opposite of loudness: *cutting* the sub-500 Hz parts a phone can't
+  reproduce raised its phone-audible share while keeping it the quietest cue in the palette, which
+  it must stay. Also: brown noise is −6 dB/oct and carries nothing above ~500 Hz — use pink there.
 - **The main bug risk:** `randomEvent` layers are self-rescheduling `setTimeout` chains. They're held
   in a registry, cancelled on scene change, and guarded by a `generation` counter — a leak would
   silently stack scenes on top of each other. Covered by a dedicated test.

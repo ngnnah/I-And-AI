@@ -249,7 +249,7 @@ test("every placement voice renders an audible, calm signal", async ({ page }) =
       const peak = await renderPeak(page, { kind: "placement", color, height });
       expect(peak, `${color} h${height} was silent`).toBeGreaterThan(0.0005);
       // Calm means calm: nothing may approach clipping.
-      expect(peak, `${color} h${height} is too loud (${peak})`).toBeLessThan(0.2);
+      expect(peak, `${color} h${height} is too loud (${peak})`).toBeLessThan(0.75);
     }
   }
 });
@@ -260,7 +260,7 @@ test("every event cue renders an audible signal", async ({ page }) => {
   for (const name of cues) {
     const peak = await renderPeak(page, { kind: "cue", name }, 2);
     expect(peak, `cue "${name}" was silent`).toBeGreaterThan(0.0005);
-    expect(peak, `cue "${name}" is too loud (${peak})`).toBeLessThan(0.2);
+    expect(peak, `cue "${name}" is too loud (${peak})`).toBeLessThan(0.75);
   }
 });
 
@@ -275,7 +275,7 @@ test("every ambience scene renders a signal under the gain cap", async ({ page }
     const peak = await renderPeak(page, { kind: "scene", name }, 2);
     expect(peak, `scene "${name}" was silent`).toBeGreaterThan(0.0005);
     // Ambience must always sit under the game — this is the audible proof of the cap.
-    expect(peak, `scene "${name}" breaches the ambience cap (${peak})`).toBeLessThan(0.12);
+    expect(peak, `scene "${name}" breaches the ambience cap (${peak})`).toBeLessThan(0.45);
   }
   // Ambience off must render silence.
   expect(await renderPeak(page, { kind: "scene", name: null })).toBe(0);
@@ -337,6 +337,90 @@ test("no placement voice is drowned out by its siblings", async ({ page }) => {
   // noise passes almost nothing) — inaudible in practice. Six voices only work as an
   // instrument if you can actually hear all six.
   expect(spread, `voice loudness spread is ${spread.toFixed(1)}x; quietest is "${quietest[0]}"`).toBeLessThan(4);
+});
+
+// Phone is the primary platform, and phone speakers roll off steeply below ~500Hz. A
+// voice whose energy is all in the fundamental measures fine here but is inaudible in
+// the hand — that happened: a bare 147Hz sine kept only 3% of its energy, making the
+// loudest laptop voice the quietest phone voice and inverting the whole mix. So every
+// voice must carry enough upper-harmonic content to survive a small speaker.
+async function phoneProfile(page) {
+  return page.evaluate(async () => {
+    const { createSoundEngine } = await import("/js/audio/sound-engine.js");
+    const render = async (fn) => {
+      const off = new OfflineAudioContext(1, 44100, 44100);
+      const e = createSoundEngine({ contextFactory: () => off });
+      e.setVolume(1); fn(e);
+      return (await off.startRendering()).getChannelData(0);
+    };
+    const energy = (d) => { let s = 0; for (let i = 0; i < d.length; i++) s += d[i] * d[i]; return Math.sqrt(s / d.length); };
+    // Two cascaded 500Hz highpasses ≈ 12dB/oct rolloff: a crude but directionally
+    // correct stand-in for a phone speaker's low-end response.
+    const throughPhone = async (d) => {
+      const off = new OfflineAudioContext(1, d.length, 44100);
+      const buf = off.createBuffer(1, d.length, 44100);
+      buf.getChannelData(0).set(d);
+      const src = off.createBufferSource(); src.buffer = buf;
+      const a = off.createBiquadFilter(); a.type = "highpass"; a.frequency.value = 500; a.Q.value = 0.7;
+      const b = off.createBiquadFilter(); b.type = "highpass"; b.frequency.value = 500; b.Q.value = 0.7;
+      src.connect(a); a.connect(b); b.connect(off.destination); src.start(0);
+      return (await off.startRendering()).getChannelData(0);
+    };
+    const out = {};
+    const add = async (name, fn) => {
+      const flat = await render(fn);
+      out[name] = { flat: energy(flat), phone: energy(await throughPhone(flat)) };
+    };
+    for (const c of ["blue", "yellow", "brown", "green", "red", "gray"]) await add(c, (e) => e.placement(c, 1));
+    for (const cue of ["error", "finishBell", "cardComplete", "gameOver", "cubePlace"]) await add(`cue:${cue}`, (e) => e.cue(cue));
+    return out;
+  });
+}
+
+test("every sound survives a phone speaker (primary platform)", async ({ page }) => {
+  await freshGame(page);
+  const prof = await phoneProfile(page);
+  const rows = Object.entries(prof).map(([k, v]) => `${k}=${(v.phone / v.flat * 100).toFixed(0)}%`);
+  console.log(`phone-audible energy: ${rows.join(" ")}`);
+
+  for (const [name, v] of Object.entries(prof)) {
+    const kept = v.phone / v.flat;
+    expect(kept, `"${name}" keeps only ${(kept * 100).toFixed(0)}% of its energy above 500Hz — inaudible on a phone`)
+      .toBeGreaterThan(0.3);
+  }
+
+  // And the phone-side balance must not be wildly inverted vs the flat balance.
+  const voices = ["blue", "yellow", "brown", "green", "red", "gray"];
+  const phoneVals = voices.map((c) => prof[c].phone);
+  const spread = Math.max(...phoneVals) / Math.min(...phoneVals);
+  console.log(`phone voice spread = ${spread.toFixed(2)}x`);
+  expect(spread, `on a phone the voices differ by ${spread.toFixed(1)}x — some will be inaudible`).toBeLessThan(4);
+});
+
+test("output stays well clear of clipping even at max volume", async ({ page }) => {
+  await freshGame(page);
+  const peak = await page.evaluate(async () => {
+    const { createSoundEngine, OUTPUT_TRIM } = await import("/js/audio/sound-engine.js");
+    const run = async (fn) => {
+      const off = new OfflineAudioContext(1, 44100 * 2, 44100);
+      const e = createSoundEngine({ contextFactory: () => off });
+      e.setVolume(1); fn(e);
+      const d = (await off.startRendering()).getChannelData(0);
+      let p = 0; for (let i = 0; i < d.length; i++) p = Math.max(p, Math.abs(d[i]));
+      return p;
+    };
+    const worst = {};
+    for (const c of ["blue", "yellow", "brown", "green", "red", "gray"]) worst[c] = await run((e) => e.placement(c, 1));
+    for (const cue of ["gameOver", "finishBell", "cardComplete", "pouchRefill"]) worst[cue] = await run((e) => e.cue(cue));
+    // Worst realistic case: ambience running while a cue and a placement land together.
+    worst.stacked = await run((e) => { e.setScene("cabin"); e.placement("gray", 1); e.cue("cardComplete"); });
+    return { worst, trim: OUTPUT_TRIM };
+  });
+  const max = Math.max(...Object.values(peak.worst));
+  console.log(`OUTPUT_TRIM=${peak.trim}  worst peak=${max.toFixed(3)} (stacked=${peak.worst.stacked.toFixed(3)})`);
+  // Loud enough to be usable on a phone, with real headroom left for overlaps.
+  expect(max, `worst peak ${max.toFixed(3)} risks clipping`).toBeLessThan(0.8);
+  expect(max, `worst peak ${max.toFixed(3)} is too quiet for a phone speaker`).toBeGreaterThan(0.1);
 });
 
 test("board persists across a reload (touch-and-go)", async ({ page }) => {

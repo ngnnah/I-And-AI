@@ -48,12 +48,22 @@ export const DEGREES_PER_LEVEL = 3;
  */
 export const VOICES = {
   // ⛰️ mountain — deep sine with a slow attack, the heaviest thing on the board.
+  //
+  // PHONE-SPEAKER CRITICAL. A bare D3 (147 Hz) sine has no harmonics at all, so a phone
+  // speaker reproduced ~3% of its energy: this was the loudest voice on a laptop and
+  // effectively inaudible on a phone, inverting the whole mix. The partials below fix
+  // that, and they're free musically — 3x of D3 is A4 and 4x is D5, both already ladder
+  // notes, so the harmonic series lands in-scale. The ear infers the missing fundamental
+  // from them, so it still reads as "deep" on a small speaker.
   gray: {
     base: 0,
     label: "mountain",
     build: (freq) => [
-      { type: "tone", wave: "sine", freq, dur: 0.34, vol: 0.032, attack: 0.02 },
-      { type: "tone", wave: "sine", freq: freq * 2, dur: 0.16, vol: 0.008, attack: 0.015 },
+      { type: "tone", wave: "sine", freq, dur: 0.34, vol: 0.026, attack: 0.02 },
+      { type: "tone", wave: "sine", freq: freq * 2, dur: 0.24, vol: 0.018, attack: 0.015 },
+      { type: "tone", wave: "sine", freq: freq * 3, dur: 0.2, vol: 0.021, attack: 0.012 },
+      { type: "tone", wave: "sine", freq: freq * 4, dur: 0.15, vol: 0.016, attack: 0.01 },
+      { type: "tone", wave: "sine", freq: freq * 6, dur: 0.09, vol: 0.008, attack: 0.008 },
     ],
   },
 
@@ -67,6 +77,9 @@ export const VOICES = {
     build: (freq) => [
       { type: "noise", color: "brown", filter: "bandpass", cutoff: 620, q: 0.7, dur: 0.06, vol: 0.045 },
       { type: "tone", wave: "triangle", freq, dur: 0.08, vol: 0.03 },
+      // Phone-audible partial (3x F#3 = ~555Hz). Triangle already has odd harmonics,
+      // but not enough of them above 500Hz to carry on a phone speaker.
+      { type: "tone", wave: "triangle", freq: freq * 3, dur: 0.05, vol: 0.016 },
     ],
   },
 
@@ -75,9 +88,12 @@ export const VOICES = {
     base: 3,
     label: "trunk",
     build: (freq) => [
-      { type: "noise", color: "white", filter: "bandpass", cutoff: 1800, q: 2.2, dur: 0.012, vol: 0.02 },
+      { type: "noise", color: "white", filter: "bandpass", cutoff: 1800, q: 1.2, dur: 0.014, vol: 0.03 },
       { type: "tone", wave: "triangle", freq, dur: 0.11, vol: 0.026 },
-      { type: "tone", wave: "sine", freq: freq * 3.01, dur: 0.05, vol: 0.007 },
+      // Slightly inharmonic upper partials are what make wood read as wood; here they
+      // double as the only part of this voice a phone speaker can actually reproduce.
+      { type: "tone", wave: "sine", freq: freq * 3.01, dur: 0.06, vol: 0.022 },
+      { type: "tone", wave: "sine", freq: freq * 5.04, dur: 0.035, vol: 0.011 },
     ],
   },
 
@@ -87,7 +103,8 @@ export const VOICES = {
     label: "field",
     build: (freq) => [
       { type: "tone", wave: "sine", freq, dur: 0.3, vol: 0.026, attack: 0.006 },
-      { type: "tone", wave: "sine", freq: freq * 1.5, dur: 0.22, vol: 0.012, attack: 0.006 },
+      { type: "tone", wave: "sine", freq: freq * 1.5, dur: 0.22, vol: 0.016, attack: 0.006 },
+      { type: "tone", wave: "sine", freq: freq * 2, dur: 0.16, vol: 0.012, attack: 0.006 },
     ],
   },
 
@@ -97,7 +114,8 @@ export const VOICES = {
     label: "water",
     build: (freq) => [
       { type: "tone", wave: "sine", freq: freq * 0.72, freqTo: freq * 1.06, dur: 0.16, vol: 0.03 },
-      { type: "noise", color: "white", filter: "highpass", cutoff: 3600, q: 0.7, dur: 0.02, vol: 0.01 },
+      { type: "tone", wave: "sine", freq: freq * 1.44, freqTo: freq * 2.12, dur: 0.1, vol: 0.014 },
+      { type: "noise", color: "white", filter: "highpass", cutoff: 3200, q: 0.7, dur: 0.025, vol: 0.018 },
     ],
   },
 
@@ -186,8 +204,18 @@ export const EVENT_CUES = {
 
   // Invalid move: a soft low muted thud. Not a buzzer. Quieter than any success cue.
   error: [
-    { type: "noise", color: "brown", filter: "lowpass", cutoff: 300, q: 0.6, dur: 0.16, vol: 0.026 },
-    { type: "tone", wave: "sine", freq: 110, dur: 0.18, vol: 0.016 },
+    // The deep parts are kept deliberately small. They give the thud its weight on good
+    // speakers, but a phone reproduces almost none of them — so spending amplitude here
+    // buys nothing on the primary platform and only makes the cue louder than the reward
+    // cues, which it must never be. Phone audibility comes from the mid band below.
+    { type: "noise", color: "brown", filter: "lowpass", cutoff: 300, q: 0.6, dur: 0.16, vol: 0.012 },
+    { type: "tone", wave: "sine", freq: 110, dur: 0.18, vol: 0.008 },
+    // Soft damped mid thud — NOT a beep. Pink, not brown: brown noise is -6dB/oct and
+    // carries almost nothing this high, which is why an earlier brown-noise attempt at
+    // the same job left the cue inaudible on a phone.
+    { type: "noise", color: "pink", filter: "bandpass", cutoff: 700, q: 0.8, dur: 0.11, vol: 0.03 },
+    { type: "noise", color: "pink", filter: "bandpass", cutoff: 1150, q: 1.0, dur: 0.06, vol: 0.014 },
+    { type: "tone", wave: "sine", freq: 330, dur: 0.13, vol: 0.012 },
   ],
 
   // End of turn: a soft downward exhale, marking the rhythm without adding chrome.
@@ -217,8 +245,13 @@ export const EVENT_CUES = {
   // Entering the final-turn Finish state: a low resonant bell — the game is closing.
   finishBell: [
     { type: "tone", wave: "sine", freq: LADDER[0], dur: 1.6, vol: 0.036, attack: 0.01 },
-    { type: "tone", wave: "sine", freq: LADDER[5], dur: 1.1, vol: 0.016, attack: 0.02 },
-    { type: "tone", wave: "sine", freq: LADDER[8], dur: 0.7, vol: 0.008, attack: 0.03 },
+    { type: "tone", wave: "sine", freq: LADDER[5], dur: 1.1, vol: 0.02, attack: 0.02 },
+    { type: "tone", wave: "sine", freq: LADDER[8], dur: 0.9, vol: 0.018, attack: 0.03 },
+    // Upper partials (D5, A5, D6) — a real bell's strike tone lives up here, and it's
+    // the only part of this cue a phone speaker reproduces.
+    { type: "tone", wave: "sine", freq: LADDER[10], dur: 0.7, vol: 0.016, attack: 0.02 },
+    { type: "tone", wave: "sine", freq: LADDER[13], dur: 0.45, vol: 0.01, attack: 0.015 },
+    { type: "tone", wave: "sine", freq: LADDER[15], dur: 0.3, vol: 0.006, attack: 0.012 },
   ],
 
   // Game over: a gentle ascending flourish, in-scale (D4 A4 D5 F#5).
