@@ -24,6 +24,19 @@ import { EVENT_CUES, cueForPlacement } from "./sfx-palette.js";
 
 const MIN_GAIN = 0.0001; // exponentialRampToValueAtTime cannot reach 0
 
+/**
+ * Single output trim applied at the master, on top of the user's 0–1 volume.
+ *
+ * The per-part `vol` numbers in sfx-palette.js are *relative weights* tuned against each
+ * other; this is the one knob that sets absolute loudness. Originally there was no trim,
+ * which put full-volume peaks at ~3% of full scale — fine on laptop speakers, too quiet
+ * on a phone, which is the primary way this game is played.
+ *
+ * Turn overall loudness up/down HERE, not by rescaling the palette — rescaling would
+ * destroy the measured SFX/ambience balance and the cross-voice balance.
+ */
+export const OUTPUT_TRIM = 7;
+
 function rand(lo, hi) {
   return lo + Math.random() * (hi - lo);
 }
@@ -95,7 +108,7 @@ export function createSoundEngine({ contextFactory, cap = AMBIENCE_CAP } = {}) {
     try {
       const ctx = makeContext();
       const master = ctx.createGain();
-      master.gain.value = state.volume;
+      master.gain.value = state.volume * OUTPUT_TRIM;
       master.connect(ctx.destination);
 
       const sfxBus = ctx.createGain();
@@ -419,7 +432,7 @@ export function createSoundEngine({ contextFactory, cap = AMBIENCE_CAP } = {}) {
         const now = state.ctx.currentTime;
         state.master.gain.cancelScheduledValues(now);
         state.master.gain.setValueAtTime(state.master.gain.value, now);
-        state.master.gain.linearRampToValueAtTime(state.volume, now + 0.08);
+        state.master.gain.linearRampToValueAtTime(state.volume * OUTPUT_TRIM, now + 0.08);
       } catch (e) { /* volume is cosmetic; never fatal */ }
     },
 
