@@ -60,9 +60,20 @@ Rules: keep logic in `js/` pure, DOM/rendering in `index.html`, no bundler. Stat
     house / **mountain**. Only `updateHexDisplay()` promotes, and only when `stack.length > 1`.
     Putting a composite in `TOKEN_SYMBOL` silently breaks the chips. `COLOR_NAMES` is *only* the chip
     tooltip, so it names the loose token too (Brick, Rock — not Building, Mountain).
-  - **No discs.** The hex/chip gradient carries the terrain colour; the glyph is a lit shape on top
-    (`.tok-glyph` drop-shadow lifts it). Don't reintroduce a disc behind a glyph — it double-paints
-    the colour and reads busy.
+  - **No discs on hexes.** The hex/chip gradient carries the terrain colour; the glyph is a lit shape
+    on top (`.tok-glyph` drop-shadow lifts it). Don't reintroduce a disc behind a board glyph — it
+    double-paints the colour and reads busy. **The score tiles are the deliberate exception:** their
+    backgrounds are pale category pastels (`#dbeafe` etc.), so a light glyph on them is invisible —
+    white water waves vanished entirely. There, `.sc-emoji` is a terrain-gradient disc (`--sc-disc`
+    per `.sc-*` rule) giving the glyph the saturated background it was drawn for. Keep `--sc-disc` in
+    sync with the matching `.hex-cell[data-terrain]` gradient.
+  - **Score tiles: three render sites, all using scoring CATEGORIES, so composites are correct there**
+    (a "trees" score is a tree, not a loose leaf) — the mobile panel, the desktop panel, and the
+    JS-built Game Over modal cells (`cellData` in `endGame()`). The modal is easy to miss: it only
+    appears at end of game. Trigger it in a test by seeding `finishing: true` and clicking
+    `#finish-btn`.
+  - **The paw has ONE definition,** `#tok-paw`; `PAW_SVG` is just a `<use>` of it, shared with the
+    Animals score tile.
   - `TOKEN_EMOJI` / `TERRAIN_EMOJI_MINI` survive as `title=` labels + a fallback, and the sound
     system keys off token *colour*, so leave both maps alone.
   - **Iterate in `dev-token-lab.html`, never in `index.html`.** It copies the real hex CSS and
