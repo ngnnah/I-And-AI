@@ -286,14 +286,41 @@
       text-align: center;
       line-height: 1;
     }
-    .score-cell .sc-emoji { display: block; font-size: 1.05rem; margin-bottom: 2px; }
+    /* The token glyphs are light shapes drawn to sit on a SATURATED terrain colour, but
+       these tiles are pale pastels — white water waves on #dbeafe all but vanish. So the
+       wrapper becomes a small terrain-coloured disc, giving the glyph the background it
+       was designed for. This is the one place a disc belongs: unlike a board hex (where a
+       disc would double-paint the terrain colour), the tile behind it is a category
+       pastel, not the terrain. Same idea as the token-supply chips, which are already
+       coloured circles. */
+    .score-cell .sc-emoji {
+      width: 1.85rem;
+      height: 1.85rem;
+      margin: 0 auto 3px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--sc-disc, rgba(15, 23, 42, 0.12));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+                  0 1px 2px rgba(15, 23, 42, 0.12);
+    }
+    .score-cell .sc-glyph {
+      display: block;
+      width: 1.2rem;
+      height: 1.2rem;
+      filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.22));
+    }
     .score-cell .sc-num { font-size: 1.5rem; font-weight: 800; }
-    .sc-trees   { background: #dcfce7; } .sc-trees   .sc-num { color: #15803d; }
-    .sc-mtn     { background: #e5e7eb; } .sc-mtn     .sc-num { color: #374151; }
-    .sc-fields  { background: #fef9c3; } .sc-fields  .sc-num { color: #a16207; }
-    .sc-build   { background: #fee2e2; } .sc-build   .sc-num { color: #b91c1c; }
-    .sc-rivers  { background: #dbeafe; } .sc-rivers  .sc-num { color: #1d4ed8; }
-    .sc-animals { background: #f3e8ff; } .sc-animals .sc-num { color: #7e22ce; }
+    /* Tile pastel + number colour, and --sc-disc = the matching TERRAIN gradient for the
+       glyph disc above. Keep these gradients identical to the .hex-cell[data-terrain]
+       rules, or a score tile and its terrain stop agreeing. */
+    .sc-trees   { background: #dcfce7; --sc-disc: linear-gradient(135deg,#7ED321,#5FA518); } .sc-trees   .sc-num { color: #15803d; }
+    .sc-mtn     { background: #e5e7eb; --sc-disc: linear-gradient(135deg,#7F8C8D,#5D6D6E); } .sc-mtn     .sc-num { color: #374151; }
+    .sc-fields  { background: #fef9c3; --sc-disc: linear-gradient(135deg,#F5A623,#E09000); } .sc-fields  .sc-num { color: #a16207; }
+    .sc-build   { background: #fee2e2; --sc-disc: linear-gradient(135deg,#D0021B,#A00116); } .sc-build   .sc-num { color: #b91c1c; }
+    .sc-rivers  { background: #dbeafe; --sc-disc: linear-gradient(135deg,#4A90E2,#357ABD); } .sc-rivers  .sc-num { color: #1d4ed8; }
+    /* Animals has no terrain, so the disc borrows the tile's own purple accent. */
+    .sc-animals { background: #f3e8ff; --sc-disc: linear-gradient(135deg,#c4b5fd,#8b5cf6); } .sc-animals .sc-num { color: #7e22ce; }
     .score-total-line {
       display: flex; align-items: center; justify-content: center; gap: 0.75rem;
       margin-top: 0.6rem; font-weight: 800; color: #1e293b;
@@ -974,6 +1001,18 @@
       </g>
     </symbol>
 
+    <!-- paw (animal cube marker + the Animals score tile). Bold dark shape with a
+         white outline so it holds up on any terrain colour underneath. -->
+    <symbol id="tok-paw" viewBox="0 0 100 100">
+      <g fill="#1e293b" stroke="#ffffff" stroke-width="6" stroke-linejoin="round">
+        <ellipse cx="50" cy="66" rx="24" ry="19"/>
+        <ellipse cx="24" cy="40" rx="10" ry="12"/>
+        <ellipse cx="42" cy="27" rx="10" ry="13"/>
+        <ellipse cx="60" cy="27" rx="10" ry="13"/>
+        <ellipse cx="77" cy="40" rx="10" ry="12"/>
+      </g>
+    </symbol>
+
   </defs></svg>
   <!-- ========================== end original token art ========================== -->
 
@@ -1024,12 +1063,12 @@
     <!-- Mobile-only score breakdown (6 colored cells) -->
     <div class="md:hidden panel-card rounded-xl shadow-lg p-3 mb-4">
       <div class="score-cells">
-        <div class="score-cell sc-trees"><span class="sc-emoji">🌲</span><span class="sc-num" id="score-trees-mobile">0</span></div>
-        <div class="score-cell sc-mtn"><span class="sc-emoji">⛰️</span><span class="sc-num" id="score-mountains-mobile">0</span></div>
-        <div class="score-cell sc-fields"><span class="sc-emoji">🌼</span><span class="sc-num" id="score-fields-mobile">0</span></div>
-        <div class="score-cell sc-build"><span class="sc-emoji">🏡</span><span class="sc-num" id="score-buildings-mobile">0</span></div>
-        <div class="score-cell sc-rivers"><span class="sc-emoji">🌊</span><span class="sc-num" id="score-rivers-mobile">0</span></div>
-        <div class="score-cell sc-animals"><span class="sc-emoji">🐾</span><span class="sc-num" id="score-animals-mobile">0</span></div>
+        <div class="score-cell sc-trees"><span class="sc-emoji" title="Trees"><svg class="sc-glyph" viewBox="0 0 100 100" aria-hidden="true"><use href="#tok-tree"/></svg></span><span class="sc-num" id="score-trees-mobile">0</span></div>
+        <div class="score-cell sc-mtn"><span class="sc-emoji" title="Mountains"><svg class="sc-glyph" viewBox="0 0 100 100" aria-hidden="true"><use href="#tok-mountain"/></svg></span><span class="sc-num" id="score-mountains-mobile">0</span></div>
+        <div class="score-cell sc-fields"><span class="sc-emoji" title="Fields"><svg class="sc-glyph" viewBox="0 0 100 100" aria-hidden="true"><use href="#tok-field"/></svg></span><span class="sc-num" id="score-fields-mobile">0</span></div>
+        <div class="score-cell sc-build"><span class="sc-emoji" title="Buildings"><svg class="sc-glyph" viewBox="0 0 100 100" aria-hidden="true"><use href="#tok-house"/></svg></span><span class="sc-num" id="score-buildings-mobile">0</span></div>
+        <div class="score-cell sc-rivers"><span class="sc-emoji" title="Water"><svg class="sc-glyph" viewBox="0 0 100 100" aria-hidden="true"><use href="#tok-water"/></svg></span><span class="sc-num" id="score-rivers-mobile">0</span></div>
+        <div class="score-cell sc-animals"><span class="sc-emoji" title="Animals"><svg class="sc-glyph" viewBox="0 0 100 100" aria-hidden="true"><use href="#tok-paw"/></svg></span><span class="sc-num" id="score-animals-mobile">0</span></div>
       </div>
       <div class="score-total-line">
         <span>🏆 <span class="big" id="score-total-mobile">0</span> <span id="sun-display-mobile"></span></span>
@@ -1116,12 +1155,12 @@
         <!-- Score breakdown (6 colored cells) — desktop/tablet; mobile uses the top grid -->
         <div class="panel-card rounded-xl shadow-lg p-4 hidden md:block">
           <div class="score-cells">
-            <div class="score-cell sc-trees"><span class="sc-emoji">🌲</span><span class="sc-num" id="score-trees">0</span></div>
-            <div class="score-cell sc-mtn"><span class="sc-emoji">⛰️</span><span class="sc-num" id="score-mountains">0</span></div>
-            <div class="score-cell sc-fields"><span class="sc-emoji">🌼</span><span class="sc-num" id="score-fields">0</span></div>
-            <div class="score-cell sc-build"><span class="sc-emoji">🏡</span><span class="sc-num" id="score-buildings">0</span></div>
-            <div class="score-cell sc-rivers"><span class="sc-emoji">🌊</span><span class="sc-num" id="score-rivers">0</span></div>
-            <div class="score-cell sc-animals"><span class="sc-emoji">🐾</span><span class="sc-num" id="score-animals">0</span></div>
+            <div class="score-cell sc-trees"><span class="sc-emoji" title="Trees"><svg class="sc-glyph" viewBox="0 0 100 100" aria-hidden="true"><use href="#tok-tree"/></svg></span><span class="sc-num" id="score-trees">0</span></div>
+            <div class="score-cell sc-mtn"><span class="sc-emoji" title="Mountains"><svg class="sc-glyph" viewBox="0 0 100 100" aria-hidden="true"><use href="#tok-mountain"/></svg></span><span class="sc-num" id="score-mountains">0</span></div>
+            <div class="score-cell sc-fields"><span class="sc-emoji" title="Fields"><svg class="sc-glyph" viewBox="0 0 100 100" aria-hidden="true"><use href="#tok-field"/></svg></span><span class="sc-num" id="score-fields">0</span></div>
+            <div class="score-cell sc-build"><span class="sc-emoji" title="Buildings"><svg class="sc-glyph" viewBox="0 0 100 100" aria-hidden="true"><use href="#tok-house"/></svg></span><span class="sc-num" id="score-buildings">0</span></div>
+            <div class="score-cell sc-rivers"><span class="sc-emoji" title="Water"><svg class="sc-glyph" viewBox="0 0 100 100" aria-hidden="true"><use href="#tok-water"/></svg></span><span class="sc-num" id="score-rivers">0</span></div>
+            <div class="score-cell sc-animals"><span class="sc-emoji" title="Animals"><svg class="sc-glyph" viewBox="0 0 100 100" aria-hidden="true"><use href="#tok-paw"/></svg></span><span class="sc-num" id="score-animals">0</span></div>
           </div>
           <div class="score-total-line">
             <span>🏆 <span class="big" id="score-total-sidebar">0</span> <span id="sun-display"></span></span>
@@ -1318,15 +1357,25 @@
 
     // A remembered scene can't start until the user interacts, so arm it and let the
     // first gesture light it up.
+    //
+    // iOS SAFARI GOTCHA — this caused total silence on iPhone. Safari only accepts some
+    // events as user activation for audio (`click`, `touchend`, `keydown`), NOT
+    // `pointerdown`/`touchstart`, and it may simply refuse a resume. The old code listened
+    // on `pointerdown` with `{ once: true }` and assumed success, so one refused attempt
+    // meant silence for the rest of the session. Now: listen on all the plausible events,
+    // in the CAPTURE phase (so the context is awake before the click handler plays a cue),
+    // and keep listening until the context reports `running`.
+    const SOUND_GESTURES = ['pointerdown', 'touchend', 'click', 'keydown'];
     let soundUnlocked = false;
-    function unlockSound() {
+    async function unlockSound() {
       if (soundUnlocked) return;
+      const running = await sound.unlock();
+      if (!running) return;                       // refused — try again on the next gesture
       soundUnlocked = true;
-      sound.unlock();
+      SOUND_GESTURES.forEach(t => document.removeEventListener(t, unlockSound, true));
       if (soundPrefs.scene) sound.setScene(soundPrefs.scene);
     }
-    document.addEventListener('pointerdown', unlockSound, { once: true });
-    document.addEventListener('keydown', unlockSound, { once: true });
+    SOUND_GESTURES.forEach(t => document.addEventListener(t, unlockSound, true));
 
     // Don't burn battery or play into a backgrounded tab (this game lives on phones).
     document.addEventListener('visibilitychange', () => {
@@ -1831,11 +1880,9 @@
       building: 'tok-house', red: 'tok-brick',
       trunk: 'tok-trunk', brown: 'tok-trunk',
     };
-    // Bold dark paw with a white outline — high contrast on any terrain color.
-    const PAW_SVG = `<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="#1e293b" stroke="#ffffff" stroke-width="6" stroke-linejoin="round">`
-      + `<ellipse cx="50" cy="66" rx="24" ry="19"/><ellipse cx="24" cy="40" rx="10" ry="12"/>`
-      + `<ellipse cx="42" cy="27" rx="10" ry="13"/><ellipse cx="60" cy="27" rx="10" ry="13"/>`
-      + `<ellipse cx="77" cy="40" rx="10" ry="12"/></g></svg>`;
+    // Bold dark paw with a white outline — high contrast on any terrain color. Shares
+    // the ONE #tok-paw definition in the symbol sheet with the Animals score tile.
+    const PAW_SVG = `<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#tok-paw"/></svg>`;
 
     // Render a pattern as a mini honeycomb (positioned flat-top hexes). The cube
     // hex gets a gold outline + a 🐾 marker (where your animal goes).
@@ -2771,18 +2818,21 @@
                  min="0" max="1" step="0.05" value="${soundPrefs.volume}" aria-label="Overall volume">
         </label>`;
 
-      panel.querySelector('#sfx-toggle').addEventListener('change', (e) => {
+      panel.querySelector('#sfx-toggle').addEventListener('change', async (e) => {
         soundPrefs.sfx = e.target.checked;
         sound.setSfxEnabled(soundPrefs.sfx);
         saveSoundPrefs();
-        if (soundPrefs.sfx) sound.cue('tokenSelect');   // confirm it's back, quietly
+        if (soundPrefs.sfx) {
+          await unlockSound();
+          sound.cue('tokenSelect');   // confirm it's back, quietly
+        }
       });
 
       panel.querySelectorAll('input[name="ambience"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
+        radio.addEventListener('change', async (e) => {
           soundPrefs.scene = e.target.value || null;
           saveSoundPrefs();
-          unlockSound();
+          await unlockSound();          // await: the context must be running first
           sound.setScene(soundPrefs.scene);
         });
       });
@@ -3221,17 +3271,25 @@
 
       // Populate + show the Game Over summary
       const s = gameState.score;
+      // Same glyphs + order as the two static score panels. Scoring categories, so the
+      // composites are right here (a "trees" score means trees, not loose leaves).
       const cellData = [
-        ['sc-trees', '🌲', s.trees], ['sc-mtn', '⛰️', s.mountains], ['sc-fields', '🌼', s.fields],
-        ['sc-build', '🏡', s.buildings], ['sc-rivers', '🌊', s.water], ['sc-animals', '🐾', s.animals],
+        ['sc-trees', 'tok-tree', 'Trees', s.trees],
+        ['sc-mtn', 'tok-mountain', 'Mountains', s.mountains],
+        ['sc-fields', 'tok-field', 'Fields', s.fields],
+        ['sc-build', 'tok-house', 'Buildings', s.buildings],
+        ['sc-rivers', 'tok-water', 'Water', s.water],
+        ['sc-animals', 'tok-paw', 'Animals', s.animals],
       ];
       const setHtml = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
       const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
       setTxt('gameover-reason', endReason);
       setTxt('gameover-suns', suns > 0 ? sunEmoji : '🌙');
       setTxt('gameover-total', gameState.score.total);
-      setHtml('gameover-cells', cellData.map(([cls, emoji, val]) =>
-        `<div class="score-cell ${cls}"><span class="sc-emoji">${emoji}</span><span class="sc-num">${val}</span></div>`).join(''));
+      setHtml('gameover-cells', cellData.map(([cls, sym, label, val]) =>
+        `<div class="score-cell ${cls}"><span class="sc-emoji" title="${label}">`
+        + `<svg class="sc-glyph" viewBox="0 0 100 100" aria-hidden="true"><use href="#${sym}"/></svg>`
+        + `</span><span class="sc-num">${val}</span></div>`).join(''));
       const goModal = document.getElementById('gameover-modal');
       if (goModal) goModal.classList.add('active');
       sound.cue('gameOver');
