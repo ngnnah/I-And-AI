@@ -55,6 +55,11 @@ Rules: keep logic in `js/` pure, DOM/rendering in `index.html`, no bundler. Stat
   `updateHexDisplay()` (board, via `TOKEN_SYMBOL` + composite rules), the two token-chip renderers,
   and `renderMiniPattern()` (animal cards, via `TERRAIN_SYMBOL_MINI`). Add a terrain → add it to
   *both* maps or board and cards silently diverge.
+  - **`TOKEN_SYMBOL` holds the UN-STACKED shapes; `STACK_PROMOTES` upgrades them.** A drafted token
+    in the supply is always singular, so its chip must show leaf / brick / **rock** — never tree /
+    house / **mountain**. Only `updateHexDisplay()` promotes, and only when `stack.length > 1`.
+    Putting a composite in `TOKEN_SYMBOL` silently breaks the chips. `COLOR_NAMES` is *only* the chip
+    tooltip, so it names the loose token too (Brick, Rock — not Building, Mountain).
   - **No discs.** The hex/chip gradient carries the terrain colour; the glyph is a lit shape on top
     (`.tok-glyph` drop-shadow lifts it). Don't reintroduce a disc behind a glyph — it double-paints
     the colour and reads busy.

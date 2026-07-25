@@ -1350,13 +1350,27 @@
     // Token colour → <symbol> id in the sheet at the top of <body>. Single source of
     // truth for the ART; TERRAIN_SYMBOL_MINI maps the mini-pattern's terrain keys onto
     // the SAME symbols so board and cards can never drift apart.
+    //
+    // These are the UN-STACKED shapes — what a single loose token looks like. That's
+    // what the token-supply chips must show, since a drafted token is always singular:
+    // a lone green is a leaf (not a tree), a lone red is a brick (not a house), and a
+    // lone gray is a rock (not a mountain). STACK_PROMOTES below upgrades them.
     const TOKEN_SYMBOL = {
       blue: 'tok-water',
       yellow: 'tok-field',
       brown: 'tok-trunk',
       green: 'tok-leaf',
       red: 'tok-brick',
-      gray: 'tok-mountain'
+      gray: 'tok-rock'
+    };
+
+    // Stacking two or more of these promotes the glyph to its composite form. Mirrors
+    // the scoring rules: leaves on a trunk are a tree, a brick on anything is a
+    // building, and 2+ gray is a mountain where 1 gray is only a rock.
+    const STACK_PROMOTES = {
+      green: { symbol: 'tok-tree', label: '🌳' },
+      red: { symbol: 'tok-house', label: '🏡' },
+      gray: { symbol: 'tok-mountain', label: '⛰️' },
     };
 
     // Build one <use> reference. `size` is a CSS length for the square glyph box.
@@ -1366,14 +1380,17 @@
            + ` style="width:${size};height:${size}"><use href="#${symbolId}"/></svg>`;
     }
 
-    // Color names for display
+    // Colour names for display. Only used as the tooltip on token-supply chips, so
+    // these name the LOOSE token (matching TOKEN_SYMBOL's un-stacked glyphs) rather
+    // than the terrain it becomes when stacked — a tooltip reading "Mountain" over a
+    // rock glyph contradicts what the player is looking at.
     const COLOR_NAMES = {
       blue: 'Water',
       yellow: 'Field',
       brown: 'Trunk',
       green: 'Leaves',
-      red: 'Building',
-      gray: 'Mountain'
+      red: 'Brick',
+      gray: 'Rock'
     };
     
     // Game state
@@ -2212,12 +2229,11 @@
       // A leaf on a trunk (green on 1-2 brown) is a full tree (leaf alone = bush).
       // A brick on another token is a building (brick alone stays a brick).
       const isBuilding = topColor === 'red' && stack.length > 1;
+      // Start from the un-stacked shape, then promote if this hex is a stack.
       let symbol = TOKEN_SYMBOL[topColor];
-      let label = TOKEN_EMOJI[topColor];
-      if (topColor === 'green' && stack.length > 1) { symbol = 'tok-tree'; label = '🌳'; }
-      if (isBuilding) { symbol = 'tok-house'; label = '🏡'; }
-      // A lone gray is a rock; two or more stacked is a mountain (matches scoring).
-      if (topColor === 'gray' && stack.length === 1) symbol = 'tok-rock';
+      let label = topColor === 'gray' ? '🪨' : TOKEN_EMOJI[topColor];
+      const promoted = stack.length > 1 ? STACK_PROMOTES[topColor] : null;
+      if (promoted) ({ symbol, label } = promoted);
       if (fill) {
         fill.innerHTML = tokenGlyph(symbol);
         fill.title = label;
