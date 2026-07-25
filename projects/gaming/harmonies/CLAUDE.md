@@ -47,10 +47,26 @@ Rules: keep logic in `js/` pure, DOM/rendering in `index.html`, no bundler. Stat
   water `#4A90E2→#357ABD` · field `#F5A623→#E09000` · trunk `#8B4513→#654321` ·
   leaves `#7ED321→#5FA518` · building `#D0021B→#A00116` · mountain `#7F8C8D→#5D6D6E` ·
   rock `#9aa4a5→#6f7d7e`.
-- **Tokens are emoji** (`TOKEN_EMOJI`): blue 🌊 · yellow 🌼 · brown 🪵 · green 🍃 · red 🧱 · gray ⛰️.
-  Composites: green-on-brown → 🌳; red-stacked → 🏡 (badge suppressed). **These are the main
-  art-replacement target** — swap in `updateHexDisplay()` and mirror in the animal-card mini-pattern
-  renderer. Swap emoji in JS with node `.split().join()`, never perl/sed (silent multibyte failures).
+- **Tokens are ORIGINAL SVG art**, not emoji. One `<symbol>` per terrain in a sheet at the top of
+  `<body>`, drawn by `tokenGlyph(symbolId, size)` as a `<use>`. **Nine glyphs, not six** — `tok-water`
+  `tok-field` `tok-leaf` `tok-tree` `tok-trunk` `tok-brick` `tok-house` `tok-mountain` `tok-rock`,
+  because rock (1 gray) is visually distinct from mountain (2+), as are leaf/tree and brick/building.
+  Three call sites must agree, all keyed off the same symbols:
+  `updateHexDisplay()` (board, via `TOKEN_SYMBOL` + composite rules), the two token-chip renderers,
+  and `renderMiniPattern()` (animal cards, via `TERRAIN_SYMBOL_MINI`). Add a terrain → add it to
+  *both* maps or board and cards silently diverge.
+  - **No discs.** The hex/chip gradient carries the terrain colour; the glyph is a lit shape on top
+    (`.tok-glyph` drop-shadow lifts it). Don't reintroduce a disc behind a glyph — it double-paints
+    the colour and reads busy.
+  - `TOKEN_EMOJI` / `TERRAIN_EMOJI_MINI` survive as `title=` labels + a fallback, and the sound
+    system keys off token *colour*, so leave both maps alone.
+  - **Iterate in `dev-token-lab.html`, never in `index.html`.** It copies the real hex CSS and
+    gradients and renders all nine glyphs at 62/52/46/22px plus a board cluster and card
+    mini-patterns. Edit the symbol block there, screenshot, then copy the block across — keep the two
+    copies identical. Authoring notes learned the hard way: an S-curve alone reads as the letter "S";
+    a smooth ellipse reads as "0", not a rock; open `<path>`s need explicit `fill="none"` or they
+    fill black; 22px is where detail dies, so silhouette beats detail.
+  - Editing emoji strings in JS: use node `.split().join()`, never perl/sed (multibyte failures).
 - **Branding:** one custom SVG `assets/harmonies-icon.svg` (Fuji + sun + sakura + Hokusai wave), used
   as favicon/header/apple-touch. New art → `assets/`, self-contained SVG or inline data URIs.
 

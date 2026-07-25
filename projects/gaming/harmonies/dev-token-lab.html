@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Harmonies — token art lab</title>
+<style>
+  /* ---- Copied verbatim from index.html so the lab is faithful, not approximate ---- */
+  :root {
+    --hex-w: 62px;
+    --hex-h: calc(var(--hex-w) * 0.8660254);
+    --hex-gap: 2px;
+  }
+  .hex-cell {
+    position: relative;
+    width: var(--hex-w);
+    height: var(--hex-h);
+    filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.22));
+  }
+  .hex-fill {
+    position: absolute;
+    inset: 0;
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    background: rgba(15, 23, 42, 0.22); /* grout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(var(--hex-w) * 0.42);
+    line-height: 1;
+    color: #fff;
+  }
+  .hex-fill::before {
+    content: "";
+    position: absolute;
+    inset: var(--hex-gap);
+    clip-path: inherit;
+    background: var(--terrain, #e3ece6);
+    z-index: -1;
+  }
+  .hex-cell[data-terrain="empty"]  { --terrain: #e3ece6; }
+  .hex-cell[data-terrain="blue"]   { --terrain: linear-gradient(135deg,#4A90E2,#357ABD); }
+  .hex-cell[data-terrain="yellow"] { --terrain: linear-gradient(135deg,#F5A623,#E09000); }
+  .hex-cell[data-terrain="brown"]  { --terrain: linear-gradient(135deg,#8B4513,#654321); }
+  .hex-cell[data-terrain="green"]  { --terrain: linear-gradient(135deg,#7ED321,#5FA518); }
+  .hex-cell[data-terrain="red"]    { --terrain: linear-gradient(135deg,#D0021B,#A00116); }
+  .hex-cell[data-terrain="gray"]   { --terrain: linear-gradient(135deg,#7F8C8D,#5D6D6E); }
+  .hex-cell[data-terrain="rock"]   { --terrain: linear-gradient(135deg,#9aa4a5,#6f7d7e); }
+
+  /* ---- Lab chrome ---- */
+  body {
+    margin: 0; padding: 22px 26px 40px;
+    font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #1f2d3a;
+    background: linear-gradient(160deg,#eef5f1,#f6f2e8 55%,#eaf1f6);
+  }
+  h1 { font-size: 17px; margin: 0 0 2px; letter-spacing: .02em; }
+  .sub { color: #5c7080; margin: 0 0 18px; font-size: 12px; }
+  h2 {
+    font-size: 12px; text-transform: uppercase; letter-spacing: .09em;
+    color: #567; margin: 24px 0 10px; font-weight: 700;
+  }
+  .panel {
+    background: rgba(255,255,255,.62); border: 1px solid rgba(120,150,170,.22);
+    border-radius: 12px; padding: 16px 18px;
+  }
+  .row { display: flex; align-items: flex-end; gap: 22px; flex-wrap: wrap; }
+  .spec { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .spec .lbl { font-size: 10px; color: #6b8091; letter-spacing: .04em; }
+  .note { font-size: 11px; color: #7d8f9c; margin-top: 10px; font-style: italic; }
+  .name { font-weight: 700; font-size: 11px; color: #2c4356; letter-spacing: .03em; }
+
+  /* The token glyph inside a hex */
+  .tok {
+    width: 64%; height: 64%; display: block;
+    filter: drop-shadow(0 1px 1.5px rgba(0,0,0,.32));
+  }
+
+  .mini-board { position: relative; }
+  .mini-cell { position: absolute; }
+  .cluster { position: relative; }
+  .cluster > div { position: absolute; }
+</style>
+</head>
+<body>
+
+<h1>Harmonies — token art lab</h1>
+<p class="sub">
+  Hex CSS + terrain gradients copied from <code>index.html</code>. Decided: simplified glyphs,
+  <strong>no discs</strong> — the hex gradient carries the terrain colour.
+</p>
+
+<!-- ================== TOKEN SYMBOLS — copy this whole block into index.html ================== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+
+  <!-- water (blue) — three stacked waves -->
+  <symbol id="tok-water" viewBox="0 0 100 100">
+    <g fill="none" stroke="#EAF6FF" stroke-width="10" stroke-linecap="round">
+      <path d="M20 36 C29 28 37 44 50 36 C63 28 71 42 80 36"/>
+      <path d="M20 52 C29 44 37 60 50 52 C63 44 71 58 80 52"/>
+      <path d="M20 68 C29 60 37 76 50 68 C63 60 71 74 80 68"/>
+    </g>
+  </symbol>
+
+  <!-- field (yellow) — one bold daisy + two buds -->
+  <symbol id="tok-field" viewBox="0 0 100 100">
+    <g stroke="#8A5A00" stroke-width="4.5" stroke-linecap="round" fill="none">
+      <path d="M50 88 V50"/>
+      <path d="M50 74 C38 72 32 64 31 55"/>
+      <path d="M50 66 C62 64 68 58 69 50"/>
+    </g>
+    <g fill="#FFF3C4" stroke="#8A5A00" stroke-width="3.4">
+      <ellipse cx="50" cy="18" rx="8" ry="10"/>
+      <ellipse cx="69" cy="29" rx="8" ry="10" transform="rotate(60 69 29)"/>
+      <ellipse cx="69" cy="51" rx="8" ry="10" transform="rotate(120 69 51)"/>
+      <ellipse cx="50" cy="62" rx="8" ry="10"/>
+      <ellipse cx="31" cy="51" rx="8" ry="10" transform="rotate(60 31 51)"/>
+      <ellipse cx="31" cy="29" rx="8" ry="10" transform="rotate(120 31 29)"/>
+    </g>
+    <circle cx="50" cy="40" r="11" fill="#E8A21A" stroke="#8A5A00" stroke-width="3.6"/>
+  </symbol>
+
+  <!-- leaves (green, single) — tilted so it doesn't read as a plain teardrop -->
+  <symbol id="tok-leaf" viewBox="0 0 100 100">
+    <path d="M26 80 C34 72 40 66 46 60"
+          fill="none" stroke="#2F6B18" stroke-width="5" stroke-linecap="round"/>
+    <path d="M78 20 C80 46 62 70 40 66 C34 44 52 22 78 20 Z"
+          fill="#DFF3C4" stroke="#2F6B18" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M76 22 C62 36 50 52 41 65"
+          fill="none" stroke="#2F6B18" stroke-width="4" stroke-linecap="round"/>
+    <g stroke="#2F6B18" stroke-width="3" stroke-linecap="round" fill="none">
+      <path d="M66 32 C64 42 60 46 52 48"/>
+      <path d="M56 47 C55 56 52 59 46 61"/>
+    </g>
+  </symbol>
+
+  <!-- tree (green stacked on brown) — lobed canopy, not a lollipop circle -->
+  <symbol id="tok-tree" viewBox="0 0 100 100">
+    <path d="M50 62 V92" fill="none" stroke="#5A3418" stroke-width="10" stroke-linecap="round"/>
+    <path d="M50 8 C62 8 70 15 72 24 C83 27 88 38 83 47 C87 57 78 68 66 67
+             C60 74 40 74 34 67 C22 68 13 57 17 47 C12 38 17 27 28 24
+             C30 15 38 8 50 8 Z"
+          fill="#8FD14F" stroke="#2F6B18" stroke-width="4.5" stroke-linejoin="round"/>
+  </symbol>
+
+  <!-- trunk (brown) — cut log with rings -->
+  <symbol id="tok-trunk" viewBox="0 0 100 100">
+    <path d="M30 38 H70 V68 A20 9 0 0 1 30 68 Z"
+          fill="#A9683A" stroke="#3E2410" stroke-width="4.5" stroke-linejoin="round"/>
+    <ellipse cx="50" cy="38" rx="20" ry="9" fill="#C68B5C" stroke="#3E2410" stroke-width="4.5"/>
+    <g fill="none" stroke="#8A552C" stroke-width="3">
+      <ellipse cx="50" cy="38" rx="12" ry="5"/>
+      <ellipse cx="50" cy="38" rx="5" ry="2.1"/>
+    </g>
+  </symbol>
+
+  <!-- brick (red, alone) — brick courses -->
+  <symbol id="tok-brick" viewBox="0 0 100 100">
+    <rect x="18" y="30" width="64" height="40" rx="4"
+          fill="#E8604F" stroke="#6E1008" stroke-width="4.5"/>
+    <g stroke="#6E1008" stroke-width="4" stroke-linecap="round">
+      <path d="M18 43.3 H82"/><path d="M18 56.6 H82"/>
+      <path d="M50 30 V43.3"/><path d="M34 43.3 V56.6"/><path d="M66 43.3 V56.6"/><path d="M50 56.6 V70"/>
+    </g>
+  </symbol>
+
+  <!-- building (red stacked on anything) — gabled house -->
+  <symbol id="tok-house" viewBox="0 0 100 100">
+    <path d="M50 15 L87 47 H13 Z"
+          fill="#C6362A" stroke="#6E1008" stroke-width="4.5" stroke-linejoin="round"/>
+    <rect x="26" y="47" width="48" height="36" rx="3"
+          fill="#FFF0E2" stroke="#6E1008" stroke-width="4.5"/>
+    <rect x="42" y="59" width="16" height="24" rx="2"
+          fill="#C08552" stroke="#6E1008" stroke-width="4"/>
+  </symbol>
+
+  <!-- mountain (2+ gray) — snow-capped peak -->
+  <symbol id="tok-mountain" viewBox="0 0 100 100">
+    <path d="M50 19 L85 77 H15 Z"
+          fill="#B9C4C5" stroke="#3F4E4F" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M50 19 L65 44 L57 48 L50 41 L43 48 L35 44 Z"
+          fill="#FFFFFF" stroke="#3F4E4F" stroke-width="3.4" stroke-linejoin="round"/>
+  </symbol>
+
+  <!-- rock (1 gray) — a faceted boulder. Deliberately angular and squat so it stays
+       distinguishable from the tall triangular mountain, even at 22px. -->
+  <symbol id="tok-rock" viewBox="0 0 100 100">
+    <path d="M28 76 L14 54 L28 32 L54 24 L78 40 L82 62 L60 80 Z"
+          fill="#BCC7C8" stroke="#37474F" stroke-width="4.5" stroke-linejoin="round"/>
+    <g fill="none" stroke="#6E7D7E" stroke-width="3.8" stroke-linejoin="round">
+      <path d="M28 32 L52 46 L54 24"/>
+      <path d="M52 46 L82 62"/>
+      <path d="M52 46 L38 77"/>
+    </g>
+  </symbol>
+
+</defs></svg>
+<!-- ================================ end symbols ================================ -->
+
+<h2>All nine glyphs × the four sizes that actually ship</h2>
+<div class="panel row" id="all"></div>
+<p class="note" style="padding-left:18px">
+  62 / 52 / 46px are the three responsive <code>--hex-w</code> breakpoints. 22px is the animal-card
+  mini-pattern — the hardest test, and where detail dies.
+</p>
+
+<h2>Realistic board — every terrain adjacent, 62px</h2>
+<div class="panel"><div class="cluster" id="cluster" style="height:290px"></div></div>
+
+<h2>Animal-card mini-patterns at 22px</h2>
+<div class="panel row" style="gap:44px; align-items:center" id="minis"></div>
+
+<script>
+  const SIZES = [62, 52, 46, 22];
+
+  // terrain key → [hex data-terrain, symbol id, label]
+  const TOKENS = [
+    ['blue',   'tok-water',    'water'],
+    ['yellow', 'tok-field',    'field'],
+    ['green',  'tok-leaf',     'leaves'],
+    ['green',  'tok-tree',     'tree'],
+    ['brown',  'tok-trunk',    'trunk'],
+    ['red',    'tok-brick',    'brick'],
+    ['red',    'tok-house',    'building'],
+    ['gray',   'tok-mountain', 'mountain'],
+    ['rock',   'tok-rock',     'rock'],
+  ];
+
+  function hex(terrain, symbolId, w) {
+    const h = (w * 0.8660254).toFixed(2);
+    const glyph = symbolId
+      ? `<svg class="tok" viewBox="0 0 100 100"><use href="#${symbolId}"/></svg>` : '';
+    return `<div class="hex-cell" data-terrain="${terrain}"
+                 style="width:${w}px;height:${h}px;--hex-gap:${w < 30 ? 1 : 2}px">
+              <div class="hex-fill">${glyph}</div>
+            </div>`;
+  }
+
+  document.getElementById('all').innerHTML = TOKENS.map(([t, s, lbl]) =>
+    `<div class="spec">
+       <div class="name">${lbl}</div>
+       <div style="display:flex;gap:7px;align-items:flex-end">
+         ${SIZES.map(w => hex(t, s, w)).join('')}
+       </div>
+     </div>`
+  ).join('');
+
+  // ---- Board cluster: flat-top axial → pixel, same math as hexToPixel() ----
+  const CLUSTER = [
+    { q: 0, r: 0, t: 'blue',   s: 'tok-water' },
+    { q: 1, r: 0, t: 'blue',   s: 'tok-water' },
+    { q: 2, r: 0, t: 'yellow', s: 'tok-field' },
+    { q: 3, r: 0, t: 'gray',   s: 'tok-mountain' },
+    { q: 0, r: 1, t: 'green',  s: 'tok-tree' },
+    { q: 1, r: 1, t: 'brown',  s: 'tok-trunk' },
+    { q: 2, r: 1, t: 'yellow', s: 'tok-field' },
+    { q: 3, r: 1, t: 'rock',   s: 'tok-rock' },
+    { q: 0, r: 2, t: 'green',  s: 'tok-leaf' },
+    { q: 1, r: 2, t: 'red',    s: 'tok-house' },
+    { q: 2, r: 2, t: 'red',    s: 'tok-brick' },
+    { q: 3, r: 2, t: 'green',  s: 'tok-tree' },
+  ];
+  (function () {
+    const w = 62, H = w * 0.8660254;
+    document.getElementById('cluster').innerHTML = CLUSTER.map(c =>
+      `<div style="left:${c.q * w * 0.75}px;top:${c.r * H + c.q * H * 0.5}px">
+         ${hex(c.t, c.s, w)}</div>`
+    ).join('');
+  })();
+
+  // ---- 22px card mini-patterns, three real-shaped animal patterns ----
+  const PATTERNS = [
+    { name: 'water · field · water', hexes: [
+      { q: 0, r: 0, t: 'blue', s: 'tok-water' },
+      { q: 1, r: 0, t: 'yellow', s: 'tok-field' },
+      { q: 1, r: 1, t: 'blue', s: 'tok-water' }] },
+    { name: 'tree · trunk · leaves', hexes: [
+      { q: 0, r: 0, t: 'green', s: 'tok-tree' },
+      { q: 1, r: 0, t: 'brown', s: 'tok-trunk' },
+      { q: 0, r: 1, t: 'green', s: 'tok-leaf' }] },
+    { name: 'building · rock · mountain', hexes: [
+      { q: 0, r: 0, t: 'red', s: 'tok-house' },
+      { q: 1, r: 0, t: 'rock', s: 'tok-rock' },
+      { q: 1, r: 1, t: 'gray', s: 'tok-mountain' }] },
+  ];
+  document.getElementById('minis').innerHTML = PATTERNS.map(p => {
+    const w = 22, H = w * 0.8660254;
+    const pts = p.hexes.map(h => ({ h, x: h.q * w * 0.75, y: h.r * H + h.q * H * 0.5 }));
+    const minX = Math.min(...pts.map(v => v.x)), minY = Math.min(...pts.map(v => v.y));
+    const maxX = Math.max(...pts.map(v => v.x)), maxY = Math.max(...pts.map(v => v.y));
+    return `<div class="spec">
+      <div class="mini-board" style="width:${(maxX-minX)+w}px;height:${(maxY-minY)+H}px">`
+      + pts.map(({ h, x, y }) =>
+          `<div class="mini-cell" style="left:${x-minX}px;top:${y-minY}px">${hex(h.t, h.s, w)}</div>`
+        ).join('')
+      + `</div><div class="lbl">${p.name}</div></div>`;
+  }).join('');
+</script>
+</body>
+</html>

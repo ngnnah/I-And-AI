@@ -8,37 +8,46 @@ the code touchpoints — this doc assumes it. Delete or trim items here as they 
 
 - **Calm & harmonious above all** — soft/translucent, light colors, minimal motion, subtle > flashy.
   When a change makes the screen busier or louder, it's probably wrong. This now applies literally:
-  SFX volumes are capped in test (`< 0.05` per part) and ambience is capped at 0.18.
+  SFX volumes are capped in test (`< 0.05` per part) and ambience at `AMBIENCE_CAP` 0.06 — a level
+  calibrated by measuring RMS, not guessed (see the Sound system section in `CLAUDE.md`).
 - **Mechanics are frozen.** Visual/interaction work only; don't alter rules or scoring.
 - **No build step, self-contained.** New art = SVG or inline data URIs in `assets/`. No pipeline.
 - **One source of truth for size:** `--hex-w`. Never hard-code hex px elsewhere.
 
-## The key fork — decide art direction first
+## Art direction — settled
 
-Everything else depends on this. Pick one for the session (can escalate later):
+**Tier B done; we are now in Tier C** (board/hex texture, backgrounds, animal-card art, header
+scene). Tier A polish still runs alongside. Decisions locked in, don't re-litigate without a reason:
 
-- **Tier A — Refine, keep emoji.** Tune layout/spacing/palette/motion; emoji tokens stay. Lowest
-  effort, keeps the current playful charm. Good if the game already "feels right."
-- **Tier B — Custom token art.** Replace the 6 emoji + 2 composites (🌳 tree, 🏡 building) with
-  original SVG art. This is what defines the game's identity. Medium effort; the highest-leverage
-  visual upgrade.
-- **Tier C — Full art pass.** Tier B + board/hex texture, backgrounds, animal-card art, header scene.
-  Largest effort; do only after B lands and feels good.
-
-Recommendation: **B**, one token at a time, verifying each on-board before moving on.
+- **Hand-authored SVG for tokens, raster for illustration.** The pre-generated art in
+  `~/Downloads/harmonies-assets/` is reference, not shippable pixels. Anything rendered small
+  (tokens, 22px card patterns) gets authored as SVG paths — tracing the PNGs gives wobbly
+  anti-aliased paths, baked-in `[cite: N]` watermarks, and opaque discs that fight the hex fill.
+  Anything rendered large where the watercolour look *is* the art (animal cards, sun medallions,
+  backgrounds) stays raster: crop → downscale → PNG/WebP in `assets/`. Don't trace those.
+- **No discs behind glyphs.** The hex carries the terrain colour. See `CLAUDE.md`.
 
 ## Backlog (prioritized)
 
-### 1. Token art — the main event (Tier B)
-Replace emoji with original art. Touchpoints:
-- `TOKEN_EMOJI` map + `updateHexDisplay()` (`index.html:1914`) — on-board rendering, incl. the
-  composite logic (green-on-brown → tree, red-stacked → building, height badge suppression).
-- `renderMiniPattern()` (`:1544`) / `getCompactPattern()` (`:1568`) — the mini honeycomb on animal
-  cards. **Must mirror the board's token visuals** or cards and board diverge.
-- Keep art readable at the smallest responsive `--hex-w` (46px) and in the ~22px card mini-pattern.
-- Swap emoji strings in JS with node `.split().join()`, never perl/sed (silent multibyte failures).
-- Suggested approach: one inline SVG symbol per terrain in `assets/`, referenced by `<use>`, so
-  board + card share exactly one definition. Do water first (most visible), verify, then the rest.
+### 1. ✅ Token art — shipped 2026-07-25
+Nine original SVG glyphs replace the emoji on board, token chips, and card mini-patterns, sharing one
+`<symbol>` sheet so they can't diverge. Iterate in `dev-token-lab.html`. Details + authoring gotchas
+in `CLAUDE.md`. Two follow-ups it surfaced:
+- **22px legibility (the real remaining gap).** At card-mini size every detailed glyph degrades to a
+  smudge — leaf is a sliver, brick is a blur, and that's exactly where animal patterns must be read
+  at a glance. Proposed fix: a second, minimal `<symbol>` per terrain (bold silhouette, no interior
+  detail) used only by `renderMiniPattern()`. It already takes `hexW`, so switch on it.
+- **Glyph contrast vs the calm principle.** The new glyphs are bright fills + dark outlines, which
+  reads crisp but pushes the board *more* saturated, against "soft/translucent, subtle > flashy".
+  Worth an audit of glyph fills together with the terrain gradients in #2 rather than in isolation.
+
+### 1b. Backgrounds & scene (Tier C, next up)
+Owner reference (2026-07-25): a dawn **Alpe di Siusi / Dolomites** photo — warm hazy sky, soft rolling
+green meadows, tiny dark cabins, pale distant peaks, very low contrast. Also
+`~/Downloads/harmonies-assets/background.png` and the four browser mockups (`IMG_3539-great-layout`,
+`IMG_3540-background2`). The mood is *atmospheric perspective*: light, desaturated, receding — it must
+sit behind the board without competing with it. Keep the board legible; this is wallpaper, not art
+direction for the hexes.
 
 ### 2. Board & layout polish (Tier A, do alongside)
 - Review desktop vs mobile balance at all three breakpoints (62/52/46px). Watch for the old
@@ -103,13 +112,13 @@ cd projects/gaming/harmonies && python3 -m http.server 8001   # play at localhos
 npm test && npx playwright test                                # baseline: all green before art work
 ```
 1. Read `CLAUDE.md` (design system + gotchas).
-2. Pick the art tier (fork above).
+2. Pick the next backlog item (art direction is settled — see above).
 3. Work one visual element end-to-end (board **and** card), screenshot, eyeball for calm, commit.
-4. Deploy via the rsync in `CLAUDE.md` (excludes `*.md`); verify live + `.md` files 404.
+   Visual work goes in a `dev-*.html` lab first, then gets copied into `index.html`.
+4. Deploy via the rsync in `CLAUDE.md` (excludes `*.md` and `dev-*`); verify live + those files 404.
 
 ## Open questions for the owner
 
-- Art tier for this session (A / B / C)?
-- Any reference art or mood (the current Fuji/Hokusai/sakura icon sets a Japanese-woodblock tone —
-  extend that, or go a different direction)?
+- Tune the sound mix by ear (capped for safety, not yet for taste)?
+- The 22px card-pattern legibility fix — worth doing before backgrounds?
 - Is PWA/installable wanted, or keep it a plain web page?
