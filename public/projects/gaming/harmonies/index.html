@@ -58,6 +58,14 @@
     .hex-cell[data-terrain="green"]  { --terrain: linear-gradient(135deg,#7ED321,#5FA518); }
     .hex-cell[data-terrain="red"]    { --terrain: linear-gradient(135deg,#D0021B,#A00116); }
     .hex-cell[data-terrain="gray"]   { --terrain: linear-gradient(135deg,#7F8C8D,#5D6D6E); }
+    /* Original token art (the <symbol> sheet at the top of <body>). Sized as a
+       percentage of its hex/chip, so it scales with --hex-w like the emoji did. The
+       drop-shadow is what lifts the glyph off the terrain gradient underneath. */
+    .tok-glyph {
+      display: block;
+      filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.32));
+      pointer-events: none;
+    }
     .hex-cell[data-terrain="empty"] .hex-fill::before {
       background: radial-gradient(120% 90% at 50% 15%, rgba(255,255,255,.55), transparent 60%), #e3ece6;
     }
@@ -958,8 +966,8 @@
          distinguishable from the tall triangular mountain, even at 22px. -->
     <symbol id="tok-rock" viewBox="0 0 100 100">
       <path d="M28 76 L14 54 L28 32 L54 24 L78 40 L82 62 L60 80 Z"
-            fill="#CDD6D7" stroke="#3F4E4F" stroke-width="4.5" stroke-linejoin="round"/>
-      <g fill="none" stroke="#8C9A9B" stroke-width="3.6" stroke-linejoin="round">
+            fill="#BCC7C8" stroke="#37474F" stroke-width="4.5" stroke-linejoin="round"/>
+      <g fill="none" stroke="#6E7D7E" stroke-width="3.8" stroke-linejoin="round">
         <path d="M28 32 L52 46 L54 24"/>
         <path d="M52 46 L82 62"/>
         <path d="M52 46 L38 77"/>
@@ -1342,13 +1350,27 @@
     // Token colour → <symbol> id in the sheet at the top of <body>. Single source of
     // truth for the ART; TERRAIN_SYMBOL_MINI maps the mini-pattern's terrain keys onto
     // the SAME symbols so board and cards can never drift apart.
+    //
+    // These are the UN-STACKED shapes — what a single loose token looks like. That's
+    // what the token-supply chips must show, since a drafted token is always singular:
+    // a lone green is a leaf (not a tree), a lone red is a brick (not a house), and a
+    // lone gray is a rock (not a mountain). STACK_PROMOTES below upgrades them.
     const TOKEN_SYMBOL = {
       blue: 'tok-water',
       yellow: 'tok-field',
       brown: 'tok-trunk',
       green: 'tok-leaf',
       red: 'tok-brick',
-      gray: 'tok-mountain'
+      gray: 'tok-rock'
+    };
+
+    // Stacking two or more of these promotes the glyph to its composite form. Mirrors
+    // the scoring rules: leaves on a trunk are a tree, a brick on anything is a
+    // building, and 2+ gray is a mountain where 1 gray is only a rock.
+    const STACK_PROMOTES = {
+      green: { symbol: 'tok-tree', label: '🌳' },
+      red: { symbol: 'tok-house', label: '🏡' },
+      gray: { symbol: 'tok-mountain', label: '⛰️' },
     };
 
     // Build one <use> reference. `size` is a CSS length for the square glyph box.
@@ -1358,14 +1380,17 @@
            + ` style="width:${size};height:${size}"><use href="#${symbolId}"/></svg>`;
     }
 
-    // Color names for display
+    // Colour names for display. Only used as the tooltip on token-supply chips, so
+    // these name the LOOSE token (matching TOKEN_SYMBOL's un-stacked glyphs) rather
+    // than the terrain it becomes when stacked — a tooltip reading "Mountain" over a
+    // rock glyph contradicts what the player is looking at.
     const COLOR_NAMES = {
       blue: 'Water',
       yellow: 'Field',
       brown: 'Trunk',
       green: 'Leaves',
-      red: 'Building',
-      gray: 'Mountain'
+      red: 'Brick',
+      gray: 'Rock'
     };
     
     // Game state
@@ -1795,6 +1820,17 @@
       water: '🌊', blue: '🌊', field: '🌼', yellow: '🌼', tree: '🌳', green: '🍃',
       mountain: '⛰️', gray: '⛰️', rock: '🪨', building: '🏡', red: '🧱', trunk: '🪵', brown: '🪵',
     };
+    // The mini-pattern's terrain keys → the SAME <symbol>s the board uses, so a card's
+    // pattern and the board it's matched against always show identical art. Nine
+    // distinct glyphs: rock (1 gray) vs mountain (2+), leaf vs tree, brick vs building.
+    const TERRAIN_SYMBOL_MINI = {
+      water: 'tok-water', blue: 'tok-water',
+      field: 'tok-field', yellow: 'tok-field',
+      tree: 'tok-tree', green: 'tok-leaf',
+      mountain: 'tok-mountain', gray: 'tok-mountain', rock: 'tok-rock',
+      building: 'tok-house', red: 'tok-brick',
+      trunk: 'tok-trunk', brown: 'tok-trunk',
+    };
     // Bold dark paw with a white outline — high contrast on any terrain color.
     const PAW_SVG = `<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="#1e293b" stroke="#ffffff" stroke-width="6" stroke-linejoin="round">`
       + `<ellipse cx="50" cy="66" rx="24" ry="19"/><ellipse cx="24" cy="40" rx="10" ry="12"/>`
@@ -1809,16 +1845,15 @@
       const minX = Math.min(...pts.map(p => p.x)), minY = Math.min(...pts.map(p => p.y));
       const maxX = Math.max(...pts.map(p => p.x)), maxY = Math.max(...pts.map(p => p.y));
       const boardW = (maxX - minX) + hexW, boardH = (maxY - minY) + H;
-      const emojiSize = Math.round(hexW * 0.42);
       const cells = pts.map(({ h, x, y }) => {
         const left = x - minX, top = y - minY;
         const fill = TERRAIN_FILL[h.terrain] || '#e3ece6';
-        const emoji = TERRAIN_EMOJI_MINI[h.terrain] || '';
+        const glyph = tokenGlyph(TERRAIN_SYMBOL_MINI[h.terrain], '66%');
         const ht = (h.height && h.height > 1)
           ? `<span class="ht-badge" style="font-size:${Math.round(hexW * 0.36)}px">${h.height}</span>` : '';
         const cube = h.isPlacementHex ? `<span class="cube-dot">${PAW_SVG}</span>` : '';
         return `<div class="mini-cell ${h.isPlacementHex ? 'cube' : ''}" style="left:${left}px;top:${top}px;width:${hexW}px;height:${H}px;--terrain:${fill}">`
-             + `<div class="mini-fill" style="font-size:${emojiSize}px">${emoji}</div>${cube}${ht}</div>`;
+             + `<div class="mini-fill" title="${TERRAIN_EMOJI_MINI[h.terrain] || ''}">${glyph}</div>${cube}${ht}</div>`;
       }).join('');
       const attrs = clickable
         ? ` onclick="event.stopPropagation(); openPatternHelperById('${cardId}')" title="Tap for full pattern" style="width:${boardW}px;height:${boardH}px;cursor:pointer"`
@@ -1963,7 +1998,8 @@
           token.dataset.color = color;
           token.dataset.space = spaceIndex;
           token.dataset.index = idx;
-          token.textContent = TOKEN_EMOJI[color];
+          token.innerHTML = tokenGlyph(TOKEN_SYMBOL[color], '62%');
+          token.title = COLOR_NAMES[color];
 
           // Single tap handler for mobile
           token.addEventListener('click', handleTokenClickMobile);
@@ -2164,7 +2200,8 @@
           token.dataset.color = color;
           token.dataset.space = spaceIndex;
           token.dataset.index = idx;
-          token.textContent = TOKEN_EMOJI[color];
+          token.innerHTML = tokenGlyph(TOKEN_SYMBOL[color], '62%');
+          token.title = COLOR_NAMES[color];
 
           // Click handler for click-to-place
           token.addEventListener('click', handleTokenClick);
@@ -2183,19 +2220,24 @@
 
       if (!stack || stack.length === 0) {
         cell.dataset.terrain = 'empty';
-        if (fill) fill.textContent = '';
+        if (fill) fill.innerHTML = '';
         return;
       }
 
       const topColor = stack[stack.length - 1].color;
       cell.dataset.terrain = topColor;
-      // A leaf on a trunk (green on 1-2 brown) is a full tree → 🌳 (leaf alone = bush 🍃).
-      // A brick on another token is a building → 🏡 (brick alone stays 🧱).
+      // A leaf on a trunk (green on 1-2 brown) is a full tree (leaf alone = bush).
+      // A brick on another token is a building (brick alone stays a brick).
       const isBuilding = topColor === 'red' && stack.length > 1;
-      let emoji = TOKEN_EMOJI[topColor];
-      if (topColor === 'green' && stack.length > 1) emoji = '🌳';
-      if (isBuilding) emoji = '🏡';
-      if (fill) fill.textContent = emoji;
+      // Start from the un-stacked shape, then promote if this hex is a stack.
+      let symbol = TOKEN_SYMBOL[topColor];
+      let label = topColor === 'gray' ? '🪨' : TOKEN_EMOJI[topColor];
+      const promoted = stack.length > 1 ? STACK_PROMOTES[topColor] : null;
+      if (promoted) ({ symbol, label } = promoted);
+      if (fill) {
+        fill.innerHTML = tokenGlyph(symbol);
+        fill.title = label;
+      }
 
       // Stack-height badge (skip for buildings — a building isn't a "height", it's
       // just a brick on a token, so the number would be misleading).
