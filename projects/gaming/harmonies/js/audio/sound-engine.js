@@ -92,6 +92,10 @@ export function createSoundEngine({ contextFactory, cap = AMBIENCE_CAP } = {}) {
     /** Bumped on every scene change; stale timer callbacks check it and bail. */
     generation: 0,
     noise: new Map(),
+    /** Set by unlock(); gates real-AudioContext creation until a user gesture. */
+    unlockRequested: false,
+    /** iOS output-path prime has been played. */
+    primed: false,
   };
 
   function makeContext() {
@@ -105,6 +109,11 @@ export function createSoundEngine({ contextFactory, cap = AMBIENCE_CAP } = {}) {
   function ensure() {
     if (state.dead) return null;
     if (state.ctx) return state.ctx;
+    // Never create a real AudioContext before a user gesture. iOS Safari starts such a
+    // context suspended and waking it afterwards is unreliable — the game used to build
+    // one during init (the pouch-refill cue), which is the worst possible starting state.
+    // Tests and the sound lab inject a contextFactory and are exempt.
+    if (!state.unlockRequested && typeof contextFactory !== "function") return null;
     try {
       const ctx = makeContext();
       const master = ctx.createGain();
@@ -237,6 +246,16 @@ export function createSoundEngine({ contextFactory, cap = AMBIENCE_CAP } = {}) {
     if (!parts || !parts.length) return;
     const ctx = ensure();
     if (!ctx) return;
+    // An OfflineAudioContext also reports "suspended" until startRendering() is called,
+    // and dropping cues there would silence every offline measurement — so only guard
+    // realtime contexts. `startRendering` is the discriminator.
+    const isRealtime = typeof ctx.startRendering !== "function";
+    if (isRealtime && ctx.state === "suspended") {
+      // currentTime is frozen while suspended, so anything scheduled now is lost.
+      // Ask for a wake and drop this one cue rather than emit silence forever.
+      try { ctx.resume && ctx.resume(); } catch (e) { /* ignore */ }
+      return;
+    }
     try {
       const destination = bus === "ambience" ? state.ambienceBus : state.sfxBus;
       const now = ctx.currentTime;
@@ -397,13 +416,34 @@ export function createSoundEngine({ contextFactory, cap = AMBIENCE_CAP } = {}) {
   // ── Public API ──────────────────────────────────────────────────────────────
 
   return {
-    /** Call from inside a user gesture — iOS/Chrome start contexts suspended. */
-    unlock() {
+    /**
+     * Call from inside a user gesture. Returns whether the context is genuinely
+     * RUNNING — callers must keep retrying on later gestures until it is.
+     *
+     * iOS Safari is strict here in ways Chrome is not:
+     *  - It only treats SOME events as user activation for audio (`click`, `touchend`,
+     *    `keydown`) — NOT `touchstart`/`pointerdown`. So a resume attempt can simply be
+     *    refused, and reporting success then is what produced total silence on iPhone.
+     *  - `resume()` is async; the context is not running until it settles.
+     *  - The output path stays asleep until something has actually been played, hence
+     *    the one-sample silent prime below.
+     */
+    async unlock() {
+      state.unlockRequested = true;
       const ctx = ensure();
       if (!ctx) return false;
       try {
-        if (ctx.state === "suspended" && ctx.resume) ctx.resume();
-        return true;
+        if (ctx.state === "suspended" && ctx.resume) await ctx.resume();
+        if (!state.primed) {
+          // Playing a silent 1-sample buffer is the reliable way to wake iOS's output.
+          const buf = ctx.createBuffer(1, 1, ctx.sampleRate);
+          const src = ctx.createBufferSource();
+          src.buffer = buf;
+          src.connect(ctx.destination);
+          src.start(0);
+          state.primed = true;
+        }
+        return ctx.state === "running";
       } catch (e) {
         return false;
       }

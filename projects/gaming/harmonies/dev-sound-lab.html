@@ -87,7 +87,7 @@
         const { freq } = cueForPlacement(color, h);
         const b = document.createElement('button');
         b.innerHTML = `h${h}<span class="hz">${freq.toFixed(0)} Hz</span>`;
-        b.onclick = () => { sound.unlock(); sound.placement(color, h); };
+        b.onclick = async () => { await sound.unlock(); sound.placement(color, h); };
         placement.appendChild(b);
       }
     }
@@ -96,7 +96,7 @@
     for (const name of Object.keys(EVENT_CUES)) {
       const b = document.createElement('button');
       b.textContent = name;
-      b.onclick = () => { sound.unlock(); sound.cue(name); };
+      b.onclick = async () => { await sound.unlock(); sound.cue(name); };
       cues.appendChild(b);
     }
 
@@ -106,8 +106,8 @@
     const addScene = (id, label) => {
       const b = document.createElement('button');
       b.textContent = label;
-      b.onclick = () => {
-        sound.unlock();
+      b.onclick = async () => {
+        await sound.unlock();
         sound.setScene(id);
         sceneBtns.forEach(x => x.classList.toggle('on', x === b && id !== null));
       };

@@ -240,7 +240,7 @@ test("an unknown scene id turns ambience off rather than half-starting it", () =
   assert.equal(engine.pendingTimerCount, 0);
 });
 
-test("a broken AudioContext latches dead and never blocks the game", () => {
+test("a broken AudioContext latches dead and never blocks the game", async () => {
   const engine = createSoundEngine({
     contextFactory: () => { throw new Error("no audio on this device"); },
   });
@@ -252,7 +252,7 @@ test("a broken AudioContext latches dead and never blocks the game", () => {
   engine.suspend();
   engine.wake();
   assert.equal(engine.dead, true);
-  assert.equal(engine.unlock(), false);
+  assert.equal(await engine.unlock(), false);
 });
 
 test("volume is clamped to 0..1", () => {
@@ -266,12 +266,39 @@ test("volume is clamped to 0..1", () => {
   assert.equal(engine.volume, 0);
 });
 
-test("suspend/wake drive the context state", () => {
+test("suspend/wake drive the context state", async () => {
   const { ctx } = fakeContext();
   const engine = createSoundEngine({ contextFactory: () => ctx });
-  engine.unlock();
+  await engine.unlock();
   engine.suspend();
   assert.equal(ctx.state, "suspended");
   engine.wake();
   assert.equal(ctx.state, "running");
+});
+
+test("unlock reports whether the context is genuinely running", async () => {
+  // Safari can refuse a resume. Claiming success then means the caller stops retrying
+  // and the game goes permanently silent — the iPhone bug this guards.
+  const { ctx } = fakeContext();
+  ctx.state = "suspended";
+  ctx.resume = () => Promise.resolve();   // refuses: state never becomes "running"
+  const engine = createSoundEngine({ contextFactory: () => ctx });
+  assert.equal(await engine.unlock(), false, "a refused resume must report failure");
+
+  const ok = fakeContext();
+  ok.ctx.state = "suspended";
+  const engine2 = createSoundEngine({ contextFactory: () => ok.ctx });
+  assert.equal(await engine2.unlock(), true, "a successful resume must report success");
+});
+
+test("cues are dropped, not silently lost, while the context is suspended", async () => {
+  // currentTime is frozen while suspended, so anything scheduled then never sounds.
+  const { ctx, log } = fakeContext();
+  const engine = createSoundEngine({ contextFactory: () => ctx });
+  await engine.unlock();
+  ctx.state = "suspended";
+  const before = log.oscillators;
+  engine.placement("gray", 1);
+  assert.equal(log.oscillators, before, "must not schedule into a suspended context");
+  assert.equal(ctx.state, "running", "should have asked the context to wake");
 });

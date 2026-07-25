@@ -116,6 +116,26 @@ default **off** (uninvited background audio is jarring, and browsers block it pr
 - **The main bug risk:** `randomEvent` layers are self-rescheduling `setTimeout` chains. They're held
   in a registry, cancelled on scene change, and guarded by a `generation` counter — a leak would
   silently stack scenes on top of each other. Covered by a dedicated test.
+- **🍎 iOS Safari unlock — this shipped as total silence on iPhone once.** Safari only accepts
+  *some* events as user activation for audio (`click`, `touchend`, `keydown`) — **not**
+  `pointerdown`/`touchstart` — and it may refuse a `resume()` outright. The original code listened
+  on `pointerdown` with `{ once: true }` and had `unlock()` return `true` whenever a context merely
+  *existed*, so one refused resume meant silence for the whole session. Rules now:
+  1. `unlock()` is **async** and returns whether the context is genuinely `running`. Never treat
+     "a context exists" as success.
+  2. Listen on all of `pointerdown`/`touchend`/`click`/`keydown`, in the **capture** phase (so the
+     context wakes before a click handler plays a cue), and **keep listening until running** — no
+     `{ once: true }`.
+  3. **Never create a real `AudioContext` before a gesture** — `ensure()` refuses until
+     `unlock()` is called. A cue during init (the pouch refill) used to create one, the worst
+     starting state on iOS.
+  4. iOS needs a 1-sample silent buffer played once to wake its output path (`state.primed`).
+  5. Never schedule into a suspended realtime context — `currentTime` is frozen so the sound is
+     lost. Note an `OfflineAudioContext` *also* reports `"suspended"` until `startRendering()`, so
+     that guard checks for `startRendering` to tell the two apart.
+- **Test Safari changes under WebKit:** `npx playwright test tests/safari-audio.spec.js --browser=webkit`.
+  Every other audio test injects a fake/offline context and therefore never touches the real unlock
+  path — which is exactly how the iPhone silence got through a green suite.
 - Audio failure is always silent, never fatal: the engine latches `dead` on first error so a broken
   context isn't retried ~90 times a game. Context suspends on `visibilitychange` (phone battery).
 - **Audition by ear:** `dev-sound-lab.html` (dev-only, excluded from deploy by `--exclude='dev-*'`)
