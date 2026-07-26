@@ -59,11 +59,11 @@ export const VOICES = {
     base: 0,
     label: "mountain",
     build: (freq) => [
-      { type: "tone", wave: "sine", freq, dur: 0.34, vol: 0.026, attack: 0.02 },
-      { type: "tone", wave: "sine", freq: freq * 2, dur: 0.24, vol: 0.018, attack: 0.015 },
-      { type: "tone", wave: "sine", freq: freq * 3, dur: 0.2, vol: 0.021, attack: 0.012 },
-      { type: "tone", wave: "sine", freq: freq * 4, dur: 0.15, vol: 0.016, attack: 0.01 },
-      { type: "tone", wave: "sine", freq: freq * 6, dur: 0.09, vol: 0.008, attack: 0.008 },
+      { type: "tone", wave: "sine", freq, dur: 0.34, vol: 0.022, attack: 0.02 },
+      { type: "tone", wave: "sine", freq: freq * 2, dur: 0.24, vol: 0.015, attack: 0.015 },
+      { type: "tone", wave: "sine", freq: freq * 3, dur: 0.2, vol: 0.018, attack: 0.012 },
+      { type: "tone", wave: "sine", freq: freq * 4, dur: 0.15, vol: 0.014, attack: 0.01 },
+      { type: "tone", wave: "sine", freq: freq * 6, dur: 0.09, vol: 0.007, attack: 0.008 },
     ],
   },
 
@@ -75,11 +75,11 @@ export const VOICES = {
     base: 2,
     label: "brick",
     build: (freq) => [
-      { type: "noise", color: "brown", filter: "bandpass", cutoff: 620, q: 0.7, dur: 0.06, vol: 0.045 },
-      { type: "tone", wave: "triangle", freq, dur: 0.08, vol: 0.03 },
+      { type: "noise", color: "brown", filter: "bandpass", cutoff: 620, q: 0.7, dur: 0.06, vol: 0.048 },
+      { type: "tone", wave: "triangle", freq, dur: 0.09, vol: 0.035 },
       // Phone-audible partial (3x F#3 = ~555Hz). Triangle already has odd harmonics,
       // but not enough of them above 500Hz to carry on a phone speaker.
-      { type: "tone", wave: "triangle", freq: freq * 3, dur: 0.05, vol: 0.016 },
+      { type: "tone", wave: "triangle", freq: freq * 3, dur: 0.055, vol: 0.019 },
     ],
   },
 

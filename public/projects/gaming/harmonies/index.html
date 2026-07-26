@@ -1365,7 +1365,11 @@
     // meant silence for the rest of the session. Now: listen on all the plausible events,
     // in the CAPTURE phase (so the context is awake before the click handler plays a cue),
     // and keep listening until the context reports `running`.
-    const SOUND_GESTURES = ['pointerdown', 'touchend', 'click', 'keydown'];
+    // ONLY events Safari accepts as user activation for audio. `pointerdown` is
+    // deliberately absent: it is not valid activation there, yet being first it would be
+    // the event that CREATES the context — born outside a valid gesture, which can leave
+    // it unresumable no matter what later events do.
+    const SOUND_GESTURES = ['touchend', 'click', 'keydown'];
     let soundUnlocked = false;
     async function unlockSound() {
       if (soundUnlocked) return;
