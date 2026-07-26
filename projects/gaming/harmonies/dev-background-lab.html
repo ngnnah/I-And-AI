@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harmonies — background lab</title>
+<style>
+  /* ============================================================================
+     BACKGROUND LAB — dev only, excluded from deploy by --exclude='dev-*'.
+     Auditions candidate page backgrounds (PLAN.md item 1b) behind a FAITHFUL
+     copy of the real board: hex CSS, terrain gradients and the <symbol> sheet are
+     copied verbatim from index.html, and the surrounding chrome (header bar,
+     panel cards, token chips, score tiles) is rebuilt with the same values so a
+     candidate can be judged for board legibility, not just for prettiness.
+
+     Deep-link for screenshots:  ?bg=<id>&panel=<opaque|frosted|bare>
+     ========================================================================= */
+
+  /* ---- copied verbatim from index.html ---- */
+  :root {
+    --hex-w: 62px;
+    --hex-h: calc(var(--hex-w) * 0.8660254);
+    --hex-gap: 2px;
+  }
+  .hex-cell {
+    position: absolute;
+    width: var(--hex-w);
+    height: var(--hex-h);
+    filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.22));
+  }
+  .hex-fill {
+    position: absolute;
+    inset: 0;
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    background: rgba(15, 23, 42, 0.22); /* grout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(var(--hex-w) * 0.42);
+    line-height: 1;
+    color: #fff;
+  }
+  .hex-fill::before {
+    content: "";
+    position: absolute;
+    inset: var(--hex-gap);
+    clip-path: inherit;
+    background: var(--terrain, #e3ece6);
+    z-index: -1;
+  }
+  .hex-cell[data-terrain="empty"]  { --terrain: #e3ece6; }
+  .hex-cell[data-terrain="blue"]   { --terrain: linear-gradient(135deg,#4A90E2,#357ABD); }
+  .hex-cell[data-terrain="yellow"] { --terrain: linear-gradient(135deg,#F5A623,#E09000); }
+  .hex-cell[data-terrain="brown"]  { --terrain: linear-gradient(135deg,#8B4513,#654321); }
+  .hex-cell[data-terrain="green"]  { --terrain: linear-gradient(135deg,#7ED321,#5FA518); }
+  .hex-cell[data-terrain="red"]    { --terrain: linear-gradient(135deg,#D0021B,#A00116); }
+  .hex-cell[data-terrain="gray"]   { --terrain: linear-gradient(135deg,#7F8C8D,#5D6D6E); }
+  .hex-cell[data-terrain="empty"] .hex-fill::before {
+    background: radial-gradient(120% 90% at 50% 15%, rgba(255,255,255,.55), transparent 60%), #e3ece6;
+  }
+  .tok-glyph {
+    display: block;
+    filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.32));
+    pointer-events: none;
+  }
+  .hex-cell.valid-token-target .hex-fill::after {
+    content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 42%; aspect-ratio: 1; border-radius: 50%;
+    background: rgba(153, 226, 210, 0.22);
+    box-shadow: inset 0 0 0 1.5px rgba(94, 194, 176, 0.55);
+  }
+  .hex-cell.selected .hex-fill { box-shadow: inset 0 0 0 3px rgba(245, 166, 35, 0.95); }
+  .stack-count {
+    position: absolute;
+    bottom: calc(var(--hex-h) * 0.05);
+    left: 50%; transform: translateX(-50%);
+    min-width: 18px; height: 18px; padding: 0 5px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 9px;
+    background: rgba(15, 23, 42, 0.9);
+    color: #fff; font-size: 11px; font-weight: 700; line-height: 1;
+    box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+  }
+  .animal-cube {
+    position: absolute;
+    top: calc(var(--hex-h) * 0.02);
+    left: 50%; transform: translateX(-50%);
+    width: calc(var(--hex-w) * 0.3); height: calc(var(--hex-w) * 0.3);
+    pointer-events: none;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
+  }
+  .hex-grid {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    height: 420px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+  .header-bar { background: linear-gradient(120deg, #7bab9c 0%, #8fb6cf 55%, #a6acd0 100%); }
+  .score-cells { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+  .score-cell { border-radius: 0.65rem; padding: 0.4rem 0.25rem; text-align: center; line-height: 1; }
+  .score-cell .sc-emoji {
+    width: 1.85rem; height: 1.85rem; margin: 0 auto 3px;
+    border-radius: 50%; display: grid; place-items: center;
+    background: var(--sc-disc, rgba(15, 23, 42, 0.12));
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 1px 2px rgba(15, 23, 42, 0.12);
+  }
+  .score-cell .sc-glyph { display: block; width: 1.2rem; height: 1.2rem; filter: drop-shadow(0 1px 1px rgba(0,0,0,.22)); }
+  .score-cell .sc-num { font-size: 1.5rem; font-weight: 800; }
+  .sc-trees   { background: #dcfce7; --sc-disc: linear-gradient(135deg,#7ED321,#5FA518); } .sc-trees   .sc-num { color: #15803d; }
+  .sc-mtn     { background: #e5e7eb; --sc-disc: linear-gradient(135deg,#7F8C8D,#5D6D6E); } .sc-mtn     .sc-num { color: #374151; }
+  .sc-fields  { background: #fef9c3; --sc-disc: linear-gradient(135deg,#F5A623,#E09000); } .sc-fields  .sc-num { color: #a16207; }
+  .sc-build   { background: #fee2e2; --sc-disc: linear-gradient(135deg,#D0021B,#A00116); } .sc-build   .sc-num { color: #b91c1c; }
+  .sc-rivers  { background: #dbeafe; --sc-disc: linear-gradient(135deg,#4A90E2,#357ABD); } .sc-rivers  .sc-num { color: #1d4ed8; }
+  .sc-animals { background: #f3e8ff; --sc-disc: linear-gradient(135deg,#c4b5fd,#8b5cf6); } .sc-animals .sc-num { color: #7e22ce; }
+  .token {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 2px 6px rgba(0,0,0,.2);
+  }
+  .token.blue { background: #4A90E2; } .token.yellow { background: #F5A623; }
+  .token.brown { background: #8B4513; } .token.green { background: #7ED321; }
+  .token.red { background: #D0021B; }  .token.gray { background: #7F8C8D; }
+  .mini-board { position: relative; margin: 4px auto 2px; }
+  .mini-cell { position: absolute; filter: drop-shadow(0 1px 1px rgba(0,0,0,.2)); }
+  .mini-fill {
+    position: absolute; inset: 0;
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    background: rgba(15, 23, 42, 0.35);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mini-fill::before { content: ""; position: absolute; inset: 1.5px; clip-path: inherit; background: var(--terrain, #e3ece6); z-index: -1; }
+
+  /* ---- lab-only chrome (mimics the Tailwind values used in index.html) ---- */
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: #1e293b;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 1.5rem 1rem; }
+  .panel-card {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(2px);
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1);
+    padding: 0.85rem;
+  }
+  header.header-bar {
+    border-radius: 0.75rem; padding: 0.75rem 1rem; margin-bottom: 1rem; color: #fff;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1);
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  }
+  header h1 { font-size: 1.6rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: .5rem; }
+  .pill { font-size: .8rem; font-weight: 700; background: rgba(0,0,0,.25); border-radius: 999px; padding: .25rem .75rem; }
+  .btn-w { background: #fff; color: #047857; font-size: .8rem; font-weight: 800; border: 0; border-radius: .5rem; padding: .5rem .85rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,.1); }
+  .game-grid { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 1.25rem; align-items: start; }
+  h2.ph { font-size: 1rem; font-weight: 700; color: #1e293b; margin: 0 0 .5rem; }
+  .board-panel h2.ph { text-align: center; font-size: 1.05rem; }
+  .card {
+    background: #fff; border-radius: 8px; padding: 6px 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.1); margin-bottom: 6px;
+  }
+  .card h3 { font-size: .8rem; margin: 0; font-weight: 700; }
+  .card p  { font-size: .65rem; margin: 2px 0 0; color: #64748b; }
+  .token-row { display: flex; align-items: center; gap: .6rem; padding: .5rem; background: #f8fafc; border-radius: .6rem; margin-bottom: .5rem; }
+  .token-row-label { font-size: .7rem; font-weight: 700; color: #64748b; min-width: 52px; }
+  .end-turn { width: 100%; margin-top: .5rem; padding: .7rem; border: 0; border-radius: .6rem; background: #10b981; color: #fff; font-weight: 800; }
+  .muted { font-size: .7rem; color: #64748b; }
+
+  /* Panel treatments — how much of the wallpaper the board lets through. */
+  /* opaque = today's index.html: an opaque washi board panel; wallpaper only
+     shows in the page margins. */
+  body[data-panel="opaque"] #board {
+    background-color: #eef7f1;
+    background-image:
+      linear-gradient(135deg, rgba(126,211,33,0.10) 0%, rgba(74,144,226,0.12) 100%),
+      radial-gradient(rgba(15,23,42,0.05) 1px, transparent 1px);
+    background-size: cover, 22px 22px;
+    border: 4px solid #cbd5e1; border-radius: .5rem;
+  }
+  /* frosted = board panel lets the wallpaper through, blurred (the IMG_3539 look
+     without giving up legibility). */
+  body[data-panel="frosted"] .board-panel { background: rgba(255,255,255,0.55); backdrop-filter: blur(7px) saturate(1.05); }
+  body[data-panel="frosted"] #board {
+    background: rgba(255,255,255,0.30);
+    border: 3px solid rgba(255,255,255,.6); border-radius: .5rem;
+  }
+  /* bare = hexes float directly on the wallpaper (the stress test) */
+  body[data-panel="bare"] .board-panel { background: transparent; box-shadow: none; backdrop-filter: none; }
+  body[data-panel="bare"] #board { background: transparent; border: 0; }
+  body[data-panel="bare"] .board-panel h2.ph { color: #334155; text-shadow: 0 1px 2px rgba(255,255,255,.8); }
+
+  /* ================== THE CANDIDATES ==================
+     Each is one `body[data-bg="…"]` rule. Adopting one = copying its declarations
+     onto the `body` rule in index.html (see the report / the note in the panel). */
+
+  /* 0 — CURRENT (index.html today): deep teal gradient + shippō pattern. Baseline. */
+  body[data-bg="current"] {
+    background-color: #0f172a;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%2256%22 height%3D%2256%22 viewBox%3D%220 0 56 56%22%3E%3Cg fill%3D%22none%22 stroke%3D%22rgba(255%2C255%2C255%2C0.05)%22 stroke-width%3D%221.4%22%3E%3Ccircle cx%3D%220%22 cy%3D%220%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%2256%22 cy%3D%220%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%220%22 cy%3D%2256%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%2256%22 cy%3D%2256%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%2228%22 cy%3D%2228%22 r%3D%2228%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),
+      linear-gradient(160deg, #2f4a49 0%, #263a41 55%, #20303a 100%);
+    background-attachment: fixed;
+    background-size: 56px 56px, cover;
+  }
+
+  /* A — CSS DAWN. Zero image bytes. Deliberately tuned to the *palette measured
+     off the blurred raster* (a 9×9 area-average of bg-dawn-wash), not invented:
+     pale cool sky, a warm valley-mouth glow, two soft ridge mounds, a cool
+     corner vignette, two meadow folds. Gradients only — no request, no decode,
+     resolution-free, repaints instantly at any viewport. */
+  body[data-bg="css-dawn"] {
+    background-color: #dfe6d8;
+    background-image:
+      /* meadow folds — warm cream highlights, the thing that stops the lower
+         half reading as flat olive */
+      radial-gradient(80% 16% at 26% 58%, rgba(255,252,235,0.42), rgba(255,252,235,0) 72%),
+      radial-gradient(70% 14% at 74% 72%, rgba(255,255,255,0.30), rgba(255,255,255,0) 72%),
+      /* dawn sun / valley mouth */
+      radial-gradient(46% 34% at 55% 30%, rgba(255,253,235,0.98), rgba(255,253,235,0) 74%),
+      /* pale receding ridges — soft mounds, never edges */
+      radial-gradient(34% 14% at 10% 38%, rgba(140,160,176,0.28), rgba(140,160,176,0) 76%),
+      radial-gradient(26% 10% at 32% 40%, rgba(140,160,176,0.20), rgba(140,160,176,0) 78%),
+      radial-gradient(38% 15% at 90% 37%, rgba(140,160,176,0.24), rgba(140,160,176,0) 76%),
+      radial-gradient(62% 10% at 52% 44%, rgba(142,164,150,0.28), rgba(142,164,150,0) 74%),
+      /* cool corner vignette centred on the horizon */
+      radial-gradient(120% 68% at 50% 40%, rgba(138,156,148,0) 42%, rgba(138,156,148,0.26) 100%),
+      /* sky → horizon → meadow base wash */
+      linear-gradient(to bottom,
+        #eaf3f3   0%,
+        #f4faf7  10%,
+        #fbfcf3  22%,
+        #f6f6ea  32%,
+        #e3e9dd  40%,
+        #dde3cf  50%,
+        #dbe0c8  62%,
+        #d2d9bd  76%,
+        #c2ccb0 100%);
+    background-attachment: fixed;
+    background-size: cover;
+  }
+
+  /* ---- The raster ladder: one source, three distances. Same crop from the
+          reference mockups (516×276 watercolour meadow), upscaled to 1600×856
+          and pushed progressively further back with desaturation + gaussian
+          blur, then WebP q72. Find where mood survives but the board wins. ---- */
+
+  /* B — σ2.5 · sat 0.60 · 26 KB. Detail intact. */
+  body[data-bg="raster-meadow"] {
+    background-color: #e9eee4;
+    background-image: url("assets/bg-dawn-meadow.webp");
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center 35%;
+  }
+  /* C — σ5 · sat 0.50 · 19 KB. Peaks and river still read; detail gone. */
+  body[data-bg="raster-soft"] {
+    background-color: #e9eee4;
+    background-image: url("assets/bg-dawn-soft.webp");
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center 35%;
+  }
+  /* D — σ14 · sat 0.42 · 11 KB. Colour masses only. */
+  body[data-bg="raster-wash"] {
+    background-color: #e9eee4;
+    background-image: url("assets/bg-dawn-wash.webp");
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center 35%;
+  }
+  /* E — σ5 + a free CSS veil. The busy detail in this source is all in the lower
+     third (flower speckle + river); one extra white gradient layer calms exactly
+     that band, for zero extra bytes, without blurring the peaks away. */
+  body[data-bg="raster-veiled"] {
+    background-color: #e9eee4;
+    background-image:
+      linear-gradient(to bottom, rgba(255,255,255,0) 34%, rgba(255,255,255,0.30) 62%, rgba(255,255,255,0.52) 100%),
+      url("assets/bg-dawn-soft.webp");
+    background-attachment: fixed, fixed;
+    background-size: cover, cover;
+    background-position: center, center 35%;
+  }
+
+  /* F — TEXTURE ONLY. No scene at all: a warm pale wash + a faint asanoha
+     (麻の葉) hemp-leaf pattern. ~0.6 KB of inline data URI. */
+  body[data-bg="texture"] {
+    background-color: #f2f1e6;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='84' viewBox='0 0 48 84'%3E%3Cg fill='none' stroke='rgba(122,140,120,0.16)' stroke-width='1'%3E%3Cpath d='M24 0 L48 14 L48 42 L24 56 L0 42 L0 14 Z'/%3E%3Cpath d='M24 0 L24 56 M0 14 L48 42 M48 14 L0 42'/%3E%3Cpath d='M24 28 L0 14 M24 28 L48 14 M24 28 L0 42 M24 28 L48 42'/%3E%3C/g%3E%3C/svg%3E"),
+      radial-gradient(70% 50% at 60% 18%, rgba(255,248,225,0.85), rgba(255,248,225,0) 70%),
+      linear-gradient(to bottom, #eef2ea 0%, #f4f2e4 45%, #e8ecdc 100%);
+    background-attachment: fixed;
+    background-size: 48px 84px, cover, cover;
+  }
+
+  /* Wallpaper-only mode (?chrome=off): strip the game so the candidate can be
+     judged as art, not just for legibility. */
+  body[data-chrome="off"] header.header-bar,
+  body[data-chrome="off"] .game-grid,
+  body[data-chrome="off"] .lab-note { display: none; }
+  body[data-chrome="off"] .wrap { min-height: 88vh; }
+
+  /* ---- lab control strip ---- */
+  .lab-bar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(15,23,42,.92); color: #e2e8f0;
+    padding: .5rem .75rem; display: flex; gap: .75rem; flex-wrap: wrap; align-items: center;
+    font-size: .75rem;
+  }
+  .lab-bar strong { color: #fff; font-size: .8rem; }
+  .lab-bar .grp { display: flex; gap: .3rem; align-items: center; }
+  .lab-bar button {
+    border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); color: #e2e8f0;
+    border-radius: .35rem; padding: .25rem .5rem; font-size: .72rem; cursor: pointer;
+  }
+  .lab-bar button[aria-pressed="true"] { background: #34d399; color: #06281f; border-color: #34d399; font-weight: 700; }
+  .lab-note {
+    background: rgba(255,255,255,.9); border-left: 4px solid #64748b;
+    border-radius: .4rem; padding: .6rem .8rem; margin: 0 0 1rem; font-size: .78rem; line-height: 1.5;
+  }
+  .lab-note code { background: rgba(15,23,42,.08); padding: 0 .25rem; border-radius: 3px; }
+  @media (max-width: 900px) {
+    .game-grid { grid-template-columns: 1fr; }
+    .hex-grid { height: 300px; }
+    :root { --hex-w: 46px; }
+  }
+</style>
+</head>
+<body data-bg="raster-veiled" data-panel="opaque">
+
+<!-- ==== token art: the <symbol> sheet, copied verbatim from index.html ==== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="tok-water" viewBox="0 0 100 100">
+    <g fill="none" stroke="#EAF6FF" stroke-width="10" stroke-linecap="round">
+      <path d="M20 36 C29 28 37 44 50 36 C63 28 71 42 80 36"/>
+      <path d="M20 52 C29 44 37 60 50 52 C63 44 71 58 80 52"/>
+      <path d="M20 68 C29 60 37 76 50 68 C63 60 71 74 80 68"/>
+    </g>
+  </symbol>
+  <symbol id="tok-field" viewBox="0 0 100 100">
+    <g stroke="#8A5A00" stroke-width="4.5" stroke-linecap="round" fill="none">
+      <path d="M50 88 V50"/><path d="M50 74 C38 72 32 64 31 55"/><path d="M50 66 C62 64 68 58 69 50"/>
+    </g>
+    <g fill="#FFF3C4" stroke="#8A5A00" stroke-width="3.4">
+      <ellipse cx="50" cy="18" rx="8" ry="10"/>
+      <ellipse cx="69" cy="29" rx="8" ry="10" transform="rotate(60 69 29)"/>
+      <ellipse cx="69" cy="51" rx="8" ry="10" transform="rotate(120 69 51)"/>
+      <ellipse cx="50" cy="62" rx="8" ry="10"/>
+      <ellipse cx="31" cy="51" rx="8" ry="10" transform="rotate(60 31 51)"/>
+      <ellipse cx="31" cy="29" rx="8" ry="10" transform="rotate(120 31 29)"/>
+    </g>
+    <circle cx="50" cy="40" r="11" fill="#E8A21A" stroke="#8A5A00" stroke-width="3.6"/>
+  </symbol>
+  <symbol id="tok-leaf" viewBox="0 0 100 100">
+    <path d="M26 80 C34 72 40 66 46 60" fill="none" stroke="#2F6B18" stroke-width="5" stroke-linecap="round"/>
+    <path d="M78 20 C80 46 62 70 40 66 C34 44 52 22 78 20 Z" fill="#DFF3C4" stroke="#2F6B18" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M76 22 C62 36 50 52 41 65" fill="none" stroke="#2F6B18" stroke-width="4" stroke-linecap="round"/>
+    <g stroke="#2F6B18" stroke-width="3" stroke-linecap="round" fill="none">
+      <path d="M66 32 C64 42 60 46 52 48"/><path d="M56 47 C55 56 52 59 46 61"/>
+    </g>
+  </symbol>
+  <symbol id="tok-tree" viewBox="0 0 100 100">
+    <path d="M50 62 V92" fill="none" stroke="#5A3418" stroke-width="10" stroke-linecap="round"/>
+    <path d="M50 8 C62 8 70 15 72 24 C83 27 88 38 83 47 C87 57 78 68 66 67
+             C60 74 40 74 34 67 C22 68 13 57 17 47 C12 38 17 27 28 24
+             C30 15 38 8 50 8 Z" fill="#8FD14F" stroke="#2F6B18" stroke-width="4.5" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="tok-trunk" viewBox="0 0 100 100">
+    <path d="M30 38 H70 V68 A20 9 0 0 1 30 68 Z" fill="#A9683A" stroke="#3E2410" stroke-width="4.5" stroke-linejoin="round"/>
+    <ellipse cx="50" cy="38" rx="20" ry="9" fill="#C68B5C" stroke="#3E2410" stroke-width="4.5"/>
+    <g fill="none" stroke="#8A552C" stroke-width="3">
+      <ellipse cx="50" cy="38" rx="12" ry="5"/><ellipse cx="50" cy="38" rx="5" ry="2.1"/>
+    </g>
+  </symbol>
+  <symbol id="tok-brick" viewBox="0 0 100 100">
+    <rect x="18" y="30" width="64" height="40" rx="4" fill="#E8604F" stroke="#6E1008" stroke-width="4.5"/>
+    <g stroke="#6E1008" stroke-width="4" stroke-linecap="round">
+      <path d="M18 43.3 H82"/><path d="M18 56.6 H82"/>
+      <path d="M50 30 V43.3"/><path d="M34 43.3 V56.6"/>
+      <path d="M66 43.3 V56.6"/><path d="M50 56.6 V70"/>
+    </g>
+  </symbol>
+  <symbol id="tok-house" viewBox="0 0 100 100">
+    <path d="M50 15 L87 47 H13 Z" fill="#C6362A" stroke="#6E1008" stroke-width="4.5" stroke-linejoin="round"/>
+    <rect x="26" y="47" width="48" height="36" rx="3" fill="#FFF0E2" stroke="#6E1008" stroke-width="4.5"/>
+    <rect x="42" y="59" width="16" height="24" rx="2" fill="#C08552" stroke="#6E1008" stroke-width="4"/>
+  </symbol>
+  <symbol id="tok-mountain" viewBox="0 0 100 100">
+    <path d="M50 19 L85 77 H15 Z" fill="#B9C4C5" stroke="#3F4E4F" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M50 19 L65 44 L57 48 L50 41 L43 48 L35 44 Z" fill="#FFFFFF" stroke="#3F4E4F" stroke-width="3.4" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="tok-rock" viewBox="0 0 100 100">
+    <path d="M28 76 L14 54 L28 32 L54 24 L78 40 L82 62 L60 80 Z" fill="#BCC7C8" stroke="#37474F" stroke-width="4.5" stroke-linejoin="round"/>
+    <g fill="none" stroke="#6E7D7E" stroke-width="3.8" stroke-linejoin="round">
+      <path d="M28 32 L52 46 L54 24"/><path d="M52 46 L82 62"/><path d="M52 46 L38 77"/>
+    </g>
+  </symbol>
+  <symbol id="tok-paw" viewBox="0 0 100 100">
+    <g fill="#1e293b" stroke="#ffffff" stroke-width="6" stroke-linejoin="round">
+      <ellipse cx="50" cy="66" rx="24" ry="19"/>
+      <ellipse cx="24" cy="40" rx="10" ry="12"/>
+      <ellipse cx="42" cy="27" rx="10" ry="13"/>
+      <ellipse cx="60" cy="27" rx="10" ry="13"/>
+      <ellipse cx="77" cy="40" rx="10" ry="12"/>
+    </g>
+  </symbol>
+</defs></svg>
+
+<div class="lab-bar">
+  <strong>bg&nbsp;lab</strong>
+  <span class="grp" id="bg-buttons"></span>
+  <span style="opacity:.4">|</span>
+  <span class="grp" id="panel-buttons"></span>
+  <span style="opacity:.4">|</span>
+  <span class="grp"><button id="chrome-toggle">wallpaper only</button></span>
+</div>
+
+<div class="wrap">
+  <p class="lab-note" id="candidate-note"></p>
+
+  <header class="header-bar">
+    <h1><img src="assets/harmonies-icon.svg" alt="" width="30" height="30"/>Harmonies</h1>
+    <span class="pill">Build landscapes, attract animals, score points!</span>
+    <span style="display:flex;gap:.4rem"><button class="btn-w">🎲 New Game</button><button class="btn-w">🔊</button><button class="btn-w">❓ Help</button></span>
+  </header>
+
+  <div class="game-grid">
+    <aside>
+      <div class="panel-card" style="margin-bottom:1rem">
+        <h2 class="ph">🎯 Your Cards</h2>
+        <div id="cards-mine"></div>
+      </div>
+      <div class="panel-card">
+        <h2 class="ph">🃏 Available</h2>
+        <div id="cards-avail"></div>
+      </div>
+    </aside>
+
+    <main class="panel-card board-panel">
+      <h2 class="ph">🗺️ Your Landscape</h2>
+      <div id="board" class="hex-grid"></div>
+    </main>
+
+    <section>
+      <div class="panel-card" style="margin-bottom:1rem">
+        <h2 class="ph">🔄 Turn 7</h2>
+        <div id="token-rows"></div>
+        <button class="end-turn">✅ End Turn</button>
+      </div>
+      <div class="panel-card">
+        <h2 class="ph">🏆 Score</h2>
+        <div class="score-cells">
+          <div class="score-cell sc-trees"><span class="sc-emoji"><svg class="sc-glyph" viewBox="0 0 100 100"><use href="#tok-tree"/></svg></span><span class="sc-num">14</span></div>
+          <div class="score-cell sc-mtn"><span class="sc-emoji"><svg class="sc-glyph" viewBox="0 0 100 100"><use href="#tok-mountain"/></svg></span><span class="sc-num">8</span></div>
+          <div class="score-cell sc-fields"><span class="sc-emoji"><svg class="sc-glyph" viewBox="0 0 100 100"><use href="#tok-field"/></svg></span><span class="sc-num">5</span></div>
+          <div class="score-cell sc-build"><span class="sc-emoji"><svg class="sc-glyph" viewBox="0 0 100 100"><use href="#tok-house"/></svg></span><span class="sc-num">10</span></div>
+          <div class="score-cell sc-rivers"><span class="sc-emoji"><svg class="sc-glyph" viewBox="0 0 100 100"><use href="#tok-water"/></svg></span><span class="sc-num">12</span></div>
+          <div class="score-cell sc-animals"><span class="sc-emoji"><svg class="sc-glyph" viewBox="0 0 100 100"><use href="#tok-paw"/></svg></span><span class="sc-num">9</span></div>
+        </div>
+        <p class="muted" style="text-align:center;margin:.6rem 0 0">🎒 <b>71</b> tokens left · ☀️☀️</p>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+/* ---------------------------------------------------------------------------
+   Faithful board render. hexToPixel / the Side A layout / TOKEN_SYMBOL +
+   STACK_PROMOTES semantics all mirror index.html so the audition is honest.
+   --------------------------------------------------------------------------- */
+const CANDIDATES = [
+  { id:'current',        label:'0 · current (dark)',  bytes:'0 KB (inline)',
+    note:'<b>Baseline — what ships today.</b> Deep teal gradient + shippō pattern. The board is legible because the panel is opaque white, but the page reads as night, not dawn.' },
+  { id:'css-dawn',       label:'A · CSS dawn',        bytes:'0 KB — no image at all',
+    note:'<b>A — CSS dawn (zero bytes).</b> Eight layered gradients tuned to the palette <i>measured</i> off the blurred raster: cool sky, warm valley-mouth glow, two soft ridge mounds, a corner vignette, two meadow folds. No request, no decode, resolution-free.' },
+  { id:'raster-meadow',  label:'B · raster σ2.5',     bytes:'25.7 KB (bg-dawn-meadow.webp)',
+    note:'<b>B — raster, σ2.5 · sat 0.60.</b> Watercolour meadow crop from the reference mockups, upscaled to 1600×856, WebP q72. Best mood match and the truest to the Dolomites reference — but detail (flower speckle, river) is intact and it competes with the board.' },
+  { id:'raster-soft',    label:'C · raster σ5',       bytes:'18.6 KB (bg-dawn-soft.webp)',
+    note:'<b>C — raster, σ5 · sat 0.50.</b> The middle of the ladder: peaks and river still read as a landscape, per-flower detail is gone. This is the "mood survives, board wins" candidate.' },
+  { id:'raster-veiled',  label:'D · σ5 + CSS veil ★', bytes:'18.6 KB (same asset, veil is free)',
+    note:'<b>D — σ5 plus a free CSS veil.</b> All the busy detail in this source sits in the lower third; one extra white gradient layer calms exactly that band at zero extra bytes, without blurring the peaks away. <b>Recommended.</b>' },
+  { id:'raster-wash',    label:'E · raster σ14',      bytes:'10.7 KB (bg-dawn-wash.webp)',
+    note:'<b>E — raster, σ14 · sat 0.42.</b> Pushed all the way back: colour masses only. Safest raster and the cheapest, but at this blur it is close to what candidate A does for nothing — compare them back to back.' },
+  { id:'texture',        label:'F · texture only',    bytes:'~0.6 KB (inline data URI)',
+    note:'<b>F — texture only.</b> No scene: a warm pale wash + a faint asanoha (麻の葉) hemp-leaf lattice. Maximum calm and maximum legibility, but it abandons the Dolomites brief entirely. Fallback, not a contender.' },
+];
+const PANELS = [
+  { id:'opaque',  label:'panel: opaque (today)' },
+  { id:'frosted', label:'panel: frosted' },
+  { id:'bare',    label:'panel: bare (stress test)' },
+];
+
+/* A plausible mid-game board: every terrain present, stacks, a cube, a
+   selection ring and a placement hint, so nothing can hide. */
+const BOARD_LAYOUT = { '-2':[-1,0,1,2,3], '-1':[-1,0,1,2], '0':[-2,-1,0,1,2], '1':[-2,-1,0,1], '2':[-3,-2,-1,0,1] };
+const TOKEN_SYMBOL = { blue:'tok-water', yellow:'tok-field', green:'tok-leaf', brown:'tok-trunk', red:'tok-brick', gray:'tok-rock' };
+const STACK_PROMOTES = { green:'tok-tree', red:'tok-house', gray:'tok-mountain' };
+// key: "q_r" → [colour, stackHeight, extras]
+const SCENE = {
+  '-2_-1':['green',2], '-2_0':['green',1],  '-2_1':['brown',1], '-2_2':['gray',3], '-2_3':['gray',1],
+  '-1_-1':['green',2], '-1_0':['blue',1],   '-1_1':['blue',1],  '-1_2':['gray',2],
+  '0_-2':['yellow',1], '0_-1':['blue',1],   '0_0':['red',2],    '0_1':['blue',1], '0_2':['green',2],
+  '1_-2':['yellow',1], '1_-1':['yellow',1], '1_0':['red',1],    '1_1':['blue',1],
+  '2_-3':['brown',1],  '2_-2':['green',1],  '2_-1':['yellow',1],
+};
+const CUBE_AT = '0_0', SELECTED_AT = '1_0', HINTS = ['2_0','2_1','1_1'];
+
+function glyph(sym, size) {
+  return `<svg class="tok-glyph" viewBox="0 0 100 100" style="width:${size};height:${size}" aria-hidden="true"><use href="#${sym}"/></svg>`;
+}
+function hexMetrics() {
+  const w = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hex-w')) || 62;
+  return { w, h: w * Math.sqrt(3) / 2 };
+}
+function renderBoard() {
+  const c = document.getElementById('board');
+  const { w, h } = hexMetrics();
+  const cw = c.clientWidth, ch = c.clientHeight;
+  let html = '';
+  for (const [qs, rs] of Object.entries(BOARD_LAYOUT)) {
+    const q = parseInt(qs, 10);
+    for (const r of rs) {
+      const key = `${q}_${r}`;
+      const s = SCENE[key];
+      const colour = s ? s[0] : 'empty', height = s ? s[1] : 0;
+      let sym = s ? TOKEN_SYMBOL[colour] : null;
+      if (s && height > 1 && STACK_PROMOTES[colour]) sym = STACK_PROMOTES[colour];
+      const x = q * w * 0.75 + cw / 2 - w / 2;
+      const y = r * h + q * h * 0.5 + ch / 2 - h / 2;
+      const cls = ['hex-cell'];
+      if (key === SELECTED_AT) cls.push('selected');
+      if (HINTS.includes(key)) cls.push('valid-token-target');
+      // buildings suppress the height badge (see CLAUDE.md)
+      const badge = (height > 1 && !(colour === 'red' && height > 1))
+        ? `<span class="stack-count">${height}</span>` : '';
+      const cube = key === CUBE_AT
+        ? `<span class="animal-cube"><svg viewBox="0 0 100 100" style="width:100%;height:100%"><use href="#tok-paw"/></svg></span>` : '';
+      html += `<div class="${cls.join(' ')}" data-terrain="${colour}" style="left:${x}px;top:${y}px">`
+            + `<div class="hex-fill">${sym ? glyph(sym, '64%') : ''}</div>${badge}${cube}</div>`;
+    }
+  }
+  c.innerHTML = html;
+}
+function renderChrome() {
+  document.getElementById('token-rows').innerHTML = [
+    ['blue','yellow','green'], ['brown','gray','red'],
+  ].map((row, i) => `<div class="token-row"><span class="token-row-label">Space ${i+1}</span>`
+      + row.map(col => `<span class="token ${col}">${glyph(TOKEN_SYMBOL[col], '68%')}</span>`).join('')
+      + `</div>`).join('');
+  const mini = (cells) => {
+    const hw = 22, H = hw * 0.8660254;
+    const pts = cells.map(c => ({ c, x: c.q * hw * 0.75, y: c.r * H + c.q * H * 0.5 }));
+    const minX = Math.min(...pts.map(p=>p.x)), minY = Math.min(...pts.map(p=>p.y));
+    const maxX = Math.max(...pts.map(p=>p.x)), maxY = Math.max(...pts.map(p=>p.y));
+    const FILL = { blue:'linear-gradient(135deg,#4A90E2,#357ABD)', yellow:'linear-gradient(135deg,#F5A623,#E09000)',
+                   brown:'linear-gradient(135deg,#8B4513,#654321)', green:'linear-gradient(135deg,#7ED321,#5FA518)',
+                   red:'linear-gradient(135deg,#D0021B,#A00116)', gray:'linear-gradient(135deg,#7F8C8D,#5D6D6E)' };
+    return `<div class="mini-board" style="width:${maxX-minX+hw}px;height:${maxY-minY+H}px">`
+      + pts.map(({c,x,y}) => `<div class="mini-cell" style="left:${x-minX}px;top:${y-minY}px;width:${hw}px;height:${H}px;--terrain:${FILL[c.t]}">`
+        + `<div class="mini-fill">${glyph(TOKEN_SYMBOL[c.t], '66%')}</div></div>`).join('') + `</div>`;
+  };
+  const card = (name, pts, cells) =>
+    `<div class="card"><h3>${name}</h3>${mini(cells)}<p>${pts}</p></div>`;
+  document.getElementById('cards-mine').innerHTML =
+      card('🦊 Fox', '10 · 7 · 4 · 0', [{q:0,r:0,t:'green'},{q:1,r:0,t:'brown'},{q:1,r:1,t:'green'}])
+    + card('🐻 Bear', '12 · 8 · 5 · 0', [{q:0,r:0,t:'gray'},{q:0,r:1,t:'green'},{q:1,r:0,t:'blue'}]);
+  document.getElementById('cards-avail').innerHTML =
+      card('🦉 Owl', '9 · 6 · 3 · 0', [{q:0,r:0,t:'brown'},{q:0,r:1,t:'green'}])
+    + card('🐟 Trout', '11 · 7 · 4 · 0', [{q:0,r:0,t:'blue'},{q:1,r:0,t:'blue'},{q:1,r:1,t:'yellow'}]);
+}
+function buildBar() {
+  document.getElementById('bg-buttons').innerHTML =
+    CANDIDATES.map(c => `<button data-bg="${c.id}">${c.label}</button>`).join('');
+  document.getElementById('panel-buttons').innerHTML =
+    PANELS.map(p => `<button data-panel="${p.id}">${p.label}</button>`).join('');
+  document.querySelectorAll('#bg-buttons button').forEach(b =>
+    b.onclick = () => setBg(b.dataset.bg));
+  document.querySelectorAll('#panel-buttons button').forEach(b =>
+    b.onclick = () => setPanel(b.dataset.panel));
+}
+function setBg(id) {
+  document.body.dataset.bg = id;
+  const c = CANDIDATES.find(x => x.id === id);
+  document.getElementById('candidate-note').innerHTML =
+    c.note + ` <span style="opacity:.65">— cost: <b>${c.bytes}</b></span>`;
+  document.querySelectorAll('#bg-buttons button').forEach(b =>
+    b.setAttribute('aria-pressed', b.dataset.bg === id));
+  history.replaceState(null, '', `?bg=${id}&panel=${document.body.dataset.panel}`);
+}
+function setPanel(id) {
+  document.body.dataset.panel = id;
+  document.querySelectorAll('#panel-buttons button').forEach(b =>
+    b.setAttribute('aria-pressed', b.dataset.panel === id));
+  history.replaceState(null, '', `?bg=${document.body.dataset.bg}&panel=${id}`);
+}
+function setChrome(on) {
+  document.body.dataset.chrome = on ? 'on' : 'off';
+  document.getElementById('chrome-toggle').setAttribute('aria-pressed', String(!on));
+  if (on) renderBoard();
+}
+document.getElementById('chrome-toggle').onclick = () =>
+  setChrome(document.body.dataset.chrome === 'off');
+
+buildBar();
+renderChrome();
+const params = new URLSearchParams(location.search);
+setBg(CANDIDATES.some(c => c.id === params.get('bg')) ? params.get('bg') : 'raster-veiled');
+setPanel(PANELS.some(p => p.id === params.get('panel')) ? params.get('panel') : 'opaque');
+setChrome(params.get('chrome') !== 'off');
+renderBoard();
+addEventListener('resize', renderBoard);
+</script>
+</body>
+</html>
