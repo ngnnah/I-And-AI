@@ -66,8 +66,16 @@
       filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.32));
       pointer-events: none;
     }
+    /* Empty hexes are the PLACEMENT TARGETS, so they have to stay findable. Against the
+       old dark background a near-white hex read instantly; on the pale dawn wallpaper it
+       nearly vanished. Hence a deeper sage fill and a defined rim — enough to read as an
+       empty slot without shouting over the placed tokens. */
+    .hex-cell[data-terrain="empty"] { --terrain: #cfded3; }
+    .hex-cell[data-terrain="empty"] .hex-fill {
+      background: rgba(15, 23, 42, 0.30); /* the grout ring, darker than a filled hex's */
+    }
     .hex-cell[data-terrain="empty"] .hex-fill::before {
-      background: radial-gradient(120% 90% at 50% 15%, rgba(255,255,255,.55), transparent 60%), #e3ece6;
+      background: radial-gradient(120% 90% at 50% 15%, rgba(255,255,255,.5), transparent 62%), #cfded3;
     }
 
     .hex-cell:hover {
@@ -242,28 +250,66 @@
       -ms-user-select: none;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
-      /* Subtle Japanese shippō (七宝, overlapping circles) pattern over a deep gradient */
-      background-color: #0f172a;
-      background-image:
-        url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%2256%22 height%3D%2256%22 viewBox%3D%220 0 56 56%22%3E%3Cg fill%3D%22none%22 stroke%3D%22rgba(255%2C255%2C255%2C0.05)%22 stroke-width%3D%221.4%22%3E%3Ccircle cx%3D%220%22 cy%3D%220%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%2256%22 cy%3D%220%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%220%22 cy%3D%2256%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%2256%22 cy%3D%2256%22 r%3D%2228%22%2F%3E%3Ccircle cx%3D%2228%22 cy%3D%2228%22 r%3D%2228%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),
-        linear-gradient(160deg, #2f4a49 0%, #263a41 55%, #20303a 100%);
-      background-attachment: fixed;
-      background-size: 56px 56px, cover;
+      /* Dawn valley wallpaper (Alpe di Siusi mood). The flat colour is the fallback and
+         the tone the page settles to while the image loads. Audition alternatives in
+         dev-background-lab.html. */
+      background-color: #e9eee4;
+    }
+
+    /* The wallpaper lives on a FIXED pseudo-element rather than
+       `background-attachment: fixed` on body. Same parallax-free result, but
+       attachment:fixed + size:cover is the known-janky combination on iOS Safari, and
+       phones are the primary platform here. */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background-image: url("assets/bg-dawn-soft.webp");
+      background-size: cover;
+      background-position: center 35%;
+      background-repeat: no-repeat;
+      pointer-events: none;
     }
 
     /* Board: soft washi-paper feel with a faint asanoha-style grid */
+    /* "Bare" board: the hexes float directly on the dawn wallpaper, like real tiles laid
+       on a landscape. No washi panel, no grid — the wallpaper IS the table. */
     #hex-grid-container {
-      background-color: #eef7f1;
-      background-image:
-        linear-gradient(135deg, rgba(126,211,33,0.10) 0%, rgba(74,144,226,0.12) 100%),
-        radial-gradient(rgba(15,23,42,0.05) 1px, transparent 1px);
-      background-size: cover, 22px 22px;
+      background: transparent;
+      background-image: none;
+      border-color: transparent;
     }
 
     /* Frosted panels so the pattern subtly shows through */
+    /* Frosted side panels, so the dawn light carries through the whole page — including
+       on a phone, where these stack vertically and would otherwise cover the wallpaper
+       entirely. Nested cards inside them stay opaque (see .panel-card .panel-card
+       below): they hold the 22px animal mini-patterns, which need a stable background. */
     .panel-card {
-      background: rgba(255, 255, 255, 0.96);
-      backdrop-filter: blur(2px);
+      background: rgba(255, 255, 255, 0.62);
+      backdrop-filter: blur(8px) saturate(1.05);
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+    /* Detail surfaces keep their solid backing — legibility beats wallpaper here. */
+    .panel-card .panel-card,
+    .panel-card .animal-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: none;
+    }
+
+    /* The BOARD panel is fully bare — no card at all, so the hexes read as tiles laid
+       straight onto the landscape. Side panels stay frosted; only this one disappears.
+       `main` contains just the board, so this can't leak into the sidebars. */
+    main > .panel-card {
+      background: transparent;
+      backdrop-filter: none;
+      box-shadow: none;
+    }
+    /* Without a card behind it the heading sits on the wallpaper, so it needs its own
+       contrast rather than relying on the panel. */
+    .landscape-heading {
+      text-shadow: 0 1px 3px rgba(255, 255, 255, 0.95), 0 0 12px rgba(255, 255, 255, 0.75);
     }
 
     /* Turn tracker "place 3" dots */
