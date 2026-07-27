@@ -45,6 +45,9 @@
   different layer, so the first that fails tells us where the problem is. Then send the log.
 </p>
 
+<div id="verdict" style="font-size:1rem;font-weight:800;padding:.9rem;border-radius:.7rem;
+     background:rgba(148,163,184,.18);margin-bottom:1rem">⏳ Run the tests below</div>
+
 <h2>Environment</h2>
 <div class="env" id="env">…</div>
 
@@ -82,7 +85,26 @@ function log(msg, cls) {
   logEl.appendChild(span);
   logEl.scrollTop = logEl.scrollHeight;
 }
-function mark(id, ok) { document.getElementById(id).classList.add(ok ? 'pass' : 'fail'); }
+const results = {};
+function mark(id, ok) {
+  const b = document.getElementById(id);
+  b.classList.remove('pass', 'fail');
+  b.classList.add(ok ? 'pass' : 'fail');
+  b.textContent = (ok ? '✅ ' : '❌ ') + b.textContent.replace(/^[✅❌]\s*/, '');
+  results[id] = ok;
+  // One-glance verdict, so a screenshot is enough — no need to copy the log.
+  const v = document.getElementById('verdict');
+  const done = Object.keys(results).length;
+  const names = { t1: 'bare WebAudio', t2: 'game engine', t3: 'ambience', t4: 'audio element' };
+  const bad = Object.entries(results).filter(([, o]) => !o).map(([k]) => names[k]);
+  if (!bad.length) {
+    v.textContent = `✅ ${done}/4 passed — audio IS working here`;
+    v.style.background = 'rgba(22,163,74,.18)';
+  } else {
+    v.textContent = `❌ FAILING: ${bad.join(', ')}  (${done}/4 run)`;
+    v.style.background = 'rgba(220,38,38,.18)';
+  }
+}
 
 window.addEventListener('error', (e) => log(`WINDOW ERROR: ${e.message}`, 'bad'));
 window.addEventListener('unhandledrejection', (e) => log(`UNHANDLED REJECTION: ${e.reason}`, 'bad'));
@@ -100,6 +122,14 @@ const env = {
   reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
   devicePixelRatio: window.devicePixelRatio,
 };
+try {
+  const probe = new AC();
+  env.sampleRate = probe.sampleRate;
+  env.baseLatency = probe.baseLatency !== undefined ? probe.baseLatency.toFixed(4) + 's' : 'n/a';
+  env.outputLatency = probe.outputLatency !== undefined ? probe.outputLatency.toFixed(4) + 's' : 'n/a';
+  env.initialState = probe.state;
+  probe.close && probe.close();
+} catch (e) { env.probeError = e && e.message; }
 document.getElementById('env').textContent =
   Object.entries(env).map(([k, v]) => `${k}: ${v}`).join('\n');
 log(`iOS ${env.ios} · AudioContext=${env.AudioContext} webkit=${env.webkitAudioContext}`);
@@ -148,8 +178,9 @@ document.getElementById('t1').addEventListener('click', async () => {
 document.getElementById('t2').addEventListener('click', async () => {
   log('--- Test 2: game sound engine ---');
   try {
-    const { createSoundEngine, OUTPUT_TRIM } = await import('./js/audio/sound-engine.js');
-    log(`engine module loaded · OUTPUT_TRIM=${OUTPUT_TRIM}`);
+    const mod = await import('./js/audio/sound-engine.js');
+    const { createSoundEngine, OUTPUT_TRIM } = mod;
+    log(`engine module loaded · OUTPUT_TRIM=${OUTPUT_TRIM} lookahead=${mod.SCHEDULE_LOOKAHEAD ?? 'MISSING'}`);
     const e = createSoundEngine({});
     const running = await e.unlock();
     log(`unlock() → running=${running} dead=${e.dead}`, running ? 'ok' : 'bad');
