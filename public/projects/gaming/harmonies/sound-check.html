@@ -9,16 +9,16 @@
   * { box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-    margin: 0; padding: 1rem 1rem 4rem; line-height: 1.45;
-    background: #f8fafc; color: #1e293b; max-width: 34rem; margin-inline: auto;
+    margin: 0 auto; padding: 1rem 1rem 4rem; line-height: 1.45; max-width: 34rem;
+    background: #f8fafc; color: #1e293b;
   }
   @media (prefers-color-scheme: dark) { body { background: #0f172a; color: #e2e8f0; } }
   h1 { font-size: 1.25rem; margin: 0 0 .25rem; }
-  p.sub { margin: 0 0 1.25rem; font-size: .85rem; color: #64748b; }
-  h2 { font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: #94a3b8; margin: 1.5rem 0 .5rem; }
+  p.sub { margin: 0 0 1rem; font-size: .85rem; color: #64748b; }
+  h2 { font-size: .74rem; text-transform: uppercase; letter-spacing: .07em; color: #94a3b8; margin: 1.4rem 0 .4rem; }
   button {
-    display: block; width: 100%; font: inherit; font-size: 1.05rem; font-weight: 700;
-    padding: 1.1rem; margin-bottom: .6rem; border-radius: .8rem; cursor: pointer;
+    display: block; width: 100%; font: inherit; font-size: 1.02rem; font-weight: 700;
+    padding: 1rem; margin-bottom: .5rem; border-radius: .8rem; cursor: pointer;
     border: 1px solid rgba(148,163,184,.5); background: #fff; color: #1e293b;
     -webkit-tap-highlight-color: rgba(123,171,156,.3);
   }
@@ -27,67 +27,66 @@
   button.primary { background: #7bab9c; border-color: #7bab9c; color: #fff; }
   button.pass { border-color: #16a34a; border-width: 2px; }
   button.fail { border-color: #dc2626; border-width: 2px; }
-  .hint { font-size: .78rem; color: #64748b; margin: -.35rem 0 .9rem; }
+  .hint { font-size: .78rem; color: #64748b; margin: -.25rem 0 .8rem; }
+  .ask { font-size: .8rem; margin: -.2rem 0 .9rem; display: flex; gap: .4rem; }
+  .ask button { margin: 0; padding: .55rem; font-size: .85rem; }
   #log {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .72rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .7rem;
     background: rgba(148,163,184,.14); border-radius: .6rem; padding: .7rem;
-    white-space: pre-wrap; word-break: break-word; min-height: 7rem; max-height: 22rem; overflow-y: auto;
+    white-space: pre-wrap; word-break: break-word; min-height: 6rem; max-height: 20rem; overflow-y: auto;
   }
   .ok { color: #16a34a; font-weight: 700; }
   .bad { color: #dc2626; font-weight: 700; }
-  .env { font-size: .74rem; background: rgba(148,163,184,.14); border-radius: .6rem; padding: .7rem; word-break: break-word; }
+  .env { font-size: .73rem; background: rgba(148,163,184,.14); border-radius: .6rem; padding: .7rem;
+         word-break: break-word; white-space: pre-wrap; }
+  .banner { font-size: .95rem; font-weight: 800; padding: .85rem; border-radius: .7rem;
+            margin-bottom: 1rem; background: rgba(148,163,184,.18); }
 </style>
 </head>
 <body>
 <h1>🔎 Harmonies Sound Check</h1>
 <p class="sub">
-  Diagnoses why sound may not play. Tap the tests <strong>in order</strong> — each one isolates a
-  different layer, so the first that fails tells us where the problem is. Then send the log.
+  Every test here <strong>measures its own output</strong> with an analyser, so it can tell
+  "the code produced no sound" apart from "the code produced sound you couldn't hear" —
+  the previous version could not, which is why it was misleading. Run the steps in order.
 </p>
 
-<div id="verdict" style="font-size:1rem;font-weight:800;padding:.9rem;border-radius:.7rem;
-     background:rgba(148,163,184,.18);margin-bottom:1rem">⏳ Run the tests below</div>
+<div class="banner" id="verdict">⏳ Running offline self-test…</div>
+
+<h2>Step 0 — Offline self-test (automatic; no speaker involved)</h2>
+<p class="hint">Renders the audio graph into a buffer and measures the actual samples. Needs no tap and
+  no working speaker. If this passes, the code demonstrably produces sound.</p>
+<div class="env" id="offline">…</div>
+
+<h2>Step 1 — Plain &lt;audio&gt; element ★ do this FIRST</h2>
+<p class="hint">Not WebAudio at all — an entirely separate pipeline. If this is silent too, the fault is
+  the device rather than WebAudio.</p>
+<button id="tA" class="primary">🎵 Play a 1-second tone via &lt;audio&gt;</button>
+<div class="ask" id="askA" hidden>
+  <button data-t="tA" data-h="1">👂 I heard it</button><button data-t="tA" data-h="0">🔇 Silent</button>
+</div>
+
+<h2>Step 2 — Sustained WebAudio tone (10s)</h2>
+<p class="hint">Long enough to adjust volume, flip the silent switch or disconnect Bluetooth
+  <em>while it plays</em>. On iOS the volume buttons only change media volume while audio is playing.</p>
+<button id="tB">🔊 Play a 10-second tone</button>
+<div class="ask" id="askB" hidden>
+  <button data-t="tB" data-h="1">👂 I heard it</button><button data-t="tB" data-h="0">🔇 Silent</button>
+</div>
+
+<h2>Step 3 — The game's own sound engine</h2>
+<p class="hint">A mountain token, the card-complete chime and a water droplet — the real engine, measured.</p>
+<button id="tC">⛰️ Play game sounds</button>
+<div class="ask" id="askC" hidden>
+  <button data-t="tC" data-h="1">👂 I heard it</button><button data-t="tC" data-h="0">🔇 Silent</button>
+</div>
 
 <h2>Environment</h2>
 <div class="env" id="env">…</div>
 
-<div style="background:rgba(234,179,8,.16);border-radius:.7rem;padding:.85rem;margin-bottom:1rem;font-size:.86rem">
-  <strong>⚠️ Check these first — they mute everything, logs and all:</strong>
-  <ol style="margin:.5rem 0 0;padding-left:1.2rem">
-    <li><strong>Media volume ≠ ringer volume.</strong> On iOS the volume buttons change the
-        <em>ringer</em> unless audio is actually playing. Run Test 0 and press volume-up
-        <em>while the tone is going</em>.</li>
-    <li><strong>Silent switch</strong> (the physical toggle above the volume buttons) — WebAudio obeys it.</li>
-    <li><strong>Bluetooth</strong> — audio may be routed to AirPods/car/speaker.</li>
-    <li><strong>Sanity check:</strong> play a YouTube video in the same browser. If that's silent too,
-        it's the device, not this page.</li>
-  </ol>
-</div>
-
-<h2>Test 0 — Sustained 10-second tone ★ start here</h2>
-<p class="hint">A loud continuous tone. Long enough to adjust volume, flip the silent switch, or
-  unpair Bluetooth <em>while it plays</em> — which short beeps are useless for.</p>
-<button id="t0" class="primary">🔊 Tap for a 10-second tone</button>
-
-<h2>Test 1 — Bare WebAudio (no game code)</h2>
-<p class="hint">The simplest possible beep. If this is silent, the problem is the device/browser, not the game.</p>
-<button id="t1">🔔 Tap for a plain beep</button>
-
-<h2>Test 2 — Game sound engine</h2>
-<p class="hint">Same engine the game uses: a mountain token, then a card-complete chime.</p>
-<button id="t2">⛰️ Tap for game sounds</button>
-
-<h2>Test 3 — Ambience</h2>
-<p class="hint">Starts the Cabin soundscape. Should be a soft continuous bed with occasional crackle.</p>
-<button id="t3">🌙 Tap for ambience (10s)</button>
-
-<h2>Test 4 — HTML audio element</h2>
-<p class="hint">A different audio path entirely. Tells us if WebAudio specifically is blocked.</p>
-<button id="t4">🎵 Tap for element audio</button>
-
 <h2>Log</h2>
 <div id="log"></div>
-<button id="copy" style="margin-top:.6rem">📋 Copy log</button>
+<button id="copy" style="margin-top:.5rem">📋 Copy everything</button>
 
 <script type="module">
 const logEl = document.getElementById('log');
@@ -95,80 +94,135 @@ const lines = [];
 const t0 = performance.now();
 function log(msg, cls) {
   const t = ((performance.now() - t0) / 1000).toFixed(2).padStart(6);
-  const line = `${t}s  ${msg}`;
-  lines.push(line);
+  lines.push(`${t}s  ${msg}`);
   const span = document.createElement('span');
   if (cls) span.className = cls;
-  span.textContent = line + '\n';
+  span.textContent = `${t}s  ${msg}\n`;
   logEl.appendChild(span);
   logEl.scrollTop = logEl.scrollHeight;
 }
-const results = {};
-function mark(id, ok) {
-  const b = document.getElementById(id);
-  b.classList.remove('pass', 'fail');
-  b.classList.add(ok ? 'pass' : 'fail');
-  b.textContent = (ok ? '✅ ' : '❌ ') + b.textContent.replace(/^[✅❌]\s*/, '');
-  results[id] = ok;
-  // One-glance verdict, so a screenshot is enough — no need to copy the log.
-  const v = document.getElementById('verdict');
-  const done = Object.keys(results).length;
-  const names = { t0: 'sustained tone', t1: 'bare WebAudio', t2: 'game engine', t3: 'ambience', t4: 'audio element' };
-  const bad = Object.entries(results).filter(([, o]) => !o).map(([k]) => names[k]);
-  if (!bad.length) {
-    v.textContent = `✅ ${done} test(s) passed — audio IS working here`;
-    v.style.background = 'rgba(22,163,74,.18)';
-  } else {
-    v.textContent = `❌ FAILING: ${bad.join(', ')}  (${done} run)`;
-    v.style.background = 'rgba(220,38,38,.18)';
-  }
-}
-
-// One engine for the page, sharing the one AudioContext — same reason as getCtx().
-let engine = null;
-async function getEngine(mod) {
-  if (!engine) {
-    const ctx = await getCtx();
-    engine = mod.createSoundEngine({ contextFactory: () => ctx });
-  }
-  return engine;
-}
-
 window.addEventListener('error', (e) => log(`WINDOW ERROR: ${e.message}`, 'bad'));
 window.addEventListener('unhandledrejection', (e) => log(`UNHANDLED REJECTION: ${e.reason}`, 'bad'));
 
-// ── Environment ───────────────────────────────────────────────────────────────
 const AC = window.AudioContext || window.webkitAudioContext;
-const ua = navigator.userAgent;
-const iosMatch = ua.match(/OS (\d+)[_.](\d+)/);
-const env = {
-  ua,
-  ios: iosMatch ? `${iosMatch[1]}.${iosMatch[2]}` : 'not detected',
-  AudioContext: window.AudioContext ? 'yes' : 'no',
-  webkitAudioContext: window.webkitAudioContext ? 'yes' : 'no',
-  standalone: !!window.navigator.standalone,
-  reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
-  devicePixelRatio: window.devicePixelRatio,
-};
-try {
-  const probe = new AC();
-  env.sampleRate = probe.sampleRate;
-  env.baseLatency = probe.baseLatency !== undefined ? probe.baseLatency.toFixed(4) + 's' : 'n/a';
-  env.outputLatency = probe.outputLatency !== undefined ? probe.outputLatency.toFixed(4) + 's' : 'n/a';
-  env.initialState = probe.state;
-  probe.close && probe.close();
-} catch (e) { env.probeError = e && e.message; }
-document.getElementById('env').textContent =
-  Object.entries(env).map(([k, v]) => `${k}: ${v}`).join('\n');
-log(`iOS ${env.ios} · AudioContext=${env.AudioContext} webkit=${env.webkitAudioContext}`);
-if (!AC) log('NO AudioContext CONSTRUCTOR — WebAudio unavailable on this browser', 'bad');
 
-// iOS allows only a handful of concurrent AudioContexts, so the whole page shares ONE.
-// (An earlier version made a fresh one per tap; after a few taps they were dead on
-// arrival, which corrupted the very diagnosis this page exists to produce.)
-let shared = null, contextsMade = 0;
+// measured = did samples actually flow?  heard = did a human hear it?
+// Keeping these separate is the whole point: the old page conflated "the context says
+// it is running" with "sound happened", so it could never report a real failure.
+const results = {};
+
+function setResult(id, measured, heard) {
+  const r = results[id] || (results[id] = { measured: null, heard: null });
+  if (measured !== undefined) r.measured = measured;
+  if (heard !== undefined) r.heard = heard;
+  const btn = document.getElementById(id);
+  if (btn && r.measured !== null) {
+    btn.classList.remove('pass', 'fail');
+    btn.classList.add(r.measured ? 'pass' : 'fail');
+  }
+  renderVerdict();
+}
+
+function renderVerdict() {
+  const v = document.getElementById('verdict');
+  const ran = Object.entries(results).filter(([, r]) => r.measured !== null);
+  if (!ran.length) return;
+  const noSignal = ran.filter(([, r]) => r.measured === false).map(([k]) => k);
+  const heardAny = ran.some(([, r]) => r.heard === true);
+  const saidSilent = ran.filter(([, r]) => r.heard === false).length;
+
+  let text, bg;
+  if (noSignal.length) {
+    text = `❌ CODE FAULT — ${noSignal.join(', ')} produced no measurable samples`;
+    bg = 'rgba(220,38,38,.18)';
+  } else if (heardAny) {
+    text = '✅ Audio works — signal measured AND heard';
+    bg = 'rgba(22,163,74,.18)';
+  } else if (saidSilent) {
+    text = '⚠️ DEVICE / ROUTING — samples were measured on every test, but you heard nothing. '
+         + 'The code is producing audio; something after it is muting or re-routing it.';
+    bg = 'rgba(234,179,8,.2)';
+  } else {
+    text = `📊 Samples measured on ${ran.length} test(s) — now say whether you HEARD them`;
+    bg = 'rgba(148,163,184,.18)';
+  }
+  v.textContent = text;
+  v.style.background = bg;
+}
+
+document.querySelectorAll('.ask button').forEach((b) => {
+  b.addEventListener('click', () => {
+    const heard = b.dataset.h === '1';
+    setResult(b.dataset.t, undefined, heard);
+    log(`user reports: ${b.dataset.t} ${heard ? 'HEARD' : 'SILENT'}`, heard ? 'ok' : 'bad');
+  });
+});
+
+// Same lookahead the engine uses. NEVER schedule at exactly ctx.currentTime: on iOS the
+// render quantum is ~21ms, so such events are already in the past and a short envelope can
+// collapse before a single audible sample. The previous version of this page made exactly
+// that mistake in its "control" test, so its silence was misread as proof of a device fault.
+const LOOK = 0.03;
+
+// ── Step 0: offline self-test — no gesture, no speaker, no human needed ───────
+(async function offlineSelfTest() {
+  const out = [];
+  const peakOf = (d) => { let p = 0; for (let i = 0; i < d.length; i++) p = Math.max(p, Math.abs(d[i])); return p; };
+  let bare = 0, engPeak = 0;
+  try {
+    const off = new OfflineAudioContext(1, 44100, 44100);
+    const osc = off.createOscillator(), g = off.createGain();
+    osc.frequency.value = 440;
+    g.gain.setValueAtTime(0.0001, LOOK);
+    g.gain.linearRampToValueAtTime(0.35, LOOK + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, LOOK + 0.5);
+    osc.connect(g); g.connect(off.destination);
+    osc.start(LOOK); osc.stop(LOOK + 0.55);
+    bare = peakOf((await off.startRendering()).getChannelData(0));
+    out.push(`bare oscillator graph … peak ${bare.toFixed(4)}  ${bare > 0.05 ? '✅' : '❌'}`);
+
+    const mod = await import('./js/audio/sound-engine.js');
+    const off2 = new OfflineAudioContext(1, 44100 * 2, 44100);
+    const eng = mod.createSoundEngine({ contextFactory: () => off2 });
+    eng.setVolume(1);
+    eng.placement('gray', 1);
+    engPeak = peakOf((await off2.startRendering()).getChannelData(0));
+    out.push(`game engine (mountain) … peak ${engPeak.toFixed(4)}  ${engPeak > 0.05 ? '✅' : '❌'}`);
+    out.push(`build: OUTPUT_TRIM=${mod.OUTPUT_TRIM} lookahead=${mod.SCHEDULE_LOOKAHEAD ?? 'MISSING'}`);
+    log(`offline self-test · bare=${bare.toFixed(4)} engine=${engPeak.toFixed(4)}`,
+        bare > 0.05 && engPeak > 0.05 ? 'ok' : 'bad');
+    document.getElementById('verdict').textContent = (bare > 0.05 && engPeak > 0.05)
+      ? '📊 Offline self-test PASSED — the code renders real samples. Now run Steps 1–3.'
+      : '❌ Offline self-test FAILED — the code itself renders silence. That is a code bug.';
+  } catch (e) {
+    out.push(`offline self-test THREW: ${e && e.message}`);
+    log(`offline self-test THREW: ${e && e.message}`, 'bad');
+  }
+  document.getElementById('offline').textContent = out.join('\n');
+})();
+
+// ── One shared realtime context, created only inside a user gesture ───────────
+// iOS caps concurrent AudioContexts at roughly four, so the page shares ONE and builds
+// nothing at module-eval time — a context created outside a gesture is the worst possible
+// starting state on iOS.
+let shared = null, analyser = null, tapped = null;
 async function getCtx() {
-  if (!shared) { shared = new AC(); contextsMade++; log(`created shared ctx #${contextsMade} · state=${shared.state} sampleRate=${shared.sampleRate}`); }
+  if (!shared) {
+    shared = new AC();
+    log(`created shared ctx · state=${shared.state} rate=${shared.sampleRate} baseLatency=${shared.baseLatency ?? 'n/a'}`);
+    // Everything routes through an analyser so we can measure what actually flows out.
+    analyser = shared.createAnalyser();
+    analyser.fftSize = 2048;
+    analyser.connect(shared.destination);
+    // The engine only ever touches ctx.destination, so proxying that is enough to tap it.
+    tapped = new Proxy(shared, {
+      get(t, p) {
+        if (p === 'destination') return analyser;
+        const v = t[p];
+        return typeof v === 'function' ? v.bind(t) : v;
+      },
+    });
+  }
   if (shared.state === 'suspended') {
     log('suspended → resume()…');
     await shared.resume();
@@ -177,108 +231,32 @@ async function getCtx() {
   if (!shared.__primed) {
     const pr = shared.createBufferSource();
     pr.buffer = shared.createBuffer(1, 1, shared.sampleRate);
-    pr.connect(shared.destination); pr.start(0);
+    pr.connect(analyser); pr.start(0);
     shared.__primed = true;
     log('played 1-sample silent prime');
   }
   return shared;
 }
 
-// ── Test 0: SUSTAINED tone — the one that actually diagnoses a volume problem ──
-document.getElementById('t0').addEventListener('click', async () => {
-  log('--- Test 0: sustained 10s tone ---');
-  try {
-    const ctx = await getCtx();
-    const osc = ctx.createOscillator(), g = ctx.createGain();
-    osc.type = 'sine'; osc.frequency.value = 660;
-    g.gain.setValueAtTime(0.0001, ctx.currentTime);
-    g.gain.linearRampToValueAtTime(0.4, ctx.currentTime + 0.05);
-    osc.connect(g); g.connect(ctx.destination);
-    osc.start();
-    log('▶ 660Hz at gain 0.4 playing for 10s — PRESS VOLUME UP NOW', 'ok');
-    const iv = setInterval(() => log(`  …playing · state=${ctx.state} t=${ctx.currentTime.toFixed(1)}`), 2500);
-    setTimeout(() => {
-      clearInterval(iv);
-      g.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.1);
-      osc.stop(ctx.currentTime + 0.2);
-      log('⏹ tone stopped');
-      mark('t0', ctx.state === 'running' && ctx.currentTime > 0);
-    }, 10000);
-  } catch (e) { log(`Test 0 THREW: ${e && e.message}`, 'bad'); mark('t0', false); }
-});
+/** Poll the analyser for `ms` and return the peak sample amplitude actually observed. */
+function measure(ms) {
+  return new Promise((resolve) => {
+    const buf = new Float32Array(analyser.fftSize);
+    let peak = 0;
+    const iv = setInterval(() => {
+      analyser.getFloatTimeDomainData(buf);
+      for (let i = 0; i < buf.length; i++) peak = Math.max(peak, Math.abs(buf[i]));
+    }, 50);
+    setTimeout(() => { clearInterval(iv); resolve(peak); }, ms);
+  });
+}
 
-// ── Test 1: bare WebAudio, built entirely inside the tap ──────────────────────
-document.getElementById('t1').addEventListener('click', async () => {
-  log('--- Test 1: bare WebAudio ---');
+// ── Step 1: HTMLAudioElement — a completely separate pipeline ─────────────────
+document.getElementById('tA').addEventListener('click', async () => {
+  log('--- Step 1: <audio> element ---');
+  document.getElementById('askA').hidden = false;
   try {
-    const ctx = await getCtx();
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.type = 'sine'; osc.frequency.value = 440;
-    g.gain.setValueAtTime(0.0001, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.35, ctx.currentTime + 0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.5);
-    osc.connect(g); g.connect(ctx.destination);
-    osc.start(); osc.stop(ctx.currentTime + 0.55);
-    log(`scheduled 440Hz beep at gain 0.35 · currentTime=${ctx.currentTime.toFixed(3)}`);
-
-    setTimeout(() => {
-      log(`0.8s later · state=${ctx.state} currentTime=${ctx.currentTime.toFixed(3)}`,
-          ctx.currentTime > 0 ? 'ok' : 'bad');
-      if (ctx.currentTime === 0) log('currentTime NEVER ADVANCED — the context is not actually running', 'bad');
-      mark('t1', ctx.state === 'running' && ctx.currentTime > 0);
-    }, 800);
-  } catch (e) {
-    log(`Test 1 THREW: ${e && e.message}`, 'bad');
-    mark('t1', false);
-  }
-});
-
-// ── Test 2: the real game engine ──────────────────────────────────────────────
-document.getElementById('t2').addEventListener('click', async () => {
-  log('--- Test 2: game sound engine ---');
-  try {
-    const mod = await import('./js/audio/sound-engine.js');
-    log(`engine module loaded · OUTPUT_TRIM=${mod.OUTPUT_TRIM} lookahead=${mod.SCHEDULE_LOOKAHEAD ?? 'MISSING'}`);
-    const e = await getEngine(mod);
-    const running = await e.unlock();
-    log(`unlock() → running=${running} dead=${e.dead}`, running ? 'ok' : 'bad');
-    if (!running) log('unlock reported NOT running — Safari refused the resume', 'bad');
-    e.placement('gray', 1);
-    log('placement(gray,1) fired');
-    setTimeout(() => { e.cue('cardComplete'); log('cue(cardComplete) fired'); }, 700);
-    mark('t2', running && !e.dead);
-  } catch (err) {
-    log(`Test 2 THREW: ${err && err.message}`, 'bad');
-    mark('t2', false);
-  }
-});
-
-// ── Test 3: ambience ──────────────────────────────────────────────────────────
-document.getElementById('t3').addEventListener('click', async () => {
-  log('--- Test 3: ambience ---');
-  try {
-    const mod = await import('./js/audio/sound-engine.js');
-    const e = await getEngine(mod);
-    const running = await e.unlock();
-    log(`unlock() → running=${running}`, running ? 'ok' : 'bad');
-    const started = e.setScene('cabin');
-    log(`setScene('cabin') → ${started} · sceneId=${e.sceneId} nodes=${e.liveNodeCount} timers=${e.pendingTimerCount}`,
-        started ? 'ok' : 'bad');
-    setTimeout(() => { e.setScene(null); log('ambience stopped'); }, 10000);
-    mark('t3', started);
-  } catch (err) {
-    log(`Test 3 THREW: ${err && err.message}`, 'bad');
-    mark('t3', false);
-  }
-});
-
-// ── Test 4: HTMLAudioElement, a completely different path ─────────────────────
-document.getElementById('t4').addEventListener('click', async () => {
-  log('--- Test 4: <audio> element ---');
-  try {
-    // A tiny WAV generated inline: 0.4s of 440Hz, so no network fetch is involved.
-    const rate = 8000, secs = 0.4, n = Math.floor(rate * secs);
+    const rate = 44100, n = rate;             // 1 second
     const buf = new ArrayBuffer(44 + n * 2), view = new DataView(buf);
     const wr = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
     wr(0, 'RIFF'); view.setUint32(4, 36 + n * 2, true); wr(8, 'WAVEfmt ');
@@ -287,26 +265,98 @@ document.getElementById('t4').addEventListener('click', async () => {
     view.setUint16(32, 2, true); view.setUint16(34, 16, true);
     wr(36, 'data'); view.setUint32(40, n * 2, true);
     for (let i = 0; i < n; i++) {
-      const env = Math.min(1, i / 200) * Math.max(0, 1 - i / n);
-      view.setInt16(44 + i * 2, Math.sin(2 * Math.PI * 440 * i / rate) * 12000 * env, true);
+      const env = Math.min(1, i / 500) * Math.max(0, 1 - i / n);
+      view.setInt16(44 + i * 2, Math.sin(2 * Math.PI * 440 * i / rate) * 20000 * env, true);
     }
     const bytes = new Uint8Array(buf);
     let bin = ''; for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
     const a = new Audio('data:audio/wav;base64,' + btoa(bin));
     a.volume = 1;
     await a.play();
-    log('<audio>.play() resolved', 'ok');
-    mark('t4', true);
+    // play() resolving only means playback STARTED. iOS resolves it on a muted device too,
+    // so this is deliberately NOT treated as proof of audibility — hence the 👂 buttons.
+    log('<audio>.play() resolved — started (does NOT prove it is audible)', 'ok');
+    setTimeout(() => {
+      log(`<audio> progressed to currentTime=${a.currentTime.toFixed(2)} ended=${a.ended}`,
+          a.currentTime > 0 ? 'ok' : 'bad');
+      setResult('tA', a.currentTime > 0);
+    }, 1300);
   } catch (err) {
-    log(`Test 4 FAILED: ${err && err.name}: ${err && err.message}`, 'bad');
-    mark('t4', false);
+    log(`Step 1 FAILED: ${err && err.name}: ${err && err.message}`, 'bad');
+    setResult('tA', false);
   }
 });
 
+// ── Step 2: sustained WebAudio tone, measured ─────────────────────────────────
+document.getElementById('tB').addEventListener('click', async () => {
+  log('--- Step 2: sustained 10s tone ---');
+  document.getElementById('askB').hidden = false;
+  try {
+    const ctx = await getCtx();
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.type = 'sine'; osc.frequency.value = 660;
+    const t = ctx.currentTime + LOOK;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.4, t + 0.05);
+    osc.connect(g); g.connect(analyser);
+    osc.start(t);
+    log('▶ 660Hz at gain 0.4 for 10s — PRESS VOLUME UP NOW', 'ok');
+    const peak = await measure(3000);
+    log(`measured output peak over 3s = ${peak.toFixed(4)}`, peak > 0.05 ? 'ok' : 'bad');
+    setResult('tB', peak > 0.05);
+    setTimeout(() => {
+      g.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.1);
+      osc.stop(ctx.currentTime + 0.2);
+      log('⏹ tone stopped');
+    }, 7000);
+  } catch (e) { log(`Step 2 THREW: ${e && e.message}`, 'bad'); setResult('tB', false); }
+});
+
+// ── Step 3: the real engine, tapped through the same analyser ─────────────────
+document.getElementById('tC').addEventListener('click', async () => {
+  log('--- Step 3: game sound engine ---');
+  document.getElementById('askC').hidden = false;
+  try {
+    await getCtx();
+    const mod = await import('./js/audio/sound-engine.js');
+    log(`engine loaded · OUTPUT_TRIM=${mod.OUTPUT_TRIM} lookahead=${mod.SCHEDULE_LOOKAHEAD ?? 'MISSING'}`);
+    const e = mod.createSoundEngine({ contextFactory: () => tapped });
+    const running = await e.unlock();
+    e.setVolume(1);
+    log(`unlock() → running=${running} dead=${e.dead}`, running ? 'ok' : 'bad');
+    e.placement('gray', 1);
+    setTimeout(() => e.cue('cardComplete'), 400);
+    setTimeout(() => e.placement('blue', 1), 900);
+    const peak = await measure(1800);
+    log(`measured engine output peak = ${peak.toFixed(4)}`, peak > 0.02 ? 'ok' : 'bad');
+    setResult('tC', peak > 0.02);
+  } catch (e) { log(`Step 3 THREW: ${e && e.message}`, 'bad'); setResult('tC', false); }
+});
+
+// ── Environment ───────────────────────────────────────────────────────────────
+const ua = navigator.userAgent;
+const m = ua.match(/OS (\d+)[_.](\d+)/);
+const env = {
+  ua,
+  ios: m ? `${m[1]}.${m[2]}` : 'not detected',
+  AudioContext: window.AudioContext ? 'yes' : 'no',
+  webkitAudioContext: window.webkitAudioContext ? 'yes' : 'no',
+  standalone: !!navigator.standalone,
+  devicePixelRatio: window.devicePixelRatio,
+};
+document.getElementById('env').textContent = Object.entries(env).map(([k, v]) => `${k}: ${v}`).join('\n');
+if (!AC) log('NO AudioContext CONSTRUCTOR', 'bad');
+
 document.getElementById('copy').addEventListener('click', async () => {
-  const text = Object.entries(env).map(([k, v]) => `${k}: ${v}`).join('\n') + '\n\n' + lines.join('\n');
-  try { await navigator.clipboard.writeText(text); log('log copied to clipboard', 'ok'); }
-  catch (e) { log('clipboard blocked — select the log text manually', 'bad'); }
+  const text = [
+    document.getElementById('verdict').textContent, '',
+    document.getElementById('offline').textContent, '',
+    Object.entries(env).map(([k, v]) => `${k}: ${v}`).join('\n'), '',
+    JSON.stringify(results), '',
+    ...lines,
+  ].join('\n');
+  try { await navigator.clipboard.writeText(text); log('copied', 'ok'); }
+  catch (e) { log('clipboard blocked — select the text manually', 'bad'); }
 });
 </script>
 </body>
