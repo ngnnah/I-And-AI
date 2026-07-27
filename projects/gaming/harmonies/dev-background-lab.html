@@ -185,7 +185,10 @@
   }
   /* frosted = board panel lets the wallpaper through, blurred (the IMG_3539 look
      without giving up legibility). */
-  body[data-panel="frosted"] .board-panel { background: rgba(255,255,255,0.55); backdrop-filter: blur(7px) saturate(1.05); }
+  /* ALL panel-cards, not just the board's. On a phone the side panels (cards,
+     available, score) stack vertically and cover most of the screen, so frosting only
+     the board panel leaves the wallpaper visible as nothing but margin trim. */
+  body[data-panel="frosted"] .panel-card { background: rgba(255,255,255,0.55); backdrop-filter: blur(7px) saturate(1.05); }
   body[data-panel="frosted"] #board {
     background: rgba(255,255,255,0.30);
     border: 3px solid rgba(255,255,255,.6); border-radius: .5rem;
