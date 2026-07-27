@@ -25,6 +25,21 @@ import { EVENT_CUES, cueForPlacement } from "./sfx-palette.js";
 const MIN_GAIN = 0.0001; // exponentialRampToValueAtTime cannot reach 0
 
 /**
+ * How far ahead of `currentTime` every cue is scheduled, in seconds.
+ *
+ * NEVER schedule at exactly `ctx.currentTime`. iOS uses a much larger render quantum than
+ * desktop (~21ms at 1024 frames, vs ~2.7ms), so by the time the audio thread picks up an
+ * event booked at `currentTime` it is already in the past. The event is clamped to "now",
+ * and for a short cue the entire attack/decay envelope can collapse inside one render
+ * block — gain is back at MIN_GAIN before a single audible sample is produced. Desktop
+ * WebKit is forgiving enough to hide this; an iPhone goes completely silent.
+ *
+ * 30ms comfortably clears the largest common quantum and is well under the ~100ms where
+ * input latency starts to feel disconnected from the tap.
+ */
+export const SCHEDULE_LOOKAHEAD = 0.03;
+
+/**
  * Single output trim applied at the master, on top of the user's 0–1 volume.
  *
  * The per-part `vol` numbers in sfx-palette.js are *relative weights* tuned against each
@@ -258,7 +273,13 @@ export function createSoundEngine({ contextFactory, cap = AMBIENCE_CAP } = {}) {
     }
     try {
       const destination = bus === "ambience" ? state.ambienceBus : state.sfxBus;
-      const now = ctx.currentTime;
+      // Schedule slightly AHEAD of currentTime, never exactly at it. iOS renders in much
+      // larger quanta than desktop (~21ms at 1024 frames vs ~2.7ms), so events booked at
+      // `currentTime` are already in the past when the audio thread reaches them. They get
+      // clamped to "now", and for a short cue the whole attack/decay envelope can collapse
+      // into a single block — the gain is back at MIN_GAIN before the first audible sample.
+      // That renders as total silence on iPhone while working fine on desktop WebKit.
+      const now = ctx.currentTime + SCHEDULE_LOOKAHEAD;
       for (const part of parts) renderPart(ctx, part, destination, gainScale, now);
     } catch (e) {
       state.dead = true;
