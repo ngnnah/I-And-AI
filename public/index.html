@@ -6,22 +6,32 @@
   <title>I And AI - Mini Projects</title>
   <link rel="icon" type="image/png" href="images/favicon.png">
   <style>
+    :root {
+      --accent: #00d4ff;
+      --red: #e05252;
+      --blue: #5b9dff;
+      --gold: #FFCB05;
+      --ink: #e4e4e4;
+      --dim: #9aa3b2;
+      --mute: #6b7381;
+      --card: rgba(255, 255, 255, 0.05);
+      --edge: rgba(255, 255, 255, 0.1);
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* The base colour lives on html. A fixed-attachment gradient only paints
+       the viewport, so without this anything below the fold falls back to
+       white — and every card here is translucent white, so they vanish. */
+    html { background: #16213e; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      background-attachment: fixed;
       min-height: 100vh;
-      color: #e4e4e4;
+      color: var(--ink);
     }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 40px 20px;
-    }
-    header {
-      text-align: center;
-      margin-bottom: 50px;
-    }
+    .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px 20px; }
+
+    header { text-align: center; margin-bottom: 44px; }
     h1 {
       font-size: 2.5rem;
       margin-bottom: 10px;
@@ -30,73 +40,230 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    .subtitle {
-      color: #888;
-      font-size: 1.1rem;
+    .subtitle { color: #888; font-size: 1.1rem; }
+
+    /* ---------------------------------------------------- section headings */
+
+    .section { margin-bottom: 44px; }
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 18px;
     }
-    .projects-grid {
+    .section-head h2 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--dim);
+      white-space: nowrap;
+    }
+    .section-head .count {
+      font-size: 0.75rem;
+      color: var(--mute);
+      font-variant-numeric: tabular-nums;
+    }
+    .section-head .rule {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--edge), transparent);
+    }
+
+    /* ------------------------------------------------------------- the grid */
+
+    .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 24px;
+      /* auto-fit, not auto-fill: a section with two projects stretches them
+         across the row instead of leaving a dead track on the right. */
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
     }
-    .project-card {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+    /* Four games under the hero sit as a tidy 2x2 rather than 3 + an orphan. */
+    .games-panel .grid { grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); }
+    .card {
+      position: relative;
+      background: var(--card);
+      border: 1px solid var(--edge);
       border-radius: 12px;
-      padding: 24px;
-      transition: transform 0.2s, box-shadow 0.2s;
+      padding: 22px;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
       text-decoration: none;
       color: inherit;
-      display: block;
+      display: flex;
+      flex-direction: column;
     }
-    .project-card:hover {
+    .card:hover {
       transform: translateY(-4px);
       box-shadow: 0 10px 40px rgba(0, 212, 255, 0.15);
       border-color: rgba(0, 212, 255, 0.3);
     }
-    .project-card h2 {
-      font-size: 1.25rem;
+    .card h3 {
+      font-size: 1.15rem;
       margin-bottom: 8px;
       color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .project-card p {
+    .card p {
       color: #999;
-      font-size: 0.9rem;
-      line-height: 1.5;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      flex: 1;
     }
-    .project-card .tag {
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 14px;
+      align-items: center;
+    }
+    .tag {
       display: inline-block;
-      background: rgba(0, 212, 255, 0.15);
-      color: #00d4ff;
+      background: rgba(0, 212, 255, 0.13);
+      color: var(--accent);
       padding: 4px 10px;
       border-radius: 20px;
-      font-size: 0.75rem;
-      margin-top: 12px;
+      font-size: 0.72rem;
+      white-space: nowrap;
     }
-    .project-card.featured {
-      border-color: rgba(255, 203, 5, 0.4);
-      background: rgba(255, 203, 5, 0.08);
+    .tag.plain {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--mute);
     }
-    .project-card.featured:hover {
-      box-shadow: 0 10px 40px rgba(255, 203, 5, 0.2);
-      border-color: rgba(255, 203, 5, 0.5);
+    .star { color: var(--gold); font-size: 0.85em; }
+    .ext {
+      color: var(--mute);
+      font-size: 0.72em;
+      font-weight: 400;
+      margin-left: auto;
+      padding-left: 8px;
     }
-    .project-card.featured .tag {
-      background: rgba(255, 203, 5, 0.2);
-      color: #FFCB05;
+    .card:hover .ext { color: var(--accent); }
+
+    /* ------------------------------------------------- games are a group */
+
+    .games-panel {
+      border: 1px solid rgba(91, 157, 255, 0.16);
+      border-radius: 18px;
+      padding: 22px;
+      background:
+        radial-gradient(900px 260px at 12% -10%, rgba(224, 82, 82, 0.07), transparent 65%),
+        radial-gradient(900px 260px at 88% -10%, rgba(91, 157, 255, 0.08), transparent 65%),
+        rgba(255, 255, 255, 0.018);
     }
+    .games-panel .section-head { margin-top: 26px; }
+    .games-panel .section-head:first-child { margin-top: 0; }
+    .games-panel .card:hover {
+      box-shadow: 0 10px 40px rgba(91, 157, 255, 0.16);
+      border-color: rgba(91, 157, 255, 0.35);
+    }
+    .games-panel .tag {
+      background: rgba(91, 157, 255, 0.14);
+      color: var(--blue);
+    }
+    .games-panel .tag.plain { background: rgba(255, 255, 255, 0.06); color: var(--mute); }
+
+    /* ------------------------------------------------------------ the hero */
+
+    .hero {
+      position: relative;
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      border: 1px solid rgba(224, 82, 82, 0.28);
+      border-radius: 14px;
+      padding: 26px 26px 22px;
+      overflow: hidden;
+      background:
+        radial-gradient(620px 240px at 0% 0%, rgba(224, 82, 82, 0.16), transparent 62%),
+        radial-gradient(620px 240px at 100% 100%, rgba(91, 157, 255, 0.16), transparent 62%),
+        rgba(255, 255, 255, 0.04);
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--red), #9c6fc4 52%, var(--blue));
+    }
+    .hero:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 50px rgba(224, 82, 82, 0.16);
+      border-color: rgba(224, 82, 82, 0.45);
+    }
+    .hero .pick {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: rgba(255, 203, 5, 0.12);
+      border: 1px solid rgba(255, 203, 5, 0.3);
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+    }
+    .hero h3 {
+      font-size: 2rem;
+      letter-spacing: 0.02em;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .hero .lede {
+      color: #b9c0cc;
+      font-size: 0.97rem;
+      line-height: 1.6;
+      max-width: 62ch;
+    }
+    .modes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .mode {
+      border: 1px solid var(--edge);
+      background: rgba(255, 255, 255, 0.045);
+      border-radius: 9px;
+      padding: 8px 12px;
+      min-width: 132px;
+      flex: 1 1 132px;
+    }
+    .mode b {
+      display: block;
+      font-size: 0.82rem;
+      color: #fff;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .mode span { font-size: 0.72rem; color: var(--mute); }
+    .hero .meta { margin-top: 16px; }
+    .hero .tag { background: rgba(224, 82, 82, 0.16); color: #ff8e8e; }
+    .hero .tag.plain { background: rgba(255, 255, 255, 0.06); color: var(--mute); }
+
     footer {
       text-align: center;
-      margin-top: 60px;
+      margin: 8px 0 40px;
       color: #555;
       font-size: 0.85rem;
     }
-    footer a {
-      color: #00d4ff;
-      text-decoration: none;
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 560px) {
+      .hero h3 { font-size: 1.5rem; }
+      .hero { padding: 20px; }
+      .games-panel { padding: 16px; border-radius: 14px; }
     }
-    footer a:hover {
-      text-decoration: underline;
+    @media (prefers-reduced-motion: reduce) {
+      .card, .hero { transition: none; }
+      .card:hover, .hero:hover { transform: none; }
     }
   </style>
 </head>
@@ -107,64 +274,162 @@
       <p class="subtitle">AI-assisted development experiments and mini-projects</p>
     </header>
 
-    <div class="projects-grid">
-      <a href="projects/pokemon-math-world/" class="project-card featured">
-        <h2>Pokemon Math World ⭐</h2>
-        <p>3 difficulty levels in one! Trainer School (beginner), Pokemon League (adventure), Champion's Road (challenge). Add/sub to 100, multiplication, division, word problems. 40+ Pokemon, chapter icons, back navigation, progress saving.</p>
-        <span class="tag">Grade 1-2 Complete</span>
+    <!-- ============================================================ GAMES -->
+    <section class="section games-panel">
+      <div class="section-head">
+        <h2>Games</h2>
+        <span class="count">5 projects</span>
+        <span class="rule"></span>
+      </div>
+
+      <a href="projects/gaming/codenames/" class="hero">
+        <span class="pick">★ Pick of the bunch</span>
+        <h3>Codenames</h3>
+        <p class="lede">
+          Two teams, two spymasters, one-word clues. The spymasters see which
+          cards belong to whom; everyone else is guessing — and one card on the
+          board ends your game on the spot. Four ways to play, real-time sync so
+          everyone shares a board over a video call, plus a clue log and game
+          history to argue over afterwards.
+        </p>
+        <div class="modes">
+          <div class="mode"><b>Words</b><span>Classic 5×5, 25 cards</span></div>
+          <div class="mode"><b>Pictures</b><span>5×4 from 280 images</span></div>
+          <div class="mode"><b>DIY</b><span>Bring your own images</span></div>
+          <div class="mode"><b>Duet</b><span>2-player co-op</span></div>
+        </div>
+        <div class="meta">
+          <span class="tag">Multiplayer</span>
+          <span class="tag plain">4 game modes</span>
+          <span class="tag plain">Real-time sync</span>
+          <span class="tag plain">Clue log &amp; history</span>
+        </div>
       </a>
 
-      <a href="projects/iron-academy/" class="project-card">
-        <h2>Iron Academy</h2>
-        <p>An interactive math game teaching Grade 5-6 concepts through Tony Stark's origin story. Features Feynman explanations, SAT vocabulary builder, and gamification.</p>
-        <span class="tag">Educational Game</span>
-      </a>
+      <div class="section-head">
+        <h2>More games</h2>
+        <span class="count">4</span>
+        <span class="rule"></span>
+      </div>
 
-      <a href="projects/github-todo-app/" class="project-card">
-        <h2>GitHub TODO App</h2>
-        <p>A client-side TODO app that syncs with GitHub as a backend. Store your tasks in a private repo using the GitHub API.</p>
-        <span class="tag">HTML/JS</span>
-      </a>
+      <div class="grid">
+        <a href="projects/gaming/harmonies/" class="card">
+          <h3>
+            <img src="projects/gaming/harmonies/assets/harmonies-icon.svg" alt=""
+                 width="26" height="26" style="border-radius:6px">
+            Harmonies <span class="star">★</span>
+          </h3>
+          <p>A calm solo build of the board game. Stack coloured tokens on a hex
+             board to grow trees, mountains, fields, rivers and buildings, complete
+             animal habitats, and earn suns. Auto-saves, so you can put it down
+             anytime.</p>
+          <div class="meta">
+            <span class="tag">Solo</span>
+            <span class="tag plain">Board game</span>
+            <span class="tag plain">Shared scores</span>
+          </div>
+        </a>
 
-      <a href="projects/gaming/nanja-monja/" class="project-card">
-        <h2>Nanja Monja</h2>
-        <p>A real-time multiplayer memory card game. Name strange creatures and compete to shout their names first! Features turn-based naming phase, Firebase sync, and keyboard shortcuts.</p>
-        <span class="tag">Multiplayer Game</span>
-      </a>
+        <a href="projects/gaming/ito/" class="card">
+          <h3>🎴 Ito</h3>
+          <p>Cooperative number game — and a good way to get to know people.
+             Everyone describes a secret number using a theme, then you put the
+             whole table in order without saying a digit.</p>
+          <div class="meta">
+            <span class="tag">Co-op</span>
+            <span class="tag plain">Over video call</span>
+          </div>
+        </a>
 
-      <a href="projects/gaming/codenames/" class="project-card">
-        <h2>Codenames</h2>
-        <p>A real-time multiplayer team word-guessing game. Two teams compete with spymasters giving one-word clues. Features team setup, clue logging, and Firebase sync.</p>
-        <span class="tag">Multiplayer Game</span>
-      </a>
+        <a href="projects/gaming/high-society/" class="card">
+          <h3>♦ High Society</h3>
+          <p>Reiner Knizia's bidding game for 3–5 players. Compete for luxury
+             status cards with a hand of money — but whoever has the least money
+             left is thrown out before scoring.</p>
+          <div class="meta">
+            <span class="tag">3–5 players</span>
+            <span class="tag plain">Bidding</span>
+          </div>
+        </a>
 
-      <a href="projects/gaming/ito/" class="project-card">
-        <h2>🎴 Ito</h2>
-        <p>Cooperative number game — get to know each other! Players describe secret numbers using fun themes, then arrange everyone in order. Play over video call with family and friends.</p>
-        <span class="tag">Multiplayer Game</span>
-      </a>
+        <a href="projects/gaming/nanja-monja/" class="card">
+          <h3>Nanja Monja</h3>
+          <p>A real-time memory card game. Name strange creatures as they appear,
+             then race to shout the name first when one turns up again. Turn-based
+             naming phase and keyboard shortcuts.</p>
+          <div class="meta">
+            <span class="tag">Multiplayer</span>
+            <span class="tag plain">Memory</span>
+          </div>
+        </a>
 
-      <a href="projects/gaming/high-society/" class="project-card">
-        <h2>♦ High Society</h2>
-        <p>Reiner Knizia's bidding game for 3–5 players. Compete for luxury status cards using a hand of money cards — but the player with the least money is eliminated before scoring!</p>
-        <span class="tag">Multiplayer Game</span>
-      </a>
+      </div>
+    </section>
 
-      <a href="projects/gaming/harmonies/" class="project-card featured">
-        <h2><img src="projects/gaming/harmonies/assets/harmonies-icon.svg" alt="" width="28" height="28" style="vertical-align:-6px;border-radius:6px"> Harmonies ⭐</h2>
-        <p>A calm solo build of the board game Harmonies. Stack colored tokens on a hex board to grow trees, mountains, fields, rivers and buildings, complete animal habitats for points, and earn suns (1–8 ☀️). Click-to-place with gentle placement hints, auto-saves so you can put it down anytime, and a shared recent-scores board.</p>
-        <span class="tag">Solo Board Game</span>
-      </a>
+    <!-- ========================================================= LEARNING -->
+    <section class="section">
+      <div class="section-head">
+        <h2>Learning</h2>
+        <span class="count">2 projects</span>
+        <span class="rule"></span>
+      </div>
+      <div class="grid">
+        <a href="projects/pokemon-math-world/" class="card">
+          <h3>Pokémon Math World <span class="star">★</span></h3>
+          <p>Three difficulty tracks in one: Trainer School, Pokémon League and
+             Champion's Road. Addition and subtraction to 100, multiplication,
+             division and word problems, with 40+ Pokémon and saved progress.</p>
+          <div class="meta">
+            <span class="tag">Grade 1–2</span>
+            <span class="tag plain">Learning game</span>
+          </div>
+        </a>
+        <a href="projects/iron-academy/" class="card">
+          <h3>Iron Academy</h3>
+          <p>Grade 5–6 maths taught through Tony Stark's origin story, with
+             Feynman-style explanations, an SAT vocabulary builder and enough
+             gamification to keep going.</p>
+          <div class="meta">
+            <span class="tag">Grade 5–6</span>
+            <span class="tag plain">Educational</span>
+          </div>
+        </a>
+      </div>
+    </section>
 
-      <!-- Add more project cards here -->
-      <!--
-      <a href="projects/your-project/" class="project-card">
-        <h2>Project Name</h2>
-        <p>Project description goes here.</p>
-        <span class="tag">Technology</span>
-      </a>
-      -->
-    </div>
+    <!-- ============================================================ TOOLS -->
+    <section class="section">
+      <div class="section-head">
+        <h2>Tools</h2>
+        <span class="count">2 projects</span>
+        <span class="rule"></span>
+      </div>
+      <div class="grid">
+        <a href="https://ngnnah.github.io/story-map/" class="card">
+          <h3>Story Map <span class="ext">↗ own repo</span></h3>
+          <p>Drag a slider through a book's page numbers and watch each
+             character move across the story's own map, leaving a trail behind
+             them. Built for <i>The Sword of Shannara</i> and the Four Lands;
+             point it at any book with a map and a JSON file.</p>
+          <div class="meta">
+            <span class="tag">Reading companion</span>
+            <span class="tag plain">Zero dependencies</span>
+            <span class="tag plain">Bring your own map</span>
+          </div>
+        </a>
+
+        <a href="projects/github-todo-app/" class="card">
+          <h3>GitHub TODO App</h3>
+          <p>A client-side TODO app that uses GitHub as its backend — your tasks
+             live in a private repo, written through the GitHub API. No server of
+             its own.</p>
+          <div class="meta">
+            <span class="tag">HTML/JS</span>
+            <span class="tag plain">GitHub API</span>
+          </div>
+        </a>
+      </div>
+    </section>
 
     <footer>
       <p>View source on <a href="https://github.com/ngnnah/I-And-AI">GitHub</a></p>
