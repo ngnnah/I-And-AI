@@ -9,13 +9,14 @@
     :root {
       --accent: #00d4ff;
       --red: #e05252;
-      --blue: #5b9dff;
+      --blue: #7dc4ff;      /* was #5b9dff: only 3.4:1 on its own tag chip */
       --gold: #FFCB05;
-      --ink: #e4e4e4;
-      --dim: #9aa3b2;
-      --mute: #6b7381;
-      --card: rgba(255, 255, 255, 0.05);
-      --edge: rgba(255, 255, 255, 0.1);
+      --ink: #f0f3f8;
+      --head: #ccd4e0;      /* section headings */
+      --dim: #b0b9c8;       /* body copy      — 6.5:1 on a card */
+      --mute: #adb6c6;      /* secondary text — 4.6:1 even on a tag chip */
+      --card: rgba(255, 255, 255, 0.07);
+      --edge: rgba(255, 255, 255, 0.14);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     /* The base colour lives on html. A fixed-attachment gradient only paints
@@ -28,19 +29,23 @@
       background-attachment: fixed;
       min-height: 100vh;
       color: var(--ink);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
     }
     .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px 20px; }
 
     header { text-align: center; margin-bottom: 44px; }
     h1 {
-      font-size: 2.5rem;
+      font-size: 2.6rem;
+      letter-spacing: -0.015em;
       margin-bottom: 10px;
       background: linear-gradient(90deg, #00d4ff, #7b2cbf);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    .subtitle { color: #888; font-size: 1.1rem; }
+    .subtitle { color: var(--mute); font-size: 1.12rem; }
 
     /* ---------------------------------------------------- section headings */
 
@@ -52,15 +57,15 @@
       margin-bottom: 18px;
     }
     .section-head h2 {
-      font-size: 0.8rem;
+      font-size: 0.9rem;
       font-weight: 700;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--dim);
+      color: var(--head);
       white-space: nowrap;
     }
     .section-head .count {
-      font-size: 0.75rem;
+      font-size: 0.85rem;
       color: var(--mute);
       font-variant-numeric: tabular-nums;
     }
@@ -85,57 +90,64 @@
       position: relative;
       background: var(--card);
       border: 1px solid var(--edge);
-      border-radius: 12px;
-      padding: 22px;
+      border-radius: 14px;
+      padding: 26px;
       transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
       text-decoration: none;
       color: inherit;
       display: flex;
       flex-direction: column;
     }
+    .card:focus-visible, .hero:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 3px;
+    }
+    footer a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
     .card:hover {
       transform: translateY(-4px);
       box-shadow: 0 10px 40px rgba(0, 212, 255, 0.15);
       border-color: rgba(0, 212, 255, 0.3);
     }
     .card h3 {
-      font-size: 1.15rem;
-      margin-bottom: 8px;
+      font-size: 1.3rem;
+      letter-spacing: -0.01em;
+      margin-bottom: 10px;
       color: #fff;
       display: flex;
       align-items: center;
       gap: 8px;
     }
     .card p {
-      color: #999;
-      font-size: 0.88rem;
-      line-height: 1.55;
+      color: var(--dim);
+      font-size: 1rem;
+      line-height: 1.62;
       flex: 1;
     }
     .meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 14px;
+      gap: 8px;
+      margin-top: 18px;
       align-items: center;
     }
     .tag {
       display: inline-block;
-      background: rgba(0, 212, 255, 0.13);
+      background: rgba(0, 212, 255, 0.16);
       color: var(--accent);
-      padding: 4px 10px;
+      padding: 5px 12px;
       border-radius: 20px;
-      font-size: 0.72rem;
+      font-size: 0.82rem;
+      font-weight: 500;
       white-space: nowrap;
     }
     .tag.plain {
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--mute);
+      background: rgba(255, 255, 255, 0.10);
+      color: #c3cbd8;        /* lighter than --mute: chips sit on a lighter stack */
     }
     .star { color: var(--gold); font-size: 0.85em; }
     .ext {
       color: var(--mute);
-      font-size: 0.72em;
+      font-size: 0.8rem;
       font-weight: 400;
       margin-left: auto;
       padding-left: 8px;
@@ -160,10 +172,10 @@
       border-color: rgba(91, 157, 255, 0.35);
     }
     .games-panel .tag {
-      background: rgba(91, 157, 255, 0.14);
+      background: rgba(91, 157, 255, 0.18);
       color: var(--blue);
     }
-    .games-panel .tag.plain { background: rgba(255, 255, 255, 0.06); color: var(--mute); }
+    .games-panel .tag.plain { background: rgba(255, 255, 255, 0.10); color: #c3cbd8; }
 
     /* ------------------------------------------------------------ the hero */
 
@@ -198,9 +210,9 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.68rem;
+      font-size: 0.82rem;
       font-weight: 700;
-      letter-spacing: 0.13em;
+      letter-spacing: 0.11em;
       text-transform: uppercase;
       color: var(--gold);
       background: rgba(255, 203, 5, 0.12);
@@ -210,15 +222,15 @@
       margin-bottom: 14px;
     }
     .hero h3 {
-      font-size: 2rem;
+      font-size: 2.3rem;
       letter-spacing: 0.02em;
       color: #fff;
       margin-bottom: 8px;
     }
     .hero .lede {
-      color: #b9c0cc;
-      font-size: 0.97rem;
-      line-height: 1.6;
+      color: #d2d9e4;
+      font-size: 1.08rem;
+      line-height: 1.65;
       max-width: 62ch;
     }
     .modes {
@@ -230,34 +242,36 @@
     .mode {
       border: 1px solid var(--edge);
       background: rgba(255, 255, 255, 0.045);
-      border-radius: 9px;
-      padding: 8px 12px;
+      border-radius: 10px;
+      padding: 10px 14px;
       min-width: 132px;
       flex: 1 1 132px;
     }
     .mode b {
       display: block;
-      font-size: 0.82rem;
+      font-size: 0.95rem;
       color: #fff;
       font-weight: 600;
       margin-bottom: 2px;
     }
-    .mode span { font-size: 0.72rem; color: var(--mute); }
+    .mode span { font-size: 0.85rem; color: var(--mute); }
     .hero .meta { margin-top: 16px; }
-    .hero .tag { background: rgba(224, 82, 82, 0.16); color: #ff8e8e; }
-    .hero .tag.plain { background: rgba(255, 255, 255, 0.06); color: var(--mute); }
+    .hero .tag { background: rgba(224, 82, 82, 0.20); color: #ff9d9d; }
+    .hero .tag.plain { background: rgba(255, 255, 255, 0.10); color: #c3cbd8; }
 
     footer {
       text-align: center;
       margin: 8px 0 40px;
-      color: #555;
-      font-size: 0.85rem;
+      color: var(--mute);
+      font-size: 0.92rem;
     }
     footer a { color: var(--accent); text-decoration: none; }
     footer a:hover { text-decoration: underline; }
 
     @media (max-width: 560px) {
-      .hero h3 { font-size: 1.5rem; }
+      .hero h3 { font-size: 1.7rem; }
+      .hero .lede { font-size: 1rem; }
+      .card { padding: 20px; }
       .hero { padding: 20px; }
       .games-panel { padding: 16px; border-radius: 14px; }
     }
@@ -414,7 +428,6 @@
           <div class="meta">
             <span class="tag">Reading companion</span>
             <span class="tag plain">Zero dependencies</span>
-            <span class="tag plain">Bring your own map</span>
           </div>
         </a>
 
