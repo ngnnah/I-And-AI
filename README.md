@@ -35,6 +35,8 @@ The current portfolio includes:
 
 - **GitHub TODO App** (`projects/github-todo-app`)  
   Static TODO app that stores tasks in a user-owned GitHub repo through the Contents API. Zero backend required.
+- **Live desk** (`projects/live-desk`)  
+  Claude Code workflow: each session keeps one markdown file with a Status block and a log of every reply, answered inline in MarkText.
 
 ## Repository layout
 

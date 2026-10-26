@@ -1,0 +1,1512 @@
+<title>The >> Director</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<!-- Picture-book demo deck: the Director oversees many building sites (agent sessions) and directs them through a board at each gate (the live desk).
+     Keys: ← → / space turn the page · click the picture for the next page · type a number to jump · Home/End.
+     Deep link: #5 opens page 5. Inline CSS/JS, system fonts, inline SVG; the photo faces load from faces/. The pictures keep their own colors in both themes. -->
+<style>
+  /* Layout: a picture book. One framed illustration per page with one caption under it that joins the story to its meaning;
+     plain pages at the back. */
+  :root{
+    --round:ui-rounded,"SF Pro Rounded","Arial Rounded MT Bold","Nunito",system-ui,sans-serif;
+    --text:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --paper:#F2F3F8; --surface:#FFFFFF; --ink:#23243A; --muted:#5B5E77; --faint:#8C8FA5; --line:#DADCE8;
+    --accent:#4048C4; --accent-soft:#E7E8FB; --code:#ECEDF4; --tip:#FFF4D6; --tip-line:#E9C766;
+    --shadow:0 2px 6px rgba(35,36,58,.06),0 18px 40px -20px rgba(35,36,58,.32);
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --paper:#14151E; --surface:#1D1F2D; --ink:#ECEDF5; --muted:#A8ABC1; --faint:#6E7189; --line:#2F3246;
+    --accent:#A9AEFF; --accent-soft:#272A4E; --code:#262839; --tip:#2E2814; --tip-line:#6B5A22;
+    --shadow:0 2px 6px rgba(0,0,0,.35),0 18px 40px -20px rgba(0,0,0,.75); color-scheme:dark;}}
+  :root[data-theme="dark"]{
+    --paper:#14151E; --surface:#1D1F2D; --ink:#ECEDF5; --muted:#A8ABC1; --faint:#6E7189; --line:#2F3246;
+    --accent:#A9AEFF; --accent-soft:#272A4E; --code:#262839; --tip:#2E2814; --tip-line:#6B5A22;
+    --shadow:0 2px 6px rgba(0,0,0,.35),0 18px 40px -20px rgba(0,0,0,.75); color-scheme:dark;}
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--text);-webkit-font-smoothing:antialiased;overflow:hidden}
+  .book{position:fixed;inset:0}
+  .page{position:absolute;inset:0;display:flex;overflow-y:auto;
+    padding-block:calc(env(safe-area-inset-top,0px) + 28px) calc(env(safe-area-inset-bottom,0px) + 48px);
+    padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+    opacity:0;visibility:hidden;transition:opacity .4s ease,visibility 0s linear .4s}
+  .page.cur{opacity:1;visibility:visible;transition:opacity .4s ease}
+  .in{margin:auto;width:100%;display:flex;flex-direction:column;align-items:center;gap:clamp(14px,2.6vh,26px)}
+  .art{width:min(100%,1060px,calc((100dvh - 230px) * 1000 / 560));aspect-ratio:1000/560;max-width:100%;margin:0;border-radius:26px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line);flex:none;cursor:pointer}
+  .art svg{display:block;width:100%;height:100%}
+  /* page 2: the easter egg pulses and twinkles; still for reduced motion */
+  .egg-ring,.egg-spark path{transform-box:fill-box;transform-origin:center}
+  .page.cur .egg-ring{animation:egg-pulse 1.6s ease-in-out infinite}
+  .page.cur .egg-spark path{animation:egg-twinkle 1.6s ease-in-out infinite}
+  @keyframes egg-pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.16);opacity:.5}}
+  @keyframes egg-twinkle{0%,100%{transform:scale(.55);opacity:.45}50%{transform:scale(1.15);opacity:1}}
+  @media (prefers-reduced-motion:reduce){.page.cur .egg-ring,.page.cur .egg-spark path{animation:none}}
+  /* page 4: question bubbles pop in as the Director reaches each gate (script below); resting state shows every bubble */
+  .qb{transition:opacity .2s ease-out}
+  .qb.hid{opacity:0;transition:none}
+  /* page 4: the thought bubble swells per check-in (springy), then the burst pops in and its pieces fly out */
+  #p4-cloud{transform-origin:0 0;transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+  #p4-boom .burst{transform-origin:0 0}
+  #p4-boom.boom .burst{animation:boom-in .45s cubic-bezier(.2,1.8,.4,1) both}
+  #p4-boom.boom .frag{animation:frag-out .6s ease-out both}
+  @keyframes boom-in{from{transform:scale(0)}}
+  @keyframes frag-out{from{transform:translate(var(--dx),var(--dy)) scale(.4);opacity:0}}
+  @media (prefers-reduced-motion:reduce){#p4-boom.boom .burst,#p4-boom.boom .frag{animation:none}}
+  .cap{font:700 clamp(1.2rem,2.6vw,1.95rem)/1.25 var(--round);text-align:center;max-width:38ch;margin:0;text-wrap:balance}
+  .cap .m{color:var(--accent)}
+  .cap b{font-family:var(--mono);font-weight:800;color:var(--accent);letter-spacing:-.04em}
+  /* the cover's >>: the Director's symbol and the rule, a badge in the hat's colors (gold on indigo), in the name and in the line */
+  b.sym{display:inline-block;font-family:var(--mono);font-weight:800;letter-spacing:-.04em;line-height:1;padding:.06em .32em .1em;margin:0 .08em;color:#F2B33D;background:#4A50D0;border:3px solid #2B2F86;border-radius:.38em;box-shadow:0 0 0 3px #F2B33D}
+  h1 b.sym{font-size:.82em;vertical-align:.06em}
+  .cap b.sym{font-size:1.25em;vertical-align:-.06em}
+  h1{font:800 clamp(2.4rem,6vw,4.2rem)/1.05 var(--round);letter-spacing:-.01em;text-align:center;margin:0;text-wrap:balance}
+  h1+.cap{margin-top:-6px}
+
+  /* SVG text */
+  .hand{font-family:"Chalkboard SE","Bradley Hand","Comic Sans MS","Segoe Print",cursive}
+  .rnd{font-family:var(--round);font-weight:800}
+
+  /* back pages */
+  .gu{width:min(100%,900px);display:flex;flex-direction:column;gap:clamp(14px,2.4vh,22px)}
+  .in.gu{align-items:stretch}
+  .gu h2{font:800 clamp(1.8rem,3.8vw,2.6rem)/1.1 var(--round);margin:0;text-wrap:balance}
+  .gu .lede{margin:0;font:600 clamp(1.05rem,1.9vw,1.3rem)/1.4 var(--round);color:var(--muted);max-width:52ch}
+  .win{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;min-width:0}
+  .bar{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--line);font:500 .74rem/1.3 var(--mono);color:var(--muted)}
+  .bar .fname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .bar .app{margin-left:auto;flex:none;text-transform:uppercase;letter-spacing:.12em;font-size:.62rem;color:var(--faint)}
+  .doc{padding:clamp(14px,2.2vw,24px) clamp(16px,3vw,32px);font:400 clamp(.88rem,1.4vw,1.02rem)/1.5 var(--text)}
+  .doc .h2{font-weight:700;font-size:1.22em;margin:0 0 .25em}
+  .doc .h2.log{margin-top:.8em;color:var(--muted)}
+  .doc .h3{font-weight:650;margin:.6em 0 .1em}
+  .doc .h3.entry{color:var(--muted);font-weight:600}
+  .doc p{margin:.1em 0}
+  .doc ul{margin:.1em 0;padding-left:1.3em}
+  .doc li{margin:.1em 0}
+  .mk{font-style:normal;font-family:var(--mono);color:var(--faint);font-weight:500;font-size:.84em;margin-right:.4em}
+  .ref{font-family:var(--mono);font-size:.86em;color:var(--muted)}
+  .reply{display:inline-block;border-left:3px solid var(--accent);background:var(--accent-soft);padding:.08em .65em;border-radius:0 6px 6px 0;font-weight:650}
+  .reply .gt{font-family:var(--mono);color:var(--accent);margin-right:.45em;font-weight:800}
+  .src{font:500 .78rem var(--mono);color:var(--muted);margin:0}
+
+  /* page 17: the board and the chat panel side by side, joined by a drawn arrow; stacked on phones.
+     The panel is a picture of the dark VS Code panel, so it keeps its own colors in both themes. */
+  .in.gu.loop-page{width:min(100%,1120px)}
+  .loop{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,400px);gap:72px;align-items:center}
+  .loop .doc{font-size:clamp(1.05rem,1.9vw,1.4rem);line-height:1.45}
+  .loop .doc .h3{margin-top:.45em}
+  .step{display:inline-flex;align-items:center;gap:8px;font:700 1rem/1.25 var(--round);color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:4px 13px 4px 4px;vertical-align:middle;align-self:flex-start}
+  .step b{display:inline-grid;place-items:center;flex:none;width:25px;height:25px;border-radius:50%;background:var(--accent);color:var(--surface);font-size:.9rem}
+  .step code{font:800 .9em var(--mono);color:inherit;background:none;padding:0;letter-spacing:-.04em}
+  .loop-arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+  @media (max-width:860px){.loop{grid-template-columns:minmax(0,1fr);gap:16px}.loop-arrow{display:none}}
+  .cc{background:#1E1E1E;border:1px solid #3A3A3A;border-radius:14px;box-shadow:var(--shadow);overflow:hidden;color:#CCCCCC;font:400 1.1rem/1.5 var(--text);min-width:0}
+  .cc-bar{display:flex;justify-content:space-between;gap:10px;padding:10px 18px;border-bottom:1px solid #333333;font:500 .8rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#8B8B8B}
+  .cc-body{padding:18px;display:flex;flex-direction:column;gap:14px}
+  .cc-msg{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#2A2A2A;border:1px solid #3C3C3C;border-radius:10px;padding:10px 14px}
+  .cc-you{font:800 1.2rem var(--mono);color:#E6E6E6;letter-spacing:-.04em}
+  .cc-time{font:500 .88rem var(--mono);color:#8B8B8B;font-variant-numeric:tabular-nums}
+  .cc-tools{display:flex;align-items:center;gap:8px;color:#9D9D9D;font-size:1.02rem;padding-left:2px}
+  .cc-dot{width:9px;height:9px;border-radius:50%;background:#3FB950;flex:none}
+  .cc-chev{color:#8B8B8B}
+  .cc-reply{margin:0;color:#D4D4D4}
+  .cc-link{color:#4DAAFC;text-decoration:underline;text-underline-offset:2px}
+  .doc code,.src code{font-family:var(--mono);font-size:.86em;background:var(--code);padding:.08em .4em;border-radius:5px;overflow-wrap:anywhere;color:var(--ink)}
+
+  /* hot tip */
+  .snip{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);min-width:0}
+  .snip pre{margin:0;padding:clamp(16px,2.4vw,24px) clamp(16px,3vw,28px);padding-right:96px;font:500 clamp(.9rem,1.6vw,1.08rem)/1.6 var(--mono);overflow-x:auto;color:var(--ink)}
+  .snip .k{color:var(--accent)} .snip .v{color:#B4561F} .snip .p{color:var(--faint)}
+  :root[data-theme="dark"] .snip .v{color:#F0A26B}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .snip .v{color:#F0A26B}}
+  .copy{position:absolute;top:12px;right:12px;font:700 .78rem var(--round);color:var(--accent);background:var(--accent-soft);border:1px solid transparent;border-radius:999px;padding:6px 14px;cursor:pointer}
+  .copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,1.6vw,16px)}
+  @media (max-width:760px){.facts{grid-template-columns:minmax(0,1fr)}}
+  .facts p{margin:0;font-size:clamp(.95rem,1.5vw,1.06rem);line-height:1.45;color:var(--muted);min-width:0}
+  .facts p code{font-family:var(--mono);font-size:.86em;background:var(--code);padding:.08em .4em;border-radius:5px;color:var(--ink);overflow-wrap:anywhere}
+  .facts p strong{color:var(--ink)}
+  .catch{margin:0;background:var(--tip);border:1px solid var(--tip-line);border-radius:12px;padding:12px 16px;font-size:clamp(.95rem,1.5vw,1.06rem);line-height:1.45}
+
+  /* chrome: a thin progress line and a page count, nothing else on screen */
+  .progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:60;transition:width .3s}
+  .count{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom,0px));right:max(18px,env(safe-area-inset-right,0px));z-index:60;font:500 .74rem var(--mono);color:var(--faint);font-variant-numeric:tabular-nums}
+  .jump{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:70;opacity:0;transition:opacity .1s;pointer-events:none;background:var(--surface);color:var(--ink);border:2px solid var(--accent);border-radius:12px;padding:10px 18px;font:800 1.5rem var(--mono)}
+  @media (prefers-reduced-motion:reduce){.page,.page.cur,.progress{transition:none}}
+
+  /* page 19: the fold. Resting styles are the end state (cards folded, one row, answer moved up, panel shrunk
+     to hug it on stretched legs, Director calm); each time the page is entered the keyframes replay from the pile.
+     Reduced motion keeps the end state. The panel's bottom edge rides with the answer: same keyframes, same 258px. */
+  .fold-cards,.fold-reply,.fold-legs{transform-box:fill-box}
+  .fold-cards{transform-origin:50% 0;transform:scaleY(.04);opacity:0}
+  .fold-panel{height:218px}
+  .fold-legs{transform-origin:50% 100%;transform:scaleY(6.864)}
+  .fold-worry{opacity:0}
+  .page.cur .fold-cards{animation:fold-cards 3s ease-in-out .5s both}
+  .page.cur .fold-row{animation:fold-row 3s ease-in-out .5s both}
+  .page.cur .fold-reply{animation:fold-reply 3s ease-in-out .5s both}
+  .page.cur .fold-panel{animation:fold-panel 3s ease-in-out .5s both}
+  .page.cur .fold-legs{animation:fold-legs 3s ease-in-out .5s both}
+  .page.cur .fold-worry{animation:fold-worry 3s ease-in-out .5s both}
+  .page.cur .fold-calm{animation:fold-calm 3s ease-in-out .5s both}
+  @keyframes fold-cards{0%,30%{opacity:1;transform:none}75%{opacity:.7;transform:scaleY(.04)}85%,100%{opacity:0;transform:scaleY(.04)}}
+  @keyframes fold-row{0%,72%{opacity:0}90%,100%{opacity:1}}
+  @keyframes fold-reply{0%,55%{transform:translateY(258px)}88%,100%{transform:none}}
+  @keyframes fold-panel{0%,55%{height:476px}88%,100%{height:218px}}
+  @keyframes fold-legs{0%,55%{transform:none}88%,100%{transform:scaleY(6.864)}}
+  @keyframes fold-worry{0%,65%{opacity:1}90%,100%{opacity:0}}
+  @keyframes fold-calm{0%,65%{opacity:0}90%,100%{opacity:1}}
+  @media (prefers-reduced-motion:reduce){.page.cur .fold-cards,.page.cur .fold-row,.page.cur .fold-reply,.page.cur .fold-panel,.page.cur .fold-legs,.page.cur .fold-worry,.page.cur .fold-calm{animation:none}}
+
+  /* page 21: three big steps, and the city's lights coming on one by one. Resting state: all lit, all steps shown. */
+  .steps3{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(10px,3vw,44px);font:800 clamp(1.45rem,3.3vw,2.4rem)/1.15 var(--round)}
+  .steps3 li{display:flex;align-items:center;gap:.4em}
+  .steps3 li b{display:inline-grid;place-items:center;flex:none;width:1.5em;height:1.5em;border-radius:50%;background:var(--accent);color:var(--surface);font-size:.6em}
+  .steps3 code{font:800 1em var(--mono);color:var(--accent);letter-spacing:-.04em}
+  .steps3 li:last-child{color:var(--accent)}
+  .page.cur .steps3 li{animation:step-in .6s ease-out both}
+  .page.cur .steps3 li:nth-child(1){animation-delay:.3s} .page.cur .steps3 li:nth-child(2){animation-delay:1.2s} .page.cur .steps3 li:nth-child(3){animation-delay:2.1s}
+  .page.cur .lite{animation:lite .7s ease-out both}
+  .page.cur .l1{animation-delay:.4s} .page.cur .l2{animation-delay:.9s} .page.cur .l3{animation-delay:1.4s} .page.cur .l4{animation-delay:1.9s} .page.cur .l5{animation-delay:2.4s}
+  @keyframes step-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes lite{from{opacity:0}to{opacity:1}}
+  @media (prefers-reduced-motion:reduce){.page.cur .steps3 li,.page.cur .lite{animation:none}}
+
+  /* page 24: the starter kit, framed under its title; items drop in one by one and the >> pen wiggles. Resting state: the full kit. */
+  .in.gu .art.kit{width:min(100%,1060px,calc((100dvh - 300px) * 1000 / 560));margin:0 auto;cursor:default}
+  .kit-paths{display:none;line-height:2}
+  @media (max-width:640px){.kit-paths{display:block}}
+  .kit-setup{font-size:1rem;position:relative}
+  .kit-setup a{color:var(--accent);text-underline-offset:3px}
+  /* the allow rules hang under the setup line, out of the flow, so the title and the kit keep their places; a short fall keeps them off the setup line */
+  .kit-allow{position:absolute;left:0;top:calc(100% + 8px);--kit-fall:-12px}
+  .kit-drop,.kit-wiggle{transform-box:fill-box;transform-origin:50% 50%}
+  .page.cur .kit-drop{animation:kit-drop .5s cubic-bezier(.3,1.4,.6,1) both}
+  .page.cur .k0{animation-delay:.9s} .page.cur .k1{animation-delay:.2s} .page.cur .k2{animation-delay:.5s} .page.cur .k3{animation-delay:.8s} .page.cur .k4{animation-delay:1.1s} .page.cur .k5{animation-delay:1.3s}
+  .page.cur .kit-wiggle{animation:kit-wiggle .5s ease-in-out 1.4s 2}
+  @keyframes kit-drop{from{opacity:0;transform:translateY(var(--kit-fall,-36px))}to{opacity:1;transform:none}}
+  @keyframes kit-wiggle{0%,100%{transform:none}25%{transform:rotate(-7deg)}75%{transform:rotate(7deg)}}
+  @media (prefers-reduced-motion:reduce){.page.cur .kit-drop,.page.cur .kit-wiggle{animation:none}}
+</style>
+
+<!-- Shared drawings: the Director, the managers, the workers and the props. Every page uses these, so the cast looks the same throughout.
+     Managers and workers take skin, hair and shirt colors from --sk, --hr and --sh on each <use>. -->
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BCE0F2"/><stop offset="1" stop-color="#EAF6FB"/></linearGradient>
+    <linearGradient id="sky-eve" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EFB487"/><stop offset="1" stop-color="#FBE6CC"/></linearGradient>
+    <linearGradient id="sky-gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6CE85"/><stop offset="1" stop-color="#FDF1D8"/></linearGradient>
+    <pattern id="lattice" width="12" height="14" patternUnits="userSpaceOnUse"><path d="M0 0 L12 14 M12 0 L0 14" stroke="#C99A1E" stroke-width="1.6"/></pattern>
+    <pattern id="stripe" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="16" height="16" fill="#FFFFFF"/><rect width="8" height="16" fill="#F07B2B"/></pattern>
+
+    <!-- >> : the Director's mark, read "direct". Stroke color comes from each use. -->
+    <path id="chev" d="M-10 -8 L-2 0 L-10 8 M0 -8 L8 0 L0 8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- faces, shared by everyone -->
+    <g id="f-eyes"><circle cx="51" cy="74" r="3.2" fill="#2B2A33"/><circle cx="69" cy="74" r="3.2" fill="#2B2A33"/></g>
+    <g id="f-cheeks"><circle cx="45" cy="81" r="4.3" fill="#F08F7E" opacity=".5"/><circle cx="75" cy="81" r="4.3" fill="#F08F7E" opacity=".5"/></g>
+    <path id="drop" d="M93 60 C 89 67, 89 72, 93 73 C 97 72, 97 67, 93 60 Z" fill="#8CCBEA"/>
+    <g id="f-smile"><use href="#f-eyes"/><use href="#f-cheeks"/><path d="M53 83 Q60 89 67 83" fill="none" stroke="#2B2A33" stroke-width="2.6" stroke-linecap="round"/></g>
+    <g id="f-happy"><use href="#f-cheeks"/><path d="M47 76 Q51 70 55 76 M65 76 Q69 70 73 76" fill="none" stroke="#2B2A33" stroke-width="2.6" stroke-linecap="round"/><path d="M52 82 Q60 92 68 82 Z" fill="#7A3A34"/></g>
+    <g id="f-talk"><use href="#f-eyes"/><use href="#f-cheeks"/><ellipse cx="60" cy="85" rx="5" ry="4.2" fill="#7A3A34"/></g>
+    <g id="f-tired"><use href="#f-cheeks"/><path d="M46 74 Q51 78 56 74 M64 74 Q69 78 74 74" fill="none" stroke="#2B2A33" stroke-width="2.6" stroke-linecap="round"/><path d="M55 86 H65" stroke="#2B2A33" stroke-width="2.6" stroke-linecap="round"/><use href="#drop"/></g>
+    <g id="f-dizzy"><circle cx="51" cy="74" r="4.4" fill="none" stroke="#2B2A33" stroke-width="1.8"/><circle cx="51" cy="74" r="1.4" fill="#2B2A33"/><circle cx="69" cy="74" r="4.4" fill="none" stroke="#2B2A33" stroke-width="1.8"/><circle cx="69" cy="74" r="1.4" fill="#2B2A33"/><path d="M51 87 q4.5 -3.5 9 0 t9 0" fill="none" stroke="#2B2A33" stroke-width="2.4" stroke-linecap="round"/><use href="#drop"/></g>
+    <g id="f-focus"><use href="#f-eyes"/><path d="M45 68 H55 M65 66 L75 68" stroke="#2B2A33" stroke-width="2.4" stroke-linecap="round"/><path d="M55 85 H65" stroke="#2B2A33" stroke-width="2.6" stroke-linecap="round"/></g>
+
+    <!-- THE DIRECTOR: indigo hard hat and cape, both marked >>, and a >> badge on the chest. -->
+    <g id="d-cape"><path d="M45 97 C 26 116, 8 150, -12 202 Q 26 214, 66 206 L 76 100 Z" fill="#2B2F86"/><use href="#chev" stroke="#F2B33D" stroke-width="4.4" transform="translate(19 182) rotate(-16) scale(1.2)"/></g>
+    <g id="d-legs"><rect x="44" y="156" width="13" height="50" rx="6" fill="#2E3140"/><rect x="63" y="156" width="13" height="50" rx="6" fill="#2E3140"/><ellipse cx="49" cy="208" rx="11" ry="6" fill="#1D1F29"/><ellipse cx="71" cy="208" rx="11" ry="6" fill="#1D1F29"/></g>
+    <g id="d-body"><rect x="36" y="92" width="48" height="74" rx="14" fill="#4A50D0"/><circle cx="60" cy="122" r="12.5" fill="#F2B33D"/><use href="#chev" stroke="#2B2F86" stroke-width="3.6" transform="translate(61 122) scale(.68)"/></g>
+    <!-- Faces from photos (the author as the Director; the easter egg as one worker): a circle under the hard hat, the brim over the forehead.
+         The drawn expressions are left off these heads; extras like a sweat drop still apply. -->
+    <clipPath id="face-clip" clipPathUnits="userSpaceOnUse"><circle cx="60" cy="79" r="30"/></clipPath>
+    <g id="d-head"><image href="faces/director.jpg" x="30" y="49" width="60" height="60" preserveAspectRatio="xMidYMid slice" clip-path="url(#face-clip)"/><circle cx="60" cy="79" r="30" fill="none" stroke="#6E4A36" stroke-opacity=".35" stroke-width="1.5"/><path d="M33 60 Q33 30 60 28 Q87 30 87 60 Z" fill="#4A50D0"/><rect x="28" y="56" width="64" height="9" rx="4.5" fill="#363BAA"/><use href="#chev" stroke="#F2B33D" stroke-width="3.8" transform="translate(61 44)"/></g>
+    <symbol id="dir-stand" viewBox="0 0 120 220" overflow="visible">
+      <use href="#d-cape"/><use href="#d-legs"/><use href="#d-body"/>
+      <path d="M40 104 L30 148 M80 104 L90 148" stroke="#3F45C0" stroke-width="11" stroke-linecap="round"/>
+      <circle cx="29" cy="151" r="6.5" fill="#B48670"/><circle cx="91" cy="151" r="6.5" fill="#B48670"/>
+      <use href="#d-head"/>
+    </symbol>
+    <symbol id="dir-worry" viewBox="0 0 120 220" overflow="visible">
+      <use href="#d-cape"/><use href="#d-legs"/><use href="#d-body"/>
+      <path d="M40 104 L30 148 M80 104 L90 148" stroke="#3F45C0" stroke-width="11" stroke-linecap="round"/>
+      <circle cx="29" cy="151" r="6.5" fill="#B48670"/><circle cx="91" cy="151" r="6.5" fill="#B48670"/>
+      <use href="#d-head"/><use href="#drop"/>
+    </symbol>
+    <symbol id="dir-point" viewBox="0 0 120 220" overflow="visible">
+      <use href="#d-cape"/><use href="#d-legs"/><use href="#d-body"/>
+      <path d="M40 104 L30 148 M80 104 L110 78" stroke="#3F45C0" stroke-width="11" stroke-linecap="round"/>
+      <circle cx="29" cy="151" r="6.5" fill="#B48670"/><circle cx="112" cy="76" r="6.5" fill="#B48670"/>
+      <use href="#d-head"/>
+    </symbol>
+    <symbol id="dir-hips" viewBox="0 0 120 220" overflow="visible">
+      <use href="#d-cape"/><use href="#d-legs"/><use href="#d-body"/>
+      <path d="M40 102 L25 124 L37 141 M80 102 L95 124 L83 141" fill="none" stroke="#3F45C0" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="37" cy="141" r="6.5" fill="#B48670"/><circle cx="83" cy="141" r="6.5" fill="#B48670"/>
+      <use href="#d-head"/>
+    </symbol>
+    <symbol id="dir-ask" viewBox="0 0 120 220" overflow="visible">
+      <use href="#d-cape"/><use href="#d-legs"/><use href="#d-body"/>
+      <path d="M40 104 L30 148 M80 104 L106 88" stroke="#3F45C0" stroke-width="11" stroke-linecap="round"/>
+      <circle cx="29" cy="151" r="6.5" fill="#B48670"/><circle cx="108" cy="86" r="6.5" fill="#B48670"/>
+      <use href="#d-head"/>
+    </symbol>
+    <symbol id="dir-mug" viewBox="0 0 120 220" overflow="visible">
+      <use href="#d-cape"/><use href="#d-legs"/><use href="#d-body"/>
+      <path d="M40 104 L30 148 M80 104 L92 126" stroke="#3F45C0" stroke-width="11" stroke-linecap="round"/>
+      <path d="M92 106 q-3 -5 0 -10 M99 106 q-3 -5 0 -10" fill="none" stroke="#A6ACBC" stroke-width="2" stroke-linecap="round"/>
+      <rect x="88" y="111" width="17" height="20" rx="3" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2"/>
+      <path d="M105 116 q7 0 7 6 q0 6 -7 6" fill="none" stroke="#2B2A33" stroke-width="2"/>
+      <circle cx="29" cy="151" r="6.5" fill="#B48670"/><circle cx="91" cy="126" r="6.5" fill="#B48670"/>
+      <use href="#d-head"/>
+    </symbol>
+    <symbol id="dir-write" viewBox="0 0 120 220" overflow="visible">
+      <use href="#d-cape"/><use href="#d-legs"/><use href="#d-body"/>
+      <path d="M40 104 L30 148 M80 104 L112 96" stroke="#3F45C0" stroke-width="11" stroke-linecap="round"/>
+      <path d="M114 95 L134 84" stroke="#2B2A33" stroke-width="6" stroke-linecap="round"/><path d="M134 84 L140 81" stroke="#4048C4" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="29" cy="151" r="6.5" fill="#B48670"/><circle cx="114" cy="95" r="6.5" fill="#B48670"/>
+      <use href="#d-head"/>
+    </symbol>
+    <!-- a Director's hat over a drawn face, for the page where everyone becomes a Director (16). Skin and hair come from --sk and --hr; add a face (f-smile, f-happy) after it. -->
+    <g id="d-head-drawn"><ellipse cx="60" cy="64" rx="28" ry="23" style="fill:var(--hr,#4A3426)"/><circle cx="60" cy="66" r="25" style="fill:var(--sk,#E2AE84)"/><path d="M33 60 Q33 30 60 28 Q87 30 87 60 Z" fill="#4A50D0"/><rect x="28" y="56" width="64" height="9" rx="4.5" fill="#363BAA"/><use href="#chev" stroke="#F2B33D" stroke-width="3.8" transform="translate(61 44)"/></g>
+
+    <!-- MANAGERS: an agent session each. White hard hat, orange vest, clipboard. -->
+    <g id="m-legs"><rect x="44" y="156" width="13" height="50" rx="6" fill="#3A4560"/><rect x="63" y="156" width="13" height="50" rx="6" fill="#3A4560"/><ellipse cx="49" cy="208" rx="11" ry="6" fill="#5A3E2B"/><ellipse cx="71" cy="208" rx="11" ry="6" fill="#5A3E2B"/></g>
+    <g id="m-legs-sit"><rect x="34" y="158" width="17" height="34" rx="7" fill="#3A4560"/><rect x="69" y="158" width="17" height="34" rx="7" fill="#3A4560"/><ellipse cx="40" cy="194" rx="12" ry="6" fill="#5A3E2B"/><ellipse cx="80" cy="194" rx="12" ry="6" fill="#5A3E2B"/></g>
+    <g id="m-body"><rect x="36" y="92" width="48" height="74" rx="14" fill="#7FA3D6"/><path d="M36 106 Q36 92 50 92 H56 V166 H50 Q36 166 36 152 Z" fill="#F07B2B"/><path d="M84 106 Q84 92 70 92 H64 V166 H70 Q84 166 84 152 Z" fill="#F07B2B"/><path d="M36 124 H56 V130 H36 Z M64 124 H84 V130 H64 Z M36 142 H56 V148 H36 Z M64 142 H84 V148 H64 Z" fill="#EEF2F5"/></g>
+    <g id="m-head"><ellipse cx="60" cy="64" rx="28" ry="23" style="fill:var(--hr,#4A3426)"/><circle cx="60" cy="66" r="25" style="fill:var(--sk,#E2AE84)"/><path d="M33 60 Q33 30 60 28 Q87 30 87 60 Z" fill="#F7F6F1" stroke="#CFCBBF" stroke-width="2"/><rect x="55" y="30" width="10" height="27" rx="4" fill="#E4E1D7"/><rect x="28" y="56" width="64" height="9" rx="4.5" fill="#E4E1D7" stroke="#CFCBBF" stroke-width="2"/></g>
+    <g id="clip"><rect x="0" y="0" width="30" height="40" rx="3" fill="#B98A55" stroke="#8A5A33" stroke-width="2"/><rect x="4" y="6" width="22" height="30" fill="#FFFFFF"/><path d="M8 14 H22 M8 21 H22 M8 28 H17" stroke="#A6ACBC" stroke-width="2.4" stroke-linecap="round"/><rect x="10" y="-3" width="10" height="7" rx="2" fill="#8E96A5"/></g>
+    <symbol id="mgr-stand" viewBox="0 0 120 220" overflow="visible">
+      <use href="#m-legs"/><use href="#m-body"/>
+      <path d="M40 104 L30 148" stroke="#6F95CC" stroke-width="11" stroke-linecap="round"/><circle cx="29" cy="151" r="6.5" style="fill:var(--sk,#E2AE84)"/>
+      <use href="#clip" transform="translate(66 110)"/>
+      <path d="M80 104 L94 124 L82 140" fill="none" stroke="#6F95CC" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/><circle cx="81" cy="141" r="6.5" style="fill:var(--sk,#E2AE84)"/>
+      <use href="#m-head"/><use href="#f-smile"/>
+    </symbol>
+    <symbol id="mgr-dizzy" viewBox="0 0 120 220" overflow="visible">
+      <use href="#m-legs"/><use href="#m-body"/>
+      <use href="#clip" transform="translate(82 148) rotate(16)"/>
+      <path d="M40 104 L30 148 M80 104 L90 148" stroke="#6F95CC" stroke-width="11" stroke-linecap="round"/>
+      <circle cx="29" cy="151" r="6.5" style="fill:var(--sk,#E2AE84)"/><circle cx="91" cy="151" r="6.5" style="fill:var(--sk,#E2AE84)"/>
+      <use href="#m-head"/><use href="#f-dizzy"/>
+    </symbol>
+    <symbol id="mgr-write" viewBox="0 0 120 220" overflow="visible">
+      <use href="#m-legs"/><use href="#m-body"/>
+      <path d="M40 104 L30 148 M80 104 L110 80" stroke="#6F95CC" stroke-width="11" stroke-linecap="round"/>
+      <path d="M112 78 L131 65" stroke="#2B2A33" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="29" cy="151" r="6.5" style="fill:var(--sk,#E2AE84)"/><circle cx="112" cy="78" r="6.5" style="fill:var(--sk,#E2AE84)"/>
+      <use href="#m-head"/><use href="#f-smile"/>
+    </symbol>
+    <symbol id="mgr-write-oh" viewBox="0 0 120 220" overflow="visible">
+      <use href="#m-legs"/><use href="#m-body"/>
+      <path d="M40 104 L30 148 M80 104 L110 80" stroke="#6F95CC" stroke-width="11" stroke-linecap="round"/>
+      <path d="M112 78 L131 65" stroke="#2B2A33" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="29" cy="151" r="6.5" style="fill:var(--sk,#E2AE84)"/><circle cx="112" cy="78" r="6.5" style="fill:var(--sk,#E2AE84)"/>
+      <use href="#m-head"/><use href="#f-talk"/>
+    </symbol>
+    <symbol id="mgr-catch" viewBox="0 0 120 220" overflow="visible">
+      <use href="#m-legs"/><use href="#m-body"/>
+      <path d="M40 104 L22 74 M80 104 L98 74" stroke="#6F95CC" stroke-width="11" stroke-linecap="round"/>
+      <circle cx="21" cy="71" r="6.5" style="fill:var(--sk,#E2AE84)"/><circle cx="99" cy="71" r="6.5" style="fill:var(--sk,#E2AE84)"/>
+      <use href="#m-head"/><use href="#f-happy"/>
+    </symbol>
+    <symbol id="mgr-throw" viewBox="0 0 120 220" overflow="visible">
+      <use href="#m-legs"/><use href="#m-body"/>
+      <path d="M40 104 L30 148 M80 104 L98 70" stroke="#6F95CC" stroke-width="11" stroke-linecap="round"/>
+      <circle cx="29" cy="151" r="6.5" style="fill:var(--sk,#E2AE84)"/><circle cx="99" cy="67" r="6.5" style="fill:var(--sk,#E2AE84)"/>
+      <use href="#m-head"/><use href="#f-happy"/>
+    </symbol>
+    <symbol id="mgr-tired" viewBox="0 0 120 220" overflow="visible">
+      <use href="#m-legs-sit"/><use href="#m-body"/>
+      <path d="M40 106 L36 150 M80 104 L100 76" stroke="#6F95CC" stroke-width="11" stroke-linecap="round"/>
+      <circle cx="36" cy="153" r="6.5" style="fill:var(--sk,#E2AE84)"/><circle cx="101" cy="73" r="6.5" style="fill:var(--sk,#E2AE84)"/>
+      <use href="#m-head"/><use href="#f-tired"/>
+    </symbol>
+    <symbol id="mgr-plan" viewBox="0 0 120 220" overflow="visible">
+      <use href="#m-legs"/><use href="#m-body"/>
+      <path d="M40 104 L18 128 M80 104 L102 128" stroke="#6F95CC" stroke-width="11" stroke-linecap="round"/>
+      <rect x="10" y="108" width="100" height="58" rx="3" fill="#3F6FB6" stroke="#2E5590" stroke-width="2"/>
+      <path d="M24 156 V134 L42 120 L60 134 V156 Z M70 122 H98 M70 132 H98 M70 142 H92 M70 152 H96" fill="none" stroke="#DCE8F7" stroke-width="2.2" stroke-linejoin="round"/>
+      <circle cx="16" cy="130" r="6.5" style="fill:var(--sk,#E2AE84)"/><circle cx="104" cy="130" r="6.5" style="fill:var(--sk,#E2AE84)"/>
+      <use href="#m-head"/><use href="#f-smile"/>
+    </symbol>
+
+    <!-- WORKERS: subagents. Yellow hard hat, blue overalls, one tool each. -->
+    <g id="w-legs"><rect x="44" y="156" width="13" height="50" rx="6" fill="#3E6FB0"/><rect x="63" y="156" width="13" height="50" rx="6" fill="#3E6FB0"/><ellipse cx="49" cy="208" rx="11" ry="6" fill="#5A3E2B"/><ellipse cx="71" cy="208" rx="11" ry="6" fill="#5A3E2B"/></g>
+    <g id="w-body"><rect x="36" y="92" width="48" height="74" rx="14" style="fill:var(--sh,#EDE6D6)"/><path d="M42 114 H78 V156 Q78 166 68 166 H52 Q42 166 42 156 Z" fill="#3E6FB0"/><path d="M46 114 L47 94 M74 114 L73 94" stroke="#3E6FB0" stroke-width="5" stroke-linecap="round"/><rect x="53" y="122" width="14" height="11" rx="2" fill="#3563A0"/></g>
+    <g id="w-head"><ellipse cx="60" cy="64" rx="28" ry="23" style="fill:var(--hr,#2B2A33)"/><circle cx="60" cy="66" r="25" style="fill:var(--sk,#C68B5E)"/><path d="M33 60 Q33 30 60 28 Q87 30 87 60 Z" fill="#F2C230"/><rect x="55" y="30" width="10" height="27" rx="4" fill="#F7D560"/><rect x="28" y="56" width="64" height="9" rx="4.5" fill="#DDA91A"/></g>
+    <symbol id="wkr-hammer" viewBox="0 0 120 220" overflow="visible">
+      <use href="#w-legs"/><use href="#w-body"/>
+      <path d="M40 104 L30 148" style="stroke:var(--sh,#EDE6D6)" stroke-width="11" stroke-linecap="round"/><circle cx="29" cy="151" r="6.5" style="fill:var(--sk,#C68B5E)"/>
+      <g transform="translate(101 76) rotate(28)"><rect x="-3.5" y="-46" width="7" height="52" rx="3" fill="#B98A55"/><rect x="-16" y="-56" width="32" height="14" rx="3" fill="#7D8696"/></g>
+      <path d="M80 104 L100 78" style="stroke:var(--sh,#EDE6D6)" stroke-width="11" stroke-linecap="round"/><circle cx="101" cy="76" r="6.5" style="fill:var(--sk,#C68B5E)"/>
+      <use href="#w-head"/><use href="#f-smile"/>
+    </symbol>
+    <symbol id="wkr-pencil" viewBox="0 0 120 220" overflow="visible">
+      <use href="#w-legs"/><use href="#w-body"/>
+      <rect x="0" y="112" width="34" height="42" rx="2" fill="#FFFFFF" stroke="#A6ACBC" stroke-width="2"/>
+      <path d="M7 146 V130 L17 121 L27 130 V146 Z" fill="none" stroke="#3F6FB6" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M40 104 L26 130" style="stroke:var(--sh,#EDE6D6)" stroke-width="11" stroke-linecap="round"/><circle cx="25" cy="132" r="6.5" style="fill:var(--sk,#C68B5E)"/>
+      <g transform="translate(106 90) rotate(22)"><rect x="-5" y="-46" width="10" height="44" fill="#E46A4E"/><rect x="-5" y="-54" width="10" height="8" rx="2" fill="#F3A7B5"/><path d="M-5 -2 L0 12 L5 -2 Z" fill="#F3D9B1"/><path d="M-1.6 7.5 L0 12 L1.6 7.5 Z" fill="#2B2A33"/></g>
+      <path d="M80 104 L104 92" style="stroke:var(--sh,#EDE6D6)" stroke-width="11" stroke-linecap="round"/><circle cx="106" cy="90" r="6.5" style="fill:var(--sk,#C68B5E)"/>
+      <use href="#w-head"/><use href="#f-smile"/>
+    </symbol>
+    <symbol id="wkr-glass" viewBox="0 0 120 220" overflow="visible">
+      <use href="#w-legs"/><use href="#w-body"/>
+      <path d="M40 102 L25 124 L37 141" fill="none" style="stroke:var(--sh,#EDE6D6)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/><circle cx="37" cy="141" r="6.5" style="fill:var(--sk,#C68B5E)"/>
+      <path d="M100 88 L108 72" stroke="#5A3E2B" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="114" cy="59" r="14" fill="#DDF0FA" fill-opacity=".8" stroke="#7D8696" stroke-width="4"/>
+      <path d="M106 54 Q109 49 114 48" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M80 104 L100 88" style="stroke:var(--sh,#EDE6D6)" stroke-width="11" stroke-linecap="round"/><circle cx="100" cy="88" r="6.5" style="fill:var(--sk,#C68B5E)"/>
+      <use href="#w-head"/><use href="#f-focus"/>
+    </symbol>
+    <symbol id="wkr-level" viewBox="0 0 120 220" overflow="visible">
+      <use href="#w-legs"/><use href="#w-body"/>
+      <path d="M40 104 L24 128 M80 104 L96 128" style="stroke:var(--sh,#EDE6D6)" stroke-width="11" stroke-linecap="round"/>
+      <rect x="6" y="122" width="108" height="14" rx="3" fill="#4FB286" stroke="#2F7E5C" stroke-width="2"/>
+      <rect x="50" y="125" width="20" height="8" rx="4" fill="#E9F7D0"/><circle cx="60" cy="129" r="3" fill="#FFFFFF" stroke="#8BBF6A"/>
+      <circle cx="23" cy="130" r="6.5" style="fill:var(--sk,#C68B5E)"/><circle cx="97" cy="130" r="6.5" style="fill:var(--sk,#C68B5E)"/>
+      <use href="#w-head"/><use href="#f-smile"/>
+    </symbol>
+    <!-- the easter eggs: workers wear a photo face under the yellow hard hat, a different photo on each page: 1, 2 (highlighted and tagged), 3, 13 and 16. Each has a sparkle beside it. -->
+    <g id="w-head-egg"><image href="faces/worker-easter-egg.jpg" x="30" y="49" width="60" height="60" preserveAspectRatio="xMidYMid slice" clip-path="url(#face-clip)"/><circle cx="60" cy="79" r="30" fill="none" stroke="#8A6A58" stroke-opacity=".35" stroke-width="1.5"/><path d="M33 60 Q33 30 60 28 Q87 30 87 60 Z" fill="#F2C230"/><rect x="55" y="30" width="10" height="27" rx="4" fill="#F7D560"/><rect x="28" y="56" width="64" height="9" rx="4.5" fill="#DDA91A"/></g>
+    <symbol id="wkr-level-egg" viewBox="0 0 120 220" overflow="visible">
+      <use href="#w-legs"/><use href="#w-body"/>
+      <path d="M40 104 L24 128 M80 104 L96 128" style="stroke:var(--sh,#EDE6D6)" stroke-width="11" stroke-linecap="round"/>
+      <rect x="6" y="122" width="108" height="14" rx="3" fill="#4FB286" stroke="#2F7E5C" stroke-width="2"/>
+      <rect x="50" y="125" width="20" height="8" rx="4" fill="#E9F7D0"/><circle cx="60" cy="129" r="3" fill="#FFFFFF" stroke="#8BBF6A"/>
+      <circle cx="23" cy="130" r="6.5" style="fill:var(--sk,#D8A993)"/><circle cx="97" cy="130" r="6.5" style="fill:var(--sk,#D8A993)"/>
+      <use href="#w-head-egg"/>
+    </symbol>
+    <g id="w-head-egg2"><image href="faces/worker-easter-egg-2.jpg" x="30" y="49" width="60" height="60" preserveAspectRatio="xMidYMid slice" clip-path="url(#face-clip)"/><circle cx="60" cy="79" r="30" fill="none" stroke="#8A6A58" stroke-opacity=".35" stroke-width="1.5"/><path d="M33 60 Q33 30 60 28 Q87 30 87 60 Z" fill="#F2C230"/><rect x="55" y="30" width="10" height="27" rx="4" fill="#F7D560"/><rect x="28" y="56" width="64" height="9" rx="4.5" fill="#DDA91A"/></g>
+    <g id="w-head-egg3"><image href="faces/worker-easter-egg-3.jpg" x="30" y="49" width="60" height="60" preserveAspectRatio="xMidYMid slice" clip-path="url(#face-clip)"/><circle cx="60" cy="79" r="30" fill="none" stroke="#8A6A58" stroke-opacity=".35" stroke-width="1.5"/><path d="M33 60 Q33 30 60 28 Q87 30 87 60 Z" fill="#F2C230"/><rect x="55" y="30" width="10" height="27" rx="4" fill="#F7D560"/><rect x="28" y="56" width="64" height="9" rx="4.5" fill="#DDA91A"/></g>
+    <g id="w-head-egg4"><image href="faces/worker-easter-egg-4.jpg" x="30" y="49" width="60" height="60" preserveAspectRatio="xMidYMid slice" clip-path="url(#face-clip)"/><circle cx="60" cy="79" r="30" fill="none" stroke="#8A6A58" stroke-opacity=".35" stroke-width="1.5"/><path d="M33 60 Q33 30 60 28 Q87 30 87 60 Z" fill="#F2C230"/><rect x="55" y="30" width="10" height="27" rx="4" fill="#F7D560"/><rect x="28" y="56" width="64" height="9" rx="4.5" fill="#DDA91A"/></g>
+    <g id="w-head-egg5"><image href="faces/worker-easter-egg-5.jpg" x="30" y="49" width="60" height="60" preserveAspectRatio="xMidYMid slice" clip-path="url(#face-clip)"/><circle cx="60" cy="79" r="30" fill="none" stroke="#8A6A58" stroke-opacity=".35" stroke-width="1.5"/><path d="M33 60 Q33 30 60 28 Q87 30 87 60 Z" fill="#F2C230"/><rect x="55" y="30" width="10" height="27" rx="4" fill="#F7D560"/><rect x="28" y="56" width="64" height="9" rx="4.5" fill="#DDA91A"/></g>
+    <g id="w-head-egg6"><image href="faces/worker-easter-egg-6.jpg" x="30" y="49" width="60" height="60" preserveAspectRatio="xMidYMid slice" clip-path="url(#face-clip)"/><circle cx="60" cy="79" r="30" fill="none" stroke="#8A6A58" stroke-opacity=".35" stroke-width="1.5"/><path d="M33 60 Q33 30 60 28 Q87 30 87 60 Z" fill="#F2C230"/><rect x="55" y="30" width="10" height="27" rx="4" fill="#F7D560"/><rect x="28" y="56" width="64" height="9" rx="4.5" fill="#DDA91A"/></g>
+    <symbol id="wkr-level-egg2" viewBox="0 0 120 220" overflow="visible">
+      <use href="#w-legs"/><use href="#w-body"/>
+      <path d="M40 104 L24 128 M80 104 L96 128" style="stroke:var(--sh,#EDE6D6)" stroke-width="11" stroke-linecap="round"/>
+      <rect x="6" y="122" width="108" height="14" rx="3" fill="#4FB286" stroke="#2F7E5C" stroke-width="2"/>
+      <rect x="50" y="125" width="20" height="8" rx="4" fill="#E9F7D0"/><circle cx="60" cy="129" r="3" fill="#FFFFFF" stroke="#8BBF6A"/>
+      <circle cx="23" cy="130" r="6.5" style="fill:var(--sk,#C68B5E)"/><circle cx="97" cy="130" r="6.5" style="fill:var(--sk,#C68B5E)"/>
+      <use href="#w-head-egg2"/>
+    </symbol>
+    <symbol id="wkr-hammer-egg4" viewBox="0 0 120 220" overflow="visible">
+      <use href="#w-legs"/><use href="#w-body"/>
+      <path d="M40 104 L30 148" style="stroke:var(--sh,#EDE6D6)" stroke-width="11" stroke-linecap="round"/><circle cx="29" cy="151" r="6.5" style="fill:var(--sk,#C68B5E)"/>
+      <g transform="translate(101 76) rotate(28)"><rect x="-3.5" y="-46" width="7" height="52" rx="3" fill="#B98A55"/><rect x="-16" y="-56" width="32" height="14" rx="3" fill="#7D8696"/></g>
+      <path d="M80 104 L100 78" style="stroke:var(--sh,#EDE6D6)" stroke-width="11" stroke-linecap="round"/><circle cx="101" cy="76" r="6.5" style="fill:var(--sk,#C68B5E)"/>
+      <use href="#w-head-egg4"/>
+    </symbol>
+    <symbol id="wkr-level-egg6" viewBox="0 0 120 220" overflow="visible">
+      <use href="#w-legs"/><use href="#w-body"/>
+      <path d="M40 104 L24 128 M80 104 L96 128" style="stroke:var(--sh,#EDE6D6)" stroke-width="11" stroke-linecap="round"/>
+      <rect x="6" y="122" width="108" height="14" rx="3" fill="#4FB286" stroke="#2F7E5C" stroke-width="2"/>
+      <rect x="50" y="125" width="20" height="8" rx="4" fill="#E9F7D0"/><circle cx="60" cy="129" r="3" fill="#FFFFFF" stroke="#8BBF6A"/>
+      <circle cx="23" cy="130" r="6.5" style="fill:var(--sk,#C68B5E)"/><circle cx="97" cy="130" r="6.5" style="fill:var(--sk,#C68B5E)"/>
+      <use href="#w-head-egg6"/>
+    </symbol>
+    <symbol id="wkr-level-egg3" viewBox="0 0 120 220" overflow="visible">
+      <use href="#w-legs"/><use href="#w-body"/>
+      <path d="M40 104 L24 128 M80 104 L96 128" style="stroke:var(--sh,#EDE6D6)" stroke-width="11" stroke-linecap="round"/>
+      <rect x="6" y="122" width="108" height="14" rx="3" fill="#4FB286" stroke="#2F7E5C" stroke-width="2"/>
+      <rect x="50" y="125" width="20" height="8" rx="4" fill="#E9F7D0"/><circle cx="60" cy="129" r="3" fill="#FFFFFF" stroke="#8BBF6A"/>
+      <circle cx="23" cy="130" r="6.5" style="fill:var(--sk,#C68B5E)"/><circle cx="97" cy="130" r="6.5" style="fill:var(--sk,#C68B5E)"/>
+      <use href="#w-head-egg3"/>
+    </symbol>
+    <symbol id="wkr-cheer-egg5" viewBox="0 0 120 220" overflow="visible">
+      <use href="#w-legs"/><use href="#w-body"/>
+      <path d="M40 104 L22 72 M80 104 L98 72" style="stroke:var(--sh,#EDE6D6)" stroke-width="11" stroke-linecap="round"/>
+      <circle cx="21" cy="69" r="6.5" style="fill:var(--sk,#C68B5E)"/><circle cx="99" cy="69" r="6.5" style="fill:var(--sk,#C68B5E)"/>
+      <use href="#w-head-egg5"/>
+    </symbol>
+    <symbol id="wkr-cheer" viewBox="0 0 120 220" overflow="visible">
+      <use href="#w-legs"/><use href="#w-body"/>
+      <path d="M40 104 L22 72 M80 104 L98 72" style="stroke:var(--sh,#EDE6D6)" stroke-width="11" stroke-linecap="round"/>
+      <circle cx="21" cy="69" r="6.5" style="fill:var(--sk,#C68B5E)"/><circle cx="99" cy="69" r="6.5" style="fill:var(--sk,#C68B5E)"/>
+      <use href="#w-head"/><use href="#f-happy"/>
+    </symbol>
+
+    <!-- SITES AND PROPS -->
+    <g id="crane">
+      <rect x="-8" y="-300" width="16" height="300" fill="#F4C13D"/><rect x="-8" y="-300" width="16" height="300" fill="url(#lattice)"/>
+      <rect x="-70" y="-312" width="280" height="14" fill="#F4C13D"/><rect x="-70" y="-312" width="280" height="14" fill="url(#lattice)"/>
+      <path d="M0 -312 V-350" stroke="#F4C13D" stroke-width="8"/>
+      <path d="M0 -350 L200 -312 M0 -350 L-66 -312" stroke="#C99A1E" stroke-width="2.5"/>
+      <rect x="-70" y="-298" width="34" height="22" fill="#7D8696"/>
+      <rect x="8" y="-298" width="24" height="20" rx="3" fill="#E46A4E"/><rect x="13" y="-294" width="14" height="9" rx="2" fill="#CFE8F5"/>
+      <path d="M150 -298 V-170" stroke="#4A4E5E" stroke-width="2.5"/>
+      <path d="M150 -170 v8 q0 8 -8 8" fill="none" stroke="#4A4E5E" stroke-width="3" stroke-linecap="round"/>
+      <rect x="-24" y="-8" width="48" height="8" fill="#8E96A5"/>
+    </g>
+    <g id="tower">
+      <rect x="0" y="-170" width="150" height="170" fill="#CDD1D8"/>
+      <g fill="#8FB3D6"><rect x="16" y="-156" width="26" height="24"/><rect x="62" y="-156" width="26" height="24"/><rect x="108" y="-156" width="26" height="24"/><rect x="16" y="-116" width="26" height="24"/><rect x="62" y="-116" width="26" height="24"/><rect x="108" y="-116" width="26" height="24"/><rect x="16" y="-76" width="26" height="24"/><rect x="108" y="-76" width="26" height="24"/></g>
+      <rect x="62" y="-36" width="26" height="36" fill="#8E96A5"/>
+      <rect x="-4" y="-178" width="158" height="10" fill="#A9B0BC"/>
+      <path d="M0 -178 V-262 M50 -178 V-262 M100 -178 V-262 M150 -178 V-262 M-4 -208 H154 M-4 -236 H154 M-4 -262 H154" stroke="#8E96A5" stroke-width="5" stroke-linecap="round"/>
+      <path d="M0 -178 L50 -208 M50 -178 L100 -208 M100 -178 L150 -208 M0 -208 L50 -236 M100 -208 L150 -236" stroke="#A9B0BC" stroke-width="2.5"/>
+    </g>
+    <g id="tower-done">
+      <rect x="0" y="-262" width="150" height="262" fill="#CDD1D8"/>
+      <rect x="-6" y="-272" width="162" height="12" fill="#A9B0BC"/>
+      <g fill="#8FB3D6"><rect x="16" y="-244" width="26" height="24"/><rect x="62" y="-244" width="26" height="24"/><rect x="108" y="-244" width="26" height="24"/><rect x="16" y="-204" width="26" height="24"/><rect x="62" y="-204" width="26" height="24"/><rect x="108" y="-204" width="26" height="24"/><rect x="16" y="-164" width="26" height="24"/><rect x="62" y="-164" width="26" height="24"/><rect x="108" y="-164" width="26" height="24"/><rect x="16" y="-124" width="26" height="24"/><rect x="62" y="-124" width="26" height="24"/><rect x="108" y="-124" width="26" height="24"/><rect x="16" y="-84" width="26" height="24"/><rect x="108" y="-84" width="26" height="24"/></g>
+      <rect x="62" y="-40" width="26" height="40" fill="#8E96A5"/>
+    </g>
+    <g id="house-frame">
+      <rect x="-125" y="-12" width="250" height="12" fill="#B8BCC4"/>
+      <path d="M-110 -12 V-120 M-55 -12 V-120 M0 -12 V-120 M55 -12 V-120 M110 -12 V-120" stroke="#C9945B" stroke-width="10"/>
+      <path d="M-110 -66 H110" stroke="#C9945B" stroke-width="6"/>
+      <path d="M-120 -120 H120" stroke="#A8733F" stroke-width="10" stroke-linecap="round"/>
+      <path d="M-122 -118 L0 -190 L122 -118" fill="none" stroke="#A8733F" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M-60 -120 V-153 M60 -120 V-153 M0 -120 V-184" stroke="#C9945B" stroke-width="6"/>
+    </g>
+    <g id="house-done">
+      <rect x="-115" y="-120" width="230" height="120" fill="#F2E3C6"/>
+      <path d="M-132 -114 L0 -194 L132 -114 Z" fill="#D9694A"/>
+      <rect x="-20" y="-62" width="40" height="62" rx="3" fill="#8A5A33"/>
+      <rect x="-92" y="-94" width="46" height="38" rx="3" fill="#8FB3D6"/><rect x="46" y="-94" width="46" height="38" rx="3" fill="#8FB3D6"/>
+    </g>
+    <g id="cone"><path d="M-12 0 L-4 -34 H4 L12 0 Z" fill="#F07B2B"/><path d="M-8.5 -14 H8.5 L7.4 -20 H-7.4 Z" fill="#FFFFFF"/><rect x="-16" y="-3" width="32" height="5" rx="2" fill="#D9651E"/></g>
+    <g id="barrier"><rect x="4" y="-38" width="6" height="38" fill="#7D8696"/><rect x="90" y="-38" width="6" height="38" fill="#7D8696"/><rect x="0" y="-36" width="100" height="12" rx="2" fill="url(#stripe)" stroke="#C9601C" stroke-width="1.5"/></g>
+    <g id="bucket"><path d="M-30 0 L-24 -46 H24 L30 0 Z" fill="#8E96A5"/><rect x="-28" y="-50" width="56" height="8" rx="3" fill="#7D8696"/><path d="M-26 -28 H26" stroke="#7D8696" stroke-width="3"/></g>
+    <g id="mixer">
+      <path d="M-60 0 L-40 -54 M40 0 L20 -54" stroke="#5A6075" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="-58" cy="-6" r="12" fill="#2B2A33"/><circle cx="-58" cy="-6" r="5" fill="#8E96A5"/>
+      <g transform="translate(0 -88) rotate(-25)">
+        <ellipse cx="0" cy="0" rx="58" ry="40" fill="#E46A4E"/>
+        <path d="M-30 -36 Q-10 0 -30 36 M0 -40 Q20 0 0 40 M30 -36 Q50 0 30 36" fill="none" stroke="#C04F37" stroke-width="5"/>
+        <ellipse cx="-58" cy="0" rx="10" ry="26" fill="#5A3E2B"/>
+      </g>
+    </g>
+    <g id="bell">
+      <rect x="-4" y="-36" width="8" height="12" rx="3" fill="#7A4E2C"/>
+      <path d="M-24 10 Q-22 -26 0 -28 Q22 -26 24 10 Z" fill="#F2B33D" stroke="#B8892F" stroke-width="3"/>
+      <rect x="-28" y="8" width="56" height="8" rx="4" fill="#D9A02A"/><circle cx="0" cy="22" r="6.5" fill="#B8892F"/>
+    </g>
+    <g id="plane"><path d="M0 0 L48 -18 L20 8 Z" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2.4" stroke-linejoin="round"/><path d="M20 8 L48 -18 L26 16 Z" fill="#DCE3EC" stroke="#2B2A33" stroke-width="2.4" stroke-linejoin="round"/></g>
+    <g id="chatb"><rect width="100" height="42" rx="14" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2.5"/><path d="M14 15 H82 M14 28 H62" stroke="#A6ACBC" stroke-width="6" stroke-linecap="round"/></g>
+    <g id="pin"><path d="M0 0 C -12 -14, -12 -30, 0 -30 C 12 -30, 12 -14, 0 0 Z" fill="#D64545"/><circle cx="0" cy="-20" r="4.5" fill="#FFFFFF"/></g>
+    <g id="flag"><path d="M0 0 V-34" stroke="#5A3E2B" stroke-width="3.5" stroke-linecap="round"/><path d="M0 -34 L24 -27 L0 -20 Z" fill="#4FB286"/></g>
+    <g id="steps"><ellipse cx="-9" cy="-5" rx="5" ry="8" fill="#8A5A33"/><ellipse cx="7" cy="-19" rx="5" ry="8" fill="#8A5A33"/><ellipse cx="-7" cy="-33" rx="5" ry="8" fill="#8A5A33" opacity=".6"/></g>
+    <path id="spark" d="M0 -14 L4 -4 L14 0 L4 4 L0 14 L-4 4 L-14 0 L-4 -4 Z" fill="#F2B33D"/>
+    <g id="mess">
+      <g fill="#2B2A33"><circle cx="-60" cy="10" r="46"/><circle cx="0" cy="-20" r="58"/><circle cx="62" cy="10" r="46"/><circle cx="0" cy="34" r="50"/></g>
+      <g fill="#FFFFFF"><circle cx="-60" cy="10" r="43"/><circle cx="0" cy="-20" r="55"/><circle cx="62" cy="10" r="43"/><circle cx="0" cy="34" r="47"/></g>
+      <path d="M-82 10 C -60 -46, -24 46, -2 -18 S 52 48, 38 -10 S -38 -32, -44 24 S 36 66, 70 16 M-50 -14 C -10 -50, 30 -34, 14 10 M-70 30 C -40 60, 0 20, 20 60" fill="none" stroke="#5A6075" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g id="mini-board"><rect x="-2" y="-24" width="4" height="24" fill="#7A4E2C"/><rect x="-17" y="-46" width="34" height="24" rx="3" fill="#FFFDF6" stroke="#7A4E2C" stroke-width="2.5"/><path d="M-11 -37 H11 M-11 -30 H6" stroke="#A6ACBC" stroke-width="2.4" stroke-linecap="round"/></g>
+    <!-- the board at every gate: the live desk. 400 x 300, posts below. Each page writes its own lines on it. -->
+    <g id="board-blank">
+      <rect x="44" y="280" width="18" height="140" fill="#7A4E2C"/><rect x="338" y="280" width="18" height="140" fill="#7A4E2C"/>
+      <rect x="0" y="0" width="400" height="300" rx="14" fill="#FFFDF6" stroke="#7A4E2C" stroke-width="6"/>
+      <path d="M3 52 V14 Q3 3 14 3 H386 Q397 3 397 14 V52 Z" fill="#8A5A33"/>
+    </g>
+    <symbol id="mgr-talk" viewBox="0 0 120 220" overflow="visible">
+      <use href="#m-legs"/><use href="#m-body"/>
+      <path d="M40 104 L18 84" stroke="#6F95CC" stroke-width="11" stroke-linecap="round"/><circle cx="16" cy="82" r="6.5" style="fill:var(--sk,#E2AE84)"/>
+      <use href="#clip" transform="translate(66 110)"/>
+      <path d="M80 104 L94 124 L82 140" fill="none" stroke="#6F95CC" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/><circle cx="81" cy="141" r="6.5" style="fill:var(--sk,#E2AE84)"/>
+      <use href="#m-head"/><use href="#f-talk"/>
+    </symbol>
+    <!-- page 21: the Director holds out a rolled board marked >>, and the city's windows light up -->
+    <linearGradient id="sky-dusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2F3A78"/><stop offset=".6" stop-color="#8A79B4"/><stop offset="1" stop-color="#F4B183"/></linearGradient>
+    <symbol id="dir-scroll" viewBox="0 0 120 220" overflow="visible">
+      <use href="#d-cape"/><use href="#d-legs"/><use href="#d-body"/>
+      <path d="M40 104 L28 122 M80 104 L104 122" stroke="#3F45C0" stroke-width="11" stroke-linecap="round"/>
+      <rect x="20" y="110" width="92" height="28" rx="14" fill="#F6E8C3" stroke="#B8925A" stroke-width="2.5"/>
+      <ellipse cx="22" cy="124" rx="6" ry="14" fill="#E3C98E" stroke="#B8925A" stroke-width="2"/><ellipse cx="110" cy="124" rx="6" ry="14" fill="#E3C98E" stroke="#B8925A" stroke-width="2"/>
+      <use href="#chev" stroke="#4048C4" stroke-width="4" transform="translate(67 124)"/>
+      <circle cx="28" cy="126" r="6.5" fill="#B48670"/><circle cx="104" cy="126" r="6.5" fill="#B48670"/>
+      <use href="#d-head"/>
+    </symbol>
+    <g id="tower-lit" fill="#FFD66B"><rect x="16" y="-244" width="26" height="24"/><rect x="62" y="-244" width="26" height="24"/><rect x="108" y="-244" width="26" height="24"/><rect x="16" y="-204" width="26" height="24"/><rect x="62" y="-204" width="26" height="24"/><rect x="108" y="-204" width="26" height="24"/><rect x="16" y="-164" width="26" height="24"/><rect x="62" y="-164" width="26" height="24"/><rect x="108" y="-164" width="26" height="24"/><rect x="16" y="-124" width="26" height="24"/><rect x="62" y="-124" width="26" height="24"/><rect x="108" y="-124" width="26" height="24"/><rect x="16" y="-84" width="26" height="24"/><rect x="108" y="-84" width="26" height="24"/></g>
+    <g id="house-lit" fill="#FFD66B"><rect x="-92" y="-94" width="46" height="38" rx="3"/><rect x="46" y="-94" width="46" height="38" rx="3"/></g>
+    <!-- page 6: the manager's private notebook, and the Director's own hand-copied notes -->
+    <symbol id="mgr-private" viewBox="0 0 120 220" overflow="visible">
+      <use href="#m-legs"/><use href="#m-body"/>
+      <rect x="36" y="104" width="48" height="50" rx="4" fill="#5A3E2B" stroke="#3E2A1C" stroke-width="2"/><rect x="40" y="104" width="4" height="50" fill="#3E2A1C"/>
+      <path d="M55 127 V121 a6 6 0 0 1 12 0 V127" fill="none" stroke="#F2B33D" stroke-width="3"/><rect x="52" y="126" width="18" height="15" rx="3" fill="#F2B33D"/><circle cx="61" cy="133" r="2.2" fill="#5A3E2B"/>
+      <path d="M40 104 L36 140 M80 104 L90 122" stroke="#6F95CC" stroke-width="11" stroke-linecap="round"/>
+      <path d="M92 120 L102 102" stroke="#E46A4E" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="37" cy="142" r="6.5" style="fill:var(--sk,#E2AE84)"/><circle cx="91" cy="123" r="6.5" style="fill:var(--sk,#E2AE84)"/>
+      <use href="#m-head"/><use href="#f-focus"/>
+    </symbol>
+    <symbol id="dir-notes" viewBox="0 0 120 220" overflow="visible">
+      <use href="#d-cape"/><use href="#d-legs"/><use href="#d-body"/>
+      <g stroke="#2B2A33" stroke-width="2">
+        <rect x="72" y="132" width="44" height="12" rx="2" fill="#E46A4E"/>
+        <rect x="74" y="120" width="42" height="12" rx="2" fill="#4FB286" transform="rotate(-4 95 126)"/>
+        <rect x="71" y="108" width="44" height="12" rx="2" fill="#F2C230" transform="rotate(3 93 114)"/>
+      </g>
+      <path d="M40 104 L70 142 M80 104 L114 136" stroke="#3F45C0" stroke-width="11" stroke-linecap="round"/>
+      <circle cx="71" cy="144" r="6.5" fill="#B48670"/><circle cx="116" cy="138" r="6.5" fill="#B48670"/>
+      <use href="#d-head"/><use href="#drop"/>
+    </symbol>
+    <!-- page 4: one frazzled Director runs the loop between the site gates -->
+    <symbol id="dir-frazzled" viewBox="0 0 120 220" overflow="visible">
+      <use href="#d-cape"/><use href="#d-legs"/><use href="#d-body"/>
+      <path d="M40 104 L28 74 M80 104 L92 74" stroke="#3F45C0" stroke-width="11" stroke-linecap="round"/>
+      <use href="#d-head"/><use href="#drop"/>
+      <circle cx="28" cy="70" r="6.5" fill="#B48670"/><circle cx="92" cy="70" r="6.5" fill="#B48670"/>
+      <path d="M38 18 q5 -8 10 0 t10 0 M64 12 q5 -8 10 0 t10 0" fill="none" stroke="#2B2A33" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M16 46 C 12 53, 12 58, 16 59 C 20 58, 20 53, 16 46 Z" fill="#8CCBEA"/>
+    </symbol>
+    <g id="gate-frame"><rect x="22" y="40" width="10" height="106" fill="#7A4E2C"/><rect x="158" y="40" width="10" height="106" fill="#7A4E2C"/><rect x="14" y="16" width="162" height="32" rx="6" fill="#8A5A33"/></g>
+    <!-- one question bubble: where are we (pin), how did we get here (footprints), what's left (flag) -->
+    <g id="q-bub"><rect x="0" y="-18" width="56" height="18" rx="9" fill="#FFFFFF" stroke="#2B2A33" stroke-width="1.6"/><use href="#pin" transform="translate(11 -3) scale(.42)"/><use href="#steps" transform="translate(28 -1) scale(.36)"/><use href="#flag" transform="translate(40 -3) scale(.4)"/></g>
+    <!-- the end-of-shift page: a tired manager yawning under a sack of papers (a full context) -->
+    <g id="f-yawn"><use href="#f-cheeks"/><path d="M46 74 Q51 78 56 74 M64 74 Q69 78 74 74" fill="none" stroke="#2B2A33" stroke-width="2.6" stroke-linecap="round"/><ellipse cx="60" cy="87" rx="5" ry="6.5" fill="#7A3A34"/></g>
+    <symbol id="mgr-sack" viewBox="0 0 120 220" overflow="visible">
+      <path d="M70 100 C 58 44, 98 8, 140 26 C 176 44, 172 108, 132 120 C 110 126, 86 120, 70 100 Z" fill="#C8A46B" stroke="#8A6A3A" stroke-width="2.5"/>
+      <g fill="#FFFFFF" stroke="#A6ACBC" stroke-width="1.5"><rect x="100" y="8" width="18" height="24" transform="rotate(-15 109 20)"/><rect x="120" y="12" width="18" height="24" transform="rotate(12 129 24)"/><rect x="86" y="20" width="16" height="22" transform="rotate(-30 94 31)"/><rect x="134" y="26" width="16" height="22" transform="rotate(28 142 37)"/></g>
+      <path d="M94 42 q14 8 30 2" stroke="#8A6A3A" stroke-width="3" fill="none"/>
+      <use href="#m-legs"/><use href="#m-body"/>
+      <path d="M40 104 L30 148 M80 104 L98 82" stroke="#6F95CC" stroke-width="11" stroke-linecap="round"/>
+      <circle cx="29" cy="151" r="6.5" style="fill:var(--sk,#E2AE84)"/><circle cx="100" cy="79" r="6.5" style="fill:var(--sk,#E2AE84)"/>
+      <use href="#m-head"/><use href="#f-yawn"/>
+    </symbol>
+    <!-- the messaging pages: site 1 (foundation) and site 2 (tower), with a gap between -->
+    <g id="scene-two-sites">
+      <rect y="330" width="1000" height="230" fill="#A9CF8B"/>
+      <rect x="24" y="338" width="400" height="40" rx="10" fill="#DCC497"/>
+      <rect x="70" y="344" width="230" height="20" fill="#B8BCC4" stroke="#8E96A5" stroke-width="2"/>
+      <path d="M88 344 V328 M116 344 V324 M144 344 V328 M172 344 V324 M200 344 V328 M228 344 V324 M256 344 V328 M282 344 V324" stroke="#B65A3C" stroke-width="3" stroke-linecap="round"/>
+      <use href="#mixer" transform="translate(372 378) scale(.5)"/>
+      <g transform="translate(36 262)"><rect x="12" y="30" width="6" height="44" fill="#7A4E2C"/><rect x="0" y="0" width="150" height="32" rx="6" fill="#8A5A33"/><text x="75" y="22" text-anchor="middle" font-size="16" class="rnd" fill="#FFF6E4">1 · foundation</text></g>
+      <rect x="576" y="338" width="400" height="40" rx="10" fill="#DCC497"/>
+      <rect x="640" y="344" width="170" height="26" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-dasharray="8 6"/>
+      <g fill="#8A5A33"><rect x="637" y="338" width="6" height="12"/><rect x="807" y="338" width="6" height="12"/><rect x="637" y="364" width="6" height="12"/><rect x="807" y="364" width="6" height="12"/></g>
+      <use href="#crane" transform="translate(900 374) scale(.6)"/>
+      <g transform="translate(596 262)"><rect x="12" y="30" width="6" height="44" fill="#7A4E2C"/><rect x="0" y="0" width="120" height="32" rx="6" fill="#8A5A33"/><text x="60" y="22" text-anchor="middle" font-size="16" class="rnd" fill="#FFF6E4">2 · tower</text></g>
+    </g>
+  </defs>
+</svg>
+
+<div class="progress" id="progress"></div>
+<div class="count" id="count"></div>
+<div class="jump" id="jump"></div>
+
+<main class="book" id="book">
+
+  <!-- 1 · COVER -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="The Director, in an indigo hard hat and cape marked with a double arrow, stands on a hill and points at a city of building sites with cranes and scaffolding.">
+      <rect width="1000" height="560" fill="url(#sky)"/>
+      <circle cx="880" cy="84" r="40" fill="#FBE7A1"/>
+      <g fill="#FFFFFF" opacity=".9"><ellipse cx="330" cy="78" rx="70" ry="16"/><ellipse cx="368" cy="66" rx="38" ry="16"/><ellipse cx="660" cy="56" rx="56" ry="13"/></g>
+      <ellipse cx="720" cy="384" rx="440" ry="56" fill="#BBDDAA"/>
+      <rect y="376" width="1000" height="184" fill="#A9CF8B"/>
+      <use href="#crane" transform="translate(520 386) scale(.74)"/>
+      <use href="#tower" transform="translate(400 386) scale(.7)"/>
+      <use href="#house-frame" transform="translate(660 386) scale(.55)"/>
+      <use href="#tower" transform="translate(760 386) scale(.5)"/>
+      <use href="#crane" transform="translate(880 386) scale(.5)"/>
+      <use href="#house-frame" transform="translate(932 386) scale(.4)"/>
+      <use href="#wkr-hammer" x="452" y="200" width="34" height="62" style="--sk:#8D5A3B;--sh:#E46A4E"/>
+      <use href="#wkr-level-egg2" x="618" y="320" width="34" height="62" style="--sk:#D8A993"/><g class="egg-spark" fill="#F2B705"><path d="M647.5 325.2 Q647.5 330.2 652.5 330.2 Q647.5 330.2 647.5 335.2 Q647.5 330.2 642.5 330.2 Q647.5 330.2 647.5 325.2Z"/></g>
+      <path d="M330 560 C 420 480, 520 420, 640 394 L 690 394 C 600 430, 520 490, 470 560 Z" fill="#D8CCAE"/>
+      <path d="M402 552 C 470 480, 560 428, 664 398" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="14 12"/>
+      <use href="#cone" transform="translate(548 462) scale(.8)"/>
+      <use href="#cone" transform="translate(626 420) scale(.6)"/>
+      <use href="#barrier" transform="translate(700 398) scale(.5)"/>
+      <use href="#barrier" transform="translate(760 398) scale(.5)"/>
+      <path d="M-20 560 L-20 384 C 60 334, 200 322, 300 362 C 360 388, 400 470, 420 560 Z" fill="#8CC174"/>
+      <g fill="#FFFFFF"><circle cx="60" cy="430" r="4"/><circle cx="250" cy="470" r="4"/><circle cx="320" cy="520" r="4"/></g>
+      <g fill="#F2C230"><circle cx="90" cy="480" r="4"/><circle cx="200" cy="420" r="4"/></g>
+      <use href="#dir-point" x="84" y="110" width="132" height="242"/>
+    </svg></figure>
+    <h1>The <b class="sym">&gt;&gt;</b> Director</h1>
+    <p class="cap">Each of us now directs <b class="sym">&gt;&gt;</b> a crew of agents.</p>
+  </div></section>
+
+  <!-- 2 · MANAGERS AND CREWS -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="An org chart in three tiers. The Director stands at the top. Lines run down to three site managers in orange vests, tagged Claude, Codex and Claude. Below each manager, lines run to a crew of three workers, each holding one tool: a pencil, a hammer, a magnifying glass or a spirit level. One tester glows inside a gold ring with sparkles.">
+      <rect width="1000" height="560" fill="url(#sky)"/>
+      <g fill="#FFFFFF" opacity=".45"><rect x="58" y="196" width="264" height="358" rx="24"/><rect x="368" y="196" width="264" height="358" rx="24"/><rect x="678" y="196" width="264" height="358" rx="24"/></g>
+      <g fill="none" stroke="#5A6075" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M500 168 V184 M190 184 H810 M190 184 V204 M500 184 V204 M810 184 V204"/>
+        <path d="M190 360 V418 M104 418 H276 M104 418 V440 M190 418 V440 M276 418 V440"/>
+        <path d="M500 360 V418 M414 418 H586 M414 418 V440 M500 418 V440 M586 418 V440"/>
+        <path d="M810 360 V418 M724 418 H896 M724 418 V440 M810 418 V440 M896 418 V440"/>
+      </g>
+      <use href="#dir-stand" x="453" y="0" width="94" height="172"/>
+      <use href="#mgr-stand" x="150" y="190" width="79" height="145" style="--sk:#E2AE84;--hr:#4A3426"/>
+      <use href="#mgr-stand" x="460" y="190" width="79" height="145" style="--sk:#8D5A3B;--hr:#2B2A33"/>
+      <use href="#mgr-stand" x="770" y="190" width="79" height="145" style="--sk:#F1C7A0;--hr:#C9A266"/>
+      <g class="rnd" font-size="16" text-anchor="middle" fill="#2B2A33">
+        <rect x="152" y="336" width="76" height="24" rx="12" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2"/><text x="190" y="353">Claude</text>
+        <rect x="462" y="336" width="76" height="24" rx="12" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2"/><text x="500" y="353">Codex</text>
+        <rect x="772" y="336" width="76" height="24" rx="12" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2"/><text x="810" y="353">Claude</text>
+      </g>
+      <use href="#wkr-pencil" x="69" y="431" width="70" height="128" style="--sk:#F1C7A0;--hr:#C9A266;--sh:#5FB8B0"/>
+      <use href="#wkr-hammer" x="155" y="431" width="70" height="128" style="--sk:#8D5A3B;--hr:#2B2A33;--sh:#E46A4E"/>
+      <!-- the easter egg, highlighted so the room spots it: a warm glow, a pulsing gold ring and sparkles, no label -->
+      <defs><radialGradient id="egg-glow"><stop offset="0" stop-color="#FFE27A" stop-opacity=".95"/><stop offset=".6" stop-color="#FFD54A" stop-opacity=".45"/><stop offset="1" stop-color="#FFD54A" stop-opacity="0"/></radialGradient></defs>
+      <ellipse cx="276" cy="494" rx="58" ry="74" fill="url(#egg-glow)"/>
+      <use href="#wkr-level-egg" x="241" y="431" width="70" height="128" style="--sk:#D8A993"/>
+      <circle class="egg-ring" cx="276" cy="471" r="28" fill="none" stroke="#F2B705" stroke-width="3.5"/>
+      <g class="egg-spark" fill="#F2B705">
+        <path d="M240 443 Q240 452 249 452 Q240 452 240 461 Q240 452 231 452 Q240 452 240 443Z"/>
+        <path d="M316 443 Q316 450 323 450 Q316 450 316 457 Q316 450 309 450 Q316 450 316 443Z" style="animation-delay:.4s"/>
+        <path d="M318 486 Q318 496 328 496 Q318 496 318 506 Q318 496 308 496 Q318 496 318 486Z" style="animation-delay:.8s"/>
+        <path d="M234 494 Q234 500 240 500 Q234 500 234 506 Q234 500 228 500 Q234 500 234 494Z" style="animation-delay:1.2s"/>
+      </g>      <use href="#wkr-glass" x="379" y="431" width="70" height="128" style="--sk:#C68B5E;--hr:#4A3426;--sh:#8BC07A"/>
+      <use href="#wkr-hammer" x="465" y="431" width="70" height="128" style="--sk:#F1C7A0;--hr:#8A5A33;--sh:#5FB8B0"/>
+      <use href="#wkr-level" x="551" y="431" width="70" height="128" style="--sk:#6B4430;--hr:#2B2A33;--sh:#E8A04E"/>
+      <use href="#wkr-pencil" x="689" y="431" width="70" height="128" style="--sk:#8D5A3B;--hr:#2B2A33;--sh:#8BC07A"/>
+      <use href="#wkr-glass" x="775" y="431" width="70" height="128" style="--sk:#E2AE84;--hr:#C9A266;--sh:#E46A4E"/>
+      <use href="#wkr-hammer" x="861" y="431" width="70" height="128" style="--sk:#C68B5E;--hr:#4A3426"/>
+    </svg></figure>
+    <p class="cap">Each manager is <span class="m">a session</span>; each worker, <span class="m">a subagent</span>.</p>
+  </div></section>
+
+  <!-- 3 · MANY SITES, SOME WAITING: the tower needs the foundation -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="The Director hovers above three sites with a megaphone, faint sight lines running down to each. On the left, the tower site sits above the foundation site, with an arrow pointing up from foundation to tower labelled needs foundation: the tower has only stakes, an hourglass sign and an idle crane. On the right, the house site is framing away on its own, with no arrow.">
+      <rect width="1000" height="560" fill="url(#sky)"/>
+      <circle cx="880" cy="96" r="38" fill="#FBE7A1"/>
+      <g fill="#FFFFFF" opacity=".9"><ellipse cx="170" cy="70" rx="62" ry="15"/><ellipse cx="204" cy="58" rx="34" ry="15"/><ellipse cx="760" cy="250" rx="70" ry="15"/><ellipse cx="796" cy="238" rx="36" ry="15"/></g>
+      <g fill="none" stroke="#5A6075" stroke-width="2.5" stroke-dasharray="6 8" opacity=".4" stroke-linecap="round">
+        <path d="M486 170 L340 290"/><path d="M494 172 L410 466"/><path d="M514 170 L700 452"/>
+      </g>
+      <!-- tower site: waiting for its foundation; only stakes, an hourglass and an idle crane -->
+      <rect x="110" y="330" width="320" height="40" rx="16" fill="#9A7A4E"/>
+      <rect x="110" y="292" width="320" height="56" rx="16" fill="#A9CF8B"/>
+      <rect x="206" y="302" width="128" height="36" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-dasharray="8 6"/>
+      <g fill="#8A5A33"><rect x="203" y="296" width="6" height="12"/><rect x="331" y="296" width="6" height="12"/><rect x="203" y="332" width="6" height="12"/><rect x="331" y="332" width="6" height="12"/></g>
+      <use href="#crane" transform="translate(388 326) scale(.34)"/>
+      <rect x="166" y="244" width="6" height="66" fill="#7A4E2C"/>
+      <g transform="translate(169 238)"><rect x="-22" y="-26" width="44" height="50" rx="6" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2.5"/><path d="M-11 -15 H11 L0 0 L11 15 H-11 L0 0 Z" fill="#F2B33D" stroke="#2B2A33" stroke-width="2" stroke-linejoin="round"/></g>
+      <text x="270" y="364" text-anchor="middle" font-size="17" class="rnd" fill="#FFF6E4">tower</text>
+      <!-- the one dependency: the tower needs the foundation (arrow points up, from foundation to tower) -->
+      <path d="M270 452 V392" stroke="#2B2A33" stroke-width="4" stroke-linecap="round"/>
+      <path d="M259 396 L270 378 L281 396 Z" fill="#2B2A33"/>
+      <rect x="96" y="402" width="160" height="28" rx="14" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2"/>
+      <text x="176" y="422" text-anchor="middle" font-size="17" class="rnd" fill="#2B2A33">needs foundation</text>
+      <!-- foundation site: being poured -->
+      <rect x="110" y="498" width="320" height="40" rx="16" fill="#9A7A4E"/>
+      <rect x="110" y="462" width="320" height="56" rx="16" fill="#A9CF8B"/>
+      <rect x="156" y="478" width="170" height="22" fill="#B8BCC4" stroke="#8E96A5" stroke-width="2"/>
+      <path d="M172 478 V462 M196 478 V458 M220 478 V462 M244 478 V458 M268 478 V462 M292 478 V458 M312 478 V462" stroke="#B65A3C" stroke-width="3" stroke-linecap="round"/>
+      <use href="#mixer" transform="translate(384 508) scale(.42)"/>
+      <use href="#wkr-hammer-egg4" x="312" y="405" width="46" height="84" style="--sk:#D8A993"/><g class="egg-spark" fill="#F2B705"><path d="M351.9 413.8 Q351.9 418.8 356.9 418.8 Q351.9 418.8 351.9 423.8 Q351.9 418.8 346.9 418.8 Q351.9 418.8 351.9 413.8Z"/></g>
+      <text x="270" y="532" text-anchor="middle" font-size="17" class="rnd" fill="#FFF6E4">foundation</text>
+      <!-- house site: depends on nothing -->
+      <rect x="600" y="498" width="300" height="40" rx="16" fill="#9A7A4E"/>
+      <rect x="600" y="462" width="300" height="56" rx="16" fill="#A9CF8B"/>
+      <use href="#house-frame" transform="translate(728 494) scale(.55)"/>
+      <use href="#wkr-level-egg6" x="826" y="406" width="46" height="84" style="--sk:#D8A993"/><g class="egg-spark" fill="#F2B705"><path d="M865.9 414.8 Q865.9 419.8 870.9 419.8 Q865.9 419.8 865.9 424.8 Q865.9 419.8 860.9 419.8 Q865.9 419.8 865.9 414.8Z"/></g>
+      <text x="750" y="532" text-anchor="middle" font-size="17" class="rnd" fill="#FFF6E4">house</text>
+      <!-- the Director, hovering with a megaphone -->
+      <g fill="#FFFFFF"><ellipse cx="500" cy="166" rx="58" ry="12"/><ellipse cx="476" cy="160" rx="24" ry="11"/><ellipse cx="524" cy="160" rx="26" ry="11"/></g>
+      <use href="#dir-point" x="457" y="4" width="86" height="158"/>
+      <path d="M536 52 L566 38 L570 78 L538 64 Z" fill="#E46A4E" stroke="#B8442E" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M552 46 L555 70" stroke="#FFFFFF" stroke-width="3"/>
+      <path d="M580 46 q8 12 0 24 M590 38 q14 20 0 40" fill="none" stroke="#2B2A33" stroke-width="2.5" stroke-linecap="round"/>
+    </svg></figure>
+    <p class="cap">Some sites wait on others: <span class="m">the tower needs its foundation.</span></p>
+  </div></section>
+
+  <!-- 4 · THE THREE QUESTIONS, AT EVERY GATE, EVERY TURN (animated on page entry) -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="One frazzled Director runs a dotted loop between three site gates: foundation, tower and house. A thought bubble over the Director's head has burst with a POP. At each gate a stack of small question bubbles, each a pin, footprints and a flag, has grown tall, one bubble per turn. A counter in the corner reads check-ins: 27.">
+      <rect width="1000" height="560" fill="url(#sky)"/>
+      <ellipse cx="500" cy="214" rx="620" ry="40" fill="#BBDDAA"/>
+      <rect y="210" width="1000" height="350" fill="#A9CF8B"/>
+      <path id="p4-track" d="M470 540 C 280 540, 128 520, 128 462 C 128 330, 330 204, 478 204 C 630 204, 798 330, 798 462 C 798 520, 650 540, 470 540 Z" fill="none" stroke="#C9AE7E" stroke-width="7" stroke-dasharray="2 13" stroke-linecap="round"/>
+      <g transform="translate(52 330) scale(.8)"><use href="#gate-frame"/><text x="95" y="38" text-anchor="middle" font-size="18" class="rnd" fill="#FFF6E4">foundation</text><rect x="40" y="118" width="110" height="18" fill="#B8BCC4" stroke="#8E96A5" stroke-width="2"/><path d="M52 118 V100 M70 118 V96 M88 118 V100 M106 118 V96 M124 118 V100 M140 118 V98" stroke="#B65A3C" stroke-width="3" stroke-linecap="round"/></g>
+      <g transform="translate(402 74) scale(.8)"><use href="#gate-frame"/><text x="95" y="38" text-anchor="middle" font-size="18" class="rnd" fill="#FFF6E4">tower</text><use href="#tower" transform="translate(70 140) scale(.34)"/></g>
+      <g transform="translate(722 330) scale(.8)"><use href="#gate-frame"/><text x="95" y="38" text-anchor="middle" font-size="18" class="rnd" fill="#FFF6E4">house</text><use href="#house-frame" transform="translate(95 140) scale(.36)"/></g>
+      <!-- the stacks: one bubble per check-in, rows of foundation, tower, house; the script pops three at a gate each time the Director arrives -->
+      <use href="#q-bub" class="qb" x="80" y="342"/><use href="#q-bub" class="qb" x="556" y="190"/><use href="#q-bub" class="qb" x="796" y="342"/>
+      <use href="#q-bub" class="qb" x="84" y="322"/><use href="#q-bub" class="qb" x="560" y="170"/><use href="#q-bub" class="qb" x="800" y="322"/>
+      <use href="#q-bub" class="qb" x="78" y="302"/><use href="#q-bub" class="qb" x="554" y="150"/><use href="#q-bub" class="qb" x="794" y="302"/>
+      <use href="#q-bub" class="qb" x="83" y="282"/><use href="#q-bub" class="qb" x="559" y="130"/><use href="#q-bub" class="qb" x="799" y="282"/>
+      <use href="#q-bub" class="qb" x="79" y="262"/><use href="#q-bub" class="qb" x="555" y="110"/><use href="#q-bub" class="qb" x="795" y="262"/>
+      <use href="#q-bub" class="qb" x="85" y="242"/><use href="#q-bub" class="qb" x="561" y="90"/><use href="#q-bub" class="qb" x="801" y="242"/>
+      <use href="#q-bub" class="qb" x="80" y="222"/><use href="#q-bub" class="qb" x="556" y="70"/><use href="#q-bub" class="qb" x="796" y="222"/>
+      <use href="#q-bub" class="qb" x="84" y="202"/><use href="#q-bub" class="qb" x="560" y="50"/><use href="#q-bub" class="qb" x="800" y="202"/>
+      <use href="#q-bub" class="qb" x="78" y="182"/><use href="#q-bub" class="qb" x="554" y="30"/><use href="#q-bub" class="qb" x="794" y="182"/>
+      <g transform="translate(24 22)"><rect width="200" height="40" rx="20" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2"/><text x="100" y="27" text-anchor="middle" font-size="20" class="rnd" fill="#2B2A33">check-ins: <tspan id="ci-n" fill="#D64545">27</tspan></text></g>
+      <!-- one Director runs the track three times on page entry (script below), then rests here at the start of the track -->
+      <g id="p4-dir" transform="translate(470 540)"><use href="#dir-frazzled" x="-37" y="-129" width="74" height="136"/>
+        <!-- the Director's thought bubble swells with every check-in, then blows up (script below); a still frame shows the burst -->
+        <g id="p4-think" style="display:none"><circle cx="-20" cy="-106" r="4" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2"/><circle cx="-34" cy="-116" r="6" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2"/><g id="p4-cloud"><path d="M-40 16 C-62 16,-62 -10,-42 -12 C-46 -34,-14 -42,-4 -27 C4 -46,38 -40,36 -18 C60 -20,62 12,40 16 C38 34,8 36,0 26 C-10 38,-38 34,-40 16 Z" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2.5" vector-effect="non-scaling-stroke"/><use href="#q-bub" x="-28" y="9"/></g></g>
+        <g id="p4-boom" transform="translate(-70 -140)"><circle class="frag" cx="-80" cy="-46" r="10" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2" style="--dx:80px;--dy:46px"/><circle class="frag" cx="-17" cy="-95" r="8" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2" style="--dx:17px;--dy:95px"/><circle class="frag" cx="69" cy="-58" r="11" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2" style="--dx:-69px;--dy:58px"/><circle class="frag" cx="93" cy="16" r="9" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2" style="--dx:-93px;--dy:-16px"/><circle class="frag" cx="44" cy="76" r="8" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2" style="--dx:-44px;--dy:-76px"/><circle class="frag" cx="-46" cy="80" r="10" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2" style="--dx:46px;--dy:-80px"/><circle class="frag" cx="-89" cy="16" r="7" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2" style="--dx:89px;--dy:-16px"/><g class="burst"><path d="M0 -62 L10 -39 L31 -54 L28 -28 L54 -31 L39 -10 L62 0 L39 10 L54 31 L28 28 L31 54 L10 39 L0 62 L-10 39 L-31 54 L-28 28 L-54 31 L-39 10 L-62 0 L-39 -10 L-54 -31 L-28 -28 L-31 -54 L-10 -39 Z" fill="#FFD23F" stroke="#E0592A" stroke-width="3" stroke-linejoin="round"/><text x="0" y="9" text-anchor="middle" font-size="26" class="rnd" fill="#D64545">POP!</text></g></g>
+      </g>
+    </svg></figure>
+    <p class="cap">Every turn, every site: <span class="m">where are we, how did we get here, what's left?</span></p>
+  </div></section>
+
+  <!-- 5 · A LONG THREAD -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="Chat bubbles stream down onto an overwhelmed manager, eyes spinning and stars circling overhead, whose armful of papers slips away, and pile into a heap taller than the Director, who stands at the edge, frowning, unable to see past it, and asks: what changed? Behind the manager, a cracked brick wall crumbles, bricks tumbling down and breaking on the ground.">
+      <rect width="1000" height="560" fill="url(#sky-eve)"/>
+      <circle cx="840" cy="370" r="54" fill="#F6A86B" opacity=".85"/>
+      <rect y="400" width="1000" height="160" fill="#9CC27F"/>
+      <path d="M0 560 L0 470 C 200 440, 500 430, 1000 448 L1000 560 Z" fill="#D2B98C"/>
+      <!-- the wall crumbles: it leans, cracks, and sheds bricks that break on the ground -->
+      <g transform="rotate(7 520 476)" stroke="#9C4A33" stroke-width="2" fill="#C9694A">
+        <rect x="520" y="450" width="54" height="24"/><rect x="576" y="450" width="54" height="24"/><rect x="632" y="450" width="54" height="24"/><rect x="688" y="450" width="54" height="24"/><rect x="744" y="450" width="54" height="24"/>
+        <rect x="536" y="424" width="54" height="24" transform="rotate(-3 563 436)"/><rect x="594" y="424" width="54" height="24"/><rect x="650" y="424" width="54" height="24" transform="rotate(4 677 436)"/><rect x="708" y="424" width="54" height="24"/>
+        <rect x="514" y="398" width="54" height="24"/><rect x="574" y="398" width="54" height="24" transform="rotate(5 601 410)"/><rect x="630" y="398" width="54" height="24"/><rect x="694" y="401" width="54" height="24" transform="rotate(16 721 413)"/>
+        <rect x="544" y="372" width="54" height="24" transform="rotate(-6 571 384)"/><rect x="602" y="372" width="54" height="24"/>
+        <rect x="528" y="346" width="54" height="24" transform="rotate(8 555 358)"/><rect x="590" y="346" width="54" height="24" transform="rotate(-5 617 358)"/>
+        <rect x="560" y="320" width="54" height="24" transform="rotate(-10 587 332)"/>
+        <path d="M618 346 L627 359 L615 372 L631 385 L621 398 L639 411 L628 424 L644 437 L634 450 L648 463 L640 474 M631 385 L650 391 M639 411 L660 404" fill="none" stroke="#4A2A22" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+      </g>
+      <g stroke="#9C4A33" stroke-width="2" fill="#C9694A">
+        <rect x="-27" y="-12" width="54" height="24" transform="translate(744 352) rotate(34)"/>
+        <rect x="-27" y="-12" width="54" height="24" transform="translate(806 448) rotate(-22)"/>
+        <path d="M0 0 H27 L22 8 L28 15 L24 24 H0 Z" transform="translate(826 498) rotate(9)"/>
+        <path d="M28 0 H6 L10 9 L3 15 L8 24 H28 Z" transform="translate(858 510) rotate(-14)"/>
+        <path d="M0 0 H30 L26 10 L31 22 H0 Z" transform="translate(900 492) rotate(18)"/>
+        <path d="M0 0 L10 -3 L13 6 L3 9 Z" transform="translate(888 526)"/><path d="M0 0 L8 -2 L9 6 L1 7 Z" transform="translate(934 516) rotate(20)"/><path d="M0 0 L7 -3 L9 4 L2 6 Z" transform="translate(812 528) rotate(-10)"/>
+      </g>
+      <g fill="none" stroke="#9C4A33" stroke-width="2.5" stroke-linecap="round" opacity=".6">
+        <path d="M726 326 L716 306 M742 324 L734 304 M758 330 L752 314"/><path d="M790 424 L784 408 M806 420 L802 404 M822 426 L819 412"/>
+      </g>
+      <g fill="#E8D7B4" opacity=".75"><circle cx="830" cy="530" r="9"/><circle cx="846" cy="524" r="12"/><circle cx="866" cy="532" r="8"/><circle cx="916" cy="522" r="10"/><circle cx="932" cy="530" r="7"/></g>
+      <use href="#chatb" transform="translate(372 18) rotate(8) scale(.7)"/>
+      <use href="#chatb" transform="translate(424 84) rotate(-6) scale(.75)"/>
+      <use href="#chatb" transform="translate(364 150) rotate(5) scale(.8)"/>
+      <use href="#chatb" transform="translate(432 214) rotate(-8) scale(.75)"/>
+      <!-- the manager, swamped: page-local pose built from the shared manager parts; spiral eyes, stars overhead, two sweat drops, papers slipping from the arms -->
+      <g transform="translate(330 290) scale(1.05)" style="--sk:#E2AE84;--hr:#4A3426">
+        <use href="#m-legs"/><use href="#m-body"/>
+        <path d="M40 104 L30 134 M80 104 L90 130" stroke="#6F95CC" stroke-width="11" stroke-linecap="round"/>
+        <use href="#chatb" transform="translate(34 136) rotate(3) scale(.52)"/>
+        <use href="#chatb" transform="translate(32 124) rotate(-4) scale(.52)"/>
+        <use href="#chatb" transform="translate(36 112) rotate(6) scale(.52)"/>
+        <use href="#chatb" transform="translate(64 94) rotate(28) scale(.52)"/>
+        <use href="#chatb" transform="translate(92 150) rotate(42) scale(.48)"/>
+        <use href="#chatb" transform="translate(-6 168) rotate(-34) scale(.48)"/>
+        <use href="#chatb" transform="translate(-14 128) rotate(-18) scale(.44)"/>
+        <circle cx="30" cy="137" r="6.5" style="fill:var(--sk,#E2AE84)"/><circle cx="91" cy="133" r="6.5" style="fill:var(--sk,#E2AE84)"/>
+        <use href="#m-head"/>
+        <path d="M51 74 a1 1 0 0 1 2 0 a2 2 0 0 1 -4 0 a3 3 0 0 1 6 0 a4 4 0 0 1 -8 0 M69 74 a1 1 0 0 1 2 0 a2 2 0 0 1 -4 0 a3 3 0 0 1 6 0 a4 4 0 0 1 -8 0" fill="none" stroke="#2B2A33" stroke-width="1.7" stroke-linecap="round"/>
+        <path d="M51 87 q4.5 -3.5 9 0 t9 0" fill="none" stroke="#2B2A33" stroke-width="2.4" stroke-linecap="round"/>
+        <use href="#drop"/><use href="#drop" transform="translate(-66 8)"/>
+        <ellipse cx="60" cy="16" rx="38" ry="9" fill="none" stroke="#6B5A3E" stroke-width="2" stroke-dasharray="7 6" opacity=".7"/>
+        <g fill="#F2B33D" stroke="#2B2A33" stroke-width="1.2" stroke-linejoin="round">
+          <path d="M0 -7 L2.1 -2.2 L6.7 -2.2 L3 0.8 L4.1 5.7 L0 2.8 L-4.1 5.7 L-3 0.8 L-6.7 -2.2 L-2.1 -2.2 Z" transform="translate(24 18)"/>
+          <path d="M0 -7 L2.1 -2.2 L6.7 -2.2 L3 0.8 L4.1 5.7 L0 2.8 L-4.1 5.7 L-3 0.8 L-6.7 -2.2 L-2.1 -2.2 Z" transform="translate(70 6) scale(.8)"/>
+          <path d="M0 -7 L2.1 -2.2 L6.7 -2.2 L3 0.8 L4.1 5.7 L0 2.8 L-4.1 5.7 L-3 0.8 L-6.7 -2.2 L-2.1 -2.2 Z" transform="translate(97 20) scale(.9)"/>
+        </g>
+      </g>
+      <use href="#chatb" transform="translate(452 474) rotate(-6) scale(.9)"/>
+      <use href="#chatb" transform="translate(470 424) rotate(9) scale(.8)"/>
+      <use href="#dir-worry" x="40" y="300" width="120" height="220"/>
+      <g>
+        <use href="#chatb" transform="translate(30 490) rotate(-5)"/>
+        <use href="#chatb" transform="translate(118 494) rotate(4)"/>
+        <use href="#chatb" transform="translate(206 492) rotate(-3)"/>
+        <use href="#chatb" transform="translate(286 498) rotate(5) scale(.9)"/>
+        <use href="#chatb" transform="translate(72 454) rotate(6)"/>
+        <use href="#chatb" transform="translate(160 450) rotate(-4)"/>
+        <use href="#chatb" transform="translate(246 454) rotate(3) scale(.9)"/>
+        <use href="#chatb" transform="translate(112 412) rotate(-5)"/>
+        <use href="#chatb" transform="translate(198 408) rotate(6)"/>
+        <use href="#chatb" transform="translate(142 370) rotate(4)"/>
+        <use href="#chatb" transform="translate(222 366) rotate(-6) scale(.9)"/>
+        <use href="#chatb" transform="translate(170 328) rotate(-4) scale(.9)"/>
+        <use href="#chatb" transform="translate(196 292) rotate(7) scale(.8)"/>
+        <use href="#chatb" transform="translate(218 262) rotate(-5) scale(.7)"/>
+      </g>
+      <g transform="translate(30 0)">
+        <path d="M30 196 H186 Q208 196 208 218 V236 Q208 258 186 258 H84 L62 316 L66 258 H30 Q8 258 8 236 V218 Q8 196 30 196 Z" fill="#FFFFFF" stroke="#2B2A33" stroke-width="3" stroke-linejoin="round"/>
+        <text x="108" y="235" text-anchor="middle" font-size="24" class="rnd" fill="#2B2A33">what changed?</text>
+      </g>
+    </svg></figure>
+    <p class="cap">A long thread piles up: <span class="m">work slips, and changes get lost.</span></p>
+  </div></section>
+
+  <!-- 6 · BEFORE -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="Behind the site fence, the manager writes in a notebook with a padlock on its cover. A thought cloud above shows its pages over time: neat at turn 1, messier at turn 20, smudged and half crossed out at turn 40, labelled context rot. Outside the fence, the Director holds a small stack of hand-copied notes and wonders what is in there.">
+      <rect width="1000" height="560" fill="url(#sky)"/>
+      <circle cx="110" cy="84" r="36" fill="#FBE7A1"/>
+      <rect y="400" width="1000" height="160" fill="#A9CF8B"/>
+      <rect x="420" y="400" width="580" height="82" fill="#DCC497"/>
+      <use href="#crane" transform="translate(560 420) scale(.8)"/>
+      <use href="#house-frame" transform="translate(860 424) scale(.9)"/>
+      <!-- the private notebook over time: neat, messier, rotten -->
+      <circle cx="746" cy="262" r="5" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2.5"/><circle cx="760" cy="230" r="7.5" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2.5"/><circle cx="772" cy="190" r="10" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2.5"/>
+      <rect x="586" y="8" width="392" height="140" rx="28" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2.5"/>
+      <g transform="translate(604 22)">
+        <rect width="96" height="84" rx="6" fill="#FFFDF6" stroke="#2B2A33" stroke-width="2"/>
+        <text x="48" y="18" text-anchor="middle" font-size="13" class="rnd" fill="#6B5A3E">turn 1</text>
+        <path d="M14 33 H82 M14 46 H76 M14 59 H82 M14 72 H58" stroke="#8E96A5" stroke-width="4" stroke-linecap="round"/>
+      </g>
+      <path d="M708 64 H728 M721 57 L729 64 L721 71" fill="none" stroke="#6B5A3E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <g transform="translate(736 22) rotate(3 48 42)">
+        <rect width="96" height="84" rx="6" fill="#FBF6E9" stroke="#2B2A33" stroke-width="2"/>
+        <text x="48" y="18" text-anchor="middle" font-size="13" class="rnd" fill="#6B5A3E">turn 20</text>
+        <path d="M14 33 q8 -4 16 0 t16 0 t16 0 t16 0 M14 46 q7 4 14 0 t14 0 t14 0 t10 0 M14 72 H48" fill="none" stroke="#8E96A5" stroke-width="4" stroke-linecap="round"/>
+        <path d="M14 59 H66" stroke="#8E96A5" stroke-width="4" stroke-linecap="round"/><path d="M12 63 L68 55" stroke="#2B2A33" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="76" cy="68" r="6" fill="#8E96A5" opacity=".75"/><circle cx="83" cy="62" r="2.5" fill="#8E96A5" opacity=".75"/>
+      </g>
+      <path d="M840 64 H860 M853 57 L861 64 L853 71" fill="none" stroke="#6B5A3E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <g transform="translate(868 24) rotate(-6 48 42)">
+        <rect width="96" height="84" rx="6" fill="#E9DDBB" stroke="#2B2A33" stroke-width="2"/>
+        <text x="48" y="18" text-anchor="middle" font-size="13" class="rnd" fill="#6B5A3E" opacity=".6">turn 40</text>
+        <ellipse cx="36" cy="50" rx="22" ry="11" fill="#7D8696" opacity=".35"/><ellipse cx="68" cy="66" rx="18" ry="9" fill="#7D8696" opacity=".3"/>
+        <path d="M12 33 q10 -8 20 2 t20 -4 t22 6 M16 60 c 10 -14 22 10 30 -4 s 14 12 26 -6 M14 74 q12 -6 22 2" fill="none" stroke="#8E96A5" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M10 30 L84 40 M12 52 L82 44" stroke="#D64545" stroke-width="3" stroke-linecap="round"/>
+      </g>
+      <text x="914" y="136" text-anchor="middle" font-size="19" class="hand" fill="#D64545">context rot</text>
+      <use href="#mgr-private" x="660" y="236" width="120" height="220" style="--sk:#E2AE84;--hr:#4A3426"/>
+      <rect x="420" y="420" width="580" height="66" fill="#C9945B"/>
+      <path d="M460 420 V486 M500 420 V486 M540 420 V486 M580 420 V486 M620 420 V486 M660 420 V486 M700 420 V486 M740 420 V486 M780 420 V486 M820 420 V486 M860 420 V486 M900 420 V486 M940 420 V486 M980 420 V486" stroke="#A8733F" stroke-width="3"/>
+      <rect x="414" y="414" width="586" height="10" rx="3" fill="#8A5A33"/><rect x="414" y="414" width="12" height="80" rx="3" fill="#8A5A33"/>
+      <use href="#dir-notes" x="150" y="300" width="120" height="220"/>
+      <path d="M232 192 H296 Q318 192 318 214 V256 Q318 278 296 278 H252 L222 318 L234 278 H232 Q210 278 210 256 V214 Q210 192 232 192 Z" fill="#FFFFFF" stroke="#2B2A33" stroke-width="3" stroke-linejoin="round"/>
+      <text x="264" y="256" text-anchor="middle" font-size="56" class="rnd" fill="#2B2A33">?</text>
+    </svg></figure>
+    <p class="cap">Before: private notes the Director couldn't check, <span class="m">rotting as the thread grew.</span></p>
+  </div></section>
+
+  <!-- 7 · AFTER: A BOARD AT EVERY GATE -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="A big board stands at the site gate. The top shows Now, Open questions, Next and Decisions; below it is a row of diary pages, one per turn. The manager writes page 7 while the Director reads, holding a coffee.">
+      <rect width="1000" height="560" fill="url(#sky)"/>
+      <rect y="420" width="1000" height="140" fill="#A9CF8B"/>
+      <path d="M0 560 L0 470 C 300 450, 700 450, 1000 470 L1000 560 Z" fill="#DCC497"/>
+      <use href="#house-frame" transform="translate(150 432) scale(.8)"/>
+      <use href="#crane" transform="translate(880 432) scale(.85)"/>
+      <g transform="translate(360 110)">
+        <use href="#board-blank"/>
+        <text x="200" y="36" text-anchor="middle" font-size="24" class="rnd" fill="#FFF6E4">3 · house</text>
+        <g class="rnd" font-size="19" fill="#8A5A33"><text x="24" y="96">Now</text><text x="24" y="136">Open questions</text><text x="24" y="176">Next</text><text x="24" y="216">Decisions</text></g>
+        <g class="hand" font-size="25" fill="#2B2A33"><text x="182" y="96">digging footings</text><text x="182" y="136">steel frame?</text><text x="182" y="176">slab, walls, roof</text><text x="182" y="216">fence first</text></g>
+        <path d="M20 234 H380" stroke="#C9A866" stroke-width="3" stroke-dasharray="10 8"/>
+        <g class="rnd" font-size="17" text-anchor="middle">
+          <rect x="24" y="248" width="34" height="38" rx="4" fill="#F3EAD3" stroke="#C9A866" stroke-width="2"/><text x="41" y="273" fill="#6B5A3E">1</text>
+          <rect x="66" y="248" width="34" height="38" rx="4" fill="#F3EAD3" stroke="#C9A866" stroke-width="2"/><text x="83" y="273" fill="#6B5A3E">2</text>
+          <rect x="108" y="248" width="34" height="38" rx="4" fill="#F3EAD3" stroke="#C9A866" stroke-width="2"/><text x="125" y="273" fill="#6B5A3E">3</text>
+          <rect x="150" y="248" width="34" height="38" rx="4" fill="#F3EAD3" stroke="#C9A866" stroke-width="2"/><text x="167" y="273" fill="#6B5A3E">4</text>
+          <rect x="192" y="248" width="34" height="38" rx="4" fill="#F3EAD3" stroke="#C9A866" stroke-width="2"/><text x="209" y="273" fill="#6B5A3E">5</text>
+          <rect x="234" y="248" width="34" height="38" rx="4" fill="#F3EAD3" stroke="#C9A866" stroke-width="2"/><text x="251" y="273" fill="#6B5A3E">6</text>
+          <rect x="276" y="248" width="34" height="38" rx="4" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2" stroke-dasharray="5 4"/><text x="293" y="273" fill="#2B2A33">7</text>
+        </g>
+      </g>
+      <use href="#dir-mug" x="150" y="314" width="120" height="220"/>
+      <use href="#mgr-write" width="120" height="220" transform="translate(864 314) scale(-1 1)" style="--sk:#E2AE84;--hr:#4A3426"/>
+    </svg></figure>
+    <p class="cap">Now a board at the gate <span class="m">serves both of them.</span></p>
+  </div></section>
+
+  <!-- 8 · THE DIRECTOR DIRECTS ON THE BOARD -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="On the board, the Director writes two double-arrow notes at exact lines: under Open questions, slab first, right under slab or walls first, and yes, right under steel frame. A speech bubble shows the Director sending just the double arrow. A mixer starts pouring the slab and the manager cheers.">
+      <rect width="1000" height="560" fill="url(#sky)"/>
+      <rect y="440" width="1000" height="120" fill="#A9CF8B"/>
+      <use href="#crane" transform="translate(810 446) scale(.7)"/>
+      <rect x="790" y="462" width="210" height="18" fill="#9AA0AB" stroke="#8A5A33" stroke-width="3"/>
+      <use href="#mixer" transform="translate(936 470) scale(.85)"/>
+      <path d="M892 416 C 872 430, 866 446, 858 466" fill="none" stroke="#9AA0AB" stroke-width="14" stroke-linecap="round"/>
+      <g transform="translate(240 100) scale(1.15)">
+        <use href="#board-blank"/>
+        <text x="200" y="36" text-anchor="middle" font-size="24" class="rnd" fill="#FFF6E4">3 · house</text>
+        <g class="rnd" font-size="19" fill="#8A5A33"><text x="24" y="92">Now</text><text x="24" y="134">Open questions</text></g>
+        <g class="hand" font-size="24" fill="#2B2A33"><text x="182" y="92">footings done</text><text x="182" y="134">slab or walls first?</text><text x="182" y="212">steel frame?</text></g>
+        <rect x="36" y="142" width="172" height="38" rx="9" fill="#E7E8FB"/>
+        <text x="50" y="170" class="hand" font-size="27" fill="#4048C4">&gt;&gt; slab first</text>
+        <rect x="36" y="220" width="172" height="38" rx="9" fill="#E7E8FB"/>
+        <text x="50" y="248" class="hand" font-size="27" fill="#4048C4">&gt;&gt; yes</text>
+      </g>
+      <path d="M118 150 H198 Q222 150 222 174 V216 Q222 240 198 240 H186 L172 276 L158 240 H118 Q94 240 94 216 V174 Q94 150 118 150 Z" fill="#FFFFFF" stroke="#2B2A33" stroke-width="3" stroke-linejoin="round"/>
+      <use href="#chev" stroke="#4048C4" stroke-width="7" transform="translate(161 195) scale(2.3)"/>
+      <use href="#dir-write" x="90" y="270" width="156" height="286"/>
+      <use href="#mgr-catch" x="704" y="296" width="120" height="220" style="--sk:#E2AE84;--hr:#4A3426"/>
+    </svg></figure>
+    <p class="cap">The Director directs at the exact line, <span class="m">then sends <b>&gt;&gt;</b>.</span></p>
+  </div></section>
+
+  <!-- 9 · A TODO ON THE BOARD -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="The Director tells the manager: put it on the board, inspect the crane before Friday. The manager writes it under Next on the board, where it waits. The crane stands behind them.">
+      <rect width="1000" height="560" fill="url(#sky)"/>
+      <rect y="440" width="1000" height="120" fill="#A9CF8B"/>
+      <use href="#crane" transform="translate(905 450) scale(.85)"/>
+      <use href="#barrier" transform="translate(190 486) scale(.8)"/>
+      <g transform="translate(330 190)">
+        <use href="#board-blank"/>
+        <text x="200" y="36" text-anchor="middle" font-size="24" class="rnd" fill="#FFF6E4">3 · house</text>
+        <g class="rnd" font-size="19" fill="#8A5A33"><text x="24" y="96">Now</text><text x="24" y="136">Next</text><text x="24" y="222">Decisions</text></g>
+        <g class="hand" font-size="25" fill="#2B2A33"><text x="128" y="96">pouring the slab</text><text x="128" y="136">walls, then roof</text><text x="128" y="222">slab first</text></g>
+        <rect x="116" y="150" width="268" height="38" rx="8" fill="#FFF1C9"/>
+        <text x="128" y="178" class="hand" font-size="25" fill="#2B2A33">inspect crane by Fri</text>
+        <path d="M20 242 H380" stroke="#C9A866" stroke-width="3" stroke-dasharray="10 8"/>
+        <g class="rnd" font-size="15" text-anchor="middle" fill="#6B5A3E">
+          <rect x="24" y="254" width="30" height="28" rx="4" fill="#F3EAD3" stroke="#C9A866" stroke-width="2"/><text x="39" y="273">7</text>
+          <rect x="60" y="254" width="30" height="28" rx="4" fill="#F3EAD3" stroke="#C9A866" stroke-width="2"/><text x="75" y="273">8</text>
+          <rect x="96" y="254" width="30" height="28" rx="4" fill="#F3EAD3" stroke="#C9A866" stroke-width="2"/><text x="111" y="273">9</text>
+        </g>
+      </g>
+      <path d="M50 40 H444 Q470 40 470 66 V144 Q470 170 444 170 H156 L124 236 L120 170 H50 Q24 170 24 144 V66 Q24 40 50 40 Z" fill="#FFFFFF" stroke="#2B2A33" stroke-width="3" stroke-linejoin="round"/>
+      <text x="247" y="96" text-anchor="middle" font-size="25" class="rnd" fill="#2B2A33">Add a todo:</text>
+      <text x="247" y="138" text-anchor="middle" font-size="24" class="rnd" fill="#4048C4">inspect the crane by Friday</text>
+      <use href="#dir-ask" x="60" y="312" width="120" height="220"/>
+      <use href="#mgr-write" width="120" height="220" transform="translate(823 298) scale(-1 1)" style="--sk:#E2AE84;--hr:#4A3426"/>
+    </svg></figure>
+    <p class="cap">Add a todo anytime. <span class="m">It stays on the board until done.</span></p>
+  </div></section>
+
+  <!-- 10 · THE BELL -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="The board has gone dusty: a cobweb in its corner, and a red stamp with ten tally marks says 10 calls since update. A bell on the board rings, and the manager hurries over with a marker.">
+      <rect width="1000" height="560" fill="url(#sky)"/>
+      <rect y="430" width="1000" height="130" fill="#A9CF8B"/>
+      <rect x="20" y="300" width="180" height="150" fill="#E9DCC0"/>
+      <path d="M8 304 L110 252 L212 304 Z" fill="#8A5A33"/>
+      <rect x="40" y="380" width="36" height="70" fill="#8A5A33"/><rect x="120" y="380" width="56" height="36" fill="#8FB3D6"/>
+      <circle cx="110" cy="338" r="20" fill="#8FB3D6"/>
+      <path d="M110 318 V358 M90 338 H130" stroke="#E9DCC0" stroke-width="4"/>
+      <use href="#crane" transform="translate(900 440) scale(.7)"/>
+      <g transform="translate(340 100)">
+        <rect x="340" y="-76" width="12" height="82" fill="#7A4E2C"/><rect x="340" y="-76" width="76" height="10" fill="#7A4E2C"/>
+        <use href="#board-blank"/>
+        <text x="200" y="36" text-anchor="middle" font-size="24" class="rnd" fill="#FFF6E4">3 · house</text>
+        <g opacity=".42">
+          <g class="rnd" font-size="19" fill="#8A5A33"><text x="24" y="96">Now</text><text x="24" y="136">Next</text><text x="24" y="176">Decisions</text><text x="24" y="216">Done</text></g>
+          <g class="hand" font-size="25" fill="#2B2A33"><text x="128" y="96">framing walls</text><text x="128" y="136">roof</text><text x="128" y="176">steel frame</text><text x="128" y="216">slab</text></g>
+        </g>
+        <g fill="none" stroke="#7D8696" stroke-width="1.6" opacity=".9" transform="translate(8 58)">
+          <path d="M0 0 L84 0 M0 0 L74 36 M0 0 L52 62 M0 0 L22 80 M0 0 L0 86"/>
+          <path d="M24 0 Q20 7 21.6 10.4 Q17 13 15.5 18.4 Q10 19 6.3 23.2 Q3 23 0 24"/>
+          <path d="M48 0 Q41 12 43.2 20.9 Q34 26 31 36.6 Q20 38 12.6 46.3 Q6 46 0 48"/>
+          <path d="M70 0 Q61 16 63 30.5 Q50 38 45.2 53.4 Q30 56 18.4 67.6 Q9 67 0 70"/>
+        </g>
+        <path d="M46 116 V150" stroke="#7D8696" stroke-width="1.4"/><circle cx="46" cy="154" r="5" fill="#2B2A33"/>
+        <g transform="translate(218 262) rotate(-4)" fill="none" stroke="#D64545">
+          <rect x="-152" y="-22" width="304" height="44" rx="8" stroke-width="3"/>
+          <path d="M-136 -11 V11 M-130 -11 V11 M-124 -11 V11 M-118 -11 V11 M-140 8 L-114 -8 M-104 -11 V11 M-98 -11 V11 M-92 -11 V11 M-86 -11 V11 M-108 8 L-82 -8" stroke-width="2.6" stroke-linecap="round"/>
+          <text x="-68" y="7" font-size="20" class="rnd" fill="#D64545" stroke="none">10 calls since update</text>
+        </g>
+        <use href="#bell" transform="translate(400 -26) rotate(14)"/>
+        <path d="M362 -50 q-12 16 0 32 M350 -60 q-18 26 0 52 M438 -50 q12 16 0 32 M450 -60 q18 26 0 52" fill="none" stroke="#2B2A33" stroke-width="3" stroke-linecap="round"/>
+      </g>
+      <use href="#spark" transform="translate(790 34) scale(.7)"/>
+      <use href="#spark" transform="translate(690 40) scale(.5)"/>
+      <path d="M230 222 H284 Q302 222 302 240 V270 Q302 288 284 288 H270 L258 314 L254 288 H230 Q212 288 212 270 V240 Q212 222 230 222 Z" fill="#FFFFFF" stroke="#2B2A33" stroke-width="3" stroke-linejoin="round"/>
+      <text x="257" y="272" text-anchor="middle" font-size="42" class="rnd" fill="#D64545">!</text>
+      <use href="#mgr-write-oh" x="212" y="312" width="120" height="220" style="--sk:#E2AE84;--hr:#4A3426"/>
+    </svg></figure>
+    <p class="cap">A quiet board? <span class="m">A bell nudges the manager.</span></p>
+  </div></section>
+
+  <!-- 11 · THE END-OF-SHIFT WHISTLE: the second hook -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="At sunset, a site clock tower blows its whistle, and a puff of steam says end of shift. The tired manager yawns under a heavy sack of papers. Under a sign that says 15 turns, about 250k tokens, time for a fresh shift, the Director points up at it. The house site's gate stands in the background.">
+      <rect width="1000" height="560" fill="url(#sky-eve)"/>
+      <circle cx="930" cy="400" r="44" fill="#F6A86B" opacity=".85"/>
+      <rect y="470" width="1000" height="90" fill="#9CC27F"/>
+      <rect x="56" y="170" width="70" height="330" fill="#C9945B" stroke="#8A5A33" stroke-width="3"/>
+      <path d="M46 174 L91 128 L136 174 Z" fill="#8A5A33"/>
+      <rect x="85" y="100" width="12" height="32" fill="#D9A02A"/><path d="M79 102 H103 L99 88 H83 Z" fill="#F2B33D" stroke="#B8892F" stroke-width="2"/>
+      <circle cx="91" cy="224" r="26" fill="#FFFFFF" stroke="#2B2A33" stroke-width="3"/>
+      <path d="M91 224 V202 M91 224 L99 236" stroke="#2B2A33" stroke-width="3" stroke-linecap="round"/>
+      <path d="M72 290 H110 M72 330 H110 M72 370 H110 M72 410 H110" stroke="#8A5A33" stroke-width="2" opacity=".5"/>
+      <g fill="#FFFFFF"><circle cx="122" cy="82" r="16"/><circle cx="150" cy="64" r="22"/><ellipse cx="252" cy="58" rx="112" ry="36"/><circle cx="196" cy="42" r="26"/><circle cx="302" cy="38" r="24"/></g>
+      <text x="252" y="68" text-anchor="middle" font-size="26" class="rnd" fill="#2B2A33">end of shift</text>
+      <path d="M66 96 q-10 -10 0 -20 M56 104 q-16 -18 0 -36" fill="none" stroke="#2B2A33" stroke-width="2.5" stroke-linecap="round"/>
+      <g transform="translate(818 352) scale(.8)"><use href="#gate-frame"/><text x="95" y="38" text-anchor="middle" font-size="18" class="rnd" fill="#FFF6E4">house</text><use href="#house-frame" transform="translate(95 140) scale(.36)"/></g>
+      <rect x="560" y="300" width="10" height="190" fill="#7A4E2C"/><rect x="744" y="300" width="10" height="190" fill="#7A4E2C"/>
+      <rect x="512" y="206" width="290" height="104" rx="12" fill="#FFFDF6" stroke="#7A4E2C" stroke-width="5"/>
+      <text x="657" y="248" text-anchor="middle" font-size="23" class="rnd" fill="#2B2A33">15 turns · ~250k tokens</text>
+      <text x="657" y="286" text-anchor="middle" font-size="23" class="rnd" fill="#4048C4">time for a fresh shift</text>
+      <use href="#dir-point" x="597" y="300" width="120" height="220"/>
+      <use href="#mgr-sack" x="250" y="282" width="126" height="231" style="--sk:#E2AE84;--hr:#4A3426"/>
+      <text x="230" y="352" font-size="22" class="rnd" fill="#5A6075">z</text><text x="212" y="326" font-size="17" class="rnd" fill="#5A6075">z</text>
+    </svg></figure>
+    <p class="cap">The end-of-shift whistle: <span class="m">time for a fresh manager.</span></p>
+  </div></section>
+
+  <!-- 12 · THE HANDOFF -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="A tired manager sits on a bucket and waves goodbye. The board's newest diary page is the handoff. The Director says resume the house, and a fresh manager reads the board, ready to start.">
+      <rect width="1000" height="560" fill="url(#sky)"/>
+      <rect y="430" width="1000" height="130" fill="#A9CF8B"/>
+      <use href="#crane" transform="translate(944 440) scale(.8)"/>
+      <g transform="translate(400 128)">
+        <use href="#board-blank"/>
+        <text x="200" y="36" text-anchor="middle" font-size="24" class="rnd" fill="#FFF6E4">3 · house</text>
+        <g class="rnd" font-size="19" fill="#8A5A33"><text x="24" y="96">Now</text><text x="24" y="136">Next</text><text x="24" y="176">Decisions</text><text x="24" y="216">Done</text></g>
+        <g class="hand" font-size="25" fill="#2B2A33"><text x="128" y="96">resume from here</text><text x="128" y="136">inspect crane by Fri</text><text x="128" y="176">steel frame</text><text x="128" y="216">slab, walls</text></g>
+        <path d="M20 234 H380" stroke="#C9A866" stroke-width="3" stroke-dasharray="10 8"/>
+        <g class="rnd" font-size="17" text-anchor="middle" fill="#6B5A3E">
+          <rect x="24" y="248" width="40" height="38" rx="4" fill="#F3EAD3" stroke="#C9A866" stroke-width="2"/><text x="44" y="273">11</text>
+          <rect x="72" y="248" width="40" height="38" rx="4" fill="#F3EAD3" stroke="#C9A866" stroke-width="2"/><text x="92" y="273">12</text>
+          <rect x="120" y="248" width="40" height="38" rx="4" fill="#F3EAD3" stroke="#C9A866" stroke-width="2"/><text x="140" y="273">13</text>
+          <rect x="168" y="246" width="190" height="42" rx="5" fill="#FBD87A" stroke="#B8892F" stroke-width="2.5"/><text x="263" y="274" fill="#3A2C10">14 · Handoff</text>
+        </g>
+      </g>
+      <use href="#mess" transform="translate(100 214) scale(.5)"/>
+      <circle cx="104" cy="286" r="6" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2.5"/>
+      <circle cx="108" cy="306" r="4" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2.5"/>
+      <use href="#bucket" transform="translate(90 528) scale(.9)"/>
+      <use href="#mgr-tired" x="36" y="342" width="108" height="198" style="--sk:#E2AE84;--hr:#4A3426"/>
+      <path d="M144 66 H364 Q392 66 392 94 V124 Q392 152 364 152 H284 L262 208 L254 152 H134 Q106 152 106 124 V94 Q106 66 134 66 Z" fill="#FFFFFF" stroke="#2B2A33" stroke-width="3" stroke-linejoin="round"/>
+      <text x="249" y="121" text-anchor="middle" font-size="28" class="rnd" fill="#4048C4">Resume the house</text>
+      <use href="#dir-ask" x="200" y="312" width="120" height="220"/>
+      <use href="#mgr-stand" x="826" y="312" width="120" height="220" style="--sk:#8D5A3B;--hr:#2B2A33"/>
+      <use href="#spark" transform="translate(826 318)"/>
+      <use href="#spark" transform="translate(954 362) scale(.7)"/>
+      <use href="#spark" transform="translate(944 300) scale(.5)"/>
+    </svg></figure>
+    <p class="cap">A tired manager leaves; <span class="m">a fresh one starts from the board.</span></p>
+  </div></section>
+
+  <!-- 13 · HIRE A CREW: subagents in parallel -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="The Director, on a small cloud at the left, points at the manager and says: hire a crew. The manager stands on the top tier holding the plan, a blueprint. Lines run down to four workers side by side below: a designer with a pencil, a builder with a hammer, a critic with a magnifying glass and a tester with a spirit level.">
+      <rect width="1000" height="560" fill="url(#sky)"/>
+      <rect y="440" width="1000" height="120" fill="#A9CF8B"/>
+      <path d="M0 560 L0 470 C 300 450, 700 450, 1000 470 L1000 560 Z" fill="#DCC497"/>
+      <use href="#crane" transform="translate(950 452) scale(.85)"/>
+      <g fill="none" stroke="#5A6075" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M500 198 V300 M200 300 H800 M200 300 V338 M400 300 V338 M600 300 V338 M800 300 V338"/>
+      </g>
+      <use href="#mgr-plan" x="446" y="0" width="108" height="198" style="--sk:#E2AE84;--hr:#4A3426"/>
+      <g fill="#FFFFFF"><ellipse cx="293" cy="174" rx="54" ry="11"/><ellipse cx="272" cy="168" rx="22" ry="10"/><ellipse cx="314" cy="168" rx="24" ry="10"/></g>
+      <use href="#dir-point" x="250" y="14" width="86" height="158"/>
+      <path d="M40 30 H202 Q226 30 226 54 V74 Q226 98 202 98 H120 Q96 98 96 98 H40 Q16 98 16 74 V54 Q16 30 40 30 Z M226 52 L266 58 L226 70 Z" fill="#FFFFFF" stroke="#2B2A33" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M224 54 V68" stroke="#FFFFFF" stroke-width="4"/>
+      <text x="121" y="72" text-anchor="middle" font-size="23" class="rnd" fill="#2B2A33">hire a crew</text>
+      <use href="#wkr-pencil" x="143" y="327" width="114" height="209" style="--sk:#F1C7A0;--hr:#C9A266;--sh:#5FB8B0"/>
+      <use href="#wkr-hammer" x="343" y="327" width="114" height="209" style="--sk:#8D5A3B;--hr:#2B2A33;--sh:#E46A4E"/>
+      <use href="#wkr-glass" x="543" y="327" width="114" height="209" style="--sk:#C68B5E;--hr:#4A3426;--sh:#8BC07A"/>
+      <use href="#wkr-level-egg3" x="743" y="327" width="114" height="209" style="--sk:#D8A993"/><g class="egg-spark" fill="#F2B705"><path d="M841.8 351.7 Q841.8 361.2 851.3 361.2 Q841.8 361.2 841.8 370.7 Q841.8 361.2 832.3 361.2 Q841.8 361.2 841.8 351.7Z"/></g>
+      <g class="rnd" font-size="18" text-anchor="middle" fill="#2B2A33">
+        <rect x="150" y="530" width="100" height="26" rx="13" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2"/><text x="200" y="549">designer</text>
+        <rect x="350" y="530" width="100" height="26" rx="13" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2"/><text x="400" y="549">builder</text>
+        <rect x="550" y="530" width="100" height="26" rx="13" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2"/><text x="600" y="549">critic</text>
+        <rect x="750" y="530" width="100" height="26" rx="13" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2"/><text x="800" y="549">tester</text>
+      </g>
+    </svg></figure>
+    <p class="cap">Too much for one head? <span class="m">Tell the manager to hire a crew.</span></p>
+  </div></section>
+
+  <!-- 14 · MESSAGES, BEFORE: the Director as go-between -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="Between site 1, the foundation, and site 2, the tower, the Director stands beside a waist-high desk, sweating, pen in hand, ticking off a checklist of changes clipped upright on the desk. A stack of drafts sits on the desk and crumpled drafts lie on the ground. Dotted footsteps lead from the foundation manager, who is reporting, to the Director, and on from the desk to the tower manager, who waits with a question mark.">
+      <defs><g id="p14-crumple" fill="#FFFFFF" stroke="#A6ACBC" stroke-width="1.6" stroke-linejoin="round"><path d="M-9 -1 L-6 -8 L1 -10 L8 -5 L9 2 L4 8 L-4 9 L-9 4 Z"/><path d="M-5 -4 L0 0 L-3 5 M2 -7 L3 0 L7 2" fill="none" stroke-width="1.2"/></g></defs>
+      <rect width="1000" height="560" fill="url(#sky)"/>
+      <use href="#scene-two-sites"/>
+      <use href="#chatb" transform="translate(150 178) scale(1.1)"/>
+      <use href="#mgr-talk" x="200" y="262" width="102" height="187" style="--sk:#C68B5E;--hr:#2B2A33"/>
+      <path d="M760 170 H812 Q830 170 830 188 V214 Q830 232 812 232 H790 L776 262 L774 232 H760 Q742 232 742 214 V188 Q742 170 760 170 Z" fill="#FFFFFF" stroke="#2B2A33" stroke-width="3" stroke-linejoin="round"/>
+      <text x="786" y="218" text-anchor="middle" font-size="40" class="rnd" fill="#2B2A33">?</text>
+      <use href="#mgr-stand" x="700" y="262" width="102" height="187" style="--sk:#E2AE84;--hr:#4A3426"/>
+      <g fill="none" stroke="#8A5A33" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round"><path d="M300 492 Q368 512 426 494"/><path d="M612 494 Q660 512 708 492"/></g>
+      <path d="M424 486 L438 494 L424 502 Z" fill="#8A5A33"/><path d="M706 484 L720 491 L706 499 Z" fill="#8A5A33"/>
+      <!-- the desk, waist-high beside the Director: a checklist of changes clipped upright, a stack of drafts, crumpled drafts -->
+      <rect x="508" y="404" width="136" height="12" rx="3" fill="#A8733F"/><path d="M520 416 V476 M632 416 V476" stroke="#8A5A33" stroke-width="7"/>
+      <g transform="translate(530 334) rotate(-3 27 70)">
+        <rect width="54" height="70" rx="4" fill="#B98A55" stroke="#8A5A33" stroke-width="2"/><rect x="5" y="8" width="44" height="57" fill="#FFFFFF"/><rect x="18" y="-3" width="18" height="8" rx="2" fill="#8E96A5"/>
+        <g fill="none" stroke="#5A6075" stroke-width="1.8"><rect x="10" y="15" width="10" height="10" rx="2"/><rect x="10" y="31" width="10" height="10" rx="2"/><rect x="10" y="47" width="10" height="10" rx="2"/></g>
+        <path d="M25 20 H44 M25 36 H44 M25 52 H40" stroke="#A6ACBC" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M11 19 L14.5 23 L22 12 M11 35 L14.5 39 L22 28" fill="none" stroke="#4FB286" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <g fill="#FFFFFF" stroke="#A6ACBC" stroke-width="1.5"><rect x="592" y="397" width="38" height="7" transform="rotate(-3 611 400)"/><rect x="594" y="390" width="36" height="7" transform="rotate(4 612 393)"/><rect x="590" y="383" width="38" height="7" transform="rotate(-2 609 386)"/></g>
+      <use href="#p14-crumple" transform="translate(636 395) scale(.9)"/>
+      <use href="#p14-crumple" transform="translate(572 468)"/>
+      <use href="#p14-crumple" transform="translate(600 472) rotate(70) scale(.85)"/>
+      <use href="#p14-crumple" transform="translate(658 466) rotate(150)"/>
+      <!-- the Director, page-local copy of the dir-write pose: the pen arm reaches down to the checklist, plus a sweat drop -->
+      <g transform="translate(410 262)">
+        <use href="#d-cape"/><use href="#d-legs"/><use href="#d-body"/>
+        <path d="M40 104 L30 148 M80 104 L111 130" stroke="#3F45C0" stroke-width="11" stroke-linecap="round"/>
+        <path d="M108 133 L130 124" stroke="#2B2A33" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="29" cy="151" r="6.5" fill="#B48670"/><circle cx="112" cy="131" r="6.5" fill="#B48670"/>
+        <use href="#d-head"/><use href="#drop"/>
+      </g>
+    </svg></figure>
+    <p class="cap">Before: <span class="m">the Director tracked every change and drafted every message.</span></p>
+  </div></section>
+
+  <!-- 15 · MESSAGES, AFTER: one line, and the managers talk directly -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="The Director stands on a small cloud above the sites, points toward the tower and says: message the tower site. Below, the foundation manager throws a paper plane with the note foundation is done straight to the tower manager, who reaches up with both hands to catch it.">
+      <rect width="1000" height="560" fill="url(#sky)"/>
+      <use href="#scene-two-sites"/>
+      <path d="M338 312 C 372 176, 770 160, 738 318" fill="none" stroke="#5A6075" stroke-width="2.5" stroke-dasharray="8 8"/>
+      <use href="#plane" transform="translate(488 218) rotate(6)"/>
+      <rect x="376" y="258" width="192" height="34" rx="17" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2"/>
+      <text x="472" y="281" text-anchor="middle" font-size="19" class="rnd" fill="#2B2A33">foundation is done</text>
+      <use href="#mgr-throw" x="250" y="262" width="102" height="187" style="--sk:#C68B5E;--hr:#2B2A33"/>
+      <use href="#mgr-catch" x="720" y="262" width="102" height="187" style="--sk:#E2AE84;--hr:#4A3426"/>
+      <g fill="#FFFFFF"><ellipse cx="423" cy="172" rx="58" ry="12"/><ellipse cx="399" cy="166" rx="24" ry="11"/><ellipse cx="447" cy="166" rx="26" ry="11"/></g>
+      <use href="#dir-point" x="380" y="10" width="86" height="158"/>
+      <path d="M86 34 H350 Q372 34 372 56 V64 Q372 86 350 86 H86 Q64 86 64 64 V56 Q64 34 86 34 Z M372 52 L401 62 L372 70 Z" fill="#FFFFFF" stroke="#2B2A33" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M370 54 V68" stroke="#FFFFFF" stroke-width="4"/>
+      <text x="218" y="68" text-anchor="middle" font-size="21" class="rnd" fill="#2B2A33">message the tower site</text>
+    </svg></figure>
+    <p class="cap">Now: <span class="m">tell the managers to message each other.</span></p>
+  </div></section>
+
+  <!-- 16 · WE ALL BECOME DIRECTORS: a team of Directors, the work multiplies -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="Back on the hill at golden hour, four Directors stand side by side over the city, all in the same indigo hard hat and cape marked with the double arrow, each with a different face: two with hands on hips, one cheering with an arm up, one pointing. A dotted line runs from each Director to a different part of the city: the blimp, the far tower, the near tower and the street. A blimp marked with the double arrow floats overhead. A paper plane passes between the two towers. In the street, five small citizens in party hats cheer, and one more cheers from the near tower.">
+      <defs>
+        <!-- page 16 only: citizens with no hard hat, a party hat over the photo face -->
+        <g id="p16-cit-cheer"><use href="#w-legs"/><rect x="36" y="92" width="48" height="74" rx="14" style="fill:var(--sh)"/><path d="M40 104 L22 72 M80 104 L98 72" style="stroke:var(--sh)" stroke-width="11" stroke-linecap="round"/><circle cx="21" cy="69" r="6.5" fill="#D8A993"/><circle cx="99" cy="69" r="6.5" fill="#D8A993"/></g>
+        <g id="p16-hat"><circle cx="60" cy="79" r="30" fill="none" stroke="#8A6A58" stroke-opacity=".35" stroke-width="1.5"/><path d="M45 55 L60 16 L75 55 Z" style="fill:var(--ht)" stroke="#2B2A33" stroke-width="1.5" stroke-linejoin="round"/><path d="M50 42 H70 M54 30 H66" stroke="#FFFFFF" stroke-width="3" opacity=".75"/><circle cx="60" cy="15" r="5" fill="#FFFFFF" stroke="#2B2A33" stroke-width="1.5"/></g>
+        <!-- page 16 only: the team of Directors, the Director's costume over drawn faces. Skin and hair from --sk and --hr; each Director adds its own face. -->
+        <g id="p16-dir-hips"><use href="#d-cape"/><use href="#d-legs"/><use href="#d-body"/><path d="M40 102 L25 124 L37 141 M80 102 L95 124 L83 141" fill="none" stroke="#3F45C0" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/><circle cx="37" cy="141" r="6.5" style="fill:var(--sk,#E2AE84)"/><circle cx="83" cy="141" r="6.5" style="fill:var(--sk,#E2AE84)"/><use href="#d-head-drawn"/></g>
+        <g id="p16-dir-point"><use href="#d-cape"/><use href="#d-legs"/><use href="#d-body"/><path d="M40 104 L30 148 M80 104 L110 84" stroke="#3F45C0" stroke-width="11" stroke-linecap="round"/><circle cx="29" cy="151" r="6.5" style="fill:var(--sk,#E2AE84)"/><circle cx="112" cy="82" r="6.5" style="fill:var(--sk,#E2AE84)"/><use href="#d-head-drawn"/></g>
+        <g id="p16-dir-cheer"><use href="#d-cape"/><use href="#d-legs"/><use href="#d-body"/><path d="M40 104 L30 148 M80 104 L98 68" stroke="#3F45C0" stroke-width="11" stroke-linecap="round"/><circle cx="29" cy="151" r="6.5" style="fill:var(--sk,#E2AE84)"/><circle cx="99" cy="65" r="6.5" style="fill:var(--sk,#E2AE84)"/><use href="#d-head-drawn"/></g>
+      </defs>
+      <rect width="1000" height="560" fill="url(#sky-gold)"/>
+      <g fill="#FFFFFF" opacity=".8"><ellipse cx="300" cy="62" rx="70" ry="16"/><ellipse cx="338" cy="50" rx="38" ry="16"/><ellipse cx="900" cy="44" rx="56" ry="13"/></g>
+      <!-- a blimp, marked with the Director's >> -->
+      <g transform="translate(640 82)">
+        <path d="M-100 -24 L-122 -48 L-140 -48 L-124 -12 Z M-100 24 L-122 48 L-140 48 L-124 12 Z" fill="#2E3140" stroke="#2B2A33" stroke-width="2" stroke-linejoin="round"/>
+        <rect x="-24" y="38" width="48" height="16" rx="6" fill="#2E3140"/>
+        <ellipse rx="125" ry="42" fill="#FFFFFF" stroke="#2B2A33" stroke-width="2.5"/>
+        <rect x="-28" y="-19" width="56" height="38" rx="11" fill="#4A50D0" stroke="#2B2F86" stroke-width="3"/>
+        <use href="#chev" stroke="#F2B33D" stroke-width="4.4" transform="translate(1.5 0) scale(1.35)"/>
+      </g>
+      <ellipse cx="720" cy="384" rx="440" ry="56" fill="#BBDDAA"/>
+      <rect y="376" width="1000" height="184" fill="#A9CF8B"/>
+      <!-- the city: a near tower, a house and a far tower, a board at each gate; a paper plane flies between the towers -->
+      <use href="#tower-done" transform="translate(400 386) scale(.7)"/>
+      <use href="#house-done" transform="translate(620 386) scale(.55)"/>
+      <use href="#tower-done" transform="translate(796 386) scale(.62)"/>
+      <use href="#mini-board" transform="translate(530 390)"/>
+      <use href="#mini-board" transform="translate(706 390)"/>
+      <use href="#mini-board" transform="translate(912 390)"/>
+      <g fill="none" stroke="#5A6075" stroke-width="2" stroke-dasharray="6 7" opacity=".7"><path d="M518 236 C 600 200, 700 200, 788 244"/></g>
+      <use href="#plane" transform="translate(596 213) scale(.6) rotate(12)"/>
+      <use href="#wkr-cheer-egg5" x="450" y="196" width="34" height="62" style="--sk:#D8A993"/><g class="egg-spark" fill="#F2B705"><path d="M479.5 201.2 Q479.5 206.2 484.5 206.2 Q479.5 206.2 479.5 211.2 Q479.5 206.2 474.5 206.2 Q479.5 206.2 479.5 201.2Z"/></g>
+      <path d="M330 560 C 420 480, 520 420, 640 394 L 690 394 C 600 430, 520 490, 470 560 Z" fill="#D8CCAE"/>
+      <path d="M402 552 C 470 480, 560 428, 664 398" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="14 12"/>
+      <!-- the citizens: easter egg faces, cheering in the street -->
+      <g transform="translate(499 441) scale(.5)" style="--sh:#E46A4E;--ht:#5FB8B0"><use href="#p16-cit-cheer"/><image href="faces/worker-easter-egg-2.jpg" x="30" y="49" width="60" height="60" preserveAspectRatio="xMidYMid slice" clip-path="url(#face-clip)"/><use href="#p16-hat"/></g>
+      <g transform="translate(590 441) scale(.5)" style="--sh:#8BC07A;--ht:#F2B33D"><use href="#p16-cit-cheer"/><image href="faces/worker-easter-egg-3.jpg" x="30" y="49" width="60" height="60" preserveAspectRatio="xMidYMid slice" clip-path="url(#face-clip)"/><use href="#p16-hat"/></g>
+      <g transform="translate(679 441) scale(.5)" style="--sh:#7FA3D6;--ht:#E46A4E"><use href="#p16-cit-cheer"/><image href="faces/worker-easter-egg-4.jpg" x="30" y="49" width="60" height="60" preserveAspectRatio="xMidYMid slice" clip-path="url(#face-clip)"/><use href="#p16-hat"/></g>
+      <g transform="translate(770 441) scale(.5)" style="--sh:#F2B33D;--ht:#7FA3D6"><use href="#p16-cit-cheer"/><image href="faces/worker-easter-egg.jpg" x="30" y="49" width="60" height="60" preserveAspectRatio="xMidYMid slice" clip-path="url(#face-clip)"/><use href="#p16-hat"/></g>
+      <g transform="translate(859 441) scale(.5)" style="--sh:#5FB8B0;--ht:#F3A7B5"><use href="#p16-cit-cheer"/><image href="faces/worker-easter-egg-6.jpg" x="30" y="49" width="60" height="60" preserveAspectRatio="xMidYMid slice" clip-path="url(#face-clip)"/><use href="#p16-hat"/></g>
+      <g><rect x="642" y="372" width="7" height="4" fill="#E46A4E" transform="rotate(25 645 374)"/><rect x="824" y="364" width="7" height="4" fill="#4FB286" transform="rotate(-30 827 366)"/><rect x="972" y="380" width="7" height="4" fill="#4048C4" transform="rotate(40 975 382)"/><rect x="455" y="402" width="7" height="4" fill="#F2B33D" transform="rotate(-20 458 404)"/><circle cx="820" cy="452" r="2.5" fill="#E46A4E"/><circle cx="640" cy="458" r="2.5" fill="#4048C4"/><circle cx="970" cy="470" r="2.5" fill="#F2B33D"/></g>
+      <path d="M-20 560 L-20 384 C 60 334, 200 322, 300 362 C 360 388, 400 470, 420 560 Z" fill="#8CC174"/>
+      <g fill="#FFFFFF"><circle cx="60" cy="430" r="4"/><circle cx="250" cy="470" r="4"/><circle cx="320" cy="520" r="4"/></g>
+      <g fill="#F2C230"><circle cx="90" cy="480" r="4"/><circle cx="200" cy="420" r="4"/></g>
+      <use href="#spark" transform="translate(186 46) scale(.8)"/>
+      <use href="#spark" transform="translate(40 124) scale(.6)"/>
+      <!-- each Director directs a different part of the city: the blimp, the far tower, the near tower, the street -->
+      <g fill="none" stroke="#363BAA" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="0 9" opacity=".55">
+        <path d="M72 239 Q 130 60, 506 82"/>
+        <path d="M143 224 Q 480 120, 842 206"/>
+        <path d="M214 224 Q 300 176, 390 200"/>
+        <path d="M288 252 Q 360 400, 476 424"/>
+      </g>
+      <!-- the team of Directors, side by side, no one in front; drawn right to left so each cape sits behind its neighbor -->
+      <g transform="translate(228.2 209.5) scale(.68)" style="--sk:#E2AE84;--hr:#8A5A33"><use href="#p16-dir-hips"/><use href="#f-happy"/></g>
+      <g transform="translate(157.2 195) scale(.68)" style="--sk:#C68B5E;--hr:#4A3426"><use href="#p16-dir-point"/><use href="#f-smile"/></g>
+      <g transform="translate(86.2 195.5) scale(.68)" style="--sk:#F1C7A0;--hr:#C9A266"><use href="#p16-dir-cheer"/><use href="#f-happy"/></g>
+      <g transform="translate(15.2 210.5) scale(.68)" style="--sk:#8D5A3B;--hr:#2B2A33"><use href="#p16-dir-hips"/><use href="#f-smile"/></g>
+    </svg></figure>
+    <p class="cap">We all become Directors; <span class="m">the work multiplies, and the city rises.</span></p>
+  </div></section>
+
+  <!-- 17 · WHAT A BOARD LOOKS LIKE: the board and the chat panel, one loop -->
+  <section class="page"><div class="in gu loop-page">
+    <h2>What a board looks like</h2>
+    <div class="loop" id="loop">
+      <div class="win">
+        <div class="bar"><span class="fname">2026-10-22-demo-weekly-report-export.md</span><span class="app">MarkText</span></div>
+        <div class="doc">
+          <div class="h2"><i class="mk">##</i>Status · updated 10-22 09:31</div>
+          <div class="h3"><i class="mk">###</i>Now</div>
+          <p>Waiting on your direction.</p>
+          <div class="h3"><i class="mk">###</i>Open questions</div>
+          <ul>
+            <li>Leave the totals row out of the CSV? <span class="ref">(§2)</span>
+              <ul><li><span class="reply"><span class="gt">&gt;&gt;</span>yes</span> <span class="step" id="loop-from"><b>1</b>direct on the board</span></li></ul>
+            </li>
+          </ul>
+          <div class="h3"><i class="mk">###</i>Next</div>
+          <ul><li>Mine: apply your answer, rerun the tests and commit.</li></ul>
+          <div class="h3"><i class="mk">###</i>Decisions</div>
+          <ul><li>The export reuses the table's query; my call <span class="ref">(§1)</span>.</li></ul>
+        </div>
+      </div>
+      <!-- the other half of the loop: the chat panel, focus view on (a mock, drawn in HTML). Claude starts when you press Enter; nothing watches the file. -->
+      <div class="cc">
+        <div class="cc-bar"><span>Claude Code</span><span>focus view</span></div>
+        <div class="cc-body">
+          <span class="step"><b>2</b>send <code>&gt;&gt;</code> (Enter)</span>
+          <div class="cc-msg" id="loop-to"><span class="cc-you">&gt;&gt;</span><span class="cc-time">09:33</span></div>
+          <span class="step"><b>3</b>Claude gets to work</span>
+          <div class="cc-tools"><i class="cc-dot"></i>6 tool calls <span class="cc-chev">⌄</span></div>
+          <span class="step"><b>4</b>one line back, with a link</span>
+          <p class="cc-reply">On “yes”: the CSV has data rows only. Details in <span class="cc-link">entry 3</span>.</p>
+        </div>
+      </div>
+      <svg class="loop-arrow" aria-hidden="true"><path id="loop-path" d="" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="6 6" stroke-linecap="round"/><path id="loop-head" d="" fill="var(--accent)"/></svg>
+    </div>
+    <p class="src">Mock-up in a real desk's format.</p>
+  </div></section>
+
+  <!-- 21 · HOT TIP: FOCUS VIEW FOLDS THE CHATTER (animated on page entry; the resting state is the folded end state) -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="A big Claude Code panel stands on the site like a screen. A pile of chat cards, the manager's tool calls, folds down into one row that says 12 tool calls. What is left is the Director's double-arrow message and the manager's one-line answer: slab poured, details in entry 9. The Director, watching beside the panel, relaxes with a coffee.">
+      <rect width="1000" height="560" fill="url(#sky)"/>
+      <rect y="500" width="1000" height="60" fill="#A9CF8B"/>
+      <g class="fold-legs"><rect x="470" y="490" width="16" height="44" fill="#5A6075"/><rect x="796" y="490" width="16" height="44" fill="#5A6075"/></g>
+      <rect class="fold-panel" x="380" y="24" width="520" height="476" rx="18" fill="#1E1E1E" stroke="#3A3A3A" stroke-width="3"/>
+      <path d="M380 62 H900" stroke="#333333" stroke-width="2"/>
+      <text x="404" y="49" font-size="13" font-family="ui-monospace,Menlo,monospace" letter-spacing="2" fill="#8B8B8B">CLAUDE CODE</text>
+      <text x="876" y="49" text-anchor="end" font-size="13" font-family="ui-monospace,Menlo,monospace" letter-spacing="2" fill="#8B8B8B">FOCUS VIEW</text>
+      <rect x="406" y="78" width="468" height="46" rx="12" fill="#2A2A2A" stroke="#3C3C3C" stroke-width="2"/>
+      <text x="428" y="109" font-size="24" font-weight="800" font-family="ui-monospace,Menlo,monospace" fill="#E6E6E6">&gt;&gt;</text>
+      <text x="856" y="107" text-anchor="end" font-size="14" font-family="ui-monospace,Menlo,monospace" fill="#8B8B8B">09:12</text>
+      <g class="fold-row"><circle cx="420" cy="154" r="5" fill="#3FB950"/><text x="434" y="160" font-size="18" fill="#9D9D9D" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">12 tool calls ⌄</text></g>
+      <g class="fold-reply"><text x="408" y="206" font-size="19" fill="#D4D4D4" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">Slab poured. Details in <tspan fill="#4DAAFC" text-decoration="underline">entry 9</tspan>.</text></g>
+      <g class="fold-cards">
+        <use href="#chatb" transform="translate(420 140) rotate(-3)"/><use href="#chatb" transform="translate(540 150) rotate(4)"/><use href="#chatb" transform="translate(660 138) rotate(-2)"/><use href="#chatb" transform="translate(768 152) rotate(5) scale(.95)"/>
+        <use href="#chatb" transform="translate(430 202) rotate(5)"/><use href="#chatb" transform="translate(560 206) rotate(-4)"/><use href="#chatb" transform="translate(690 198) rotate(3)"/>
+        <use href="#chatb" transform="translate(440 262) rotate(-6)"/><use href="#chatb" transform="translate(580 268) rotate(3)"/><use href="#chatb" transform="translate(720 258) rotate(-5)"/>
+        <use href="#chatb" transform="translate(460 326) rotate(4)"/><use href="#chatb" transform="translate(600 332) rotate(-3)"/><use href="#chatb" transform="translate(740 322) rotate(6)"/>
+        <use href="#chatb" transform="translate(480 390) rotate(-4)"/><use href="#chatb" transform="translate(640 396) rotate(5)"/>
+      </g>
+      <use href="#mgr-talk" x="900" y="340" width="90" height="165" style="--sk:#E2AE84;--hr:#4A3426"/>
+      <g class="fold-worry"><use href="#dir-worry" x="110" y="301" width="132" height="242"/></g>
+      <g class="fold-calm"><use href="#dir-mug" x="110" y="301" width="132" height="242"/></g>
+    </svg></figure>
+    <p class="cap">Hot tip: focus view <span class="m">folds the chatter away.</span></p>
+  </div></section>
+
+  <!-- 22 · FOCUS VIEW: THE SETTINGS -->
+  <section class="page"><div class="in gu">
+    <h2>Focus view: the settings</h2>
+    <p class="lede">Two VS Code settings stop the panel jumping.</p>
+    <div class="snip">
+      <pre id="snip-json"><span class="p">{</span>
+  <span class="k">"claudeCode.focusView"</span><span class="p">:</span> <span class="v">true</span><span class="p">,</span>
+  <span class="k">"claudeCode.scrollToBottomOnSend"</span><span class="p">:</span> <span class="v">false</span>
+<span class="p">}</span></pre>
+      <button class="copy" id="copy-json" type="button">Copy</button>
+    </div>
+    <div class="facts">
+      <p><strong>Focus view</strong> folds tool calls into one-line rows.</p>
+      <p><strong>Scroll to bottom on send</strong>, off, stops the jump when you send.</p>
+    </div>
+    <p class="catch">One catch: tool approvals still jump the panel. No setting fixes that.</p>
+    <p class="src">Paste into your user <code>settings.json</code>. Checked on extension 2.1.301.</p>
+  </div></section>
+
+  <!-- 23 · TRY IT: the close (animated on page entry; the resting state shows every light and step) -->
+  <section class="page"><div class="in">
+    <figure class="art"><svg viewBox="0 0 1000 560" role="img" aria-label="At dusk, the Director stands on the hill holding out a rolled-up board marked with the double arrow. Behind, the finished city's windows light up one by one.">
+      <rect width="1000" height="560" fill="url(#sky-dusk)"/>
+      <g fill="#FFFFFF" opacity=".85"><circle cx="300" cy="60" r="2"/><circle cx="420" cy="34" r="1.6"/><circle cx="560" cy="80" r="2"/><circle cx="690" cy="40" r="1.6"/><circle cx="820" cy="70" r="2.2"/><circle cx="930" cy="30" r="1.6"/><circle cx="380" cy="120" r="1.4"/><circle cx="760" cy="130" r="1.4"/></g>
+      <ellipse cx="720" cy="384" rx="440" ry="56" fill="#7E9C83"/>
+      <rect y="376" width="1000" height="184" fill="#7FA37A"/>
+      <use href="#tower-done" transform="translate(420 386) scale(.7)"/>
+      <use href="#house-done" transform="translate(600 386) scale(.5)"/>
+      <use href="#tower-done" transform="translate(700 386) scale(.55)"/>
+      <use href="#tower-done" transform="translate(820 386) scale(.45)"/>
+      <use href="#house-done" transform="translate(940 386) scale(.38)"/>
+      <g class="lite l1"><use href="#tower-lit" transform="translate(420 386) scale(.7)"/></g>
+      <g class="lite l2"><use href="#house-lit" transform="translate(600 386) scale(.5)"/></g>
+      <g class="lite l3"><use href="#tower-lit" transform="translate(700 386) scale(.55)"/></g>
+      <g class="lite l4"><use href="#tower-lit" transform="translate(820 386) scale(.45)"/></g>
+      <g class="lite l5"><use href="#house-lit" transform="translate(940 386) scale(.38)"/></g>
+      <use href="#mini-board" transform="translate(529 392)"/><use href="#mini-board" transform="translate(683 392)"/><use href="#mini-board" transform="translate(801 392)"/>
+      <path d="M330 560 C 420 480, 520 420, 640 394 L 690 394 C 600 430, 520 490, 470 560 Z" fill="#C9BB9A"/>
+      <path d="M402 552 C 470 480, 560 428, 664 398" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="14 12" opacity=".8"/>
+      <path d="M-20 560 L-20 384 C 60 334, 200 322, 300 362 C 360 388, 400 470, 420 560 Z" fill="#6E9F62"/>
+      <use href="#spark" transform="translate(262 236) scale(.7)"/><use href="#spark" transform="translate(70 230) scale(.5)"/>
+      <use href="#dir-scroll" x="84" y="110" width="132" height="242"/>
+    </svg></figure>
+    <ol class="steps3">
+      <li><b>1</b>Add the rule once</li>
+      <li><b>2</b>Write <code>&gt;&gt;</code> where it matters</li>
+      <li><b>3</b>Direct</li>
+    </ol>
+  </div></section>
+
+  <!-- 24 · TRY IT: THE DETAILS, as a new director's starter kit (items drop in on page entry; the resting state is the full kit) -->
+  <section class="page"><div class="in gu">
+    <h2>Try it: the details</h2>
+    <figure class="art kit"><svg viewBox="0 0 1000 560" role="img" aria-label="A new director's starter kit laid out on a tarp, with three numbered steps along one arrow. One, a rolled blueprint tagged ~/.claude/rules/live-desk.md: add the rule (once). Two, a site board in MarkText with Auto Save on, tagged ~/claude-replies: open the board. Three, a pen marked with the double arrow: direct. In a corner, a second blueprint: Codex, untested; append to ~/.codex/AGENTS.md. On the other side, two badges for the Claude Code extras: the hooks, a bell and a whistle, and focus view, folded tool calls.">
+      <rect width="1000" height="560" fill="#CDB58A"/>
+      <rect width="1000" height="70" fill="url(#sky)"/>
+      <rect x="36" y="96" width="928" height="440" rx="22" fill="#F3EAD3"/>
+      <rect x="50" y="110" width="900" height="412" rx="16" fill="none" stroke="#C9A866" stroke-width="2.5" stroke-dasharray="10 8"/>
+      <!-- the Codex copy, small, in the corner; not tried with Codex yet, so it says so -->
+      <g class="kit-drop k0">
+        <rect x="80" y="140" width="96" height="30" rx="15" fill="#6F8FC4"/><ellipse cx="80" cy="155" rx="7" ry="15" fill="#5A7FB8"/><ellipse cx="176" cy="155" rx="7" ry="15" fill="#5A7FB8"/>
+        <text x="198" y="161" font-size="16" class="rnd" fill="#5A6075">Codex: untested; append to</text>
+        <rect x="424" y="140" width="174" height="30" rx="5" fill="#FFFFFF" stroke="#A6ACBC" stroke-width="2"/>
+        <text x="511" y="160" text-anchor="middle" font-size="14" font-family="ui-monospace,Menlo,monospace" fill="#2B2A33">~/.codex/AGENTS.md</text>
+      </g>
+      <!-- the Claude Code extras: the hooks (bell and whistle) and focus view (folded tool calls) -->
+      <g class="kit-drop k4">
+        <text x="836" y="140" text-anchor="middle" font-size="16" class="rnd" fill="#5A6075">Claude Code extras</text>
+        <circle cx="790" cy="190" r="32" fill="#FFFFFF" stroke="#C9A866" stroke-width="2.5"/>
+        <use href="#bell" transform="translate(780 194) scale(.5)"/>
+        <rect x="796" y="182" width="16" height="7" rx="2" fill="#D9A02A"/><path d="M808 182 L816 176 V195 L808 189 Z" fill="#F2B33D"/>
+        <circle cx="882" cy="190" r="32" fill="#FFFFFF" stroke="#C9A866" stroke-width="2.5"/>
+        <rect x="860" y="172" width="44" height="36" rx="6" fill="#1E1E1E"/><circle cx="868" cy="184" r="3" fill="#3FB950"/><path d="M875 184 H896 M866 197 H896" stroke="#9D9D9D" stroke-width="3" stroke-linecap="round"/>
+        <text x="790" y="244" text-anchor="middle" font-size="14" class="rnd" fill="#5A6075">hooks</text>
+        <text x="882" y="244" text-anchor="middle" font-size="14" class="rnd" fill="#5A6075">focus view</text>
+      </g>
+      <!-- 1 · the rules: one file -->
+      <g class="kit-drop k1">
+        <rect x="104" y="270" width="176" height="48" rx="24" fill="#3F6FB6"/><ellipse cx="104" cy="294" rx="10" ry="24" fill="#2E5590"/><ellipse cx="280" cy="294" rx="10" ry="24" fill="#5A8BD0"/>
+        <path d="M130 286 H250 M130 300 H226" stroke="#DCE8F7" stroke-width="3" stroke-linecap="round"/>
+        <path d="M192 318 V334" stroke="#8A6A3A" stroke-width="2"/>
+        <rect x="63" y="334" width="260" height="32" rx="5" fill="#FFFFFF" stroke="#A6ACBC" stroke-width="2"/>
+        <text x="193" y="355" text-anchor="middle" font-size="14" font-family="ui-monospace,Menlo,monospace" fill="#2B2A33">~/.claude/rules/live-desk.md</text>
+      </g>
+      <!-- 2 · the board: MarkText with Auto Save on -->
+      <g class="kit-drop k2">
+        <rect x="430" y="300" width="10" height="70" fill="#7A4E2C"/><rect x="560" y="300" width="10" height="70" fill="#7A4E2C"/>
+        <rect x="400" y="196" width="200" height="140" rx="10" fill="#FFFDF6" stroke="#7A4E2C" stroke-width="4"/>
+        <path d="M402 226 V206 Q402 198 410 198 H590 Q598 198 598 206 V226 Z" fill="#8A5A33"/>
+        <text x="500" y="219" text-anchor="middle" font-size="15" class="rnd" fill="#FFF6E4">MarkText</text>
+        <path d="M418 248 H560 M418 266 H530 M418 284 H548" stroke="#C9B994" stroke-width="5" stroke-linecap="round"/>
+        <text x="418" y="319" font-size="14" class="rnd" fill="#5A6075">Auto Save</text>
+        <rect x="532" y="304" width="40" height="20" rx="10" fill="#3FB950"/><circle cx="562" cy="314" r="7" fill="#FFFFFF"/>
+        <rect x="406" y="378" width="188" height="28" rx="5" fill="#FFFFFF" stroke="#A6ACBC" stroke-width="2"/>
+        <text x="500" y="397" text-anchor="middle" font-size="14" font-family="ui-monospace,Menlo,monospace" fill="#2B2A33">~/claude-replies</text>
+      </g>
+      <!-- 3 · the >> pen -->
+      <g class="kit-drop k3"><g class="kit-wiggle">
+        <g transform="rotate(-28 790 330)">
+          <rect x="700" y="312" width="150" height="36" rx="10" fill="#4A50D0"/>
+          <rect x="836" y="312" width="38" height="36" rx="8" fill="#2B2F86"/>
+          <path d="M700 314 L672 330 L700 346 Z" fill="#E6E3DA"/><path d="M680 326 L672 330 L680 334 Z" fill="#2B2A33"/>
+          <use href="#chev" stroke="#F2B33D" stroke-width="5" transform="translate(772 330) scale(1.3)"/>
+        </g>
+      </g></g>
+      <!-- the arrow and the three steps -->
+      <path d="M150 466 H836" stroke="#4048C4" stroke-width="3" stroke-dasharray="8 8"/>
+      <path d="M836 458 L852 466 L836 474 Z" fill="#4048C4"/>
+      <g class="rnd" font-size="17">
+        <rect x="110" y="450" width="212" height="32" rx="16" fill="#E7E8FB"/><circle cx="128" cy="466" r="12" fill="#4048C4"/><text x="128" y="472" text-anchor="middle" font-size="15" fill="#FFFFFF">1</text><text x="148" y="472" fill="#4048C4">add the rule (once)</text>
+        <rect x="414" y="450" width="176" height="32" rx="16" fill="#E7E8FB"/><circle cx="432" cy="466" r="12" fill="#4048C4"/><text x="432" y="472" text-anchor="middle" font-size="15" fill="#FFFFFF">2</text><text x="452" y="472" fill="#4048C4">open the board</text>
+        <rect x="726" y="450" width="96" height="32" rx="16" fill="#E7E8FB"/><circle cx="744" cy="466" r="12" fill="#4048C4"/><text x="744" y="472" text-anchor="middle" font-size="15" fill="#FFFFFF">3</text><text x="764" y="472" fill="#4048C4">direct</text>
+      </g>
+    </svg></figure>
+    <!-- phones only: the paths are too small to read inside the picture there -->
+    <p class="src kit-paths"><code>~/.claude/rules/live-desk.md</code> · <code>~/.codex/AGENTS.md</code> · <code>~/claude-replies</code></p>
+    <!-- the allow rules; without them every write to the board stops for an approval. They drop in last. -->
+    <p class="src kit-setup">Setup: <a href="https://github.com/ngnnah/I-And-AI/tree/main/projects/live-desk">github.com/ngnnah/I-And-AI/projects/live-desk</a><span class="kit-allow kit-drop k5">Allow: <code>"Edit(~/claude-replies/**)"</code>, <code>"Bash(open -a MarkText ~/claude-replies/*)"</code>, <code>"Bash(date:*)"</code></span></p>
+  </div></section>
+</main>
+
+<script>
+  document.getElementById('copy-json').addEventListener('click',e=>{
+    const btn=e.currentTarget, text=document.getElementById('snip-json').textContent;
+    const done=()=>{btn.textContent='Copied';setTimeout(()=>{btn.textContent='Copy';},1600);};
+    const pick=()=>{const r=document.createRange();r.selectNodeContents(document.getElementById('snip-json'));const s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selected';};
+    try{navigator.clipboard.writeText(text).then(done,pick);}catch(err){pick();}
+  });
+
+  // Page 17: draw the arrow from the board's ">> yes" to the panel's ">>" message. Hidden pages keep their layout, so this can measure any time.
+  function drawLoop(){
+    const box=document.getElementById('loop'), from=document.getElementById('loop-from'), to=document.getElementById('loop-to');
+    if(!box||!from||!to) return;
+    const r=box.getBoundingClientRect(), a=from.getBoundingClientRect(), b=to.getBoundingClientRect();
+    const x1=a.right-r.left+8, y1=a.top+a.height/2-r.top, x2=b.left-r.left-3, y2=b.top+b.height/2-r.top;
+    if(x2-x1<40){document.getElementById('loop-path').setAttribute('d','');document.getElementById('loop-head').setAttribute('d','');return;}
+    const k=Math.min(160,(x2-x1)/2);
+    document.getElementById('loop-path').setAttribute('d',`M${x1} ${y1} C ${x1+k} ${y1}, ${x2-k} ${y2}, ${x2-6} ${y2}`);
+    document.getElementById('loop-head').setAttribute('d',`M${x2} ${y2} L${x2-11} ${y2-6} L${x2-11} ${y2+6} Z`);
+  }
+  addEventListener('resize',drawLoop);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(drawLoop);
+  drawLoop();
+
+  const pages=[...document.querySelectorAll('.page')];
+  const prog=document.getElementById('progress'), count=document.getElementById('count');
+  const jumpEl=document.getElementById('jump');
+
+  // Page 4: on entry, the one Director runs the track three times, each lap quicker than the last. They ease out of every gate,
+  // climb slowly to the tower and hurry downhill, and stop at each gate while three question bubbles pop and the counter ticks.
+  // The resting state (all 27 bubbles, counter 27, Director at the start) is in the page, so a still frame or reduced motion shows it.
+  const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
+  const LAPS=[{run:3.4,stop:.65},{run:2.6,stop:.5},{run:2,stop:.38}];  // seconds per lap on the move, and per gate stop
+  const PACE=[1,1.35,.8,1];  // time per unit of track: to the foundation, uphill to the tower, downhill to the house, back to the start
+  let loopGen=0;
+  function stopLoop(){loopGen++;}
+  function runLoop(){
+    const gen=++loopGen;
+    const n=document.getElementById('ci-n'), dir=document.getElementById('p4-dir'), track=document.getElementById('p4-track');
+    if(!n||!dir||!track) return;
+    const bubs=[...track.ownerSVGElement.querySelectorAll('.qb')];
+    const think=document.getElementById('p4-think'), cloud=document.getElementById('p4-cloud'), boom=document.getElementById('p4-boom');
+    const swell=(k,x=1)=>{cloud.style.transform=`translate(-70px,-140px) scale(${((.4+1.15*k/27)*x).toFixed(3)})`;};
+    const rest=()=>{bubs.forEach(b=>b.classList.remove('hid'));n.textContent='27';dir.setAttribute('transform','translate(470 540)');think.style.display='none';boom.style.display='';};
+    if(reduceMotion.matches){rest();return;}
+    // the gates sit at the ends of the track's first three curves; measure each prefix of the path
+    const d=track.getAttribute('d').replace(/\s*Z\s*$/,''), parts=d.split('C');
+    const probe=document.createElementNS('http://www.w3.org/2000/svg','path');
+    track.parentNode.appendChild(probe);
+    const ends=parts.slice(1).map((_,i)=>{probe.setAttribute('d',parts.slice(0,i+2).join('C'));return probe.getTotalLength();});
+    probe.remove();
+    const T=ends[3], segs=ends.map((e,i)=>e-(i?ends[i-1]:0)), weight=segs.reduce((a,s,i)=>a+s*PACE[i],0);
+    const dur=(L,j)=>LAPS[L].run*segs[j]*PACE[j]/weight;
+    const moves=[], pops=[]; let t=0, pos=0;
+    const go=(to,secs)=>{moves.push({t0:t,t1:t+secs,a:pos,b:to});t+=secs;pos=to;};
+    LAPS.forEach((lap,L)=>{
+      for(let i=0;i<3;i++){
+        // the leg from the house runs back past the start into the next lap without stopping
+        go(L*T+ends[i],i?dur(L,i):(L?dur(L-1,3):0)+dur(L,0));
+        for(let k=0;k<3;k++) pops.push({t:t+lap.stop*(2*k+1)/6,b:(3*L+k)*3+i});
+        go(pos,lap.stop);
+      }
+    });
+    go(LAPS.length*T,dur(LAPS.length-1,3));
+    bubs.forEach(b=>b.classList.add('hid')); n.textContent='0';
+    think.style.display=''; boom.style.display='none'; boom.classList.remove('boom'); swell(0);
+    let popped=0, start=null;
+    const frame=now=>{
+      if(gen!==loopGen) return;
+      if(start===null) start=now;
+      const s=(now-start)/1000;
+      while(popped<pops.length&&pops[popped].t<=s){bubs[pops[popped].b]?.classList.remove('hid');popped++;n.textContent=String(popped);swell(popped);}
+      // the last lap ends: the bubble swells once more, then blows up
+      if(s>=t){swell(27,1.35);setTimeout(()=>{if(gen!==loopGen)return;rest();void boom.getBBox();boom.classList.add('boom');},380);return;}
+      const m=moves.find(m=>s<m.t1);
+      const u=Math.min(1,Math.max(0,(s-m.t0)/(m.t1-m.t0))), len=m.a+(m.b-m.a)*(.5-.5*Math.cos(Math.PI*u));
+      const p=track.getPointAtLength(len%T), hop=m.a===m.b?0:-Math.abs(Math.sin(len/16))*6;
+      dir.setAttribute('transform',`translate(${p.x.toFixed(1)} ${(p.y+hop).toFixed(1)})`);
+      requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  }
+
+  let idx=0, jumpBuf='', jumpTimer=null;
+  function show(n){
+    idx=Math.max(0,Math.min(pages.length-1,n));
+    if(pages[idx].contains(document.getElementById('ci-n'))) runLoop(); else stopLoop();
+    pages.forEach((p,i)=>{const on=i===idx;p.classList.toggle('cur',on);p.setAttribute('aria-hidden',on?'false':'true');});
+    prog.style.width=((idx+1)/pages.length*100)+'%';
+    count.textContent=(idx+1)+' / '+pages.length;
+    try{history.replaceState(null,'','#'+(idx+1));}catch(e){}
+  }
+  function commitJump(){clearTimeout(jumpTimer);if(jumpBuf){const n=parseInt(jumpBuf,10);if(n>=1&&n<=pages.length)show(n-1);}jumpBuf='';jumpEl.style.opacity='0';}
+  addEventListener('keydown',e=>{
+    if(e.metaKey||e.ctrlKey||e.altKey) return;
+    if(e.target.closest&&e.target.closest('button')&&(e.key===' '||e.key==='Enter')) return;
+    if(/^[0-9]$/.test(e.key)){e.preventDefault();jumpBuf+=e.key;jumpEl.textContent='▶ '+jumpBuf;jumpEl.style.opacity='1';clearTimeout(jumpTimer);
+      if(parseInt(jumpBuf,10)*10>pages.length)commitJump();else jumpTimer=setTimeout(commitJump,650);return;}
+    if(e.key==='Enter'&&jumpBuf){e.preventDefault();commitJump();return;}
+    if(e.key==='Escape'){jumpBuf='';jumpEl.style.opacity='0';}
+    if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();show(idx+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(idx-1);}
+    if(e.key==='Home'){e.preventDefault();show(0);} if(e.key==='End'){e.preventDefault();show(pages.length-1);}
+  });
+  document.querySelectorAll('.art').forEach(a=>a.addEventListener('click',()=>show(idx+1)));
+  function fromHash(){const m=/^#(\d+)$/.exec(location.hash||'');return m?parseInt(m[1],10)-1:null;}
+  addEventListener('hashchange',()=>{const n=fromHash();if(n!==null&&n!==idx)show(n);});
+  show(fromHash() ?? 0);
+</script>
