@@ -22,7 +22,7 @@ Working out how to share this setup with the team.
 - Reply file and focus view set up (§1).
 
 ## Log
-### 2 · 10-21 17:36 · Folder moved
+### @2 · 10-21 17:36 · Folder moved
 Which one do you want? Answer with a `>>` line under this.
 - >> you run open
 ```
@@ -41,13 +41,15 @@ The desk keeps all of that in one file that stays where you left it.
    mkdir -p ~/.claude/rules && pbpaste > ~/.claude/rules/live-desk.md
    ```
 
-2. **MarkText.** Install [MarkText](https://github.com/marktext/marktext/releases), open the `~/claude-replies` folder, and turn on Auto Save in Preferences. Claude reads what's on disk, so an unsaved answer is invisible to it.
+2. **MarkText.** Install [MarkText](https://github.com/marktext/marktext/releases), open the `~/claude-replies` folder (and `~/claude-replies-personal`, if you keep personal desks), and turn on Auto Save in Preferences. Claude reads what's on disk, so an unsaved answer is invisible to it.
 
 3. **Allow rules.** Add these to `permissions.allow` in `~/.claude/settings.json`, so writing the desk, opening it and checking the time never stop for an approval:
 
    ```json
    "Edit(~/claude-replies/**)",
+   "Edit(~/claude-replies-personal/**)",
    "Bash(open -a MarkText ~/claude-replies/*)",
+   "Bash(open -a MarkText ~/claude-replies-personal/*)",
    "Bash(date:*)",
    ```
 
@@ -60,7 +62,7 @@ The desk keeps all of that in one file that stays where you left it.
 "claudeCode.scrollToBottomOnSend": false,
 ```
 
-**The hook** nudges Claude when Status goes quiet for 10 tool calls, and reminds it to hand off after about 15 turns or 250k tokens. It needs `jq`. Copy [`desk-nudge.sh`](desk-nudge.sh), then:
+**The hook** nudges Claude when Status goes quiet for 10 tool calls, and after about 15 turns or 400k tokens reminds it to ask you about a fresh session. It needs `jq`. Copy [`desk-nudge.sh`](desk-nudge.sh), then:
 
 ```bash
 mkdir -p ~/.claude/hooks && pbpaste > ~/.claude/hooks/desk-nudge.sh && chmod +x ~/.claude/hooks/desk-nudge.sh
@@ -81,8 +83,10 @@ Then merge this into the `"hooks"` object in `~/.claude/settings.json`:
 
 - Answer with `>>`, on its own line under the question or at the end of the question's line: `- Push it? >> yes`.
 - Then send `>>` in chat. It's also how you tell Claude a run or step is done. A single `>` still works in the file.
+- An answer Claude has handled ends in ` ✓§<n>`, the entry that handled it. An answer without the tag is still open.
 - Add a todo anytime, in chat or in the file. It goes under Next and stays there until it's done.
-- When a session gets long, Claude writes a Handoff entry. It opens with a resume line, `Resume from the live desk ~/claude-replies/<file>, handoff §<n>`, that you paste into a fresh session.
+- When a session gets long, Claude asks whether to continue in a fresh one. Say yes, and it writes a Handoff entry that opens with a resume line, `Resume from the live desk ~/claude-replies/<file>, handoff §<n>`, to paste into the new session.
+- Personal work keeps its desks in `~/claude-replies-personal`, so a work sync never sees them.
 
 ## Codex
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Live desk nudges, one script for two hook events. Both stay silent until the
-# session first writes its desk (~/claude-replies/*.md), so sessions without a
+# session first writes its desk (~/claude-replies/*.md, or
+# ~/claude-replies-personal/*.md for personal work), so sessions without a
 # desk are never nudged, and both skip subagents (agent_id set), since
 # subagents don't write the desk.
 #
@@ -10,14 +11,14 @@
 #
 # UserPromptSubmit: counts the session's prompts and reads the context size
 # from the transcript's last assistant usage. Once turns reach HANDOFF_TURNS or
-# context reaches HANDOFF_TOKENS, it tells Claude to suggest a fresh session and
-# write the Handoff entry at the next natural break, and shows the user a
-# systemMessage. It fires at the first crossing, then again after REFIRE_TURNS
-# more turns or REFIRE_TOKENS more tokens. A missing or unreadable transcript
-# keeps it silent.
+# context reaches HANDOFF_TOKENS, it tells Claude to ask the user at the next
+# natural break whether to continue in a fresh session, and to write the
+# Handoff entry only after they agree, and shows the user a systemMessage. It
+# fires at the first crossing, then again after REFIRE_TURNS more turns or
+# REFIRE_TOKENS more tokens. A missing or unreadable transcript keeps it silent.
 LIMIT="${DESK_NUDGE_LIMIT:-10}"
 HANDOFF_TURNS="${DESK_HANDOFF_TURNS:-15}"
-HANDOFF_TOKENS="${DESK_HANDOFF_TOKENS:-250000}"
+HANDOFF_TOKENS="${DESK_HANDOFF_TOKENS:-400000}"
 REFIRE_TURNS=5
 REFIRE_TOKENS=100000
 STATE_DIR="${TMPDIR:-/tmp}/claude-desk-nudge"
@@ -64,7 +65,7 @@ if [ "$event" = UserPromptSubmit ]; then
     systemMessage: "Live desk: \($n) turns, ~\($k)k tokens. Time for a fresh session soon.",
     hookSpecificOutput: {
       hookEventName: "UserPromptSubmit",
-      additionalContext: "Live desk: this session has run \($n) turns and about \($k)k tokens of context. Per the live desk rules, at the next natural break (work pushed, no agent running, nothing half-done), suggest continuing in a fresh session, and first write the Handoff entry in \($f) with the resume line in Status → Now."
+      additionalContext: "Live desk: this session has run \($n) turns and about \($k)k tokens of context. Per the live desk rules, at the next natural break (work pushed, no agent running, nothing half-done), ask the user whether to continue in a fresh session. Only after they agree, write the Handoff entry in \($f) with the resume line in Status → Now."
     }
   }'
   exit 0
@@ -72,7 +73,8 @@ fi
 
 # A desk write arms the counter (first time) and resets it.
 case "$tool:$path" in
-  Edit:"$HOME"/claude-replies/*.md | Write:"$HOME"/claude-replies/*.md)
+  Edit:"$HOME"/claude-replies/*.md | Write:"$HOME"/claude-replies/*.md | \
+    Edit:"$HOME"/claude-replies-personal/*.md | Write:"$HOME"/claude-replies-personal/*.md)
     printf '0\t%s\n' "$path" >"$state"
     exit 0
     ;;
