@@ -96,4 +96,4 @@ Append the same text to `~/.codex/AGENTS.md`. I haven't tested that yet. Focus v
 
 ## The deck
 
-[`director-deck.html`](director-deck.html) is a picture-book deck about the workflow. GitHub shows HTML as source, so open it in a browser from a clone of the repo, since it loads its photos from `faces/`. Or read [`offline/director-storybook.pdf`](offline/director-storybook.pdf) right on GitHub; [`offline/director-storybook.html`](offline/director-storybook.html) is the same pages as one self-contained file.
+[`director-deck.html`](director-deck.html) is a picture-book deck about the workflow, live at [ngnnah.github.io/I-And-AI/projects/live-desk](https://ngnnah.github.io/I-And-AI/projects/live-desk/). Or read [`offline/director-storybook.pdf`](offline/director-storybook.pdf) right on GitHub; [`offline/director-storybook.html`](offline/director-storybook.html) is the same pages as one self-contained file.
