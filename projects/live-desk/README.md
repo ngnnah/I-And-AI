@@ -6,7 +6,7 @@ My Claude Code setup, on trial since 21 Oct 2026. macOS and the VS Code extensio
 
 Claude writes each session's replies to a markdown file in `~/claude-replies`, the session's live desk. A Status block on top says what's now, what's next, what's decided and what's done, and a log of every reply sits below.
 
-I read it in MarkText and answer inline, right next to the point I'm answering. In chat, Claude posts one line with a link to the new log entry.
+I read it in Obsidian and answer inline, right next to the point I'm answering. In chat, Claude posts one line with a link to the new log entry.
 
 A sample desk, `~/claude-replies/2026-10-21-dotfiles-reply-file-setup.md`:
 
@@ -41,15 +41,15 @@ The desk keeps all of that in one file that stays where you left it.
    mkdir -p ~/.claude/rules && pbpaste > ~/.claude/rules/live-desk.md
    ```
 
-2. **MarkText.** Install [MarkText](https://github.com/marktext/marktext/releases), open the `~/claude-replies` folder (and `~/claude-replies-personal`, if you keep personal desks), and turn on Auto Save in Preferences. Claude reads what's on disk, so an unsaved answer is invisible to it.
+2. **Obsidian.** Install [Obsidian](https://obsidian.md) and open the `~/claude-replies` folder as a vault once ("Open folder as vault"; the same for `~/claude-replies-personal`, if you keep personal desks). From then on, the rules' `open -a Obsidian` command opens each desk as a tab in that vault. Obsidian saves as you type, and Claude reads what's on disk, so it sees each answer as soon as you write it. Any markdown editor that saves on its own still works; change the `open -a` command and the allow rules to match.
 
 3. **Allow rules.** Add these to `permissions.allow` in `~/.claude/settings.json`, so writing the desk, opening it and checking the time never stop for an approval:
 
    ```json
    "Edit(~/claude-replies/**)",
    "Edit(~/claude-replies-personal/**)",
-   "Bash(open -a MarkText ~/claude-replies/*)",
-   "Bash(open -a MarkText ~/claude-replies-personal/*)",
+   "Bash(open -a Obsidian ~/claude-replies/*)",
+   "Bash(open -a Obsidian ~/claude-replies-personal/*)",
    "Bash(date:*)",
    ```
 
