@@ -1,9 +1,19 @@
 #!/usr/bin/env bash
-# Live desk nudges, one script for two hook events. Both stay silent until the
-# session first writes its desk (~/claude-replies/*.md, or
-# ~/claude-replies-personal/*.md for personal work), so sessions without a
-# desk are never nudged, and both skip subagents (agent_id set), since
-# subagents don't write the desk.
+# Live desk hook, one script for three hook events: a guard on desk writes and
+# two nudges. A desk is a .md file directly in ~/claude-replies or
+# ~/claude-replies-personal (personal work), by that path or the folder it
+# links to.
+#
+# PreToolUse (Edit, Write, MultiEdit): refuses a desk write whose new text
+# looks like a key, token, password, private key or credentialed URL, or holds
+# an email address outside EMAIL_DOMAINS. It exits 2 with the kind on stderr,
+# which Claude Code hands back to Claude, and never echoes the match. It checks
+# every write, subagents included, and fails open: unreadable input or a
+# missing jq or perl lets the write through.
+#
+# The two nudges stay silent until the session first writes its desk, so
+# sessions without a desk are never nudged, and both skip subagents (agent_id
+# set), since subagents don't write the desk.
 #
 # PostToolUse (every tool): after LIMIT main-session tool calls without an
 # Edit/Write to the desk, it puts a reminder to update Status into Claude's
@@ -22,11 +32,57 @@ HANDOFF_TOKENS="${DESK_HANDOFF_TOKENS:-400000}"
 REFIRE_TURNS=5
 REFIRE_TOKENS=100000
 STATE_DIR="${TMPDIR:-/tmp}/claude-desk-nudge"
+# Email domains the guard lets through (git remotes, commit trailers); add your
+# own mail domain here.
+EMAIL_DOMAINS="${DESK_GUARD_EMAIL_DOMAINS:-github.com users.noreply.github.com anthropic.com example.com}"
 
 input="$(cat)"
 IFS=$'\x1f' read -r session agent tool path event transcript < <(
-  jq -r '[.session_id, .agent_id, .tool_name, .tool_input.file_path, .hook_event_name, .transcript_path] | map(. // "") | join("\u001f")' <<<"$input"
+  jq -r '[.session_id, .agent_id, .tool_name, .tool_input.file_path, .hook_event_name, .transcript_path] | map(. // "") | join("\u001f")' <<<"$input" 2>/dev/null
 )
+
+is_desk() { # path
+  case "$1" in *.md) ;; *) return 1 ;; esac
+  local dir="${1%/*}" real root
+  real=$(CDPATH= cd -P -- "$dir" 2>/dev/null && pwd -P)
+  for root in "$HOME/claude-replies" "$HOME/claude-replies-personal"; do
+    [ "$dir" = "$root" ] && return 0
+    [ -n "$real" ] && [ "$real" = "$(CDPATH= cd -P -- "$root" 2>/dev/null && pwd -P)" ] && return 0
+  done
+  return 1
+}
+
+if [ "$event" = PreToolUse ]; then
+  case "$tool" in Edit | Write | MultiEdit) ;; *) exit 0 ;; esac
+  is_desk "$path" || exit 0
+  # NOTE: macOS grep has no -P, so the patterns run in perl, which macOS ships.
+  # Only the new text is scanned: Edit's new_string, Write's content,
+  # MultiEdit's edits[].new_string.
+  kinds=$(jq -r '[.tool_input.new_string, .tool_input.content, (.tool_input.edits // [] | .[]? | .new_string)]
+    | map(select(type == "string")) | join("\n")' <<<"$input" 2>/dev/null |
+    DOMAINS="$EMAIL_DOMAINS" perl -0777 -ne '
+      my @k;
+      push @k, "an AWS access key id" if /\b(?:AKIA|ASIA)[0-9A-Z]{16}/;
+      push @k, "a GitHub token" if /\bgh[pousr]_[A-Za-z0-9]{30,}|\bgithub_pat_[A-Za-z0-9_]{20,}/;
+      push @k, "a Slack token" if /\bxox[abprs]-[A-Za-z0-9-]{10,}/;
+      push @k, "an Anthropic or OpenAI API key" if /\bsk-(?:ant-)?[A-Za-z0-9_-]{20,}/;
+      push @k, "a private key block" if /-----BEGIN [A-Z ]*PRIVATE KEY-----/;
+      push @k, "credentials in a URL" if m{[a-z][a-z0-9+.-]*://[^/\s:@]+:[^/\s@]+@};
+      push @k, "a password, secret or token assignment"
+        if /(?:password|passwd|secret|api[_-]?key|token)["\x27]?\s*[:=]\s*\S{6,}/i;
+      my %ok = map { lc($_) => 1 } split " ", $ENV{DOMAINS};
+      while (/[A-Za-z0-9._%+-]+@((?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,})/g) {
+        next if $ok{lc $1};
+        push @k, "an email address";
+        last;
+      }
+      print @k > 1 ? join(", ", @k[0 .. $#k - 1]) . " and $k[-1]" : @k;
+    ' 2>/dev/null)
+  [ -n "$kinds" ] || exit 0
+  echo "Live desk guard: this desk write looks like it contains $kinds. Desks hold working notes only; leave it out or describe it (counts, table names, where it lives)." >&2
+  exit 2
+fi
+
 [ -n "$session" ] && [ -z "$agent" ] || exit 0
 
 mkdir -p "$STATE_DIR"

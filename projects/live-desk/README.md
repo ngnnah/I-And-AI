@@ -62,7 +62,7 @@ The desk keeps all of that in one file that stays where you left it.
 "claudeCode.scrollToBottomOnSend": false,
 ```
 
-**The hook** nudges Claude when Status goes quiet for 10 tool calls, and after about 15 turns or 400k tokens reminds it to ask you about a fresh session. It needs `jq`. Copy [`desk-nudge.sh`](desk-nudge.sh), then:
+**The hook** nudges Claude when Status goes quiet for 10 tool calls, and after about 15 turns or 400k tokens reminds it to ask you about a fresh session. It also refuses a desk write that looks like a key, token or password, or holds an email address; add your own mail domain to `EMAIL_DOMAINS` at the top of the script. It needs `jq` and `perl`, which macOS ships. Copy [`desk-nudge.sh`](desk-nudge.sh), then:
 
 ```bash
 mkdir -p ~/.claude/hooks && pbpaste > ~/.claude/hooks/desk-nudge.sh && chmod +x ~/.claude/hooks/desk-nudge.sh
@@ -76,6 +76,9 @@ Then merge this into the `"hooks"` object in `~/.claude/settings.json`:
 ],
 "UserPromptSubmit": [
   {"hooks": [{"type": "command", "command": "~/.claude/hooks/desk-nudge.sh", "timeout": 5}]}
+],
+"PreToolUse": [
+  {"matcher": "Edit|Write|MultiEdit", "hooks": [{"type": "command", "command": "~/.claude/hooks/desk-nudge.sh", "timeout": 5}]}
 ]
 ```
 
@@ -95,7 +98,7 @@ Append the same text to `~/.codex/AGENTS.md`. I haven't tested that yet. Focus v
 ## Limitations
 
 - It's a trial on one person's setup.
-- Nothing enforces the rules, and the hook only nudges.
+- The hook enforces one rule, keeping keys and email addresses out of a desk, and it can't spot query rows or names. Nothing enforces the rest.
 - Tool approvals still pull the VS Code panel to the bottom, and `open -a` is macOS-only.
 
 ## The deck
