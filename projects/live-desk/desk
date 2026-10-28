@@ -157,7 +157,7 @@ def cmd_check(args: argparse.Namespace) -> None:
             if name not in sections and re.match(rf"### {name}\b", text):
                 sections[name] = no
                 current = name
-        if current == "Next" and re.match(r"\s*[-*+] \[[xX]\] Yours:", text):
+        if current == "Next" and re.match(r"\s*[-*+] \[[xX]\] Yours\b", text):
             ticked.append(f"{no}:{text}")
     out.append(f"ticked Yours steps: {len(ticked) or 'none'}")
     out += ticked
