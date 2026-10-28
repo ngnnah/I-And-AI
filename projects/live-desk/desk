@@ -6,9 +6,10 @@ turn, get the time, run the rules' open-answer grep and look up line numbers in
 its desk. Chained into one shell command, those match no allow rule, so each
 turn stopped for an approval. This script does them as one allow-listed call:
 
-    desk check <file>      time, open answers, Status's line numbers, last entry
+    desk check <file>      time, open answers, ticked Yours steps, Status's line numbers, last entry
     desk line <file> <n>   line number of entry n
     desk new <topic> ...   create a desk and open it in Obsidian
+    desk open <file>       show a desk in Obsidian: its open tab, else a new tab
 
 Writes to an existing desk stay on the Edit tool, never this script: Edit
 refuses a write when the file changed since Claude read it, which catches an
@@ -21,21 +22,41 @@ doesn't exist yet.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import quote
 
 # Desk-name aliases for repo folders, for short desk names: {"my-long-repo": "MLR"}
 # names my-long-repo's desks 2026-10-28-MLR-<topic>.md. A folder not listed keeps
 # its own name. If you add any, name them in the rules' first bullet too.
 REPO_ALIASES = {}
 
+# Obsidian's own CLI (1.12+), on when Settings > General > Advanced > Command
+# line interface is. DESK_OBSIDIAN_CLI points elsewhere, for a test stub.
+OBSIDIAN_CLI = os.environ.get("DESK_OBSIDIAN_CLI") or "/Applications/Obsidian.app/Contents/MacOS/obsidian-cli"
+
+# Runs inside Obsidian through its CLI: switch to the tab already showing the
+# desk, else open it in a new tab. getViewState() also sees tabs Obsidian hasn't
+# loaded yet, and the wait covers a desk created a moment ago that the vault
+# hasn't indexed.
+SHOW_DESK_JS = (
+    "(async () => {{ const path = {path}, ws = app.workspace; let leaf = null;"
+    " ws.iterateAllLeaves(l => {{ if (!leaf && l.getViewState().state?.file === path) leaf = l; }});"
+    " if (leaf) {{ ws.setActiveLeaf(leaf, {{ focus: true }}); await ws.revealLeaf(leaf); return 'switched'; }}"
+    " let file = app.vault.getFileByPath(path);"
+    " for (let i = 0; !file && i < 30; i++) {{ await sleep(100); file = app.vault.getFileByPath(path); }}"
+    " if (!file) return 'missing';"
+    " await ws.getLeaf('tab').openFile(file, {{ active: true }}); return 'opened'; }})()"
+)
+
 # NOTE: copied verbatim from the rules' "Find my open answers" block, which stays
 # the definition; change the two together.
-OPEN_ANSWER_PATTERN = r"^[[:space:]]*([-*+]|[0-9]+\.)?[[:space:]]*>[^✓]*$|(^|[^`])>>[^✓]*$"
+OPEN_ANSWER_PATTERN = r"(^|[^`])>>[^✓]*$"
 
 STATUS_SECTIONS = ("Now", "Open questions", "Next", "Decisions", "Done")
 SKELETON = """# Live desk
@@ -43,7 +64,8 @@ SKELETON = """# Live desk
 ## Status · updated {stamp}
 
 ### Now
-{now}
+> [!info] Working
+> {now}
 
 ### Open questions
 None.
@@ -114,7 +136,7 @@ def entries(lines: list[str]) -> list[tuple[int, int, bool]]:
 
 
 def cmd_check(args: argparse.Namespace) -> None:
-    """Print the time, open answers, Status's line numbers and the last entry."""
+    """Print the time, open answers, ticked Yours steps, Status's line numbers and the last entry."""
     lines = read_lines(args.file)
     out = [f"now: {stamp()}"]
     answers = open_answers(args.file)
@@ -122,16 +144,23 @@ def cmd_check(args: argparse.Namespace) -> None:
     out += answers
 
     status = log = None
-    sections = {}
+    sections, ticked, current = {}, [], None
     for no, text in headings(lines):
         if text.startswith("## Log"):
             log = no
             break
         if status is None and text.startswith("## Status"):
             status = f"line {no} {text[len('## Status'):].strip()}".rstrip()
+        if text.startswith("### "):
+            current = None
         for name in STATUS_SECTIONS:
             if name not in sections and re.match(rf"### {name}\b", text):
                 sections[name] = no
+                current = name
+        if current == "Next" and re.match(r"\s*[-*+] \[[xX]\] Yours:", text):
+            ticked.append(f"{no}:{text}")
+    out.append(f"ticked Yours steps: {len(ticked) or 'none'}")
+    out += ticked
     out.append(f"status: {status or 'missing'}")
     parts = [f"{n} {sections.get(n, 'missing')}" for n in STATUS_SECTIONS]
     out.append("sections: " + ", ".join(parts + [f"Log {log or 'missing'}"]))
@@ -193,10 +222,79 @@ def cmd_new(args: argparse.Namespace) -> None:
     except FileExistsError:
         die(f"{path} already exists; continue it with the Edit tool")
     if not args.no_open:
-        opened = subprocess.run(["open", "-a", "Obsidian", str(path)], capture_output=True)
-        if opened.returncode != 0:
-            print("desk: created, but open -a Obsidian failed", file=sys.stderr)
+        try:
+            show_in_obsidian(path)
+        except SystemExit:
+            print("desk: created, but not opened in Obsidian", file=sys.stderr)
     print(path)
+
+
+def vault_of(path: Path) -> Path:
+    """The Obsidian vault holding the desk: the nearest folder with .obsidian."""
+    # WHY: the desk folder may be a symlink into the vault, so the vault is
+    # found from the resolved path.
+    for folder in path.resolve().parents:
+        if (folder / ".obsidian").is_dir():
+            return folder
+    die(f"{path} is not in an Obsidian vault")
+
+
+def open_tabs(vault: Path) -> set[str]:
+    """Vault paths of the files in the vault's tabs, from Obsidian's last saved layout."""
+    try:
+        layout = json.loads((vault / ".obsidian" / "workspace.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return set()
+    files, stack = set(), [layout.get("main", {})]
+    while stack:
+        node = stack.pop()
+        if node.get("type") == "leaf":
+            files.add(node.get("state", {}).get("state", {}).get("file"))
+        stack += node.get("children", [])
+    return files
+
+
+def show_in_obsidian(path: Path) -> str:
+    """Show the desk in Obsidian without replacing the tab in front; return what happened."""
+    vault = vault_of(path)
+    rel = path.resolve().relative_to(vault).as_posix()
+    js = SHOW_DESK_JS.format(path=json.dumps(rel))
+    try:
+        run = subprocess.run(
+            [OBSIDIAN_CLI, f"vault={vault.name}", "eval", f"code={js}"],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        result = run.stdout.strip().splitlines()[-1:] or [""]
+    except (OSError, subprocess.TimeoutExpired):
+        result = [""]
+    if result[0] == "=> missing":
+        die(f"Obsidian has no {rel} in the {vault.name} vault")
+    if result[0] in ("=> switched", "=> opened"):
+        subprocess.run(["open", "-a", "Obsidian"], capture_output=True)
+        return "switched to its tab" if result[0] == "=> switched" else "opened in a new tab"
+    # The CLI is off, or Obsidian didn't answer. `open -a Obsidian <file>` and
+    # a plain obsidian://open both load the desk into the tab in front,
+    # replacing it, so: leave an open desk where it is, else a new tab.
+    if rel in open_tabs(vault):
+        subprocess.run(["open", "-a", "Obsidian"], capture_output=True)
+        return (
+            "already in a tab, not switched to: Obsidian's CLI is off "
+            "(Settings > General > Advanced > Command line interface)"
+        )
+    url = f"obsidian://open?vault={quote(vault.name)}&file={quote(rel)}&paneType=tab"
+    if subprocess.run(["open", url], capture_output=True).returncode != 0:
+        die("open obsidian://open failed")
+    return "opened in a new tab"
+
+
+def cmd_open(args: argparse.Namespace) -> None:
+    """Show an existing desk in Obsidian and say how."""
+    path = Path(args.file).expanduser()
+    if not path.is_file():
+        die(f"no desk at {path}")
+    print(f"{path}: {show_in_obsidian(path)}")
 
 
 def main() -> None:
@@ -208,9 +306,10 @@ def main() -> None:
 
     p = sub.add_parser(
         "check",
-        help="time, open answers, Status line numbers, last entry",
+        help="time, open answers, ticked Yours steps, Status line numbers, last entry",
         description="Print the time (MM-DD HH:MM), every open answer (the rules' grep, "
-        "as <line>:<text>), Status's heading line numbers, and the last entry.",
+        "as <line>:<text>), every ticked Yours step in Status's Next, Status's heading "
+        "line numbers, and the last entry.",
     )
     p.add_argument("file", help="the desk")
     p.set_defaults(func=cmd_check)
@@ -238,6 +337,16 @@ def main() -> None:
     p.add_argument("--now", default="Starting.", help="first Status → Now text")
     p.add_argument("--no-open", action="store_true", help="don't open it in Obsidian")
     p.set_defaults(func=cmd_new)
+
+    p = sub.add_parser(
+        "open",
+        help="show a desk in Obsidian",
+        description="Switch Obsidian to the desk's tab, or open it in a new tab; the tab in "
+        "front is never replaced. Switching needs Obsidian's CLI (Settings > General > "
+        "Advanced); without it a desk that's already in a tab is left there.",
+    )
+    p.add_argument("file", help="the desk")
+    p.set_defaults(func=cmd_open)
 
     args = parser.parse_args()
     args.func(args)

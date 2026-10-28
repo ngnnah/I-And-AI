@@ -13,9 +13,10 @@ A sample desk, `~/claude-replies/2026-10-21-dotfiles-reply-file-setup.md`:
 ```markdown
 ## Status · updated 10-21 23:57
 ### Now
-Working out how to share this setup with the team.
+> [!info] Working
+> Working out how to share this setup with the team.
 ### Next
-- Yours: check that each session's Status stays current.
+- [ ] Yours: check that each session's Status stays current.
 ### Decisions
 - Replies live in ~/claude-replies so they survive a reboot; you picked it (§2).
 ### Done
@@ -41,15 +42,14 @@ The desk keeps all of that in one file that stays where you left it.
    mkdir -p ~/.claude/rules && pbpaste > ~/.claude/rules/live-desk.md
    ```
 
-2. **Obsidian.** Install [Obsidian](https://obsidian.md) and open the `~/claude-replies` folder as a vault once ("Open folder as vault"; the same for `~/claude-replies-personal`, if you keep personal desks). From then on, the rules' `open -a Obsidian` command opens each desk as a tab in that vault. Obsidian saves as you type, and Claude reads what's on disk, so it sees each answer as soon as you write it. Any markdown editor that saves on its own still works; change the `open -a` command and the allow rules to match.
+2. **Obsidian.** Install [Obsidian](https://obsidian.md) and open the `~/claude-replies` folder as a vault once ("Open folder as vault"; the same for `~/claude-replies-personal`, if you keep personal desks). From then on, each desk opens in a tab of its own in that vault, never in place of the tab in front: through the desk script below, which can also switch to a desk's tab, or else through the rules' `obsidian://open` link. Obsidian saves as you type, and Claude reads what's on disk, so it sees each answer as soon as you write it. The rules write desks for reading in Obsidian, with callouts, task lists, `==highlights==` and Mermaid flowcharts. Any markdown editor that saves on its own still works, though it shows those as plain markdown; change the rules' open command and the allow rules to match.
 
 3. **Allow rules.** Add these to `permissions.allow` in `~/.claude/settings.json`, so writing the desk, opening it and checking the time never stop for an approval. The last rule is for the desk script, an optional extra below:
 
    ```json
    "Edit(~/claude-replies/**)",
    "Edit(~/claude-replies-personal/**)",
-   "Bash(open -a Obsidian ~/claude-replies/*)",
-   "Bash(open -a Obsidian ~/claude-replies-personal/*)",
+   "Bash(open 'obsidian://open?*)",
    "Bash(date:*)",
    "Bash(~/.claude/bin/desk:*)",
    ```
@@ -83,7 +83,7 @@ Then merge this into the `"hooks"` object in `~/.claude/settings.json`:
 ]
 ```
 
-**The desk script** does each turn's checks in one allowed call: the time, your open answers (the rules' grep, unchanged) and where Status's sections are, so Claude doesn't chain `date` and `grep` into a command that stops for an approval. It also creates and opens a new desk. Writes stay on the Edit tool. It needs `python3`, which the Xcode Command Line Tools install. Copy [`desk`](desk), then:
+**The desk script** does each turn's checks in one allowed call (`desk check`): the time, your open answers (the rules' grep, unchanged), the Yours steps you've ticked under Next and where Status's sections are, so Claude doesn't chain `date` and `grep` into a command that stops for an approval. `desk line` finds an entry's line. `desk new` creates a desk and shows it in Obsidian, and `desk open` shows one a session continues: both switch to the desk's tab if one is open, else open it in a new tab, and never replace the tab in front, which may be another session's desk. Switching tabs needs Obsidian 1.12 or later with its command line interface on (Settings → General → Advanced); without it, a desk already in a tab stays where it is. Writes stay on the Edit tool. It needs `python3`, which the Xcode Command Line Tools install. Copy [`desk`](desk), then:
 
 ```bash
 mkdir -p ~/.claude/bin && pbpaste > ~/.claude/bin/desk && chmod +x ~/.claude/bin/desk
@@ -92,7 +92,8 @@ mkdir -p ~/.claude/bin && pbpaste > ~/.claude/bin/desk && chmod +x ~/.claude/bin
 ## Using it
 
 - Answer with `>>`, on its own line under the question or at the end of the question's line: `- Push it? >> yes`.
-- Then send `>>` in chat. It's also how you tell Claude a run or step is done. A single `>` still works in the file.
+- Then send `>>` in chat. It's also how you tell Claude a run or step is done. Only `>>` counts as an answer: a line that starts with a single `>` is a callout, like the one under Now that says whose move it is.
+- Tick a Yours step under Next when you've done it; Claude picks it up at its next turn, like an answer.
 - An answer Claude has handled ends in ` ✓§<n>`, the entry that handled it. An answer without the tag is still open.
 - Add a todo anytime, in chat or in the file. It goes under Next and stays there until it's done.
 - When a session gets long, Claude asks whether to continue in a fresh one. Say yes, and it writes a Handoff entry that opens with a resume line, `Resume from the live desk ~/claude-replies/<file>, handoff §<n>`, to paste into the new session.
@@ -106,7 +107,7 @@ Append the same text to `~/.codex/AGENTS.md`. I haven't tested that yet. Focus v
 
 - It's a trial on one person's setup.
 - The hook enforces one rule, keeping keys and email addresses out of a desk, and it can't spot query rows or names. Nothing enforces the rest.
-- Tool approvals still pull the VS Code panel to the bottom, and `open -a` is macOS-only.
+- Tool approvals still pull the VS Code panel to the bottom, and opening a desk in Obsidian (`open`, and the desk script's path to Obsidian's CLI) is macOS-only.
 
 ## The deck
 
