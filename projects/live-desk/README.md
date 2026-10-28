@@ -43,7 +43,7 @@ The desk keeps all of that in one file that stays where you left it.
 
 2. **Obsidian.** Install [Obsidian](https://obsidian.md) and open the `~/claude-replies` folder as a vault once ("Open folder as vault"; the same for `~/claude-replies-personal`, if you keep personal desks). From then on, the rules' `open -a Obsidian` command opens each desk as a tab in that vault. Obsidian saves as you type, and Claude reads what's on disk, so it sees each answer as soon as you write it. Any markdown editor that saves on its own still works; change the `open -a` command and the allow rules to match.
 
-3. **Allow rules.** Add these to `permissions.allow` in `~/.claude/settings.json`, so writing the desk, opening it and checking the time never stop for an approval:
+3. **Allow rules.** Add these to `permissions.allow` in `~/.claude/settings.json`, so writing the desk, opening it and checking the time never stop for an approval. The last rule is for the desk script, an optional extra below:
 
    ```json
    "Edit(~/claude-replies/**)",
@@ -51,6 +51,7 @@ The desk keeps all of that in one file that stays where you left it.
    "Bash(open -a Obsidian ~/claude-replies/*)",
    "Bash(open -a Obsidian ~/claude-replies-personal/*)",
    "Bash(date:*)",
+   "Bash(~/.claude/bin/desk:*)",
    ```
 
 ## Optional extras
@@ -80,6 +81,12 @@ Then merge this into the `"hooks"` object in `~/.claude/settings.json`:
 "PreToolUse": [
   {"matcher": "Edit|Write|MultiEdit", "hooks": [{"type": "command", "command": "~/.claude/hooks/desk-nudge.sh", "timeout": 5}]}
 ]
+```
+
+**The desk script** does each turn's checks in one allowed call: the time, your open answers (the rules' grep, unchanged) and where Status's sections are, so Claude doesn't chain `date` and `grep` into a command that stops for an approval. It also creates and opens a new desk. Writes stay on the Edit tool. It needs `python3`, which the Xcode Command Line Tools install. Copy [`desk`](desk), then:
+
+```bash
+mkdir -p ~/.claude/bin && pbpaste > ~/.claude/bin/desk && chmod +x ~/.claude/bin/desk
 ```
 
 ## Using it

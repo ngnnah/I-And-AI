@@ -61,6 +61,9 @@ if [ "$event" = PreToolUse ]; then
   kinds=$(jq -r '[.tool_input.new_string, .tool_input.content, (.tool_input.edits // [] | .[]? | .new_string)]
     | map(select(type == "string")) | join("\n")' <<<"$input" 2>/dev/null |
     DOMAINS="$EMAIL_DOMAINS" perl -0777 -ne '
+      # WHY: perl reads bytes; decoded, lengths count characters, so an ellipsis
+      # is one character, not three. Invalid UTF-8 stays as bytes.
+      utf8::decode($_);
       my @k;
       push @k, "an AWS access key id" if /\b(?:AKIA|ASIA)[0-9A-Z]{16}/;
       push @k, "a GitHub token" if /\bgh[pousr]_[A-Za-z0-9]{30,}|\bgithub_pat_[A-Za-z0-9_]{20,}/;
@@ -68,8 +71,11 @@ if [ "$event" = PreToolUse ]; then
       push @k, "an Anthropic or OpenAI API key" if /\bsk-(?:ant-)?[A-Za-z0-9_-]{20,}/;
       push @k, "a private key block" if /-----BEGIN [A-Z ]*PRIVATE KEY-----/;
       push @k, "credentials in a URL" if m{[a-z][a-z0-9+.-]*://[^/\s:@]+:[^/\s@]+@};
+      # NOTE: a value made only of quotes, dots, ellipses, backticks, * or x is a
+      # placeholder (password="…", token: ******), not a secret.
       push @k, "a password, secret or token assignment"
-        if /(?:password|passwd|secret|api[_-]?key|token)["\x27]?\s*[:=]\s*\S{6,}/i;
+        if /(?:password|passwd|secret|api[_-]?key|token)["\x27]?\s*[:=]\s*
+            (?![\x22\x27\x60.*x\x{2026}\x{2018}\x{2019}\x{201C}\x{201D}]*(?:\s|\z))\S{6,}/ix;
       my %ok = map { lc($_) => 1 } split " ", $ENV{DOMAINS};
       while (/[A-Za-z0-9._%+-]+@((?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,})/g) {
         next if $ok{lc $1};

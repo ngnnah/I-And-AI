@@ -1,0 +1,247 @@
+#!/usr/bin/env python3
+"""desk: the live desk's per-turn reads in one command, plus creating a desk.
+
+The live desk rules (~/.claude/rules/live-desk.md) have the main session, every
+turn, get the time, run the rules' open-answer grep and look up line numbers in
+its desk. Chained into one shell command, those match no allow rule, so each
+turn stopped for an approval. This script does them as one allow-listed call:
+
+    desk check <file>      time, open answers, Status's line numbers, last entry
+    desk line <file> <n>   line number of entry n
+    desk new <topic> ...   create a desk and open it in Obsidian
+
+Writes to an existing desk stay on the Edit tool, never this script: Edit
+refuses a write when the file changed since Claude read it, which catches an
+answer typed on the phone mid-turn, and the desk guard hook (desk-nudge.sh)
+sees only Edit and Write. `desk new` is the one write, and only to a file that
+doesn't exist yet.
+"""
+
+# WHY: macOS's own python3 is 3.9, which can't evaluate `str | None` at runtime.
+from __future__ import annotations
+
+import argparse
+import os
+import re
+import subprocess
+import sys
+from datetime import datetime
+from pathlib import Path
+
+# Desk-name aliases for repo folders, for short desk names: {"my-long-repo": "MLR"}
+# names my-long-repo's desks 2026-10-28-MLR-<topic>.md. A folder not listed keeps
+# its own name. If you add any, name them in the rules' first bullet too.
+REPO_ALIASES = {}
+
+# NOTE: copied verbatim from the rules' "Find my open answers" block, which stays
+# the definition; change the two together.
+OPEN_ANSWER_PATTERN = r"^[[:space:]]*([-*+]|[0-9]+\.)?[[:space:]]*>[^✓]*$|(^|[^`])>>[^✓]*$"
+
+STATUS_SECTIONS = ("Now", "Open questions", "Next", "Decisions", "Done")
+SKELETON = """# Live desk
+
+## Status · updated {stamp}
+
+### Now
+{now}
+
+### Open questions
+None.
+
+### Next
+
+### Decisions
+
+### Done
+
+## Log
+"""
+
+
+def stamp() -> str:
+    """Local time in the rules' heading format, MM-DD HH:MM."""
+    return datetime.now().strftime("%m-%d %H:%M")
+
+
+def die(msg: str, code: int = 1) -> None:
+    """Print an error to stderr and exit."""
+    print(f"desk: {msg}", file=sys.stderr)
+    sys.exit(code)
+
+
+def read_lines(path: str) -> list[str]:
+    """The desk's lines, or exit if it can't be read."""
+    try:
+        return Path(path).read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError as e:
+        die(f"can't read {path}: {e.strerror}")
+
+
+def headings(lines: list[str]):
+    """Yield (line number, text) for each line outside fenced code blocks."""
+    fenced = False
+    for no, text in enumerate(lines, 1):
+        if text.lstrip().startswith(("```", "~~~")):
+            fenced = not fenced
+        elif not fenced:
+            yield no, text
+
+
+def open_answers(path: str) -> list[str]:
+    """The rules' grep, run as is: its output lines, `<line>:<text>`."""
+    env = dict(os.environ)
+    ctype = (env.get("LC_ALL") or env.get("LC_CTYPE") or env.get("LANG") or "").lower()
+    if "utf-8" not in ctype and "utf8" not in ctype:
+        # WHY: [^✓] means "any character but ✓" only in a UTF-8 locale; in C it
+        # excludes ✓'s three bytes, so an answer holding an em dash goes unseen.
+        env["LC_ALL"] = "en_US.UTF-8"
+    run = subprocess.run(
+        ["/usr/bin/grep", "-nE", OPEN_ANSWER_PATTERN, path], capture_output=True, env=env
+    )
+    if run.returncode > 1:
+        die(f"grep failed: {run.stderr.decode(errors='replace').strip()}", 2)
+    return run.stdout.decode("utf-8", errors="replace").splitlines()
+
+
+def entries(lines: list[str]) -> list[tuple[int, int, bool]]:
+    """(entry number, line, @ form) for each entry heading: `### @<n> ` or `### <n> ·`."""
+    found = []
+    for no, text in headings(lines):
+        m = re.match(r"### @(\d+) |### (\d+) ·", text)
+        if m:
+            found.append((int(m.group(1) or m.group(2)), no, m.group(1) is not None))
+    return found
+
+
+def cmd_check(args: argparse.Namespace) -> None:
+    """Print the time, open answers, Status's line numbers and the last entry."""
+    lines = read_lines(args.file)
+    out = [f"now: {stamp()}"]
+    answers = open_answers(args.file)
+    out.append(f"open answers: {len(answers) or 'none'}")
+    out += answers
+
+    status = log = None
+    sections = {}
+    for no, text in headings(lines):
+        if text.startswith("## Log"):
+            log = no
+            break
+        if status is None and text.startswith("## Status"):
+            status = f"line {no} {text[len('## Status'):].strip()}".rstrip()
+        for name in STATUS_SECTIONS:
+            if name not in sections and re.match(rf"### {name}\b", text):
+                sections[name] = no
+    out.append(f"status: {status or 'missing'}")
+    parts = [f"{n} {sections.get(n, 'missing')}" for n in STATUS_SECTIONS]
+    out.append("sections: " + ", ".join(parts + [f"Log {log or 'missing'}"]))
+
+    found = entries(lines)
+    last = f"§{found[-1][0]} at line {found[-1][1]}" if found else "none"
+    out.append(f"last entry: {last} · file: {len(lines)} lines")
+    print("\n".join(out))
+
+
+def cmd_line(args: argparse.Namespace) -> None:
+    """Print the line number of entry n, preferring the `### @<n> ` form."""
+    found = entries(read_lines(args.file))
+    for at_form in (True, False):
+        for n, no, at in found:
+            if n == args.n and at == at_form:
+                print(no)
+                return
+    die(f"no entry {args.n} in {args.file}")
+
+
+def repo_name(explicit: str | None) -> str:
+    """The desk name's repo part: --repo, else the current git repo's folder."""
+    name = explicit
+    if not name:
+        git = subprocess.run(
+            ["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+            capture_output=True,
+            text=True,
+        )
+        if git.returncode != 0:
+            die("not in a git repo; pass --repo <name>")
+        common = Path(git.stdout.strip())
+        # WHY: the common dir's parent is the main checkout, so a worktree's desk
+        # is named for its repo, not for the worktree folder.
+        if common.name == ".git":
+            name = common.parent.name
+        else:
+            top = subprocess.run(
+                ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True
+            )
+            name = Path(top.stdout.strip()).name
+    return REPO_ALIASES.get(name, name)
+
+
+def cmd_new(args: argparse.Namespace) -> None:
+    """Create a desk from the rules' skeleton, open it in Obsidian, print its path."""
+    if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", args.topic):
+        die(f"topic must be kebab-case (lowercase words joined by -): {args.topic!r}")
+    home = Path(os.environ.get("DESK_HOME") or Path.home())
+    folder = home / ("claude-replies-personal" if args.personal else "claude-replies")
+    if not folder.is_dir():
+        die(f"no desk folder at {folder}")
+    name = f"{datetime.now():%Y-%m-%d}-{repo_name(args.repo)}-{args.topic}.md"
+    path = folder / name
+    try:
+        with path.open("x", encoding="utf-8") as f:
+            f.write(SKELETON.format(stamp=stamp(), now=args.now))
+    except FileExistsError:
+        die(f"{path} already exists; continue it with the Edit tool")
+    if not args.no_open:
+        opened = subprocess.run(["open", "-a", "Obsidian", str(path)], capture_output=True)
+        if opened.returncode != 0:
+            print("desk: created, but open -a Obsidian failed", file=sys.stderr)
+    print(path)
+
+
+def main() -> None:
+    """Parse the subcommand and run it."""
+    parser = argparse.ArgumentParser(
+        prog="desk", description="Live desk reads (check, line) and desk creation (new)."
+    )
+    sub = parser.add_subparsers(dest="cmd", required=True)
+
+    p = sub.add_parser(
+        "check",
+        help="time, open answers, Status line numbers, last entry",
+        description="Print the time (MM-DD HH:MM), every open answer (the rules' grep, "
+        "as <line>:<text>), Status's heading line numbers, and the last entry.",
+    )
+    p.add_argument("file", help="the desk")
+    p.set_defaults(func=cmd_check)
+
+    p = sub.add_parser(
+        "line",
+        help="line number of entry n",
+        description="Print the line of entry n's heading (### @<n> , or the older "
+        "### <n> ·). Exits 1 if there is none.",
+    )
+    p.add_argument("file", help="the desk")
+    p.add_argument("n", type=int, help="entry number")
+    p.set_defaults(func=cmd_line)
+
+    p = sub.add_parser(
+        "new",
+        help="create a desk and open it",
+        description="Create <YYYY-MM-DD>-<repo>-<topic>.md in ~/claude-replies (or "
+        "~/claude-replies-personal) with the rules' skeleton, open it in Obsidian and "
+        "print its path. Refuses an existing file. DESK_HOME overrides ~ for both folders.",
+    )
+    p.add_argument("topic", help="kebab-case topic")
+    p.add_argument("--repo", help="repo part of the name (default: the current git repo)")
+    p.add_argument("--personal", action="store_true", help="use ~/claude-replies-personal")
+    p.add_argument("--now", default="Starting.", help="first Status → Now text")
+    p.add_argument("--no-open", action="store_true", help="don't open it in Obsidian")
+    p.set_defaults(func=cmd_new)
+
+    args = parser.parse_args()
+    args.func(args)
+
+
+if __name__ == "__main__":
+    main()
