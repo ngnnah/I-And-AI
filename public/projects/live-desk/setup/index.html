@@ -1,0 +1,963 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Live desk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,600..900&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Layout: one page column that widens for the loop, the sample desk and the setup lists. Yellow marker = your move (answers, Copy buttons); ink = the agent's. */
+:root {
+  --bg: #f1f3f6;
+  --surface: #ffffff;
+  --sunken: #e7eaf0;
+  --ink: #14171c;
+  --muted: #586070;
+  --line: #d5dae2;
+  --line-strong: #aeb5c2;
+  --accent: #3f46c2;
+  --mark: #f2b33d;
+  --mark-hover: #f5c25a;
+  --mark-ink: #1f2160;
+  --btn-edge: #2b2f86;
+  --badge: #4a50d0;
+  --badge-hover: #3f45c0;
+  --badge-edge: #2b2f86;
+  --gold: #f2b33d;
+  --vest: #f07b2b;
+  --vest-ink: #1e1408;
+  --reg-status: #4a50d0;
+  --reg-status-bg: rgba(74, 80, 208, 0.07);
+  --reg-log: #1f8a5b;
+  --reg-log-bg: rgba(31, 138, 91, 0.08);
+  --reg-ink: #ffffff;
+  --ok: #17803d;
+  --ok-ink: #ffffff;
+  --ok-edge: #0d5428;
+  --hl-bg: rgba(255, 214, 10, 0.55);
+  --obs-bg: #ffffff;
+  --obs-chrome: #ecedf0;
+  --obs-ink: #222222;
+  --obs-muted: #6b6b6b;
+  --obs-check: #7b6cd9;
+  --todo: #086ddd;
+  --todo-bg: rgba(8, 109, 221, 0.09);
+  --warn: #c45f00;
+  --warn-bg: rgba(236, 117, 0, 0.1);
+  --example: #6a46e6;
+  --example-bg: rgba(120, 82, 238, 0.09);
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115; --surface: #171a20; --sunken: #20242c; --ink: #e8eaef; --muted: #9ca3b0;
+    --line: #2b303a; --line-strong: #4a5160; --accent: #a9aeff;
+    --mark: #f2b33d; --mark-hover: #f6c55e; --mark-ink: #1a1c4f; --btn-edge: #7a80e8;
+    --ok: #2fa65a; --ok-ink: #08130c; --ok-edge: #1d6e3a; --hl-bg: rgba(245, 214, 61, 0.3);
+    --obs-bg: #1e1e1e; --obs-chrome: #262626; --obs-ink: #dadada; --obs-muted: #9a9a9a; --obs-check: #9d8ff0;
+    --todo: #4ea1ff; --todo-bg: rgba(2, 122, 255, 0.12); --warn: #f0954a; --warn-bg: rgba(233, 151, 63, 0.12);
+    --example: #a891ff; --example-bg: rgba(168, 130, 255, 0.12);
+    --reg-status: #a3a8ff; --reg-status-bg: rgba(163, 168, 255, 0.1); --reg-log: #52c48f; --reg-log-bg: rgba(82, 196, 143, 0.1); --reg-ink: #0f1115;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1115; --surface: #171a20; --sunken: #20242c; --ink: #e8eaef; --muted: #9ca3b0;
+  --line: #2b303a; --line-strong: #4a5160; --accent: #a9aeff;
+  --mark: #f2b33d; --mark-hover: #f6c55e; --mark-ink: #1a1c4f; --btn-edge: #7a80e8;
+  --ok: #2fa65a; --ok-ink: #08130c; --ok-edge: #1d6e3a; --hl-bg: rgba(245, 214, 61, 0.3);
+  --obs-bg: #1e1e1e; --obs-chrome: #262626; --obs-ink: #dadada; --obs-muted: #9a9a9a; --obs-check: #9d8ff0;
+  --todo: #4ea1ff; --todo-bg: rgba(2, 122, 255, 0.12); --warn: #f0954a; --warn-bg: rgba(233, 151, 63, 0.12);
+  --example: #a891ff; --example-bg: rgba(168, 130, 255, 0.12);
+    --reg-status: #a3a8ff; --reg-status-bg: rgba(163, 168, 255, 0.1); --reg-log: #52c48f; --reg-log-bg: rgba(82, 196, 143, 0.1); --reg-ink: #0f1115;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+}
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(3.5rem, 8vw, 6rem);
+  padding-block: clamp(1.75rem, 5vw, 3.5rem) 3rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { width: 100%; max-width: 68rem; margin-inline: auto; display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
+section { scroll-margin-top: 1rem; }
+.prose { max-width: 42rem; display: flex; flex-direction: column; gap: 0.75rem; min-width: 0; }
+h1, h2 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.05; }
+h1 { font-size: clamp(3rem, 9vw, 5rem); font-weight: 850; font-stretch: 122%; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.7rem, 3.6vw, 2.4rem); font-weight: 800; font-stretch: 115%; letter-spacing: -0.01em; }
+h3 { font-size: 1.08rem; font-weight: 600; margin: 0; line-height: 1.35; text-wrap: balance; }
+p, ul, ol, dl, dd, figure { margin: 0; }
+a { color: var(--accent); text-underline-offset: 0.15em; }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+code { font-family: var(--font-mono); font-size: 0.86em; background: var(--sunken); padding: 0.08em 0.35em; border-radius: 4px; overflow-wrap: anywhere; }
+.mk { background: var(--mark); color: var(--mark-ink); font-family: var(--font-mono); font-weight: 600; padding: 0.04em 0.35em; border-radius: 4px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.muted { color: var(--muted); }
+.small { font-size: 0.9rem; }
+
+/* Buttons: every copy action is a yellow button with a verb label */
+.btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font: 600 0.9rem/1.2 var(--font-body);
+  color: var(--mark-ink); background: var(--mark);
+  border: 1.5px solid var(--btn-edge); border-radius: 8px;
+  padding: 0.5rem 0.85rem; cursor: pointer;
+  box-shadow: 0 2px 0 var(--btn-edge);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--mark-hover); }
+.btn:active { transform: translateY(2px); box-shadow: 0 0 0 var(--btn-edge); }
+.btn svg { width: 1.05em; height: 1.05em; flex: none; }
+.btn .i-check { display: none; }
+.btn.is-copied { background: var(--ok); color: var(--ok-ink); border-color: var(--ok-edge); box-shadow: 0 2px 0 var(--ok-edge); }
+.btn.is-copied .i-copy { display: none; }
+.btn.is-copied .i-check { display: inline; }
+.btn.is-note { white-space: normal; text-align: left; }
+.btn-xl { font-size: 1.12rem; padding: 0.8rem 1.25rem; border-radius: 10px; box-shadow: 0 3px 0 var(--btn-edge); }
+.btn-xl:active { transform: translateY(3px); }
+
+/* Hero */
+/* Phone order puts the Try box (Copy setup prompt) before the picture and its deck button; desktop keeps the picture left, Try right */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "title" "intro" "try" "art" "more"; gap: 1.5rem; align-items: start; }
+.h-title { grid-area: title; }
+.h-intro { grid-area: intro; display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
+.h-art { grid-area: art; }
+.h-more { grid-area: more; display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; }
+.hero > .try { grid-area: try; }
+/* The Director at the board, drawn with the Director deck's shapes; the picture keeps its own colors in both themes */
+.hero-art { display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+.hero-art > svg { display: block; width: 100%; height: auto; border-radius: 18px; border: 1px solid var(--line); box-shadow: 0 14px 34px -22px rgba(20, 23, 60, 0.45); }
+.hero-art figcaption { display: flex; flex-direction: column; align-items: flex-start; gap: 0.9rem; }
+.hero-cap { font-family: ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", "Nunito", system-ui, sans-serif; font-weight: 800; font-size: clamp(1.3rem, 2.5vw, 1.7rem); line-height: 1.25; text-wrap: balance; margin: 0; }
+.hero-cap .m { color: var(--accent); }
+.hero-cap .sym { font-size: 1.05em; vertical-align: 0.04em; margin-left: 0.1em; }
+/* The deck link: a button in the badge's colors, one step lighter in weight than Copy setup prompt */
+.btn-deck {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  font: 700 0.95rem/1.2 var(--font-body); text-decoration: none;
+  color: var(--gold); background: var(--badge); border: 2px solid var(--badge-edge); border-radius: 10px;
+  padding: 0.6rem 1rem; box-shadow: 0 0 0 2px var(--gold);
+  transition: background-color 0.15s ease, transform 0.08s ease;
+}
+.btn-deck:hover { background: var(--badge-hover); }
+.btn-deck:active { transform: translateY(1px); }
+.btn-deck svg { width: 1.1em; height: 1.1em; flex: none; }
+.btn-deck:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.ld-rnd { font-family: ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", "Nunito", system-ui, sans-serif; font-weight: 800; }
+.ld-hand { font-family: "Chalkboard SE", "Bradley Hand", "Comic Sans MS", "Segoe Print", cursive; }
+/* The deck's >> badge: gold on indigo, read "direct" */
+.sym { display: inline-block; font-family: var(--font-mono); font-weight: 700; letter-spacing: -0.04em; line-height: 1; padding: 0.08em 0.34em 0.12em; color: #f2b33d; background: var(--badge); border: 2px solid var(--badge-edge); border-radius: 0.38em; box-shadow: 0 0 0 2px #f2b33d; }
+.lede { font-size: 1.2rem; line-height: 1.5; max-width: 36rem; }
+.lede-strong { font-weight: 600; }
+.qual { font-size: 0.92rem; color: var(--muted); max-width: 36rem; }
+.why { color: var(--muted); max-width: 36rem; }
+
+.try {
+  background: var(--surface); border: 1.5px solid var(--ink); border-radius: 14px;
+  padding: 1.4rem 1.4rem 1.2rem; display: flex; flex-direction: column; gap: 1.1rem; min-width: 0;
+  scroll-margin-top: 1rem;
+}
+.try h2 { font-size: 1.5rem; }
+.glance { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1rem; counter-reset: g; }
+.glance > li { display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 0.15rem 0.8rem; counter-increment: g; align-items: start; }
+.glance > li::before {
+  content: counter(g); grid-row: 1 / span 3; width: 2rem; height: 2rem; border-radius: 50%;
+  display: grid; place-items: center; font: 700 0.95rem var(--font-mono);
+  background: var(--ink); color: var(--bg);
+}
+.glance > li > * { grid-column: 2; }
+.glance p { padding-top: 0.2rem; }
+.glance .btn { justify-self: start; margin-block: 0.1rem 0.35rem; }
+.glance .starter { display: block; margin-top: 0.35rem; padding: 0.45rem 0.6rem; font-size: 0.85rem; }
+.status-line { font-size: 0.88rem; color: var(--muted); }
+.status-line:empty { display: none; }
+.status-line.is-error { color: var(--warn); }
+.try-foot { font-size: 0.9rem; border-top: 1px solid var(--line); padding-top: 0.85rem; display: flex; gap: 0.4rem 1.2rem; flex-wrap: wrap; }
+
+@media (min-width: 960px) {
+  .hero { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-areas: "title try" "art try" "intro try" "more try"; grid-template-rows: auto auto auto 1fr; gap: 1.2rem 3.5rem; }
+  .h-art { margin-bottom: 0.4rem; }
+  .try { margin-top: 1.6rem; }
+}
+
+/* The loop */
+.loop-wrap { position: relative; padding-bottom: 1.4rem; }
+.loop { --gap: 2.4rem; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gap); counter-reset: loop; }
+.loop > li {
+  position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  padding: 1rem 1.1rem 1.15rem; display: flex; flex-direction: column; gap: 0.55rem; min-width: 0; counter-increment: loop;
+}
+.loop > li:not(:last-child)::after {
+  content: "\2192"; position: absolute; right: calc(var(--gap) / -2); top: 50%; transform: translate(50%, -50%);
+  color: var(--muted); font-size: 1.4rem; line-height: 1;
+}
+.loop .top { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+.who { font: 600 0.7rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; padding: 0.15rem 0.55rem; border-radius: 999px; white-space: nowrap; }
+.you .who, .who.you-chip { background: var(--mark); color: var(--mark-ink); }
+.agent .who { background: var(--vest); color: var(--vest-ink); }
+.loop .num::before { content: counter(loop); font: 600 0.8rem var(--font-mono); color: var(--muted); }
+.glyph { font: 600 1.3rem/1.3 var(--font-mono); min-height: 1.7rem; }
+.glyph .bubble { display: inline-block; background: var(--sunken); border: 1px solid var(--line); border-radius: 12px 12px 12px 3px; padding: 0 0.6rem; }
+.glyph .ok { color: var(--ok); }
+.glyph .linkish { color: var(--accent); text-decoration: underline; text-underline-offset: 0.15em; font-weight: 400; font-family: var(--font-body); font-size: 1.1rem; }
+.loop p { font-size: 0.95rem; color: var(--muted); }
+.loop-return {
+  height: 2rem; margin-inline: calc((100% - 3 * 2.4rem) / 8);
+  border: 2px solid var(--line-strong); border-top: 0; border-radius: 0 0 16px 16px; position: relative;
+}
+.loop-return::before {
+  content: ""; position: absolute; left: -7px; top: 0;
+  border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 9px solid var(--line-strong);
+}
+.loop-return span {
+  position: absolute; left: 50%; top: 100%; transform: translate(-50%, -50%);
+  background: var(--bg); padding: 0 0.7rem; font: 0.8rem var(--font-mono); color: var(--muted); white-space: nowrap;
+}
+.loop-note { color: var(--muted); font-size: 0.95rem; max-width: 42rem; }
+@media (max-width: 820px) {
+  .loop-wrap { padding-left: 1.7rem; padding-bottom: 0; }
+  .loop { grid-template-columns: minmax(0, 1fr); --gap: 1.9rem; }
+  .loop > li:not(:last-child)::after { content: "\2193"; right: auto; left: 50%; top: auto; bottom: calc(var(--gap) / -2); transform: translate(-50%, 50%); }
+  .loop-return { position: absolute; left: 0; top: 1.8rem; bottom: 1.8rem; width: 1.7rem; height: auto; margin: 0; border: 2px solid var(--line-strong); border-right: 0; border-radius: 16px 0 0 16px; }
+  .loop-return::before { left: auto; right: 0; top: -7px; border: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-left: 9px solid var(--line-strong); }
+  .loop-return span { display: none; }
+}
+
+/* Sample desk */
+.sample { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.75rem; align-items: start; }
+@media (min-width: 940px) { .sample { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 2.5rem; } }
+.desk { background: var(--obs-bg); color: var(--obs-ink); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; min-width: 0; box-shadow: 0 12px 30px -18px rgba(10, 14, 22, 0.35); }
+.desk-bar { background: var(--obs-chrome); padding: 0.45rem 0.6rem 0; display: flex; align-items: flex-end; gap: 0.5rem; border-bottom: 1px solid var(--line); }
+.desk-bar .dots { display: flex; gap: 6px; padding: 0 0.4rem 0.6rem 0.2rem; flex: none; }
+.desk-bar .dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--line-strong); display: block; }
+.desk-tab { background: var(--obs-bg); border-radius: 8px 8px 0 0; padding: 0.4rem 0.9rem; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.desk-body { padding: 1.1rem 1.25rem 1.3rem; font-size: 0.92rem; line-height: 1.55; display: flex; flex-direction: column; gap: 0.32rem; }
+.d-row { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+.d-row > :first-child { min-width: 0; flex: 1; }
+.d-h2 { font-size: 1.35em; font-weight: 700; margin-top: 0.4rem; line-height: 1.3; }
+.d-h2:first-child { margin-top: 0; }
+.d-h3 { font-size: 1.08em; font-weight: 650; margin-top: 0.55rem; line-height: 1.35; }
+.d-li { position: relative; padding-left: 1.15rem; }
+.d-li::before { content: ""; position: absolute; left: 0.35rem; top: 0.68em; width: 5px; height: 5px; border-radius: 50%; background: var(--obs-muted); }
+.d-task { display: flex; gap: 0.55rem; align-items: flex-start; }
+.d-task .box { flex: none; width: 15px; height: 15px; border: 1.5px solid var(--obs-muted); border-radius: 4px; margin-top: 0.22em; position: relative; }
+.d-task.done .box { background: var(--obs-check); border-color: var(--obs-check); }
+.d-task.done .box::after { content: ""; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: solid var(--obs-bg); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.d-task.done .t { color: var(--obs-muted); text-decoration: line-through; }
+.d-faint { color: var(--obs-muted); letter-spacing: 0.2em; }
+.desk code { background: var(--sunken); color: inherit; }
+.ans { background: var(--mark); color: var(--mark-ink); font-weight: 600; padding: 0.02em 0.3em; border-radius: 3px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.tag { color: var(--ok); font-weight: 600; white-space: nowrap; }
+.hl { background: var(--hl-bg); color: inherit; padding: 0.05em 0.1em; border-radius: 2px; }
+.callout { border-radius: 5px; padding: 0.55rem 0.8rem; display: flex; flex-direction: column; gap: 0.2rem; margin-block: 0.15rem; }
+.callout-title { display: flex; align-items: center; gap: 0.45rem; font-weight: 600; }
+.callout-title svg { width: 16px; height: 16px; flex: none; }
+.callout-title .grow { flex: 1; min-width: 0; }
+.c-todo { background: var(--todo-bg); } .c-todo .callout-title { color: var(--todo); }
+.c-warn { background: var(--warn-bg); } .c-warn .callout-title { color: var(--warn); }
+.c-example { background: var(--example-bg); } .c-example .callout-title { color: var(--example); }
+.pin { flex: none; display: inline-grid; place-items: center; width: 1.4rem; height: 1.4rem; border-radius: 50%; background: var(--ink); color: var(--bg); font: 600 0.72rem/1 var(--font-mono); }
+.desk-cap { font-size: 0.85rem; color: var(--muted); padding: 0.6rem 0.2rem 0; font-family: var(--font-mono); overflow-wrap: anywhere; }
+/* Two regions, Status and Log: a tinted band in the sample and a matching note group beside it */
+.r-status, .g-status { --reg: var(--reg-status); --reg-bg: var(--reg-status-bg); }
+.r-log, .g-log { --reg: var(--reg-log); --reg-bg: var(--reg-log-bg); }
+.region { display: flex; flex-direction: column; gap: 0.32rem; border-left: 3px solid var(--reg); background: var(--reg-bg); border-radius: 0 6px 6px 0; padding: 0.55rem 0.7rem; margin-left: -0.7rem; }
+.desk-body > .region + .region { margin-top: 0.5rem; }
+.pin.lead { background: var(--reg); color: var(--reg-ink); }
+.pin.sub { width: 1.2rem; height: 1.2rem; font-size: 0.66rem; background: transparent; color: var(--reg); border: 1.5px solid var(--reg); }
+.notes { display: flex; flex-direction: column; gap: 1.5rem; }
+.ng { display: flex; flex-direction: column; gap: 0.6rem; }
+.ng-head { display: grid; grid-template-columns: 1.4rem minmax(0, 1fr); gap: 0.75rem; align-items: start; font-size: 0.97rem; }
+.ng-head .pin, .ng-sub .pin { margin-top: 0.15rem; }
+.ng-head strong { color: var(--reg); font-weight: 650; }
+.ng-sub { list-style: none; margin: 0 0 0 0.68rem; padding: 0.1rem 0 0.1rem 1.25rem; border-left: 2px solid var(--reg); display: flex; flex-direction: column; gap: 0.6rem; }
+.ng-sub li { display: grid; grid-template-columns: 1.2rem minmax(0, 1fr); gap: 0.6rem; align-items: start; }
+.ng-sub p { font-size: 0.95rem; }
+.ng-sub strong { font-weight: 600; }
+
+/* Setup: one table, one row per change; rows stack into blocks on a phone */
+.does-wrap { min-width: 0; }
+.does { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.does th { text-align: left; font: 600 0.72rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 0 1rem 0.45rem 0; border-bottom: 2px solid var(--ink); }
+.does td { padding: 0.7rem 1rem 0.7rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.does td:first-child { width: 14rem; }
+.does td:last-child, .does th:last-child { padding-right: 0; }
+.does td:last-child { color: var(--muted); }
+.does td:nth-child(2) code { overflow-wrap: anywhere; }
+.does .k { font-weight: 600; display: block; }
+.tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.3rem; }
+.tg { font: 600 0.64rem/1.5 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 0 0.45rem; border-radius: 999px; white-space: nowrap; }
+.t-req { border: 1.5px solid var(--ink); }
+.t-opt { border: 1px dashed var(--line-strong); color: var(--muted); }
+.t-tool { background: var(--sunken); color: var(--muted); }
+@media (max-width: 640px) {
+  .does thead { display: none; }
+  .does, .does tbody, .does tr, .does td { display: block; width: auto; }
+  .does tr { padding: 0.75rem 0; border-bottom: 1px solid var(--line); }
+  .does tr:first-child { border-top: 2px solid var(--ink); }
+  .does td { border: 0; padding: 0.1rem 0; }
+  .does td:first-child { width: auto; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.6rem; margin-bottom: 0.25rem; }
+  .does td:first-child .tags { margin-top: 0; }
+}
+
+.fold { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); min-width: 0; scroll-margin-top: 1rem; }
+.fold > summary { cursor: pointer; padding: 1rem 1.2rem; display: flex; align-items: center; flex-wrap: wrap; gap: 0.25rem 0.75rem; list-style: none; font-weight: 600; }
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary::before { content: ""; width: 0.55rem; height: 0.55rem; border: solid var(--muted); border-width: 0 2px 2px 0; transform: rotate(-45deg); transition: transform 0.15s ease; flex: none; }
+.fold[open] > summary::before { transform: rotate(45deg); }
+.fold > summary .sub { font-weight: 400; color: var(--muted); font-size: 0.9rem; }
+.fold-body { padding: 0 1.2rem 1.3rem; display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; }
+.fold-body > .btn { align-self: flex-start; }
+.prompt-pre { margin: 0; max-height: 26rem; overflow: auto; background: var(--sunken); border-radius: 8px; padding: 0.9rem 1rem; font: 0.78rem/1.55 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.bul { padding-left: 1.15rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.bul li::marker { color: var(--muted); }
+
+.manual { list-style: none; padding: 0; counter-reset: m; display: flex; flex-direction: column; gap: 1.4rem; }
+.manual > li { counter-increment: m; display: grid; grid-template-columns: 1.8rem minmax(0, 1fr); gap: 0.4rem 0.8rem; }
+.manual > li::before { content: counter(m); grid-row: 1 / span 6; font: 800 1.35rem/1.2 var(--font-display); color: var(--muted); }
+.manual > li > * { grid-column: 2; min-width: 0; }
+.manual h3 .opt { font: 600 0.68rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border: 1px dashed var(--line-strong); border-radius: 999px; padding: 0.08rem 0.45rem; margin-left: 0.4rem; vertical-align: 0.15em; }
+.moves { list-style: none; padding: 0; counter-reset: mv; display: flex; flex-direction: column; gap: 0.6rem; }
+.moves > li { counter-increment: mv; display: grid; grid-template-columns: 1.5rem minmax(0, 1fr); gap: 0.35rem 0.6rem; align-items: start; }
+.moves > li::before { content: counter(mv, lower-alpha); grid-row: 1 / span 2; width: 1.5rem; height: 1.5rem; border-radius: 50%; border: 1px solid var(--line-strong); display: grid; place-items: center; font: 600 0.75rem var(--font-mono); color: var(--muted); }
+.moves > li > * { grid-column: 2; min-width: 0; }
+.moves .btn { justify-self: start; }
+.snippet { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; min-width: 0; background: var(--sunken); }
+.snip-head { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem 1rem; flex-wrap: wrap; padding: 0.45rem 0.5rem 0.45rem 0.85rem; border-bottom: 1px solid var(--line); background: var(--surface); }
+.snip-head .where { font: 0.78rem var(--font-mono); color: var(--muted); min-width: 0; overflow-wrap: anywhere; }
+.snippet pre { margin: 0; padding: 0.75rem 0.9rem; font: 0.8rem/1.6 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* Using it */
+.habits { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 1rem; max-width: 52rem; }
+.habit { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 1.1rem 1.15rem 1.2rem; display: flex; flex-direction: column; gap: 0.55rem; min-width: 0; }
+.habit .glyph { font-size: 1.05rem; min-height: 0; }
+.habit .glyph span { display: inline-block; background: var(--sunken); border-radius: 6px; padding: 0.1rem 0.5rem; }
+.habit p { font-size: 0.95rem; color: var(--muted); }
+.habit p code { color: var(--ink); }
+
+/* Works with, FAQ */
+.limits { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; max-width: 46rem; }
+.limits li { display: grid; grid-template-columns: 1.2rem minmax(0, 1fr); gap: 0.6rem; font-size: 0.95rem; }
+.limits li::before { content: ""; width: 0.6rem; height: 0.6rem; margin-top: 0.5rem; border: 2px solid var(--warn); border-radius: 2px; transform: rotate(45deg); }
+.faq { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 1.75rem 2.5rem; }
+.faq > div { display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; border-top: 2px solid var(--ink); padding-top: 0.8rem; }
+.faq dd { color: var(--muted); font-size: 0.97rem; }
+.faq dd ul { padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.2rem; margin-top: 0.3rem; }
+
+.foot { border-top: 1px solid var(--line); padding-top: 1.2rem; font-size: 0.88rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; }
+.foot a { font-family: var(--font-mono); font-size: 0.85rem; }
+.foot { flex-direction: column; gap: 0.5rem; }
+.foot p { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; }
+
+/* File viewer: the three files open on the page, since the viewer frame doesn't follow links to them */
+.file-view { width: min(56rem, calc(100vw - 32px)); max-height: 85vh; padding: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); box-shadow: 0 24px 60px -24px rgba(10, 14, 22, 0.5); }
+.file-view::backdrop { background: rgba(10, 14, 22, 0.45); }
+.fv-head { display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 0.8rem 0.7rem 1.1rem; border-bottom: 1px solid var(--line); }
+.fv-head .name { font: 600 0.95rem var(--font-mono); flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.fv-close { font: 600 0.9rem var(--font-body); color: var(--ink); background: transparent; border: 1px solid var(--line-strong); border-radius: 8px; padding: 0.45rem 0.8rem; cursor: pointer; }
+.file-view pre { margin: 0; padding: 1rem 1.1rem; max-height: calc(85vh - 4rem); overflow: auto; font: 0.8rem/1.55 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; background: var(--sunken); }
+
+@media (max-width: 480px) {
+  body { font-size: 16px; }
+  .try { padding: 1.15rem 1rem 1rem; }
+  .btn-xl { font-size: 1.05rem; padding: 0.75rem 1rem; }
+  .desk-body { padding: 0.9rem 0.9rem 1.1rem; font-size: 0.88rem; }
+  .manual > li { grid-template-columns: 1.3rem minmax(0, 1fr); }
+  .fold > summary { padding: 0.9rem 1rem; }
+  .fold-body { padding: 0 1rem 1.1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .fold > summary::before { transition: none; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<!-- The Director and the board, from the Director deck's shared drawings (drawn head only, no photos). Every id is prefixed ld- so nothing clashes. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="ld-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BCE0F2"/><stop offset="1" stop-color="#EAF6FB"/></linearGradient>
+    <path id="ld-chev" d="M-10 -8 L-2 0 L-10 8 M0 -8 L8 0 L0 8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <g id="ld-f-smile"><circle cx="51" cy="74" r="3.2" fill="#2B2A33"/><circle cx="69" cy="74" r="3.2" fill="#2B2A33"/><circle cx="45" cy="81" r="4.3" fill="#F08F7E" opacity=".5"/><circle cx="75" cy="81" r="4.3" fill="#F08F7E" opacity=".5"/><path d="M53 83 Q60 89 67 83" fill="none" stroke="#2B2A33" stroke-width="2.6" stroke-linecap="round"/></g>
+    <g id="ld-d-cape"><path d="M45 97 C 26 116, 8 150, -12 202 Q 26 214, 66 206 L 76 100 Z" fill="#2B2F86"/><use href="#ld-chev" stroke="#F2B33D" stroke-width="4.4" transform="translate(19 182) rotate(-16) scale(1.2)"/></g>
+    <g id="ld-d-legs"><rect x="44" y="156" width="13" height="50" rx="6" fill="#2E3140"/><rect x="63" y="156" width="13" height="50" rx="6" fill="#2E3140"/><ellipse cx="49" cy="208" rx="11" ry="6" fill="#1D1F29"/><ellipse cx="71" cy="208" rx="11" ry="6" fill="#1D1F29"/></g>
+    <g id="ld-d-body"><rect x="36" y="92" width="48" height="74" rx="14" fill="#4A50D0"/><circle cx="60" cy="122" r="12.5" fill="#F2B33D"/><use href="#ld-chev" stroke="#2B2F86" stroke-width="3.6" transform="translate(61 122) scale(.68)"/></g>
+    <g id="ld-d-head-drawn"><ellipse cx="60" cy="64" rx="28" ry="23" fill="#4A3426"/><circle cx="60" cy="66" r="25" fill="#E2AE84"/><path d="M33 60 Q33 30 60 28 Q87 30 87 60 Z" fill="#4A50D0"/><rect x="28" y="56" width="64" height="9" rx="4.5" fill="#363BAA"/><use href="#ld-chev" stroke="#F2B33D" stroke-width="3.8" transform="translate(61 44)"/></g>
+    <symbol id="ld-dir-write" viewBox="0 0 120 220" overflow="visible">
+      <use href="#ld-d-cape"/><use href="#ld-d-legs"/><use href="#ld-d-body"/>
+      <path d="M40 104 L30 148 M80 104 L112 96" stroke="#3F45C0" stroke-width="11" stroke-linecap="round"/>
+      <path d="M114 95 L134 84" stroke="#2B2A33" stroke-width="6" stroke-linecap="round"/><path d="M134 84 L140 81" stroke="#4048C4" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="29" cy="151" r="6.5" fill="#E2AE84"/><circle cx="114" cy="95" r="6.5" fill="#E2AE84"/>
+      <use href="#ld-d-head-drawn"/><use href="#ld-f-smile"/>
+    </symbol>
+    <g id="ld-board-blank">
+      <rect x="44" y="280" width="18" height="140" fill="#7A4E2C"/><rect x="338" y="280" width="18" height="140" fill="#7A4E2C"/>
+      <rect x="0" y="0" width="400" height="300" rx="14" fill="#FFFDF6" stroke="#7A4E2C" stroke-width="6"/>
+      <path d="M3 52 V14 Q3 3 14 3 H386 Q397 3 397 14 V52 Z" fill="#8A5A33"/>
+    </g>
+  </defs>
+</svg>
+
+<main class="page">
+
+  <!-- Hero: what it is, why, and the three-step start -->
+  <header class="wrap hero">
+      <h1 class="h-title">Live desk</h1>
+      <figure class="hero-art h-art">
+        <svg viewBox="0 0 540 340" role="img" aria-label="The Director, in an indigo hard hat and cape marked with a gold double arrow, writes '>> yes' under 'Push it?' on the board at a site gate.">
+          <rect width="540" height="340" fill="url(#ld-sky)"/>
+          <g transform="translate(190 30) scale(.8)">
+            <use href="#ld-board-blank"/>
+            <text x="200" y="36" text-anchor="middle" font-size="24" class="ld-rnd" fill="#FFF6E4">export retries</text>
+            <text x="24" y="92" font-size="19" class="ld-rnd" fill="#8A5A33">Open questions</text>
+            <text x="30" y="136" font-size="28" class="ld-hand" fill="#2B2A33">Push it?</text>
+            <rect x="24" y="154" width="170" height="44" rx="9" fill="#E7E8FB"/>
+            <text x="40" y="186" font-size="30" class="ld-hand" fill="#4048C4">&gt;&gt; yes</text>
+            <text x="24" y="240" font-size="19" class="ld-rnd" fill="#8A5A33">Next</text>
+            <text x="30" y="280" font-size="24" class="ld-hand" fill="#2B2A33">clear the run</text>
+            <path d="M236 92 H372 M236 128 H352 M236 164 H366 M236 200 H340" stroke="#D9D3C2" stroke-width="5" stroke-linecap="round"/>
+          </g>
+          <rect y="305" width="540" height="35" fill="#A9CF8B"/>
+          <use href="#ld-dir-write" x="30" y="62" width="150" height="275"/>
+        </svg>
+        <figcaption>
+          <p class="hero-cap">The Director directs at the exact line, <span class="m">then sends</span> <span class="sym">&gt;&gt;</span></p>
+          <a class="btn-deck" href="../"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 8.5v5l4.5-2.5z" fill="currentColor"/><path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Open the Director deck</a>
+        </figcaption>
+      </figure>
+      <div class="h-intro">
+        <p class="lede lede-strong">A rules file for your coding agent: Claude Code, Codex, Amp or another, in any editor or terminal.</p>
+        <p class="qual">Built and used with Claude Code; Codex, Amp and others should follow it but are untested.</p>
+      </div>
+      <div class="h-more">
+        <p class="lede">The agent writes each session's replies to a markdown file, the session's desk. You read it in Obsidian and answer next to the line you mean.</p>
+        <p class="why">After ten turns it's hard to say what's done, what's happening now and what's next, because the answers are buried in chat. The desk keeps all of it in one file that stays where you left it.</p>
+      </div>
+
+    <aside class="try" id="try" aria-labelledby="try-h">
+      <h2 id="try-h">Try it in 5 minutes</h2>
+      <ol class="glance">
+        <li>
+          <button class="btn btn-xl" type="button" id="copy-prompt" data-prompt><svg class="i-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="i-check" aria-hidden="true"><use href="#i-check"/></svg><span class="lbl">Copy setup prompt</span></button>
+          <p>Paste it into your agent. It installs the rules and tells you what it changed.</p>
+          <p class="status-line" id="prompt-status" role="status"></p>
+        </li>
+        <li><p>In <a href="https://obsidian.md" target="_blank" rel="noopener">Obsidian</a>, open <code>~/claude-replies</code> as a vault.</p></li>
+        <li><p>Start a new session and send:<code class="starter">Start a live desk for this session: &lt;what you're working on&gt;</code></p><p class="small muted">It worked when a new desk opens as a tab in Obsidian.</p></li>
+      </ol>
+      <p class="try-foot"><a href="#prompt-box" data-open="prompt-box">See the prompt</a><a href="#setup">What it does</a><a href="#manual" data-open="manual">Set it up by hand</a></p>
+    </aside>
+  </header>
+
+  <!-- The loop -->
+  <section class="wrap" id="loop" aria-labelledby="loop-h">
+    <div class="prose">
+      <h2 id="loop-h">How a turn goes</h2>
+      <p class="muted">In <a href="../">the Director deck</a>'s words: you're the Director, each session is a manager, and the desk is the board at its gate.</p>
+    </div>
+    <div class="loop-wrap">
+      <ol class="loop">
+        <li class="you">
+          <div class="top"><span class="who">You</span><span class="num"></span></div>
+          <div class="glyph"><span class="mk">&gt;&gt; yes</span></div>
+          <h3>Answer in the file</h3>
+          <p>Read the desk in Obsidian and type your answer next to the line you mean.</p>
+        </li>
+        <li class="you">
+          <div class="top"><span class="who">You</span><span class="num"></span></div>
+          <div class="glyph"><span class="sym">&gt;&gt;</span></div>
+          <h3>Send <code>&gt;&gt;</code> in chat</h3>
+          <p>That can be the whole message. Send it too when a step you were doing is done.</p>
+        </li>
+        <li class="agent">
+          <div class="top"><span class="who">Agent</span><span class="num"></span></div>
+          <div class="glyph"><span class="ok">✓§5</span></div>
+          <h3>The agent reads and works</h3>
+          <p>One grep finds your open answers. It does the work, updates Status, adds a Log entry and marks each answer it handled.</p>
+        </li>
+        <li class="agent">
+          <div class="top"><span class="who">Agent</span><span class="num"></span></div>
+          <div class="glyph"><span class="linkish">entry 5</span></div>
+          <h3>One line back</h3>
+          <p>In chat you get the gist and a link to the new entry.</p>
+        </li>
+      </ol>
+      <div class="loop-return" aria-hidden="true"><span>your move again</span></div>
+    </div>
+    <p class="loop-note">Any message works too. The agent checks the desk for open answers at the start of every turn.</p>
+  </section>
+
+  <!-- Sample desk -->
+  <section class="wrap" id="sample" aria-labelledby="sample-h">
+    <div class="prose">
+      <h2 id="sample-h">What a desk looks like</h2>
+      <p>One desk per session: Status on top, the Log below.</p>
+    </div>
+    <div class="sample">
+      <figure>
+        <div class="desk" role="img" aria-label="A sample desk as Obsidian shows it, with numbered markers explained alongside">
+          <div class="desk-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="desk-tab">2026-10-28-my-repo-export-retries</span></div>
+          <div class="desk-body">
+            <div class="region r-status">
+            <div class="d-row d-h2"><span>Status · updated 10-28 15:42</span><span class="pin lead">1</span></div>
+            <div class="d-h3">Now</div>
+            <div class="callout c-todo">
+              <div class="callout-title"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 12.5l3 3 5-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="grow">Your move</span><span class="pin sub">2</span></div>
+              <div>Clear the failed run, then send <code>&gt;&gt;</code>.</div>
+            </div>
+            <div class="d-h3">Open questions</div>
+            <div class="d-row"><div class="d-li">Keep the old export? <span class="ans">&gt;&gt; no</span></div><span class="pin sub">3</span></div>
+            <div class="d-row d-h3"><span>Next</span><span class="pin sub">4</span></div>
+            <div class="d-task done"><span class="box"></span><span class="t">Yours: push the branch</span></div>
+            <div class="d-task"><span class="box"></span><span class="t">Mine: check the rerun</span></div>
+            <div class="d-row d-h3"><span>Decisions</span><span class="pin sub">5</span></div>
+            <div class="d-li">Retry timeouts only (§5)</div>
+            <div class="d-h3">Done</div>
+            <div class="d-li">Fix committed (§5)</div>
+            </div>
+            <div class="region r-log">
+            <div class="d-row d-h2"><span>Log</span><span class="pin lead">6</span></div>
+            <div class="d-h3">@4 · 14:10 · Retry plan</div>
+            <div class="d-row"><div class="d-li"><span class="ans">&gt;&gt; only timeouts</span> <span class="tag">✓§5</span></div><span class="pin sub">7</span></div>
+            <div class="d-h3">@5 · 15:42 · Fix committed</div>
+            <div class="d-row"><div><mark class="hl">Clear the failed run on dev</mark></div><span class="pin sub">8</span></div>
+            </div>
+          </div>
+        </div>
+        <figcaption class="desk-cap">~/claude-replies/2026-10-28-my-repo-export-retries.md · a made-up sample</figcaption>
+      </figure>
+
+      <div class="notes" role="group" aria-label="What each marker shows">
+        <div class="ng g-status">
+          <p class="ng-head"><span class="pin lead" aria-hidden="true">1</span><span><strong>Status:</strong> rewritten each turn, so it's always current.</span></p>
+          <ol class="ng-sub">
+            <li><span class="pin sub" aria-hidden="true">2</span><p><strong>Now:</strong> whose move it is, yours or the agent's.</p></li>
+            <li><span class="pin sub" aria-hidden="true">3</span><p><strong>Your answer:</strong> <code>&gt;&gt;</code> and your reply, on the question's line.</p></li>
+            <li><span class="pin sub" aria-hidden="true">4</span><p><strong>Next:</strong> Yours and Mine steps; tick yours when done.</p></li>
+            <li><span class="pin sub" aria-hidden="true">5</span><p><strong>Decisions and Done:</strong> one line each, with its log entry.</p></li>
+          </ol>
+        </div>
+        <div class="ng g-log">
+          <p class="ng-head"><span class="pin lead" aria-hidden="true">6</span><span><strong>Log:</strong> one entry per reply, never rewritten.</span></p>
+          <ol class="ng-sub">
+            <li><span class="pin sub" aria-hidden="true">7</span><p><strong>Handled:</strong> <code>✓§5</code> names the entry that handled it.</p></li>
+            <li><span class="pin sub" aria-hidden="true">8</span><p><strong>Highlighted:</strong> what you need to do, written <code style="white-space: nowrap">==…==</code>. Status lists it once, as an open question or a Yours step, and Now points to it.</p></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Setup detail -->
+  <section class="wrap" id="setup" aria-labelledby="setup-h">
+    <div class="prose">
+      <h2 id="setup-h">What the setup prompt does</h2>
+      <p>The prompt carries all three files, so the paste is enough on its own.</p>
+    </div>
+
+    <div class="does-wrap">
+      <table class="does">
+        <thead><tr><th scope="col">Adds</th><th scope="col">Where</th><th scope="col">Why</th></tr></thead>
+        <tbody>
+          <tr><td><span class="k">Rules file</span><span class="tags"><span class="tg t-req">required</span></span></td><td><code>~/.claude/rules/live-desk.md</code>, or your agent's instructions file</td><td>Tells the agent how to keep the desk (<a href="live-desk.md" data-view="live-desk.md">read it</a>)</td></tr>
+          <tr><td><span class="k">Desk folder</span><span class="tags"><span class="tg t-req">required</span></span></td><td><code>~/claude-replies</code></td><td>One markdown file per session</td></tr>
+          <tr><td><span class="k">Allow rules</span><span class="tags"><span class="tg t-tool">Claude Code</span></span></td><td><code>~/.claude/settings.json</code></td><td>No approval prompt for desk writes</td></tr>
+          <tr><td><span class="k">Hook</span><span class="tags"><span class="tg t-opt">optional</span><span class="tg t-tool">Claude Code</span></span></td><td><code>~/.claude/hooks/desk-nudge.sh</code></td><td>The bell: nudges stale Status, blocks secrets. Needs <code>jq</code> and <code>perl</code> (<a href="desk-nudge.sh" data-view="desk-nudge.sh">read it</a>)</td></tr>
+          <tr><td><span class="k">desk script</span><span class="tags"><span class="tg t-opt">optional</span><span class="tg t-tool">Claude Code</span><span class="tg t-tool">macOS</span></span></td><td><code>~/.claude/bin/desk</code></td><td>One call per turn, opens desks in tabs. Needs <code>python3</code> (<a href="desk" data-view="desk">read it</a>)</td></tr>
+          <tr><td><span class="k">Focus view</span><span class="tags"><span class="tg t-opt">optional</span><span class="tg t-tool">VS Code</span></span></td><td>VS Code user settings</td><td>Hides tool calls in the panel</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">It asks before the optional ones, changes nothing else, and ends by telling you what it changed.</p>
+
+    <details class="fold" id="prompt-box">
+      <summary>Preview the setup prompt <span class="sub">what you paste into your agent</span></summary>
+      <div class="fold-body">
+        <button class="btn" type="button" id="copy-prompt-2" data-prompt><svg class="i-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="i-check" aria-hidden="true"><use href="#i-check"/></svg><span class="lbl">Copy setup prompt</span></button>
+        <pre class="prompt-pre" id="prompt-preview">Loading the three files…</pre>
+      </div>
+    </details>
+
+    <details class="fold" id="manual">
+      <summary>Set it up by hand <span class="sub">Claude Code on macOS, one copy at a time</span></summary>
+      <div class="fold-body">
+        <ul class="bul small muted">
+          <li>Another agent: copy <a href="live-desk.md" data-view="live-desk.md">live-desk.md</a> into its global instructions file, such as <code>~/.codex/AGENTS.md</code> for Codex, and make the desk folder.</li>
+          <li>For each file below, paste the command into Terminal first, then copy the file, then press Return. In the other order, the command would save itself.</li>
+        </ul>
+        <ol class="manual">
+          <li>
+            <h3>Save the rules</h3>
+            <ol class="moves">
+              <li><p>Copy the command, paste it into Terminal, don't press Return yet.</p>
+                <div class="snippet"><div class="snip-head"><span class="where">Terminal</span><button class="btn" type="button" id="copy-save-rules" data-copy="snip-save-rules"><svg class="i-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="i-check" aria-hidden="true"><use href="#i-check"/></svg><span class="lbl">Copy command</span></button></div>
+<pre id="snip-save-rules">mkdir -p ~/.claude/rules &amp;&amp; pbpaste &gt; ~/.claude/rules/live-desk.md</pre></div></li>
+              <li><p>Copy <a href="live-desk.md" data-view="live-desk.md">live-desk.md</a>.</p>
+                <button class="btn" type="button" id="copy-file-rules" data-src="live-desk.md"><svg class="i-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="i-check" aria-hidden="true"><use href="#i-check"/></svg><span class="lbl">Copy rules file</span></button></li>
+              <li><p>Press Return in Terminal.</p></li>
+            </ol>
+          </li>
+          <li>
+            <h3>Make the desk folder</h3>
+            <div class="snippet"><div class="snip-head"><span class="where">Terminal</span><button class="btn" type="button" id="copy-mkdir" data-copy="snip-mkdir"><svg class="i-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="i-check" aria-hidden="true"><use href="#i-check"/></svg><span class="lbl">Copy command</span></button></div>
+<pre id="snip-mkdir">mkdir -p ~/claude-replies</pre></div>
+          </li>
+          <li>
+            <h3>Add the allow rules</h3>
+            <p class="small muted">Into <code>permissions.allow</code> in <code>~/.claude/settings.json</code>.</p>
+            <div class="snippet"><div class="snip-head"><span class="where">~/.claude/settings.json</span><button class="btn" type="button" id="copy-allow" data-copy="snip-allow"><svg class="i-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="i-check" aria-hidden="true"><use href="#i-check"/></svg><span class="lbl">Copy allow rules</span></button></div>
+<pre id="snip-allow">"Edit(~/claude-replies/**)",
+"Bash(open \"obsidian://open?*)",
+"Bash(date:*)"</pre></div>
+          </li>
+          <li>
+            <h3>The hook <span class="opt">Optional</span></h3>
+            <ol class="moves">
+              <li><p>Copy the command, paste it into Terminal, don't press Return yet.</p>
+                <div class="snippet"><div class="snip-head"><span class="where">Terminal</span><button class="btn" type="button" id="copy-save-hook" data-copy="snip-save-hook"><svg class="i-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="i-check" aria-hidden="true"><use href="#i-check"/></svg><span class="lbl">Copy command</span></button></div>
+<pre id="snip-save-hook">mkdir -p ~/.claude/hooks &amp;&amp; pbpaste &gt; ~/.claude/hooks/desk-nudge.sh &amp;&amp; chmod +x ~/.claude/hooks/desk-nudge.sh</pre></div></li>
+              <li><p>Copy <a href="desk-nudge.sh" data-view="desk-nudge.sh">desk-nudge.sh</a>, then press Return in Terminal.</p>
+                <button class="btn" type="button" id="copy-file-hook" data-src="desk-nudge.sh"><svg class="i-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="i-check" aria-hidden="true"><use href="#i-check"/></svg><span class="lbl">Copy hook file</span></button></li>
+              <li><p>Merge this into the <code>"hooks"</code> object in <code>~/.claude/settings.json</code>.</p>
+                <div class="snippet"><div class="snip-head"><span class="where">~/.claude/settings.json</span><button class="btn" type="button" id="copy-hookcfg" data-copy="snip-hookcfg"><svg class="i-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="i-check" aria-hidden="true"><use href="#i-check"/></svg><span class="lbl">Copy hook config</span></button></div>
+<pre id="snip-hookcfg">"PostToolUse": [
+  {"hooks": [{"type": "command", "command": "~/.claude/hooks/desk-nudge.sh", "timeout": 5}]}
+],
+"UserPromptSubmit": [
+  {"hooks": [{"type": "command", "command": "~/.claude/hooks/desk-nudge.sh", "timeout": 5}]}
+],
+"PreToolUse": [
+  {"matcher": "Edit|Write|MultiEdit", "hooks": [{"type": "command", "command": "~/.claude/hooks/desk-nudge.sh", "timeout": 5}]}
+]</pre></div></li>
+            </ol>
+          </li>
+          <li>
+            <h3>The desk script <span class="opt">Optional</span></h3>
+            <ol class="moves">
+              <li><p>Copy the command, paste it into Terminal, don't press Return yet.</p>
+                <div class="snippet"><div class="snip-head"><span class="where">Terminal</span><button class="btn" type="button" id="copy-save-desk" data-copy="snip-save-desk"><svg class="i-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="i-check" aria-hidden="true"><use href="#i-check"/></svg><span class="lbl">Copy command</span></button></div>
+<pre id="snip-save-desk">mkdir -p ~/.claude/bin &amp;&amp; pbpaste &gt; ~/.claude/bin/desk &amp;&amp; chmod +x ~/.claude/bin/desk</pre></div></li>
+              <li><p>Copy <a href="desk" data-view="desk">desk</a>, then press Return in Terminal.</p>
+                <button class="btn" type="button" id="copy-file-desk" data-src="desk"><svg class="i-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="i-check" aria-hidden="true"><use href="#i-check"/></svg><span class="lbl">Copy desk script</span></button></li>
+              <li><p>Add its allow rule to <code>permissions.allow</code> in <code>~/.claude/settings.json</code>.</p>
+                <div class="snippet"><div class="snip-head"><span class="where">~/.claude/settings.json</span><button class="btn" type="button" id="copy-allow-desk" data-copy="snip-allow-desk"><svg class="i-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="i-check" aria-hidden="true"><use href="#i-check"/></svg><span class="lbl">Copy allow rule</span></button></div>
+<pre id="snip-allow-desk">"Bash(~/.claude/bin/desk:*)"</pre></div></li>
+            </ol>
+          </li>
+          <li>
+            <h3>Focus view <span class="opt">Optional</span></h3>
+            <p class="small muted">Into your VS Code user settings.</p>
+            <div class="snippet"><div class="snip-head"><span class="where">VS Code settings.json</span><button class="btn" type="button" id="copy-vscode" data-copy="snip-vscode"><svg class="i-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="i-check" aria-hidden="true"><use href="#i-check"/></svg><span class="lbl">Copy settings</span></button></div>
+<pre id="snip-vscode">"claudeCode.focusView": true,
+"claudeCode.scrollToBottomOnSend": false</pre></div>
+          </li>
+        </ol>
+      </div>
+    </details>
+  </section>
+
+  <!-- Using it -->
+  <section class="wrap" id="using" aria-labelledby="using-h">
+    <div class="prose">
+      <h2 id="using-h">Using it</h2>
+    </div>
+    <div class="habits">
+      <article class="habit">
+        <div class="glyph"><span>- [ ] Yours</span></div>
+        <h3>Add todos</h3>
+        <p>Add a todo any time, in chat or in the file. It stays on the board under Next until it's done, even across a handoff.</p>
+      </article>
+      <article class="habit">
+        <div class="glyph"><span>Handoff</span></div>
+        <h3>The whistle: hand off long sessions</h3>
+        <p>When a session gets long, the agent asks whether to continue in a fresh one. Say yes and it writes a Handoff entry that opens with a line to paste into the new session: <code>Resume from the live desk ~/claude-replies/&lt;file&gt;, handoff §&lt;n&gt;</code>.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- Limits -->
+  <section class="wrap" id="works" aria-labelledby="works-h">
+    <div class="prose">
+      <h2 id="works-h">Limits</h2>
+    </div>
+    <ul class="limits">
+      <li><span>The rules name Claude Code's tools and macOS's <code>open</code>, so another agent or OS may need small wording edits.</span></li>
+      <li><span>The link to the new entry in the chat line opens in VS Code; in a terminal it's plain text.</span></li>
+      <li><span>The hook enforces one rule, keeping keys and email addresses out of a desk, and it can't spot query rows or names. Nothing enforces the rest. It's still a trial.</span></li>
+      <li><span>In VS Code, tool approvals still pull the panel to the bottom.</span></li>
+      <li><span>The manual steps use <code>pbpaste</code>, which is macOS only.</span></li>
+    </ul>
+  </section>
+
+  <!-- FAQ -->
+  <section class="wrap" id="faq" aria-labelledby="faq-h">
+    <div class="prose">
+      <h2 id="faq-h">Questions</h2>
+    </div>
+    <dl class="faq">
+      <div>
+        <dt><h3>Doesn't it burn tokens?</h3></dt>
+        <dd>Each turn costs one grep and the Status block, plus a re-read of the file after you edit it in Obsidian.</dd>
+      </div>
+      <div>
+        <dt><h3>Does Status stay current?</h3></dt>
+        <dd>In the trial it was current at the end of every turn. It went quiet inside long turns, which the hook now nudges.</dd>
+      </div>
+      <div>
+        <dt><h3>Can I read it on my phone?</h3></dt>
+        <dd>Put <code>~/claude-replies</code> in a synced Obsidian vault, after checking that work notes may sit in that cloud.</dd>
+      </div>
+      <div>
+        <dt><h3>What stays out of a desk?</h3></dt>
+        <dd>Keys, passwords, query rows and customer details. A scan of 13 work desks (about 8,200 lines) found no keys, passwords or customer emails.</dd>
+      </div>
+      <div>
+        <dt><h3>Do I need Obsidian?</h3></dt>
+        <dd>No. Any markdown editor that saves on its own works. Change the rules' open command and the allow rules to match.</dd>
+      </div>
+      <div>
+        <dt><h3>How do I stop?</h3></dt>
+        <dd>Remove what you installed:
+          <ul>
+            <li>the rules file, <code>~/.claude/rules/live-desk.md</code>, or the rules in your agent's instructions file</li>
+            <li>the allow rules in <code>~/.claude/settings.json</code></li>
+            <li>the hook, <code>~/.claude/hooks/desk-nudge.sh</code>, and its <code>"hooks"</code> entries</li>
+            <li>the script, <code>~/.claude/bin/desk</code>, and its allow rule</li>
+          </ul>
+        </dd>
+      </div>
+    </dl>
+    <div class="foot">
+      <p><span>Links:</span><a href="../">The Director deck</a><a href="https://obsidian.md" target="_blank" rel="noopener">Obsidian</a></p>
+      <p><span>Files:</span><a href="live-desk.md" data-view="live-desk.md">live-desk.md</a><a href="desk-nudge.sh" data-view="desk-nudge.sh">desk-nudge.sh</a><a href="desk" data-view="desk">desk</a></p>
+    </div>
+  </section>
+</main>
+
+<dialog class="file-view" id="file-view" aria-labelledby="file-view-name">
+  <div class="fv-head"><span class="name" id="file-view-name"></span><button class="btn" type="button" id="file-view-copy"><svg class="i-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="i-check" aria-hidden="true"><use href="#i-check"/></svg><span class="lbl">Copy file</span></button><button class="fv-close" type="button" id="file-view-close">Close</button></div>
+  <pre id="file-view-text"></pre>
+</dialog>
+
+<script>
+var EMBED = {"live-desk.md": "# Live desk\n\n- The main session writes every reply to its live desk: a markdown file in `~/claude-replies/`, one per session, named `<YYYY-MM-DD>-<repo>-<topic>.md` with a kebab-case topic, where `<repo>` is the repo's folder name. Subagents don't. I read and answer it in Obsidian. A session resumed from a handoff (below) continues its predecessor's file instead of starting one, unless that Handoff moved to a fresh desk.\n- Create the session's file on its first turn, before other tool work, with a Status whose Now says what you're starting on. If I installed the desk script (`~/.claude/bin/desk`), `~/.claude/bin/desk new <topic>` (with `--now \"<text>\"` for the first Now) creates it from the skeleton, opens it and prints its path; call `desk` by that path, which my allow rule matches. Don't hold it back until you have an answer; with focus view on, the file is my only sign the session is working.\n- On a session's first turn, show its desk in Obsidian once. With the desk script, `desk new` does it for a new desk; a session that continues a desk (resumed from a handoff, or told to use one) runs `~/.claude/bin/desk open <file>` right after its first `desk check`. Both switch to the desk's tab if one is open, else open it in a new tab, and never load it into the tab in front, which may be another session's desk; so never use `open -a Obsidian <file>` or a bare `obsidian://open`, which do. Switching tabs needs Obsidian's command line interface (Settings → General → Advanced); without it, a desk already in a tab stays where it is and `desk open` says so. Without the script, open a new desk with `open \"obsidian://open?vault=<vault name>&file=<path inside the vault, URL-encoded>&paneType=tab\"`. That opens a new tab and never loads the desk into the tab in front. It can't switch to a tab that's already open; that needs `desk open` plus Obsidian's CLI, so leave a continued desk where it is.\n- The file has two parts, and they are its only H2 headings. At the top, `## Status · updated <MM-DD HH:MM>`, which you rewrite in place so it is always current. Below it, `## Log`: add each reply as a new entry at the bottom, `### @<n> · <MM-DD HH:MM> · <short title>`, with any headings inside an entry at `####`. Only headings use `@<n>`, so a search for `@<n> ` (with the space) lands on the entry; everywhere else, Status, the resume line and answer tags included, an entry is `§<n>`. Never rewrite or reorder log entries, except to tag my answers (below).\n- Status has, in this order: `### Now` (what you're doing this minute, or what you're waiting on me for); `### Open questions`; `### Next` (the steps left, each marked as mine or yours); `### Decisions` (one line each: the decision, why, who made it, its log entry); `### Done` (one line each, newest first, with its log entry). It holds only what's true now: drop finished steps from Next, move answered questions into Decisions, and rewrite a decision's line when it lands or changes (no \"Proposed\" left on something shipped). Status gets rewritten, so its items have no stable numbers: anywhere in the file, refer to them by their words, never \"question 2\" or \"Next step 6\".\n- Write for reading in Obsidian, on a phone as well as a desktop. Status → Now is a callout that says whose move it is: `> [!todo] Your move` when you wait on me, else `> [!info] Working`, with its text on the `> ` lines below. Next is a task list, `- [ ] Yours: …` and `- [ ] Mine: …`; a Yours step I've ticked counts as done, and `desk check` lists it (without the script, look for `- [x] Yours` lines in Next, `- [x] Yours, any time:` included), so handle it at your next turn as you would an answer. Done and Decisions stay plain bullets. In log entries, use:\n  - a table for a comparison or a set of results, at most three short columns, since wider ones scroll sideways on a phone;\n  - `==highlight==` on the one thing an entry needs from me, at most one per entry. The same ask goes in Status once: an open question if it's a question, a Yours step if it's an action. Now's Your move points to it in a few words (\"two open questions below\", \"the Yours step on top\") and doesn't repeat it;\n  - a `> [!warning]` callout for a risk, a blocker or a surprise I should know about;\n  - a folded `> [!example]-` callout for evidence (output, counts, what you checked), so the entry reads short and the proof is one tap away;\n  - a Mermaid `flowchart` when the big picture, a flow or its branches are clearer drawn than told; keep it to about a dozen nodes.\n- Update Status as you go, whenever part of it changes: a step finishes, a decision lands, the plan changes, a question comes up. During long work, don't go more than about ten tool calls without touching it; if I installed the nudge hook (`~/.claude/hooks/desk-nudge.sh`), it reminds you when you do.\n- When you rewrite Status, keep every answer of mine in it you haven't answered yet, including one after `>>` at the end of a line.\n- Write the file only with the Edit or Write tool, never through Bash (`cat >>`, `sed`, inline python): a Bash write needs my approval, and the prompt drags the VS Code panel to the bottom. The one exception is `desk new`, which writes only a new file. Get the time from `desk check <file>` (below), or from `date` without the script, before writing a heading or the Status line; never guess it and fix it afterwards.\n- A desk holds working notes only: never write keys, tokens, passwords or connection strings into it, nor query result rows or customer details (names, emails, phone numbers, addresses); give counts and table names instead, and say where the rows live. If I installed the nudge hook, it also refuses a desk write that looks like a key or holds an email address; it can't recognise query rows or names, so those rest on this rule.\n- Inside a desk, link only what Obsidian can open: another desk as a wikilink, `[[<file name>]]`, and a web page by its URL. Give a local file outside the vault as a path in backticks, never a link: a click on one makes Obsidian create an empty note at that path inside the vault.\n- In chat, write one line: the gist plus a VS Code line link to the new entry's `###` heading, `[entry <n>](<the file's absolute path>#L<line>)`. Take the line number (`desk line <file> <n>`, if I installed the script) after the turn's last edit to the file, since Status edits shift it. `open -a` can't open the desk at a section.\n- Ask questions in the file, not with AskUserQuestion; its prompt drags the VS Code panel to the bottom.\n- A question I send while you're working gets a one-line answer in chat at once, between tool calls, and the work carries on; the answer also goes in the next log entry. If answering takes research, give it to a background agent, keep working, and answer when it reports.\n- My inline answers start with `>>`, either on their own line or at the end of the line I'm answering: `- >> yes` under a bullet, or `- Push it? >> yes` on the same line. Only `>>` marks an answer; a line that starts with a single `>` is a callout. Write `>` lines only as callouts, never a plain blockquote, and write `>>` yourself only inside backticks. At the start of each turn, if I installed `desk` at `~/.claude/bin/desk`, run `~/.claude/bin/desk check <file>` as one call, never chained with other commands; it prints the time, my open answers (the grep below, unchanged) and Status's line numbers. Else run the grep below. The grep returns only answer lines with no ` ✓` tag, anywhere in the file, old entries included; never filter or trim its output, and read every hit plus Status. When an entry handles my answer, append ` ✓§<n>` (that entry) to the end of my line wherever it is, and to each line of a multi-line answer. In your own text, write `>>` only inside backticks and leave it out of quotes of my words, so your lines never show up as open. Treat answers you haven't handled as part of my message, which may be just `>>`. When you wait on me (a run to finish, a step to take), ask me to send `>>`, never \"r\". In the new log entry, quote a few words of each answer you handle.\n- Keep context clean: once a session has run about 15 of my turns, reached about 400k tokens of context, or had its context compacted, ask me at the next natural break (work pushed, no agent running, nothing half-done) whether to continue in a fresh session; a Handoff written before I'm ready to switch goes stale and adds noise. If I installed the nudge hook, it also reminds you, and shows me a line, when a session crosses 15 turns or 400k tokens. Only once I agree, add a log entry titled \"Handoff\": where things stand, what we tried and what surprised us (each with its evidence), uncommitted or unpushed work, running agents, open questions and any answer of mine still unhandled, my pending steps, anything from earlier entries the next session still needs, and the first next step. When the desk has passed about 2,000 lines, the Handoff starts a fresh desk instead: a new file for the same work, dated today, whose §1 is the Handoff, with a short recap, a link to the old desk and \"old §<n>\" for its entries; the old desk ends with a one-line entry linking the new file, and the resume line names the new file. The Handoff entry opens with the resume line, in backticks so I can copy it into the fresh session, naming that entry since a long desk can hold more than one: `Resume from the live desk ~/claude-replies/<file>, handoff §<n>`. Put the same line in Status → Now, and make it that turn's chat line, in backticks, with the entry link. Once a new session has picked the file up, the old session stops writing to it; until then, if I keep talking to the old session, it keeps the file and its Handoff current. The new session reads Status, the named Handoff and everything after it (`desk line <file> <n>` or `grep -n '^### @<n> '` finds its line), and the lines around each open answer; it opens an older entry only when one of those points to it. It shows the desk with `desk open` (if I installed the script), checks `git status` and `git log` before trusting what it says, continues its log numbering, and still runs the repo's own handoff, if the repo has one.\n\nFind my open answers with:\n\n```bash\ngrep -nE '(^|[^`])>>[^✓]*$' <file>\n```\n", "desk-nudge.sh": "#!/usr/bin/env bash\n# Live desk hook, one script for three hook events: a guard on desk writes and\n# two nudges. A desk is a .md file directly in ~/claude-replies, by that path\n# or the folder it links to.\n#\n# PreToolUse (Edit, Write, MultiEdit): refuses a desk write whose new text\n# looks like a key, token, password, private key or credentialed URL, or holds\n# an email address outside EMAIL_DOMAINS. It exits 2 with the kind on stderr,\n# which Claude Code hands back to Claude, and never echoes the match. It checks\n# every write, subagents included, and fails open: unreadable input or a\n# missing jq or perl lets the write through.\n#\n# The two nudges stay silent until the session first writes its desk, so\n# sessions without a desk are never nudged, and both skip subagents (agent_id\n# set), since subagents don't write the desk.\n#\n# PostToolUse (every tool): after LIMIT main-session tool calls without an\n# Edit/Write to the desk, it puts a reminder to update Status into Claude's\n# context.\n#\n# UserPromptSubmit: counts the session's prompts and reads the context size\n# from the transcript's last assistant usage. Once turns reach HANDOFF_TURNS or\n# context reaches HANDOFF_TOKENS, it tells Claude to ask the user at the next\n# natural break whether to continue in a fresh session, and to write the\n# Handoff entry only after they agree, and shows the user a systemMessage. It\n# fires at the first crossing, then again after REFIRE_TURNS more turns or\n# REFIRE_TOKENS more tokens. A missing or unreadable transcript keeps it silent.\nLIMIT=\"${DESK_NUDGE_LIMIT:-10}\"\nHANDOFF_TURNS=\"${DESK_HANDOFF_TURNS:-15}\"\nHANDOFF_TOKENS=\"${DESK_HANDOFF_TOKENS:-400000}\"\nREFIRE_TURNS=5\nREFIRE_TOKENS=100000\nSTATE_DIR=\"${TMPDIR:-/tmp}/claude-desk-nudge\"\n# Email domains the guard lets through (git remotes, commit trailers); add your\n# own mail domain here.\nEMAIL_DOMAINS=\"${DESK_GUARD_EMAIL_DOMAINS:-github.com users.noreply.github.com anthropic.com example.com}\"\n\ninput=\"$(cat)\"\nIFS=$'\\x1f' read -r session agent tool path event transcript < <(\n  jq -r '[.session_id, .agent_id, .tool_name, .tool_input.file_path, .hook_event_name, .transcript_path] | map(. // \"\") | join(\"\\u001f\")' <<<\"$input\" 2>/dev/null\n)\n\nis_desk() { # path\n  case \"$1\" in *.md) ;; *) return 1 ;; esac\n  local dir=\"${1%/*}\" real root=\"$HOME/claude-replies\"\n  [ \"$dir\" = \"$root\" ] && return 0\n  real=$(CDPATH= cd -P -- \"$dir\" 2>/dev/null && pwd -P)\n  [ -n \"$real\" ] && [ \"$real\" = \"$(CDPATH= cd -P -- \"$root\" 2>/dev/null && pwd -P)\" ] && return 0\n  return 1\n}\n\nif [ \"$event\" = PreToolUse ]; then\n  case \"$tool\" in Edit | Write | MultiEdit) ;; *) exit 0 ;; esac\n  is_desk \"$path\" || exit 0\n  # NOTE: macOS grep has no -P, so the patterns run in perl, which macOS ships.\n  # Only the new text is scanned: Edit's new_string, Write's content,\n  # MultiEdit's edits[].new_string.\n  kinds=$(jq -r '[.tool_input.new_string, .tool_input.content, (.tool_input.edits // [] | .[]? | .new_string)]\n    | map(select(type == \"string\")) | join(\"\\n\")' <<<\"$input\" 2>/dev/null |\n    DOMAINS=\"$EMAIL_DOMAINS\" perl -0777 -ne '\n      # WHY: perl reads bytes; decoded, lengths count characters, so an ellipsis\n      # is one character, not three. Invalid UTF-8 stays as bytes.\n      utf8::decode($_);\n      my @k;\n      push @k, \"an AWS access key id\" if /\\b(?:AKIA|ASIA)[0-9A-Z]{16}/;\n      push @k, \"a GitHub token\" if /\\bgh[pousr]_[A-Za-z0-9]{30,}|\\bgithub_pat_[A-Za-z0-9_]{20,}/;\n      push @k, \"a Slack token\" if /\\bxox[abprs]-[A-Za-z0-9-]{10,}/;\n      push @k, \"an Anthropic or OpenAI API key\" if /\\bsk-(?:ant-)?[A-Za-z0-9_-]{20,}/;\n      push @k, \"a private key block\" if /-----BEGIN [A-Z ]*PRIVATE KEY-----/;\n      push @k, \"credentials in a URL\" if m{[a-z][a-z0-9+.-]*://[^/\\s:@]+:[^/\\s@]+@};\n      # NOTE: a value made only of quotes, dots, ellipses, backticks, * or x is a\n      # placeholder (password=\"…\", token: ******), not a secret.\n      push @k, \"a password, secret or token assignment\"\n        if /(?:password|passwd|secret|api[_-]?key|token)[\"\\x27]?\\s*[:=]\\s*\n            (?![\\x22\\x27\\x60.*x\\x{2026}\\x{2018}\\x{2019}\\x{201C}\\x{201D}]*(?:\\s|\\z))\\S{6,}/ix;\n      my %ok = map { lc($_) => 1 } split \" \", $ENV{DOMAINS};\n      while (/[A-Za-z0-9._%+-]+@((?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,})/g) {\n        next if $ok{lc $1};\n        push @k, \"an email address\";\n        last;\n      }\n      print @k > 1 ? join(\", \", @k[0 .. $#k - 1]) . \" and $k[-1]\" : @k;\n    ' 2>/dev/null)\n  [ -n \"$kinds\" ] || exit 0\n  echo \"Live desk guard: this desk write looks like it contains $kinds. Desks hold working notes only; leave it out or describe it (counts, table names, where it lives).\" >&2\n  exit 2\nfi\n\n[ -n \"$session\" ] && [ -z \"$agent\" ] || exit 0\n\nmkdir -p \"$STATE_DIR\"\nstate=\"$STATE_DIR/$session\"\n\nif [ \"$event\" = UserPromptSubmit ]; then\n  [ -f \"$state\" ] || exit 0\n  IFS=$'\\t' read -r _ desk <\"$state\"\n  turn_state=\"$state.turns\"\n  # WHY: the rules have the desk written on the session's first turn, and this\n  # branch only runs once it exists, so the first prompt counted here is turn 2.\n  turns=1 fired_turns=0 fired_tokens=0\n  [ -f \"$turn_state\" ] && IFS=$'\\t' read -r turns fired_turns fired_tokens <\"$turn_state\"\n  turns=$((turns + 1))\n  printf '%s\\t%s\\t%s\\n' \"$turns\" \"$fired_turns\" \"$fired_tokens\" >\"$turn_state\"\n\n  [ -r \"$transcript\" ] || exit 0\n  # NOTE: transcripts pass 10 MB, and the last assistant line sits within a few\n  # KB of the end, so only the tail is read. Synthetic (all-zero) and sidechain\n  # usage lines are skipped.\n  tokens=$(tail -c 2000000 \"$transcript\" 2>/dev/null | grep '\"type\":\"assistant\"' | jq -nR '\n    [inputs | fromjson? | select(.type == \"assistant\" and .isSidechain != true)\n     | .message.usage // empty\n     | (.input_tokens // 0) + (.cache_read_input_tokens // 0) + (.cache_creation_input_tokens // 0)\n     | select(. > 0)] | last // 0' 2>/dev/null)\n  case \"$tokens\" in '' | *[!0-9]*) exit 0 ;; esac\n\n  [ \"$turns\" -ge \"$HANDOFF_TURNS\" ] || [ \"$tokens\" -ge \"$HANDOFF_TOKENS\" ] || exit 0\n  if [ \"$fired_turns\" -gt 0 ] &&\n    [ $((turns - fired_turns)) -lt \"$REFIRE_TURNS\" ] &&\n    [ $((tokens - fired_tokens)) -lt \"$REFIRE_TOKENS\" ]; then\n    exit 0\n  fi\n  printf '%s\\t%s\\t%s\\n' \"$turns\" \"$turns\" \"$tokens\" >\"$turn_state\"\n  jq -n --arg n \"$turns\" --arg k \"$(((tokens + 500) / 1000))\" --arg f \"$desk\" '{\n    systemMessage: \"Live desk: \\($n) turns, ~\\($k)k tokens. Time for a fresh session soon.\",\n    hookSpecificOutput: {\n      hookEventName: \"UserPromptSubmit\",\n      additionalContext: \"Live desk: this session has run \\($n) turns and about \\($k)k tokens of context. Per the live desk rules, at the next natural break (work pushed, no agent running, nothing half-done), ask the user whether to continue in a fresh session. Only after they agree, write the Handoff entry in \\($f) with the resume line in Status → Now.\"\n    }\n  }'\n  exit 0\nfi\n\n# A desk write arms the counter (first time) and resets it.\ncase \"$tool:$path\" in\n  Edit:\"$HOME\"/claude-replies/*.md | Write:\"$HOME\"/claude-replies/*.md)\n    printf '0\\t%s\\n' \"$path\" >\"$state\"\n    exit 0\n    ;;\nesac\n\n[ -f \"$state\" ] || exit 0\nIFS=$'\\t' read -r count desk <\"$state\"\ncount=$((count + 1))\nif [ \"$count\" -lt \"$LIMIT\" ]; then\n  printf '%s\\t%s\\n' \"$count\" \"$desk\" >\"$state\"\n  exit 0\nfi\n\nprintf '0\\t%s\\n' \"$desk\" >\"$state\"\njq -n --arg n \"$count\" --arg f \"$desk\" '{\n  hookSpecificOutput: {\n    hookEventName: \"PostToolUse\",\n    additionalContext: \"Live desk: \\($n) tool calls since your last edit to \\($f). Update its Status now (Now, plus anything finished, decided or newly open) before you go on.\"\n  }\n}'\n", "desk": "#!/usr/bin/env python3\n\"\"\"desk: the live desk's per-turn reads in one command, plus creating a desk.\n\nThe live desk rules (~/.claude/rules/live-desk.md) have the main session, every\nturn, get the time, run the rules' open-answer grep and look up line numbers in\nits desk. Chained into one shell command, those match no allow rule, so each\nturn stopped for an approval. This script does them as one allow-listed call:\n\n    desk check <file>      time, open answers, ticked Yours steps, Status's line numbers, last entry\n    desk line <file> <n>   line number of entry n\n    desk new <topic> ...   create a desk and open it in Obsidian\n    desk open <file>       show a desk in Obsidian: its open tab, else a new tab\n\nWrites to an existing desk stay on the Edit tool, never this script: Edit\nrefuses a write when the file changed since Claude read it, which catches an\nanswer typed on the phone mid-turn, and the desk guard hook (desk-nudge.sh)\nsees only Edit and Write. `desk new` is the one write, and only to a file that\ndoesn't exist yet.\n\"\"\"\n\n# WHY: macOS's own python3 is 3.9, which can't evaluate `str | None` at runtime.\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport os\nimport re\nimport subprocess\nimport sys\nfrom datetime import datetime\nfrom pathlib import Path\nfrom urllib.parse import quote\n\n# Obsidian's own CLI (1.12+), on when Settings > General > Advanced > Command\n# line interface is. DESK_OBSIDIAN_CLI points the tests at a stub.\nOBSIDIAN_CLI = os.environ.get(\"DESK_OBSIDIAN_CLI\") or \"/Applications/Obsidian.app/Contents/MacOS/obsidian-cli\"\n\n# Runs inside Obsidian through its CLI: switch to the tab already showing the\n# desk, else open it in a new tab. getViewState() also sees tabs Obsidian hasn't\n# loaded yet, and the wait covers a desk created a moment ago that the vault\n# hasn't indexed.\nSHOW_DESK_JS = (\n    \"(async () => {{ const path = {path}, ws = app.workspace; let leaf = null;\"\n    \" ws.iterateAllLeaves(l => {{ if (!leaf && l.getViewState().state?.file === path) leaf = l; }});\"\n    \" if (leaf) {{ ws.setActiveLeaf(leaf, {{ focus: true }}); await ws.revealLeaf(leaf); return 'switched'; }}\"\n    \" let file = app.vault.getFileByPath(path);\"\n    \" for (let i = 0; !file && i < 30; i++) {{ await sleep(100); file = app.vault.getFileByPath(path); }}\"\n    \" if (!file) return 'missing';\"\n    \" await ws.getLeaf('tab').openFile(file, {{ active: true }}); return 'opened'; }})()\"\n)\n\n# NOTE: copied verbatim from the rules' \"Find my open answers\" block, which stays\n# the definition; change the two together.\nOPEN_ANSWER_PATTERN = r\"(^|[^`])>>[^✓]*$\"\n\nSTATUS_SECTIONS = (\"Now\", \"Open questions\", \"Next\", \"Decisions\", \"Done\")\nSKELETON = \"\"\"# Live desk\n\n## Status · updated {stamp}\n\n### Now\n> [!info] Working\n> {now}\n\n### Open questions\nNone.\n\n### Next\n\n### Decisions\n\n### Done\n\n## Log\n\"\"\"\n\n\ndef stamp() -> str:\n    \"\"\"Local time in the rules' heading format, MM-DD HH:MM.\"\"\"\n    return datetime.now().strftime(\"%m-%d %H:%M\")\n\n\ndef die(msg: str, code: int = 1) -> None:\n    \"\"\"Print an error to stderr and exit.\"\"\"\n    print(f\"desk: {msg}\", file=sys.stderr)\n    sys.exit(code)\n\n\ndef read_lines(path: str) -> list[str]:\n    \"\"\"The desk's lines, or exit if it can't be read.\"\"\"\n    try:\n        return Path(path).read_text(encoding=\"utf-8\", errors=\"replace\").splitlines()\n    except OSError as e:\n        die(f\"can't read {path}: {e.strerror}\")\n\n\ndef headings(lines: list[str]):\n    \"\"\"Yield (line number, text) for each line outside fenced code blocks.\"\"\"\n    fenced = False\n    for no, text in enumerate(lines, 1):\n        if text.lstrip().startswith((\"```\", \"~~~\")):\n            fenced = not fenced\n        elif not fenced:\n            yield no, text\n\n\ndef open_answers(path: str) -> list[str]:\n    \"\"\"The rules' grep, run as is: its output lines, `<line>:<text>`.\"\"\"\n    env = dict(os.environ)\n    ctype = (env.get(\"LC_ALL\") or env.get(\"LC_CTYPE\") or env.get(\"LANG\") or \"\").lower()\n    if \"utf-8\" not in ctype and \"utf8\" not in ctype:\n        # WHY: [^✓] means \"any character but ✓\" only in a UTF-8 locale; in C it\n        # excludes ✓'s three bytes, so an answer holding an em dash goes unseen.\n        env[\"LC_ALL\"] = \"en_US.UTF-8\"\n    run = subprocess.run(\n        [\"/usr/bin/grep\", \"-nE\", OPEN_ANSWER_PATTERN, path], capture_output=True, env=env\n    )\n    if run.returncode > 1:\n        die(f\"grep failed: {run.stderr.decode(errors='replace').strip()}\", 2)\n    return run.stdout.decode(\"utf-8\", errors=\"replace\").splitlines()\n\n\ndef entries(lines: list[str]) -> list[tuple[int, int, bool]]:\n    \"\"\"(entry number, line, @ form) for each entry heading: `### @<n> ` or `### <n> ·`.\"\"\"\n    found = []\n    for no, text in headings(lines):\n        m = re.match(r\"### @(\\d+) |### (\\d+) ·\", text)\n        if m:\n            found.append((int(m.group(1) or m.group(2)), no, m.group(1) is not None))\n    return found\n\n\ndef cmd_check(args: argparse.Namespace) -> None:\n    \"\"\"Print the time, open answers, ticked Yours steps, Status's line numbers and the last entry.\"\"\"\n    lines = read_lines(args.file)\n    out = [f\"now: {stamp()}\"]\n    answers = open_answers(args.file)\n    out.append(f\"open answers: {len(answers) or 'none'}\")\n    out += answers\n\n    status = log = None\n    sections, ticked, current = {}, [], None\n    for no, text in headings(lines):\n        if text.startswith(\"## Log\"):\n            log = no\n            break\n        if status is None and text.startswith(\"## Status\"):\n            status = f\"line {no} {text[len('## Status'):].strip()}\".rstrip()\n        if text.startswith(\"### \"):\n            current = None\n        for name in STATUS_SECTIONS:\n            if name not in sections and re.match(rf\"### {name}\\b\", text):\n                sections[name] = no\n                current = name\n        if current == \"Next\" and re.match(r\"\\s*[-*+] \\[[xX]\\] Yours\\b\", text):\n            ticked.append(f\"{no}:{text}\")\n    out.append(f\"ticked Yours steps: {len(ticked) or 'none'}\")\n    out += ticked\n    out.append(f\"status: {status or 'missing'}\")\n    parts = [f\"{n} {sections.get(n, 'missing')}\" for n in STATUS_SECTIONS]\n    out.append(\"sections: \" + \", \".join(parts + [f\"Log {log or 'missing'}\"]))\n\n    found = entries(lines)\n    last = f\"§{found[-1][0]} at line {found[-1][1]}\" if found else \"none\"\n    out.append(f\"last entry: {last} · file: {len(lines)} lines\")\n    print(\"\\n\".join(out))\n\n\ndef cmd_line(args: argparse.Namespace) -> None:\n    \"\"\"Print the line number of entry n, preferring the `### @<n> ` form.\"\"\"\n    found = entries(read_lines(args.file))\n    for at_form in (True, False):\n        for n, no, at in found:\n            if n == args.n and at == at_form:\n                print(no)\n                return\n    die(f\"no entry {args.n} in {args.file}\")\n\n\ndef repo_name(explicit: str | None) -> str:\n    \"\"\"The desk name's repo part: --repo, else the current git repo's folder.\"\"\"\n    name = explicit\n    if not name:\n        git = subprocess.run(\n            [\"git\", \"rev-parse\", \"--path-format=absolute\", \"--git-common-dir\"],\n            capture_output=True,\n            text=True,\n        )\n        if git.returncode != 0:\n            die(\"not in a git repo; pass --repo <name>\")\n        common = Path(git.stdout.strip())\n        # WHY: the common dir's parent is the main checkout, so a worktree's desk\n        # is named for its repo, not for the worktree folder.\n        if common.name == \".git\":\n            name = common.parent.name\n        else:\n            top = subprocess.run(\n                [\"git\", \"rev-parse\", \"--show-toplevel\"], capture_output=True, text=True\n            )\n            name = Path(top.stdout.strip()).name\n    return name\n\n\ndef cmd_new(args: argparse.Namespace) -> None:\n    \"\"\"Create a desk from the rules' skeleton, open it in Obsidian, print its path.\"\"\"\n    if not re.fullmatch(r\"[a-z0-9]+(-[a-z0-9]+)*\", args.topic):\n        die(f\"topic must be kebab-case (lowercase words joined by -): {args.topic!r}\")\n    home = Path(os.environ.get(\"DESK_HOME\") or Path.home())\n    folder = home / \"claude-replies\"\n    if not folder.is_dir():\n        die(f\"no desk folder at {folder}\")\n    name = f\"{datetime.now():%Y-%m-%d}-{repo_name(args.repo)}-{args.topic}.md\"\n    path = folder / name\n    try:\n        with path.open(\"x\", encoding=\"utf-8\") as f:\n            f.write(SKELETON.format(stamp=stamp(), now=args.now))\n    except FileExistsError:\n        die(f\"{path} already exists; continue it with the Edit tool\")\n    if not args.no_open:\n        try:\n            show_in_obsidian(path)\n        except SystemExit:\n            print(\"desk: created, but not opened in Obsidian\", file=sys.stderr)\n    print(path)\n\n\ndef vault_of(path: Path) -> Path:\n    \"\"\"The Obsidian vault holding the desk: the nearest folder with .obsidian.\"\"\"\n    # WHY: ~/claude-replies is a symlink into the vault, so the vault is found\n    # from the resolved path.\n    for folder in path.resolve().parents:\n        if (folder / \".obsidian\").is_dir():\n            return folder\n    die(f\"{path} is not in an Obsidian vault\")\n\n\ndef open_tabs(vault: Path) -> set[str]:\n    \"\"\"Vault paths of the files in the vault's tabs, from Obsidian's last saved layout.\"\"\"\n    try:\n        layout = json.loads((vault / \".obsidian\" / \"workspace.json\").read_text(encoding=\"utf-8\"))\n    except (OSError, ValueError):\n        return set()\n    files, stack = set(), [layout.get(\"main\", {})]\n    while stack:\n        node = stack.pop()\n        if node.get(\"type\") == \"leaf\":\n            files.add(node.get(\"state\", {}).get(\"state\", {}).get(\"file\"))\n        stack += node.get(\"children\", [])\n    return files\n\n\ndef show_in_obsidian(path: Path) -> str:\n    \"\"\"Show the desk in Obsidian without replacing the tab in front; return what happened.\"\"\"\n    vault = vault_of(path)\n    rel = path.resolve().relative_to(vault).as_posix()\n    js = SHOW_DESK_JS.format(path=json.dumps(rel))\n    try:\n        run = subprocess.run(\n            [OBSIDIAN_CLI, f\"vault={vault.name}\", \"eval\", f\"code={js}\"],\n            capture_output=True,\n            text=True,\n            timeout=15,\n        )\n        result = run.stdout.strip().splitlines()[-1:] or [\"\"]\n    except (OSError, subprocess.TimeoutExpired):\n        result = [\"\"]\n    if result[0] == \"=> missing\":\n        die(f\"Obsidian has no {rel} in the {vault.name} vault\")\n    if result[0] in (\"=> switched\", \"=> opened\"):\n        subprocess.run([\"open\", \"-a\", \"Obsidian\"], capture_output=True)\n        return \"switched to its tab\" if result[0] == \"=> switched\" else \"opened in a new tab\"\n    # The CLI is off, or Obsidian didn't answer. `open -a Obsidian <file>` and\n    # a plain obsidian://open both load the desk into the tab in front,\n    # replacing it, so: leave an open desk where it is, else a new tab.\n    if rel in open_tabs(vault):\n        subprocess.run([\"open\", \"-a\", \"Obsidian\"], capture_output=True)\n        return (\n            \"already in a tab, not switched to: Obsidian's CLI is off \"\n            \"(Settings > General > Advanced > Command line interface)\"\n        )\n    url = f\"obsidian://open?vault={quote(vault.name)}&file={quote(rel)}&paneType=tab\"\n    if subprocess.run([\"open\", url], capture_output=True).returncode != 0:\n        die(\"open obsidian://open failed\")\n    return \"opened in a new tab\"\n\n\ndef cmd_open(args: argparse.Namespace) -> None:\n    \"\"\"Show an existing desk in Obsidian and say how.\"\"\"\n    path = Path(args.file).expanduser()\n    if not path.is_file():\n        die(f\"no desk at {path}\")\n    print(f\"{path}: {show_in_obsidian(path)}\")\n\n\ndef main() -> None:\n    \"\"\"Parse the subcommand and run it.\"\"\"\n    parser = argparse.ArgumentParser(\n        prog=\"desk\", description=\"Live desk reads (check, line) and desk creation (new).\"\n    )\n    sub = parser.add_subparsers(dest=\"cmd\", required=True)\n\n    p = sub.add_parser(\n        \"check\",\n        help=\"time, open answers, ticked Yours steps, Status line numbers, last entry\",\n        description=\"Print the time (MM-DD HH:MM), every open answer (the rules' grep, \"\n        \"as <line>:<text>), every ticked Yours step in Status's Next, Status's heading \"\n        \"line numbers, and the last entry.\",\n    )\n    p.add_argument(\"file\", help=\"the desk\")\n    p.set_defaults(func=cmd_check)\n\n    p = sub.add_parser(\n        \"line\",\n        help=\"line number of entry n\",\n        description=\"Print the line of entry n's heading (### @<n> , or the older \"\n        \"### <n> ·). Exits 1 if there is none.\",\n    )\n    p.add_argument(\"file\", help=\"the desk\")\n    p.add_argument(\"n\", type=int, help=\"entry number\")\n    p.set_defaults(func=cmd_line)\n\n    p = sub.add_parser(\n        \"new\",\n        help=\"create a desk and open it\",\n        description=\"Create <YYYY-MM-DD>-<repo>-<topic>.md in ~/claude-replies with the \"\n        \"rules' skeleton, open it in Obsidian and print its path. Refuses an existing \"\n        \"file. DESK_HOME overrides ~.\",\n    )\n    p.add_argument(\"topic\", help=\"kebab-case topic\")\n    p.add_argument(\"--repo\", help=\"repo part of the name (default: the current git repo)\")\n    p.add_argument(\"--now\", default=\"Starting.\", help=\"first Status → Now text\")\n    p.add_argument(\"--no-open\", action=\"store_true\", help=\"don't open it in Obsidian\")\n    p.set_defaults(func=cmd_new)\n\n    p = sub.add_parser(\n        \"open\",\n        help=\"show a desk in Obsidian\",\n        description=\"Switch Obsidian to the desk's tab, or open it in a new tab; the tab in \"\n        \"front is never replaced. Switching needs Obsidian's CLI (Settings > General > \"\n        \"Advanced); without it a desk that's already in a tab is left there.\",\n    )\n    p.add_argument(\"file\", help=\"the desk\")\n    p.set_defaults(func=cmd_open)\n\n    args = parser.parse_args()\n    args.func(args)\n\n\nif __name__ == \"__main__\":\n    main()\n"};
+</script>
+<script>
+(function () {
+  "use strict";
+
+  var FILES = [
+    { src: "live-desk.md", dest: "~/.claude/rules/live-desk.md" },
+    { src: "desk-nudge.sh", dest: "~/.claude/hooks/desk-nudge.sh" },
+    { src: "desk", dest: "~/.claude/bin/desk" }
+  ];
+
+  // Each published file is fetched once; the file buttons and the setup prompt share it.
+  var loads = {};
+  function load(src) {
+    // The three files are built into the page, so it also works opened from disk.
+    if (EMBED[src] != null) return Promise.resolve(EMBED[src]);
+    if (!loads[src]) {
+      loads[src] = fetch(src)
+        .then(function (r) { return r.ok ? r.text() : null; })
+        .catch(function () { return null; });
+    }
+    return loads[src];
+  }
+
+  function flash(btn, text, ms) {
+    var lbl = btn.querySelector(".lbl");
+    if (!btn.dataset.label) btn.dataset.label = lbl.textContent;
+    clearTimeout(btn._t);
+    lbl.textContent = text;
+    btn._t = setTimeout(function () {
+      lbl.textContent = btn.dataset.label;
+      btn.classList.remove("is-copied", "is-note");
+    }, ms || 2200);
+  }
+  function copied(btn) { btn.classList.remove("is-note"); btn.classList.add("is-copied"); flash(btn, "Copied"); }
+  function note(btn, text) { btn.classList.remove("is-copied"); btn.classList.add("is-note"); flash(btn, text, 5000); }
+  function selectText(el) {
+    var range = document.createRange();
+    range.selectNodeContents(el);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+  function copy(text, btn, onFail) {
+    try {
+      navigator.clipboard.writeText(text).then(function () { copied(btn); }, onFail);
+    } catch (e) { onFail(); }
+  }
+
+  // Snippet buttons copy the text of their block.
+  document.querySelectorAll("[data-copy]").forEach(function (btn) {
+    var pre = document.getElementById(btn.getAttribute("data-copy"));
+    if (!pre) return;
+    btn.addEventListener("click", function () {
+      copy(pre.textContent, btn, function () { selectText(pre); note(btn, "Selected; press Cmd+C"); });
+    });
+  });
+
+  // File buttons copy a published file. It is fetched on load so the click can copy at once.
+  document.querySelectorAll("[data-src]").forEach(function (btn) {
+    var src = btn.getAttribute("data-src");
+    var text = null;
+    load(src).then(function (t) { text = t; });
+    btn.addEventListener("click", function () {
+      var fail = function () { note(btn, "Open the link to copy"); };
+      if (text == null) { fail(); return; }
+      copy(text, btn, fail);
+    });
+  });
+
+  // File links open the file on the page: the viewer frame doesn't follow links to the page's own files.
+  var viewer = document.getElementById("file-view");
+  var viewerText = document.getElementById("file-view-text");
+  var viewerCopy = document.getElementById("file-view-copy");
+  function closeViewer() { if (viewer.close) viewer.close(); else viewer.removeAttribute("open"); }
+  document.querySelectorAll("[data-view]").forEach(function (a) {
+    a.addEventListener("click", function (e) {
+      e.preventDefault();
+      var src = a.getAttribute("data-view");
+      document.getElementById("file-view-name").textContent = src;
+      viewerText.textContent = "Loading…";
+      if (viewer.showModal) viewer.showModal(); else viewer.setAttribute("open", "");
+      load(src).then(function (t) { viewerText.textContent = t == null ? "Couldn't load " + src + "." : t; });
+    });
+  });
+  viewerCopy.addEventListener("click", function () {
+    copy(viewerText.textContent, viewerCopy, function () { selectText(viewerText); note(viewerCopy, "Selected; press Cmd+C"); });
+  });
+  document.getElementById("file-view-close").addEventListener("click", closeViewer);
+  viewer.addEventListener("click", function (e) { if (e.target === viewer) closeViewer(); });
+
+  // Links that point at a folded section open it.
+  document.querySelectorAll("[data-open]").forEach(function (a) {
+    a.addEventListener("click", function () {
+      var d = document.getElementById(a.getAttribute("data-open"));
+      if (d) d.open = true;
+    });
+  });
+
+  // The setup prompt is built here from the three published files, so the paste
+  // alone carries everything and never points at this page or a URL.
+  function sha256(text) {
+    try {
+      if (!(window.crypto && crypto.subtle && window.TextEncoder)) return Promise.resolve(null);
+      return crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)).then(function (buf) {
+        return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ("0" + b.toString(16)).slice(-2); }).join("");
+      }, function () { return null; });
+    } catch (e) { return Promise.resolve(null); }
+  }
+  function block(id) { return document.getElementById(id).textContent; }
+
+  function buildPrompt(texts, hashes) {
+    var L = [];
+    L.push("Set up the live desk for me. This message has everything you need, including three files, so don't fetch anything.");
+    L.push("");
+    L.push("The live desk is a rules file. It has you write each session's replies to a markdown file, the session's desk, in ~/claude-replies. I read the desk in Obsidian and answer inline with >>. The rules take effect from my next session.");
+    L.push("");
+    L.push("Part A is for any agent. Part B is for Claude Code only. If you are Claude Code, start by asking me once, in a single question, which of the optional extras in B2 I want. Then do the steps that apply to you.");
+    L.push("");
+    L.push("When you edit a file that already exists, merge: keep everything in it, skip entries that are already there, and never replace the whole file. Create any file or folder that doesn't exist yet. If the live desk is already installed, tell me, then replace it with the version below. Change nothing beyond the steps here.");
+    L.push("");
+    L.push("A. Any agent");
+    L.push("1. Create the folder ~/claude-replies if it doesn't exist.");
+    L.push("2. Save the rules file live-desk.md (below) where you load global instructions in every session:");
+    L.push("   - Claude Code: save it as ~/.claude/rules/live-desk.md.");
+    L.push("   - Codex: append it to ~/.codex/AGENTS.md.");
+    L.push("   - Any other agent: add it to your global instructions file.");
+    L.push("   If you aren't Claude Code, keep the text as it is, and tell me which rules name a tool or command you don't have. They name Claude Code's Edit, Write and AskUserQuestion tools, and macOS's open command.");
+    L.push("");
+    L.push("B. Claude Code only. Any other agent skips B.");
+    L.push("1. In ~/.claude/settings.json, add these entries to the permissions.allow array:");
+    L.push(block("snip-allow"));
+    L.push("2. Optional extras. Do only the ones I pick.");
+    L.push("   a. The nudge hook. It reminds you to update the desk's Status, reminds you to offer me a fresh session when one gets long, and refuses desk writes that look like a key, a password or an email address. It needs jq and perl. Save desk-nudge.sh (below) as ~/.claude/hooks/desk-nudge.sh and make it executable (chmod +x). Then merge these into the \"hooks\" object in ~/.claude/settings.json; where an event already has entries, append these to its array:");
+    L.push(block("snip-hookcfg"));
+    L.push("   b. The desk script, macOS only. It does each turn's desk checks in one allowed call, and needs python3. Save desk (below) as ~/.claude/bin/desk and make it executable (chmod +x). Then add this entry to the permissions.allow array in ~/.claude/settings.json:");
+    L.push(block("snip-allow-desk"));
+    L.push("   c. Focus view, for the Claude Code extension in VS Code. In my VS Code user settings (on macOS, ~/Library/Application Support/Code/User/settings.json), set these two keys, keeping every other setting and comment:");
+    L.push(block("snip-vscode"));
+    L.push("");
+    L.push("Checks when you're done:");
+    if (hashes.every(Boolean)) {
+      L.push("- Each file you saved as its own file matches the text below byte for byte. shasum -a 256 should print the hashes below. They match only when the file ends with a single newline after its last line, so add one if it's missing rather than rewriting the file:");
+      FILES.forEach(function (f, i) { L.push("  " + hashes[i] + "  " + f.dest); });
+      L.push("  If a hash still differs, write that file again from the text below.");
+    } else {
+      L.push("- Each file you saved as its own file matches the text below byte for byte, ending with a single newline.");
+    }
+    L.push("- Every JSON settings file you edited is still valid JSON.");
+    L.push("- If you installed the hook: bash -n ~/.claude/hooks/desk-nudge.sh");
+    L.push("- If you installed the desk script: ~/.claude/bin/desk --help");
+    L.push("");
+    L.push("The three files follow. Each file's content is every line between its opening tag line and its closing tag line.");
+    FILES.forEach(function (f, i) {
+      L.push("");
+      L.push('<file name="' + f.src + '">');
+      L.push(texts[i].replace(/\n$/, ""));
+      L.push("</file>");
+    });
+    L.push("");
+    L.push("Then tell me what you changed.");
+    return L.join("\n");
+  }
+
+  var promptText = null;
+  var promptFailed = false;
+  var status = document.getElementById("prompt-status");
+  var preview = document.getElementById("prompt-preview");
+  var FAIL_MSG = "Couldn't load the files for the prompt. Use Set it up by hand below.";
+
+  Promise.all(FILES.map(function (f) { return load(f.src); })).then(function (texts) {
+    if (texts.some(function (t) { return t == null; })) throw new Error("missing");
+    return Promise.all(texts.map(sha256)).then(function (hashes) {
+      promptText = buildPrompt(texts, hashes);
+      preview.textContent = promptText;
+    });
+  }).catch(function () {
+    promptFailed = true;
+    status.textContent = FAIL_MSG;
+    status.classList.add("is-error");
+    preview.textContent = FAIL_MSG;
+  });
+
+  document.querySelectorAll("[data-prompt]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      if (promptFailed) {
+        status.textContent = FAIL_MSG;
+        var m = document.getElementById("manual");
+        if (m) m.open = true;
+        note(btn, "Use the manual steps");
+        return;
+      }
+      if (promptText == null) { note(btn, "Still loading, try again"); return; }
+      copy(promptText, btn, function () {
+        var box = document.getElementById("prompt-box");
+        if (box) box.open = true;
+        selectText(preview);
+        note(btn, "Selected; press Cmd+C");
+      });
+    });
+  });
+})();
+</script>
+
+</body></html>
