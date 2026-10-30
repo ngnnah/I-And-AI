@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Live desk hook, one script for three hook events: a guard on desk writes and
-# two nudges. A desk is a .md file directly in ~/claude-replies or
-# ~/claude-replies-personal (personal work), by that path or the folder it
-# links to.
+# two nudges. A desk is a .md file in ~/claude-replies or
+# ~/claude-replies-personal (personal work), either directly or in a month
+# folder (YYYY-MM) directly inside one, by that path or the folder it links to.
+# A .md file in any other subfolder is not a desk.
 #
 # PreToolUse (Edit, Write, MultiEdit): refuses a desk write whose new text
 # looks like a key, token, password, private key or credentialed URL, or holds
@@ -44,6 +45,10 @@ IFS=$'\x1f' read -r session agent tool path event transcript < <(
 is_desk() { # path
   case "$1" in *.md) ;; *) return 1 ;; esac
   local dir="${1%/*}" real root
+  # NOTE: a month folder (YYYY-MM) is checked as its parent, so a desk in one
+  # counts and a desk in any other subfolder doesn't. Resolving the parent, not
+  # the month folder, also covers a month folder that doesn't exist yet.
+  case "${dir##*/}" in [0-9][0-9][0-9][0-9]-[0-9][0-9]) dir="${dir%/*}" ;; esac
   real=$(CDPATH= cd -P -- "$dir" 2>/dev/null && pwd -P)
   for root in "$HOME/claude-replies" "$HOME/claude-replies-personal"; do
     [ "$dir" = "$root" ] && return 0
@@ -134,11 +139,12 @@ if [ "$event" = UserPromptSubmit ]; then
 fi
 
 # A desk write arms the counter (first time) and resets it.
-case "$tool:$path" in
-  Edit:"$HOME"/claude-replies/*.md | Write:"$HOME"/claude-replies/*.md | \
-    Edit:"$HOME"/claude-replies-personal/*.md | Write:"$HOME"/claude-replies-personal/*.md)
-    printf '0\t%s\n' "$path" >"$state"
-    exit 0
+case "$tool" in
+  Edit | Write)
+    if is_desk "$path"; then
+      printf '0\t%s\n' "$path" >"$state"
+      exit 0
+    fi
     ;;
 esac
 

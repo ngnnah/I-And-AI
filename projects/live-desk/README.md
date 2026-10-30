@@ -4,19 +4,22 @@ My Claude Code setup, on trial since 21 Oct 2026. macOS and the VS Code extensio
 
 ## What
 
-Claude writes each session's replies to a markdown file in `~/claude-replies`, the session's live desk. A Status block on top says what's now, what's next, what's decided and what's done, and a log of every reply sits below.
+Claude writes each session's replies to a markdown file in `~/claude-replies`, the session's live desk, filed in a folder per month. A Status block on top recaps where things stand, then lists what's due now, what comes later, what's decided and what's done, and a log of every reply sits below.
 
 I read it in Obsidian and answer inline, right next to the point I'm answering. In chat, Claude posts one line with a link to the new log entry.
 
-A sample desk, `~/claude-replies/2026-10-21-dotfiles-reply-file-setup.md`:
+A sample desk, `~/claude-replies/2026-10/21-dotfiles-reply-file-setup.md`:
 
 ```markdown
 ## Status · updated 10-21 23:57
 ### Now
 > [!info] Working
-> Working out how to share this setup with the team.
-### Next
-- [ ] Yours: check that each session's Status stays current.
+> The reply file and focus view are set up.
+> I'm working out how to share the setup with the team.
+### Immediate actions
+- Mine: draft the setup notes for the team.
+### Later
+- Yours: check that each session's Status stays current.
 ### Decisions
 - Replies live in ~/claude-replies so they survive a reboot; you picked it (§2).
 ### Done
@@ -83,7 +86,7 @@ Then merge this into the `"hooks"` object in `~/.claude/settings.json`:
 ]
 ```
 
-**The desk script** does each turn's checks in one allowed call (`desk check`): the time, your open answers (the rules' grep, unchanged), the Yours steps you've ticked under Next and where Status's sections are, so Claude doesn't chain `date` and `grep` into a command that stops for an approval. `desk line` finds an entry's line. `desk new` creates a desk and shows it in Obsidian, and `desk open` shows one a session continues: both switch to the desk's tab if one is open, else open it in a new tab, and never replace the tab in front, which may be another session's desk. Switching tabs needs Obsidian 1.12 or later with its command line interface on (Settings → General → Advanced); without it, a desk already in a tab stays where it is. Writes stay on the Edit tool. It needs `python3`, which the Xcode Command Line Tools install. Copy [`desk`](desk), then:
+**The desk script** does each turn's checks in one allowed call (`desk check`): the time, your open answers (the rules' grep, unchanged), the items you've ticked in Status and where Status's sections are, so Claude doesn't chain `date` and `grep` into a command that stops for an approval. `desk line` finds an entry's line. `desk new` creates a desk in this month's folder, making the folder if it's new, and shows it in Obsidian, and `desk open` shows one a session continues: both switch to the desk's tab if one is open, else open it in a new tab, and never replace the tab in front, which may be another session's desk. Switching tabs needs Obsidian 1.12 or later with its command line interface on (Settings → General → Advanced); without it, a desk already in a tab stays where it is. Writes stay on the Edit tool. It needs `python3`, which the Xcode Command Line Tools install. Copy [`desk`](desk), then:
 
 ```bash
 mkdir -p ~/.claude/bin && pbpaste > ~/.claude/bin/desk && chmod +x ~/.claude/bin/desk
@@ -93,10 +96,11 @@ mkdir -p ~/.claude/bin && pbpaste > ~/.claude/bin/desk && chmod +x ~/.claude/bin
 
 - Answer with `>>`, on its own line under the question or at the end of the question's line: `- Push it? >> yes`.
 - Then send `>>` in chat. It's also how you tell Claude a run or step is done. Only `>>` counts as an answer: a line that starts with a single `>` is a callout, like the one under Now that says whose move it is.
-- Tick a Yours step under Next when you've done it; Claude picks it up at its next turn, like an answer.
+- What Claude needs from you is a Yours item under Immediate actions, a question or a step; answer it with `>>` like any other line. A bare yes/no item gets a checkbox instead: tick it for yes, and Claude picks the tick up at its next turn, like an answer.
 - An answer Claude has handled ends in ` ✓§<n>`, the entry that handled it. An answer without the tag is still open.
-- Add a todo anytime, in chat or in the file. It goes under Next and stays there until it's done.
-- When a session gets long, Claude asks whether to continue in a fresh one. Say yes, and it writes a Handoff entry that opens with a resume line, `Resume from the live desk ~/claude-replies/<file>, handoff §<n>`, to paste into the new session.
+- Add a todo anytime, in chat or in the file. It goes under Immediate actions or Later, by when it's due, and stays there until it's done.
+- Desks sit in a folder per month, `~/claude-replies/2026-10/29-my-repo-export-retries.md`, and a desk stays in the month it started. Link one desk from another with its month, `[[2026-10/29-my-repo-export-retries]]`, since the day alone repeats each month.
+- When a session gets long, Claude asks whether to continue in a fresh one. Say yes, and it writes a Handoff entry that opens with a resume line, `Resume from the live desk ~/claude-replies/<YYYY-MM>/<file>, handoff §<n>`, to paste into the new session.
 - Personal work keeps its desks in `~/claude-replies-personal`, so a work sync never sees them.
 
 ## Codex

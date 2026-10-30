@@ -6,16 +6,16 @@ turn, get the time, run the rules' open-answer grep and look up line numbers in
 its desk. Chained into one shell command, those match no allow rule, so each
 turn stopped for an approval. This script does them as one allow-listed call:
 
-    desk check <file>      time, open answers, ticked Yours steps, Status's line numbers, last entry
+    desk check <file>      time, open answers, ticked items, Status's line numbers, last entry
     desk line <file> <n>   line number of entry n
-    desk new <topic> ...   create a desk and open it in Obsidian
+    desk new <topic> ...   create a desk in this month's folder and open it in Obsidian
     desk open <file>       show a desk in Obsidian: its open tab, else a new tab
 
 Writes to an existing desk stay on the Edit tool, never this script: Edit
 refuses a write when the file changed since Claude read it, which catches an
 answer typed on the phone mid-turn, and the desk guard hook (desk-nudge.sh)
 sees only Edit and Write. `desk new` is the one write, and only to a file that
-doesn't exist yet.
+doesn't exist yet (plus its month folder, when that doesn't exist either).
 """
 
 # WHY: macOS's own python3 is 3.9, which can't evaluate `str | None` at runtime.
@@ -32,7 +32,7 @@ from pathlib import Path
 from urllib.parse import quote
 
 # Desk-name aliases for repo folders, for short desk names: {"my-long-repo": "MLR"}
-# names my-long-repo's desks 2026-10-28-MLR-<topic>.md. A folder not listed keeps
+# names my-long-repo's desks 2026-10/28-MLR-<topic>.md. A folder not listed keeps
 # its own name. If you add any, name them in the rules' first bullet too.
 REPO_ALIASES = {}
 
@@ -58,7 +58,16 @@ SHOW_DESK_JS = (
 # the definition; change the two together.
 OPEN_ANSWER_PATTERN = r"(^|[^`])>>[^✓]*$"
 
-STATUS_SECTIONS = ("Now", "Open questions", "Next", "Decisions", "Done")
+# Status's sections in order, each as (name, name before the rename). Desks
+# written before Immediate actions and Later existed keep Open questions and
+# Next, so check falls back to those.
+STATUS_SECTIONS = (
+    ("Now",),
+    ("Immediate actions", "Open questions"),
+    ("Later", "Next"),
+    ("Decisions",),
+    ("Done",),
+)
 SKELETON = """# Live desk
 
 ## Status · updated {stamp}
@@ -67,10 +76,10 @@ SKELETON = """# Live desk
 > [!info] Working
 > {now}
 
-### Open questions
+### Immediate actions
 None.
 
-### Next
+### Later
 
 ### Decisions
 
@@ -136,7 +145,7 @@ def entries(lines: list[str]) -> list[tuple[int, int, bool]]:
 
 
 def cmd_check(args: argparse.Namespace) -> None:
-    """Print the time, open answers, ticked Yours steps, Status's line numbers and the last entry."""
+    """Print the time, open answers, ticked items, Status's line numbers and the last entry."""
     lines = read_lines(args.file)
     out = [f"now: {stamp()}"]
     answers = open_answers(args.file)
@@ -144,25 +153,30 @@ def cmd_check(args: argparse.Namespace) -> None:
     out += answers
 
     status = log = None
-    sections, ticked, current = {}, [], None
+    sections, ticked = {}, []
     for no, text in headings(lines):
         if text.startswith("## Log"):
             log = no
             break
         if status is None and text.startswith("## Status"):
             status = f"line {no} {text[len('## Status'):].strip()}".rstrip()
-        if text.startswith("### "):
-            current = None
-        for name in STATUS_SECTIONS:
-            if name not in sections and re.match(rf"### {name}\b", text):
-                sections[name] = no
-                current = name
-        if current == "Next" and re.match(r"\s*[-*+] \[[xX]\] Yours\b", text):
+        for names in STATUS_SECTIONS:
+            for name in names:
+                if name not in sections and re.match(rf"### {name}\b", text):
+                    sections[name] = no
+        # WHY: a checkbox survives in Status only on a bare yes/no item, so a
+        # tick anywhere there is an answer, whichever section holds it.
+        if status is not None and re.match(r"\s*[-*+] \[[xX]\](\s|$)", text):
             ticked.append(f"{no}:{text}")
-    out.append(f"ticked Yours steps: {len(ticked) or 'none'}")
+    out.append(f"ticked items: {len(ticked) or 'none'}")
     out += ticked
     out.append(f"status: {status or 'missing'}")
-    parts = [f"{n} {sections.get(n, 'missing')}" for n in STATUS_SECTIONS]
+    parts = []
+    for names in STATUS_SECTIONS:
+        # NOTE: the current name wins over the old one; a section under neither
+        # is reported missing under its current name.
+        name = next((n for n in names if n in sections), names[0])
+        parts.append(f"{name} {sections.get(name, 'missing')}")
     out.append("sections: " + ", ".join(parts + [f"Log {log or 'missing'}"]))
 
     found = entries(lines)
@@ -207,15 +221,24 @@ def repo_name(explicit: str | None) -> str:
 
 
 def cmd_new(args: argparse.Namespace) -> None:
-    """Create a desk from the rules' skeleton, open it in Obsidian, print its path."""
+    """Create a desk from the rules' skeleton in its month folder, open it in Obsidian, print its path."""
     if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", args.topic):
         die(f"topic must be kebab-case (lowercase words joined by -): {args.topic!r}")
     home = Path(os.environ.get("DESK_HOME") or Path.home())
     folder = home / ("claude-replies-personal" if args.personal else "claude-replies")
     if not folder.is_dir():
         die(f"no desk folder at {folder}")
-    name = f"{datetime.now():%Y-%m-%d}-{repo_name(args.repo)}-{args.topic}.md"
-    path = folder / name
+    # NOTE: one clock read for both, so a desk made at midnight on the 1st
+    # lands in the month its own day belongs to.
+    now = datetime.now()
+    month = folder / f"{now:%Y-%m}"
+    try:
+        month.mkdir(exist_ok=True)
+    except OSError as e:
+        die(f"can't create {month}: {e.strerror}")
+    # WHY: the month folder holds the year and month, so the name starts at the day.
+    name = f"{now:%d}-{repo_name(args.repo)}-{args.topic}.md"
+    path = month / name
     try:
         with path.open("x", encoding="utf-8") as f:
             f.write(SKELETON.format(stamp=stamp(), now=args.now))
@@ -306,10 +329,11 @@ def main() -> None:
 
     p = sub.add_parser(
         "check",
-        help="time, open answers, ticked Yours steps, Status line numbers, last entry",
+        help="time, open answers, ticked items, Status line numbers, last entry",
         description="Print the time (MM-DD HH:MM), every open answer (the rules' grep, "
-        "as <line>:<text>), every ticked Yours step in Status's Next, Status's heading "
-        "line numbers, and the last entry.",
+        "as <line>:<text>), every ticked checkbox line in Status (as <line>:<text>), "
+        "Status's heading line numbers under the names found (Open questions and Next "
+        "on desks from before the rename), and the last entry.",
     )
     p.add_argument("file", help="the desk")
     p.set_defaults(func=cmd_check)
@@ -327,9 +351,10 @@ def main() -> None:
     p = sub.add_parser(
         "new",
         help="create a desk and open it",
-        description="Create <YYYY-MM-DD>-<repo>-<topic>.md in ~/claude-replies (or "
-        "~/claude-replies-personal) with the rules' skeleton, open it in Obsidian and "
-        "print its path. Refuses an existing file. DESK_HOME overrides ~ for both folders.",
+        description="Create <YYYY-MM>/<DD>-<repo>-<topic>.md in ~/claude-replies "
+        "(or ~/claude-replies-personal), making the month folder if it's missing, with "
+        "the rules' skeleton, open it in Obsidian and print its path. Refuses an existing "
+        "file. DESK_HOME overrides ~ for both folders.",
     )
     p.add_argument("topic", help="kebab-case topic")
     p.add_argument("--repo", help="repo part of the name (default: the current git repo)")
