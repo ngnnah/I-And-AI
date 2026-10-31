@@ -63,7 +63,10 @@ STATUS_SECTIONS = (
     ("Decisions",),
     ("Done",),
 )
-SKELETON = """# Live desk
+# WHY: no H1. Obsidian shows the file name as the note's title, so a heading
+# above Abstract would only repeat it.
+SKELETON = """## Abstract
+{abstract}
 
 ## Status · updated {stamp}
 
@@ -147,12 +150,14 @@ def cmd_check(args: argparse.Namespace) -> None:
     out.append(f"open answers: {len(answers) or 'none'}")
     out += answers
 
-    status = log = None
+    abstract = status = log = None
     sections, ticked = {}, []
     for no, text in headings(lines):
         if text.startswith("## Log"):
             log = no
             break
+        if abstract is None and text.startswith("## Abstract"):
+            abstract = no
         if status is None and text.startswith("## Status"):
             status = f"line {no} {text[len('## Status'):].strip()}".rstrip()
         for names in STATUS_SECTIONS:
@@ -166,7 +171,7 @@ def cmd_check(args: argparse.Namespace) -> None:
     out.append(f"ticked items: {len(ticked) or 'none'}")
     out += ticked
     out.append(f"status: {status or 'missing'}")
-    parts = []
+    parts = [f"Abstract {abstract or 'missing'}"]
     for names in STATUS_SECTIONS:
         # NOTE: the current name wins over the old one; a section under neither
         # is reported missing under its current name.
@@ -236,7 +241,7 @@ def cmd_new(args: argparse.Namespace) -> None:
     path = month / name
     try:
         with path.open("x", encoding="utf-8") as f:
-            f.write(SKELETON.format(stamp=stamp(), now=args.now))
+            f.write(SKELETON.format(abstract=args.abstract, stamp=stamp(), now=args.now))
     except FileExistsError:
         die(f"{path} already exists; continue it with the Edit tool")
     if not args.no_open:
@@ -327,7 +332,7 @@ def main() -> None:
         help="time, open answers, ticked items, Status line numbers, last entry",
         description="Print the time (MM-DD HH:MM), every open answer (the rules' grep, "
         "as <line>:<text>), every ticked checkbox line in Status (as <line>:<text>), "
-        "Status's heading line numbers under the names found (Open questions and Next "
+        "the Abstract's and Status's heading line numbers, under the names found (Open questions and Next "
         "on desks from before the rename), and the last entry.",
     )
     p.add_argument("file", help="the desk")
@@ -352,6 +357,7 @@ def main() -> None:
     )
     p.add_argument("topic", help="kebab-case topic")
     p.add_argument("--repo", help="repo part of the name (default: the current git repo)")
+    p.add_argument("--abstract", default="To come.", help="the desk's goal, one to three lines")
     p.add_argument("--now", default="Starting.", help="first Status → Now text")
     p.add_argument("--no-open", action="store_true", help="don't open it in Obsidian")
     p.set_defaults(func=cmd_new)
