@@ -108,6 +108,15 @@
       box-shadow: 0 10px 40px rgba(0, 212, 255, 0.15);
       border-color: rgba(0, 212, 255, 0.3);
     }
+    .card .thumb {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
     .card h3 {
       font-size: 1.3rem;
       letter-spacing: -0.01em;
@@ -445,8 +454,10 @@
         </a>
 
         <a href="projects/pr-spotlight/" class="card">
+          <img class="thumb" src="images/pr-spotlight-card.gif" width="560" height="365" loading="lazy"
+               alt="A spotlight GIF: a detective beekeeper holds up a honeycomb frame while a duck in a pinstripe suit leans in with a magnifying glass">
           <h3>PR Spotlight</h3>
-          <p>A picture-book deck about my free-time project: every merged PR
+          <p>A picture-book deck: every merged PR
              gets a picture of the people behind it and a lesson from its diff,
              and reviewers are the stars. 261 art styles keep it fun. The code
              is MIT licensed, ready to clone for your team.</p>
