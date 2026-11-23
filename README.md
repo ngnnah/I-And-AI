@@ -37,6 +37,8 @@ The current portfolio includes:
   Static TODO app that stores tasks in a user-owned GitHub repo through the Contents API. Zero backend required.
 - **Live desk** (`projects/live-desk`)  
   Claude Code workflow: each session keeps one markdown file with a Status block and a log of every reply, answered inline in MarkText.
+- **PR Spotlight** (`public/projects/pr-spotlight`)  
+  Picture-book deck for a READY hackathon 2026 project: every merged PR gets a picture of the people behind it and a lesson from its diff. Built from a private deck by its `build-public.py`.
 
 ## Repository layout
 

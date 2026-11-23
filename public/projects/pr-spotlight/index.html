@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Every merged PR gets a picture of the people behind it and a lesson from its diff; reviewers are the stars. A READY hackathon 2026 project by Nhat, built with Claude Code.">
+<title>PR Spotlight</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<!-- DEMO-DECK SCAFFOLD: a picture-book deck published as a claude.ai Artifact. Copy it, then replace the three sample pages.
+     The Artifact host wraps the page in doctype/html/head/body: don't add them. Self-contained: inline CSS and JS, system
+     fonts, inline SVG; no external assets.
+     Keys: ← → / space / PageUp PageDown turn the page · click the picture for the next page · type a number to jump ·
+     Home/End · N speaker notes (off by default, so they never show in a screen recording).
+
+     Contracts (tags below are written without their angle brackets, so tools that count pages skip this comment):
+     1. Every page is  section class="page" id="SLUG" data-title="Short title" . The slug stays the same when pages
+        move. Page-only CSS goes in a style element inside that section, every selector prefixed #SLUG (#cover .x{…});
+        SVG ids and @keyframes names inside a page start with its slug too.
+     2. A page's speaker notes are its last child,  aside class="notes"  holding the full spoken lines, hidden on the
+        page. N shows the current page's aside in the notes panel. Nothing outside a page lines up with pages by index,
+        so one page's diff never touches another page's lines.
+     3. #N (1-based) on load shows page N at once, with no fade, so a headless screenshot of deck.html#7 shows page 7
+        settled. Entry animations go under .page.cur (they restart on each visit), rest in their end state, stop for
+        prefers-reduced-motion and finish within about 3 s.
+     4. After every page change the engine fires `deck:show` on document (detail: {index, page}); a page script that
+        animates in JS starts and stops there. show(i) is global and 0-based. -->
+</head>
+<body>
+<style>
+  :root{
+    --round:ui-rounded,"SF Pro Rounded","Arial Rounded MT Bold","Nunito",system-ui,sans-serif;
+    --text:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --paper:#EDF2F4; --surface:#FFFFFF; --ink:#18253A; --muted:#4E5D72; --faint:#8494A8; --line:#D3DDE4;
+    --accent:#B8650F; --accent-soft:#FBEBD3; --code:#E3EAEE;
+    --shadow:0 2px 6px rgba(35,36,58,.06),0 18px 40px -20px rgba(35,36,58,.32);
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --paper:#0E1726; --surface:#16223A; --ink:#EAF0F5; --muted:#A9B8C9; --faint:#6F8197; --line:#263652;
+    --accent:#F2B04A; --accent-soft:#3A2A12; --code:#1E2C47;
+    --shadow:0 2px 6px rgba(0,0,0,.35),0 18px 40px -20px rgba(0,0,0,.75); color-scheme:dark;}}
+  :root[data-theme="dark"]{
+    --paper:#0E1726; --surface:#16223A; --ink:#EAF0F5; --muted:#A9B8C9; --faint:#6F8197; --line:#263652;
+    --accent:#F2B04A; --accent-soft:#3A2A12; --code:#1E2C47;
+    --shadow:0 2px 6px rgba(0,0,0,.35),0 18px 40px -20px rgba(0,0,0,.75); color-scheme:dark;}
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--text);-webkit-font-smoothing:antialiased;overflow:hidden}
+
+  /* the book: every page fills the screen; only the .cur page shows */
+  .book{position:fixed;inset:0}
+  .page{position:absolute;inset:0;display:flex;overflow-y:auto;
+    padding-block:calc(env(safe-area-inset-top,0px) + 28px) calc(env(safe-area-inset-bottom,0px) + 48px);
+    padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+    opacity:0;visibility:hidden;transition:opacity .4s ease,visibility 0s linear .4s}
+  .page.cur{opacity:1;visibility:visible;transition:opacity .4s ease}
+  /* WHY: a page fading out stays visible for .4s, and a later page draws on top, so it would take the next click */
+  .page:not(.cur){pointer-events:none}
+  .page>aside.notes{display:none}
+  .in{margin:auto;width:100%;display:flex;flex-direction:column;align-items:center;gap:clamp(14px,2.6vh,26px)}
+
+  /* story pages: one framed 1000x560 picture and one caption under it. The pictures keep their own colors in both themes. */
+  .art{position:relative;width:min(100%,1060px,calc((100dvh - 230px) * 16 / 9));aspect-ratio:16/9;max-width:100%;margin:0;border-radius:26px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line);flex:none;cursor:pointer}
+  .art .stag{position:absolute;right:12px;top:12px;z-index:3;font:700 clamp(10px,1vw,13px)/1 var(--round);color:#3B3326;background:rgba(255,252,242,.88);padding:.45em .8em;border-radius:999px;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+  .art svg,.art>img{display:block;width:100%;height:100%}
+  .art>img{object-fit:cover}
+  /* a real posted spotlight shown inside a story picture */
+  .frame{position:absolute;background:#fff;padding:6px;border-radius:6px;box-shadow:0 10px 30px -8px rgba(0,0,0,.45)}
+  .frame img{display:block;width:100%;border-radius:3px}
+  h1{font:800 clamp(2.4rem,6vw,4.2rem)/1.05 var(--round);letter-spacing:-.01em;text-align:center;margin:0;text-wrap:balance}
+  .cap{font:700 clamp(1.2rem,2.6vw,1.95rem)/1.25 var(--round);text-align:center;max-width:38ch;margin:0;text-wrap:balance}
+  .cap .m{color:var(--accent)}
+  /* one muted line of context under a caption, so a page reads on its own */
+  .sub{font:600 clamp(.95rem,1.55vw,1.2rem)/1.35 var(--round);color:var(--muted);text-align:center;max-width:62ch;margin:-4px 0 0;text-wrap:balance}
+  .sub a{color:var(--accent)}
+  .cap+.sub{margin-top:-8px}
+  .cap b{font-family:var(--mono);font-weight:800;color:var(--accent);letter-spacing:-.04em}
+  h1+.cap{margin-top:-6px}
+  /* SVG text */
+  .hand{font-family:"Chalkboard SE","Bradley Hand","Comic Sans MS","Segoe Print",cursive}
+  .rnd{font-family:var(--round);font-weight:800}
+
+  /* plain pages at the back: a title, a line under it, a short list */
+  .gu{width:min(100%,900px);display:flex;flex-direction:column;gap:clamp(14px,2.4vh,22px)}
+  .in.gu{align-items:stretch}
+  .gu h2{font:800 clamp(1.8rem,3.8vw,2.6rem)/1.1 var(--round);margin:0;text-wrap:balance}
+  .gu .lede{margin:0;font:600 clamp(1.05rem,1.9vw,1.3rem)/1.4 var(--round);color:var(--muted);max-width:52ch}
+  .gu .list{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:.55em;font:500 clamp(1.05rem,1.9vw,1.35rem)/1.4 var(--text)}
+  .gu code{font-family:var(--mono);font-size:.86em;background:var(--code);padding:.08em .4em;border-radius:5px;overflow-wrap:anywhere;color:var(--ink)}
+  .src{font:500 .78rem var(--mono);color:var(--muted);margin:0}
+
+  /* chrome: a thin progress line and a page count, nothing else on screen */
+  .progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:60;transition:width .3s}
+  .count{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom,0px));right:max(18px,env(safe-area-inset-right,0px));z-index:60;font:500 .74rem var(--mono);color:var(--faint);font-variant-numeric:tabular-nums}
+  .jump{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:70;opacity:0;transition:opacity .1s;pointer-events:none;background:var(--surface);color:var(--ink);border:2px solid var(--accent);border-radius:12px;padding:10px 18px;font:800 1.5rem var(--mono)}
+  .notes-panel{position:fixed;left:0;right:0;bottom:0;z-index:65;padding:14px max(20px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));background:var(--surface);border-top:3px solid var(--accent);color:var(--ink);font-size:clamp(.95rem,1.6vw,1.1rem);line-height:1.55;max-height:42vh;overflow-y:auto}
+  .notes-panel .nb{white-space:pre-line}
+  .nlab{font:600 .6rem var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .deck-instant .page,.deck-instant .progress{transition:none}
+  @media (prefers-reduced-motion:reduce){.page,.page.cur,.progress{transition:none}}
+</style>
+
+<!-- Shared drawings: the main character as one symbol, used on every page so it looks the same throughout.
+     Colors that change per page come from CSS variables on each use element (style="--shirt:#E46A4E"). -->
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <defs>
+    <!-- the keeper: yellow oilskin, sou'wester, brass lantern; the storybook pictures draw the same figure -->
+    <symbol id="hero" viewBox="0 0 120 220" overflow="visible">
+      <rect x="44" y="168" width="13" height="40" rx="6" fill="#2E3140"/><rect x="63" y="168" width="13" height="40" rx="6" fill="#2E3140"/>
+      <path d="M32 100 Q60 88 88 100 L94 176 Q60 184 26 176 Z" fill="#F2C230"/>
+      <circle cx="60" cy="70" r="24" fill="#E8B892"/>
+      <circle cx="52" cy="70" r="3" fill="#2B2A33"/><circle cx="68" cy="70" r="3" fill="#2B2A33"/>
+      <path d="M53 80 Q60 85 67 80" fill="none" stroke="#2B2A33" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M30 58 Q60 30 90 58 L98 62 Q60 56 22 62 Z" fill="#F2C230"/>
+      <line x1="92" y1="120" x2="104" y2="136" stroke="#8A6A2A" stroke-width="3"/>
+      <rect x="96" y="134" width="18" height="24" rx="4" fill="#C9973A"/><rect x="100" y="138" width="10" height="14" rx="2" fill="#FFE9A8"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="progress" id="progress"></div>
+<div class="count" id="count"></div>
+<div class="jump" id="jump"></div>
+<div class="notes-panel" id="notes-panel" hidden></div>
+
+<main class="book" id="book">
+
+  <section class="page" id="cover" data-title="PR spotlight">
+    <style>
+      /* the lamp and its beam glow, slowly, and rest at the peak */
+      #cover .glow{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:.35;
+        background:
+          radial-gradient(circle at 11% 23%,rgba(255,236,170,.85) 0,rgba(255,214,120,.35) 7%,rgba(255,200,100,0) 17%),
+          radial-gradient(ellipse 46% 20% at 40% 36%,rgba(255,220,140,.30) 0,rgba(255,210,120,0) 100%)}
+      #cover.cur .glow{animation:cover-beam 6s ease-in-out infinite}
+      @keyframes cover-beam{0%,12%{opacity:.25}42%,68%{opacity:1}100%{opacity:.25}}
+      @media (prefers-reduced-motion:reduce){#cover.cur .glow{animation:none;opacity:.6}}
+    </style>
+    <div class="in">
+      <h1>PR Spotlight</h1>
+      <figure class="art"><img src="img/art/p1.jpg" alt="A keeper in a yellow oilskin and sou'wester stands on the gallery of a red-and-white lighthouse at dusk, holding a lantern while the beam sweeps over a small harbour"><span class="glow"></span><span class="stag">Art: Mid-century gouache</span></figure>
+      <p class="cap">Every merged PR gets a picture of the people behind it, and a lesson</p>
+      <p class="sub">A READY hackathon 2026 project by Nhat, built with Claude Code</p>
+    </div>
+  </section>
+
+  <section class="page" id="reviews" data-title="Reviews">
+    <style>
+      #reviews .art::after{content:"";position:absolute;left:70%;top:6%;width:27%;height:42%;pointer-events:none;
+        background:radial-gradient(ellipse at 50% 50%,rgba(255,214,120,.55) 0%,rgba(255,190,80,.22) 45%,rgba(255,190,80,0) 72%);
+        mix-blend-mode:screen;opacity:.35}
+      #reviews.cur .art::after{animation:reviews-flicker 6s ease-in-out infinite}
+      @keyframes reviews-flicker{0%{opacity:.25}35%{opacity:.85}50%{opacity:.85}85%{opacity:.25}100%{opacity:.25}}
+      @media (prefers-reduced-motion:reduce){#reviews.cur .art::after{animation:none}}
+    </style>
+    <div class="in">
+      <figure class="art"><picture><source srcset="img/art/p2.jpg" media="(prefers-reduced-motion: reduce)"><img src="img/art/storm.gif" alt="Ukiyo-e flipbook of a night storm: the lighthouse beam guides a small sailing boat past the rocks to the harbour while the keeper in a yellow oilskin tends the great lamp; nobody on the boat looks up." style="display:block;width:100%;height:100%;object-fit:cover"></picture><span class="stag">Art: Ukiyo-e woodblock</span></figure>
+      <p class="cap"><span class="m">Reviewers</span> keep bad code off the rocks, and nobody sees them</p>
+      <p class="sub">A review catches the problem before it reaches prod</p>
+    </div>
+  </section>
+
+  <section class="page" id="promotions" data-title="Promotions">
+    <style>
+      #promotions .frame{width:26%;right:3%;bottom:4%;transform:rotate(-2deg);cursor:default}
+      @keyframes promotions-settle{from{opacity:0;transform:translateY(18px) rotate(-2deg)}to{opacity:1;transform:translateY(0) rotate(-2deg)}}
+      #promotions.cur .frame{animation:promotions-settle 1.2s cubic-bezier(.16,.84,.3,1) .4s backwards}
+      @media (prefers-reduced-motion:reduce){#promotions.cur .frame{animation:none}}
+    </style>
+    <div class="in">
+      <figure class="art">
+        <picture><source srcset="img/art/p3.jpg" media="(prefers-reduced-motion: reduce)"><img src="img/art/beam.gif" alt="Art deco flipbook: the lighthouse beam swings from the sea round onto the keeper in a yellow oilskin on the rocks, the ships raise flags, and a framed spotlight print floats on the calm sea" style="display:block;width:100%;height:100%;object-fit:cover"></picture>
+        <div class="frame"><img src="img/airflow-v3-365.jpg" alt="The posted spotlight for promotion 365"></div>
+      <span class="stag">Art: Art deco poster</span></figure>
+      <p class="cap">On a dev → main promotion, the beam turns to <span class="m">the reviewers</span></p>
+      <p class="sub">Example: a release to prod, reviewed by a teammate (the duck)</p>
+    </div>
+  </section>
+
+  <section class="page" id="gallery" data-title="Every picture is new">
+    <style>
+      #gallery .wall{position:absolute;left:37%;top:7%;width:59%;height:73%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3.2% 2.4%;align-items:center}
+      #gallery .wall .frame{position:relative;padding:min(6px,.6vw);transform:rotate(var(--r))}
+      #gallery .wall .frame.gif{box-shadow:0 0 0 3px #E8890C,0 0 18px 4px rgba(232,137,12,.55);border-radius:3px;animation:gif-glow 1.6s ease-in-out infinite alternate}
+      #gallery .wall .frame.gif .gtag{position:absolute;left:-6px;top:-8px;z-index:2;font:800 clamp(9px,1vw,13px)/1 var(--round);color:#fff;background:#E8890C;padding:.35em .6em;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+      @keyframes gif-glow{from{box-shadow:0 0 0 3px #E8890C,0 0 8px 2px rgba(232,137,12,.35)}to{box-shadow:0 0 0 3px #E8890C,0 0 22px 6px rgba(232,137,12,.7)}}
+      @media (prefers-reduced-motion:reduce){#gallery .wall .frame.gif{animation:none}}
+      #gallery .wall .lbl{display:block;font:800 clamp(8px,.95vw,13.5px)/1.15 var(--round);color:#3B3326;text-align:center;padding-top:.28em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      @keyframes gallery-hang{from{opacity:0;transform:translateY(-10px) rotate(var(--r))}to{opacity:1;transform:translateY(0) rotate(var(--r))}}
+      #gallery.cur .wall .frame{animation:gallery-hang .45s ease-out backwards;animation-delay:calc(var(--i)*.18s)}
+      @media (prefers-reduced-motion:reduce){#gallery.cur .wall .frame{animation:none}}
+    </style>
+    <div class="in">
+      <figure class="art">
+        <img src="img/art/p4.jpg" alt="The keeper in a yellow oilskin looks up in delight at a curved cream wall hung with nine small framed spotlights">
+        <div class="wall">
+        <div class="frame" style="--r:-1.4deg;--i:0"><img src="img/airflow-v3-365.jpg" alt="#365 The Duck Drives the Spike"><span class="lbl">Risograph</span></div>
+        <div class="frame" style="--r:1.2deg;--i:1"><img src="img/game-agent-163.jpg" alt="game-agent#163 One sealed crate sets sail"><span class="lbl">Siesta light</span></div>
+        <div class="frame gif" style="--r:-0.8deg;--i:2"><span class="gtag">▶ GIF</span><img src="img/airflow-v3-404.gif" alt="#404 One new frame in the hive, a looping GIF"><span class="lbl">Ink and watercolor</span></div>
+        <div class="frame" style="--r:1.6deg;--i:3"><img src="img/airflow-v3-375.jpg" alt="#375 Three Minis, one machine"><span class="lbl">Paper cutout</span></div>
+        <div class="frame" style="--r:-1.8deg;--i:4"><img src="img/airflow-v3-374.jpg" alt="#374 One Pass at the Gate"><span class="lbl">Ligne claire</span></div>
+        <div class="frame" style="--r:0.9deg;--i:5"><img src="img/airflow-v3-359.jpg" alt="#359 The Lighthouse Clears the Door"><span class="lbl">One-color gouache</span></div>
+        <div class="frame" style="--r:1.9deg;--i:6"><img src="img/airflow-v3-355.jpg" alt="#355 The Don seals the index"><span class="lbl">Flat editorial</span></div>
+        <div class="frame" style="--r:-1.1deg;--i:7"><img src="img/airflow-v3-368.jpg" alt="#368 One Key, One Room"><span class="lbl">Ukiyo-e</span></div>
+        <div class="frame" style="--r:0.7deg;--i:8"><img src="img/airflow-v3-340.jpg" alt="#340 The crane clears the drawer"><span class="lbl">Painted storybook</span></div>
+        </div>
+      <span class="stag">Art: Cut-paper collage</span></figure>
+      <p class="cap"><span class="m">261 art styles</span>, a sprinkle of fun on every PR review</p>
+      <p class="sub">Each picture takes the least-used style, and its story comes straight from the diff</p>
+    </div>
+  </section>
+
+  <section class="page" id="lesson" data-title="The lesson">
+    <style>
+      #lesson .log{position:absolute;right:3%;bottom:5%;width:41%;padding:.8em 1.1em .9em;background:#F6EBD0;color:#2A1D12;border-radius:4px 4px 6px 3px;
+        box-shadow:0 14px 30px -8px rgba(0,0,0,.6),0 2px 4px rgba(0,0,0,.3);transform:rotate(-1.2deg);
+        font:600 clamp(13px,1.75vw,25px)/1.45 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
+      #lesson .log p{margin:0 0 .35em}
+      #lesson .log p:last-child{margin:0}
+      #lesson .log .pr{display:block;font:800 .62em var(--mono);letter-spacing:.04em;color:#8A5A1E;margin-bottom:.25em}
+      #lesson .log .h{font-weight:800;font-size:1.12em;margin-bottom:.5em;border-bottom:2px solid rgba(120,80,40,.3);padding-bottom:.3em}
+      #lesson .log .k{font-weight:800}
+      #lesson .log code{font:600 .88em ui-monospace,Menlo,monospace;background:rgba(90,60,30,.12);padding:0 .25em;border-radius:3px}
+      #lesson.cur .log p{animation:lesson-write .5s cubic-bezier(.2,.7,.2,1) both}
+      #lesson.cur .log p:nth-child(1){animation-delay:.3s}
+      #lesson.cur .log p:nth-child(2){animation-delay:1.15s}
+      #lesson.cur .log p:nth-child(3){animation-delay:2s}
+      #lesson.cur .log p:nth-child(4){animation-delay:2.85s}
+      @keyframes lesson-write{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+      @media (prefers-reduced-motion:reduce){#lesson.cur .log p{animation:none}}
+    </style>
+    <div class="in">
+      <figure class="art">
+        <img src="img/art/p5.jpg" alt="The keeper in a yellow oilskin writing in a large logbook by lantern light, a ship passing in a round window">
+        <div class="log" aria-label="Example from a release: ships a release to prod; thanks to the reviewer; lesson: join on a stable key; tip: wrap sources in a dbt macro">
+          <p class="h"><span class="pr">A release PR</span>Ships a release to prod</p>
+          <p>&#x1F64F; Thanks to the reviewer</p>
+          <p>&#x1F4A1; Join on a stable key</p>
+          <p>&#x1F6E0;&#xFE0F; Wrap sources in a dbt macro</p>
+        </div>
+      <span class="stag">Art: Candlelit oil</span></figure>
+      <p class="cap">Under each picture: what it did, thanks, a lesson, a tip</p>    </div>
+  </section>
+
+  <section class="page" id="join" data-title="Join in">
+    <style>
+      #join .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:0;padding:0;list-style:none}
+      #join .chips li{font:700 clamp(1rem,1.6vw,1.35rem) var(--round);color:var(--muted);background:var(--code);border:1px solid var(--line);padding:.25em .7em;border-radius:999px}
+      #join .peek{position:absolute;left:7%;top:3%;width:25%;height:84%;border-radius:40% 40% 30% 30%/18% 18% 10% 10%;pointer-events:none;opacity:0;box-shadow:0 0 0 3px rgba(255,214,120,.75),0 0 28px 10px rgba(255,196,90,.45)}
+      #join.cur .peek{animation:join-peek 4.2s cubic-bezier(.4,0,.2,1) .5s 1 both}
+      @keyframes join-peek{0%{opacity:0;transform:scale(.97)}18%{opacity:1;transform:scale(1.015)}38%{opacity:.15;transform:scale(1)}58%{opacity:1;transform:scale(1.015)}80%,100%{opacity:0;transform:scale(1)}}
+      @media (prefers-reduced-motion:reduce){#join.cur .peek{animation:none}}
+    </style>
+    <div class="in">
+      <figure class="art"><picture><source srcset="img/art/p6.jpg" media="(prefers-reduced-motion: reduce)"><img src="img/art/hats.gif" alt="Flipbook: the keeper in a yellow oilskin tries on a sou'wester, a top hat and a sailor's cap at a round mirror, while a duck in a pinstripe suit, a fox in a trench coat, an octopus concierge and a crane watch from the doorway and cheer" style="display:block;width:100%;height:100%;object-fit:cover"></picture><span class="peek" aria-hidden="true"></span><span class="stag">Art: Little Golden Books</span></figure>
+      <p class="cap">Your face, or your animal: <span class="m">you choose</span></p>
+      <p class="sub">Everyone starts as an animal totem. Pictures go to OpenAI's image model only for people who opt in</p>
+          </div>
+  </section>
+
+  <section class="page" id="team" data-title="Your team next">
+    <style>
+      #team .glow{position:absolute;width:9%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;
+        background:radial-gradient(circle,rgba(255,236,170,.95) 0,rgba(255,200,90,.6) 22%,rgba(255,170,60,.22) 50%,rgba(255,170,60,0) 70%);opacity:1}
+      #team .g1{left:59%;top:47%}#team .g2{left:76%;top:51%}#team .g3{left:87%;top:53%}
+      @keyframes team-light{from{opacity:0;transform:translate(-50%,-50%) scale(.3)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+      #team.cur .glow{animation:team-light .8s cubic-bezier(.16,.8,.3,1) both}
+      #team.cur .g1{animation-delay:.5s}#team.cur .g2{animation-delay:1.9s}#team.cur .g3{animation-delay:3.3s}
+      @media (prefers-reduced-motion:reduce){#team.cur .glow{animation:none}}
+    </style>
+    <div class="in"><figure class="art"><img src="img/art/p7.jpg" alt="At dawn the keeper in a yellow oilskin raises a lantern on the near headland, and three far lighthouses along the coast light their lamps in answer"><i class="glow g1"></i><i class="glow g2"></i><i class="glow g3"></i><span class="stag">Art: Watercolour seascape</span></figure><p class="cap">Any team can get <span class="m">🔦 spotlights</span> on its own repos with one PR</p><p class="sub">Each team lists its repos in <code>teams/&lt;team&gt;.yaml</code>; a Claude Code prompt sets one up</p></div>
+  </section>
+
+  <section class="page" id="made" data-title="How it's made">
+    <style>
+      #made .glance{display:block;width:100%;height:auto;border-radius:14px}
+      #made .list a{color:var(--accent);overflow-wrap:anywhere}
+      #made .list{font-size:clamp(1.3rem,2.4vw,1.75rem)}
+    </style>
+    <div class="in gu">
+      <h2>How it's made</h2>
+      <img class="glance" src="img/at-a-glance.png" width="2000" height="488" alt="A PR merges, Claude writes, OpenAI draws, the team sees it">
+      <ul class="list">
+        <li>Today: one Mac and a ChatGPT seat, through the Codex CLI</li>
+        <li>Next: a Claude routine, an API key, a bot account</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  /* ENGINE: one page on screen at a time. Pages carry their own notes and CSS; nothing here is per page. */
+  const pages=[...document.querySelectorAll('.page')];
+  const prog=document.getElementById('progress'), count=document.getElementById('count');
+  const jumpEl=document.getElementById('jump'), notesEl=document.getElementById('notes-panel');
+  // Page scripts that animate in JS read this, and show their resting state when it matches.
+  const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
+  let idx=0, notesOn=false, jumpBuf='', jumpTimer=null;
+
+  // Show page n (0-based). instant skips the fade, for the #N deep link on load.
+  // CSS animations under .page.cur restart on every visit: they start when .cur is added.
+  function show(n,instant){
+    n=Math.trunc(+n); if(!Number.isFinite(n)) return;
+    idx=Math.max(0,Math.min(pages.length-1,n));
+    const root=document.documentElement;
+    if(instant) root.classList.add('deck-instant');
+    pages.forEach((p,i)=>{const on=i===idx;p.classList.toggle('cur',on);p.setAttribute('aria-hidden',on?'false':'true');});
+    prog.style.width=((idx+1)/pages.length*100)+'%';
+    count.textContent=(idx+1)+' / '+pages.length;
+    if(notesOn) renderNotes();
+    try{history.replaceState(null,'','#'+(idx+1));}catch(e){}
+    // WHY: reading offsetWidth commits the new page's style with transitions off; removing the class then starts none.
+    if(instant){void root.offsetWidth;root.classList.remove('deck-instant');}
+    document.dispatchEvent(new CustomEvent('deck:show',{detail:{index:idx,page:pages[idx]}}));
+  }
+  // A page's notes are its own <aside class="notes">: source indentation dropped, blank lines kept.
+  function notesOf(page){
+    const a=page.querySelector(':scope>aside.notes');
+    return a?a.textContent.split('\n').map(s=>s.trim()).join('\n').replace(/^\n+|\n+$/g,'').replace(/\n{3,}/g,'\n\n'):'';
+  }
+  function renderNotes(){
+    const p=pages[idx], lab=document.createElement('div'), body=document.createElement('div');
+    lab.className='nlab';lab.textContent='Notes · '+(idx+1)+' / '+pages.length+(p.dataset.title?' · '+p.dataset.title:'');
+    body.className='nb';body.textContent=notesOf(p);
+    notesEl.replaceChildren(lab,body);
+  }
+  function toggleNotes(){notesOn=!notesOn;notesEl.hidden=!notesOn;if(notesOn)renderNotes();}
+  function cancelJump(){clearTimeout(jumpTimer);jumpBuf='';jumpEl.style.opacity='0';}
+  function commitJump(){const n=parseInt(jumpBuf,10);cancelJump();if(n>=1&&n<=pages.length)show(n-1);}
+  addEventListener('keydown',e=>{
+    if(e.metaKey||e.ctrlKey||e.altKey||e.isComposing) return;
+    const t=e.target.closest?e.target:null;
+    // Keys typed into a form field on a page belong to the field.
+    if(t&&t.closest('input,textarea,select,[contenteditable]')) return;
+    if(t&&t.closest('button')&&(e.key===' '||e.key==='Enter')) return;
+    if(/^[0-9]$/.test(e.key)){e.preventDefault();jumpBuf+=e.key;jumpEl.textContent='▶ '+jumpBuf;jumpEl.style.opacity='1';clearTimeout(jumpTimer);
+      if(parseInt(jumpBuf,10)*10>pages.length)commitJump();else jumpTimer=setTimeout(commitJump,650);return;}
+    if(e.key==='Enter'&&jumpBuf){e.preventDefault();commitJump();return;}
+    if(e.key==='Escape'){cancelJump();return;}
+    if(e.key==='n'||e.key==='N'){e.preventDefault();toggleNotes();return;}
+    // WHY: a navigation key drops a half-typed number, so its timer cannot jump after the page has moved.
+    const to=['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)?idx+1:['ArrowLeft','ArrowUp','PageUp'].includes(e.key)?idx-1
+      :e.key==='Home'?0:e.key==='End'?pages.length-1:null;
+    if(to!==null){e.preventDefault();cancelJump();show(to);}
+  });
+  document.querySelectorAll('.art').forEach(a=>a.addEventListener('click',()=>show(idx+1)));
+  function fromHash(){const m=/^#(\d+)$/.exec(location.hash||'');return m?parseInt(m[1],10)-1:null;}
+  addEventListener('hashchange',()=>{const n=fromHash();if(n!==null&&n!==idx)show(n);});
+  show(fromHash() ?? 0,true);
+</script>
+
+</body>
+</html>
