@@ -38,7 +38,7 @@ The current portfolio includes:
 - **Live desk** (`projects/live-desk`)  
   Claude Code workflow: each session keeps one markdown file with a Status block and a log of every reply, answered inline in MarkText.
 - **PR Spotlight** (`public/projects/pr-spotlight`)  
-  Picture-book deck for a READY hackathon 2026 project: every merged PR gets a picture of the people behind it and a lesson from its diff. Built from a private deck by its `build-public.py`.
+  Picture-book deck: every merged PR gets a picture of the people behind it and a lesson from its diff. Code: https://github.com/ngnnah/pr-spotlight
 
 ## Repository layout
 
