@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>I And AI - Mini Projects</title>
+  <meta name="description" content="Games, learning tools and coding-agent tools built with AI, by Nhat Nguyen.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="I And AI">
+  <meta property="og:description" content="Games, learning tools and coding-agent tools built with AI, by Nhat Nguyen.">
+  <meta property="og:url" content="https://ngnnah.github.io/I-And-AI/">
+  <meta property="og:image" content="https://ngnnah.github.io/images/art/share-i-and-ai.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preload" as="image" href="/images/art/camp.webp" imagesrcset="/images/art/camp-900.webp 900w, /images/art/camp.webp 1672w" imagesizes="100vw">
   <link rel="icon" type="image/png" href="images/favicon.png">
   <style>
     :root {
@@ -34,6 +42,33 @@
       -webkit-font-smoothing: antialiased;
     }
     .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px 20px; }
+
+
+    /* ------------------------------------------- art from image-gen's site-art
+       concept, served from the home site's /images/art/. The camp sits between
+       the title and the first panel, fading into the navy; the road closes the page. */
+    .backdrop {
+      position: absolute; inset: 232px 0 auto 0; height: clamp(340px, 46vh, 440px);
+      overflow: hidden; pointer-events: none; z-index: 0;
+    }
+    .backdrop img {
+      width: 100%; height: 100%; object-fit: cover; object-position: center 45%;
+      -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 62%, transparent);
+      mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 62%, transparent);
+    }
+    .topbar, .container, .road { position: relative; z-index: 1; }
+    /* the title on plain navy, then the camp in the gap before the first panel */
+    .container > header { margin-bottom: clamp(260px, 36vh, 340px); }
+    .road {
+      height: clamp(90px, 15vw, 220px); margin-top: 8px;
+      background: url("/images/art/long-road.webp") center 45% / cover no-repeat;
+      -webkit-mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 75%, transparent);
+      mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 75%, transparent);
+    }
+    .hero .thumb {
+      display: block; width: 100%; height: auto; aspect-ratio: 21 / 9; object-fit: cover;
+      border-radius: 10px; margin-bottom: 18px; aspect-ratio: 32 / 9; object-position: center 60%;
+    }
 
     /* ------------------------------------------- top bar, shared with
        ngnnah.github.io (its css/style.css); change both together. */
@@ -305,6 +340,8 @@
     footer a:hover { text-decoration: underline; }
 
     @media (max-width: 560px) {
+      .backdrop { top: 300px; height: 260px; }
+      .container > header { margin-bottom: 220px; }
       .hero h3 { font-size: 1.7rem; }
       .hero .lede { font-size: 1rem; }
       .card { padding: 20px; }
@@ -318,6 +355,10 @@
   </style>
 </head>
 <body>
+  <div class="backdrop" aria-hidden="true">
+    <img src="/images/art/camp.webp" srcset="/images/art/camp-900.webp 900w, /images/art/camp.webp 1672w" sizes="100vw" alt="" fetchpriority="high">
+  </div>
+
   <header class="topbar">
     <div class="bar">
       <a class="brand" href="/">
@@ -348,6 +389,7 @@
       </div>
 
       <a href="projects/gaming/codenames/" class="hero">
+        <img class="thumb" src="/images/art/signal-fires.webp" alt="" width="800" height="450">
         <span class="pick">★ Pick of the bunch</span>
         <h3>Codenames</h3>
         <p class="lede">
@@ -379,6 +421,7 @@
 
       <div class="grid">
         <a href="projects/gaming/harmonies/" class="card">
+          <img class="thumb" src="/images/art/hex-valley.webp" alt="" width="800" height="450" loading="lazy">
           <h3>
             <img src="projects/gaming/harmonies/assets/harmonies-icon.svg" alt=""
                  width="26" height="26" style="border-radius:6px">
@@ -440,6 +483,7 @@
       </div>
       <div class="grid">
         <a href="projects/pokemon-math-world/" class="card">
+          <img class="thumb" src="/images/art/trail-map.webp" alt="" width="800" height="450" loading="lazy">
           <h3>Pokémon Math World <span class="star">★</span></h3>
           <p>Three difficulty tracks in one: Trainer School, Pokémon League and
              Champion's Road. Addition and subtraction to 100, multiplication,
@@ -471,6 +515,7 @@
       </div>
       <div class="grid">
         <a href="projects/live-desk/setup/" class="card">
+          <img class="thumb" src="/images/art/caravans.webp" alt="" width="800" height="450" loading="lazy">
           <h3>Live desk <span class="star">★</span></h3>
           <p>A live desk turns each coding-agent session into one live page
              (its goal, a Status of what the agent knows, is doing and will do
@@ -534,6 +579,9 @@
       </div>
     </section>
 
+  </div>
+  <div class="road" aria-hidden="true"></div>
+  <div class="container">
     <footer>
       <p>View source on <a href="https://github.com/ngnnah/I-And-AI">GitHub</a></p>
     </footer>
