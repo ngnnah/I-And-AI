@@ -35,6 +35,33 @@
     }
     .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px 20px; }
 
+    /* ------------------------------------------- top bar, shared with
+       ngnnah.github.io (its css/style.css); change both together. */
+
+    .topbar { border-bottom: 1px solid var(--edge); }
+    .topbar .bar {
+      max-width: 1000px; margin: 0 auto; padding: 14px 20px;
+      display: flex; flex-wrap: wrap; align-items: center;
+      justify-content: space-between; gap: 8px 20px;
+    }
+    .topbar a { text-decoration: none; }
+    .topbar .brand {
+      display: inline-flex; align-items: center; gap: 10px;
+      color: #fff; font-weight: 700; font-size: 0.98rem; letter-spacing: -0.01em;
+    }
+    .topbar .brand img {
+      width: 26px; height: 26px; border-radius: 6px; background: #f0f3f8; padding: 2px;
+    }
+    .topbar nav { display: flex; flex-wrap: wrap; gap: 4px 22px; }
+    .topbar nav a {
+      color: var(--mute); font-size: 0.92rem; padding: 4px 0;
+      border-bottom: 2px solid transparent;
+    }
+    .topbar nav a:hover { color: #fff; }
+    .topbar nav a[aria-current] { color: #fff; border-bottom-color: var(--accent); }
+    .topbar a:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+    @media (max-width: 640px) { .topbar nav { gap: 4px 16px; } }
+
     header { text-align: center; margin-bottom: 44px; }
     h1 {
       font-size: 2.6rem;
@@ -291,6 +318,21 @@
   </style>
 </head>
 <body>
+  <header class="topbar">
+    <div class="bar">
+      <a class="brand" href="/">
+        <img src="/images/mark-64.png" alt="" width="26" height="26">
+        Nhat Nguyen
+      </a>
+      <nav aria-label="Site">
+        <a href="/#now">Now</a>
+        <a href="/#writing">Writing</a>
+        <a href="/reading/">Reading</a>
+        <a href="/I-And-AI/" aria-current="page">I And AI</a>
+      </nav>
+    </div>
+  </header>
+
   <div class="container">
     <header>
       <h1>I And AI</h1>
