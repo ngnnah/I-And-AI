@@ -133,13 +133,15 @@
         background:
           radial-gradient(circle at 11% 23%,rgba(255,236,170,.85) 0,rgba(255,214,120,.35) 7%,rgba(255,200,100,0) 17%),
           radial-gradient(ellipse 46% 20% at 40% 36%,rgba(255,220,140,.30) 0,rgba(255,210,120,0) 100%)}
+      #cover .art{container-type:inline-size}
+      #cover .who{position:absolute;left:16.5%;top:33.5%;transform:translate(-50%,-50%);z-index:3;width:max-content;text-align:center;font:700 clamp(6px,.95cqw,11px)/1.15 var(--round);color:#3B3326;background:rgba(255,252,242,.92);padding:.3em .55em;border-radius:.7em;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,.3)}
       #cover.cur .glow{animation:cover-beam 6s ease-in-out infinite}
       @keyframes cover-beam{0%,12%{opacity:.25}42%,68%{opacity:1}100%{opacity:.25}}
       @media (prefers-reduced-motion:reduce){#cover.cur .glow{animation:none;opacity:.6}}
     </style>
     <div class="in">
       <h1>PR Spotlight</h1>
-      <figure class="art"><img src="img/art/p1.jpg" alt="A keeper in a yellow oilskin and sou'wester stands on the gallery of a red-and-white lighthouse at dusk, holding a lantern while the beam sweeps over a small harbour"><span class="glow"></span><span class="stag">Art: Mid-century gouache</span></figure>
+      <figure class="art"><img src="img/art/p1.jpg" alt="A keeper in a yellow oilskin and sou'wester stands on the gallery of a red-and-white lighthouse at dusk, holding a lantern while the beam sweeps over a small harbour"><span class="glow"></span><span class="who">keeper /<br>reviewer</span><span class="stag">Art: Mid-century gouache</span></figure>
       <p class="cap">Every merged PR gets a picture of the people behind it, and a lesson</p>
       <p class="sub">By Nhat · <a href="https://github.com/ngnnah/pr-spotlight">github.com/ngnnah/pr-spotlight</a></p>
     </div>
@@ -147,6 +149,9 @@
 
   <section class="page" id="reviews" data-title="Reviews">
     <style>
+      #reviews .art{container-type:inline-size}
+      #reviews .who{position:absolute;left:90%;top:33%;transform:translate(-50%,-50%);z-index:3;width:max-content;text-align:center;font:700 clamp(6px,.95cqw,11px)/1.15 var(--round);color:#3B3326;background:rgba(255,252,242,.92);padding:.3em .55em;border-radius:.7em;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+      @media (prefers-reduced-motion:reduce){#reviews .who{left:88%}}
       #reviews .art::after{content:"";position:absolute;left:70%;top:6%;width:27%;height:42%;pointer-events:none;
         background:radial-gradient(ellipse at 50% 50%,rgba(255,214,120,.55) 0%,rgba(255,190,80,.22) 45%,rgba(255,190,80,0) 72%);
         mix-blend-mode:screen;opacity:.35}
@@ -155,7 +160,7 @@
       @media (prefers-reduced-motion:reduce){#reviews.cur .art::after{animation:none}}
     </style>
     <div class="in">
-      <figure class="art"><picture><source srcset="img/art/p2.jpg" media="(prefers-reduced-motion: reduce)"><img src="img/art/storm.gif" alt="Ukiyo-e flipbook of a night storm: the lighthouse beam guides a small sailing boat past the rocks to the harbour while the keeper in a yellow oilskin tends the great lamp; nobody on the boat looks up." style="display:block;width:100%;height:100%;object-fit:cover"></picture><span class="stag">Art: Ukiyo-e woodblock</span></figure>
+      <figure class="art"><picture><source srcset="img/art/p2.jpg" media="(prefers-reduced-motion: reduce)"><img src="img/art/storm.gif" alt="Ukiyo-e flipbook of a night storm: the lighthouse beam guides a small sailing boat past the rocks to the harbour while the keeper in a yellow oilskin tends the great lamp; nobody on the boat looks up." style="display:block;width:100%;height:100%;object-fit:cover"></picture><span class="who">keeper /<br>reviewer</span><span class="stag">Art: Ukiyo-e woodblock</span></figure>
       <p class="cap"><span class="m">Reviewers</span> keep bad code off the rocks, and nobody sees them</p>
       <p class="sub">A review catches the problem before it reaches prod</p>
     </div>
@@ -163,6 +168,9 @@
 
   <section class="page" id="promotions" data-title="Promotions">
     <style>
+      #promotions .art{container-type:inline-size}
+      #promotions .who{position:absolute;left:22.5%;top:72%;transform:translate(-50%,-50%);z-index:3;width:max-content;text-align:center;font:700 clamp(6px,.95cqw,11px)/1.15 var(--round);color:#3B3326;background:rgba(255,252,242,.92);padding:.3em .55em;border-radius:.7em;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+      @media (prefers-reduced-motion:reduce){#promotions .who{left:30%}}
       #promotions .frame{width:26%;right:3%;bottom:4%;transform:rotate(-2deg);cursor:default}
       @keyframes promotions-settle{from{opacity:0;transform:translateY(18px) rotate(-2deg)}to{opacity:1;transform:translateY(0) rotate(-2deg)}}
       #promotions.cur .frame{animation:promotions-settle 1.2s cubic-bezier(.16,.84,.3,1) .4s backwards}
@@ -172,7 +180,7 @@
       <figure class="art">
         <picture><source srcset="img/art/p3.jpg" media="(prefers-reduced-motion: reduce)"><img src="img/art/beam.gif" alt="Art deco flipbook: the lighthouse beam swings from the sea round onto the keeper in a yellow oilskin on the rocks, the ships raise flags, and a framed spotlight print floats on the calm sea" style="display:block;width:100%;height:100%;object-fit:cover"></picture>
         <div class="frame"><img src="img/airflow-v3-365.jpg" alt="The posted spotlight for promotion 365"></div>
-      <span class="stag">Art: Art deco poster</span></figure>
+      <span class="who">keeper /<br>reviewer</span><span class="stag">Art: Art deco poster</span></figure>
       <p class="cap">On a dev → main promotion, the beam turns to <span class="m">the reviewers</span></p>
       <p class="sub">Example: a release to prod, reviewed by a teammate (the duck)</p>
     </div>
@@ -181,12 +189,12 @@
   <section class="page" id="gallery" data-title="Every picture is new">
     <style>
       #gallery .wall{position:absolute;left:37%;top:7%;width:59%;height:73%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3.2% 2.4%;align-items:center}
-      #gallery .wall .frame{position:relative;padding:min(6px,.6vw);transform:rotate(var(--r))}
-      #gallery .wall .frame.gif{box-shadow:0 0 0 3px #E8890C,0 0 18px 4px rgba(232,137,12,.55);border-radius:3px;animation:gif-glow 1.6s ease-in-out infinite alternate}
-      #gallery .wall .frame.gif .gtag{position:absolute;left:-6px;top:-8px;z-index:2;font:800 clamp(9px,1vw,13px)/1 var(--round);color:#fff;background:#E8890C;padding:.35em .6em;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,.25)}
-      @keyframes gif-glow{from{box-shadow:0 0 0 3px #E8890C,0 0 8px 2px rgba(232,137,12,.35)}to{box-shadow:0 0 0 3px #E8890C,0 0 22px 6px rgba(232,137,12,.7)}}
-      @media (prefers-reduced-motion:reduce){#gallery .wall .frame.gif{animation:none}}
-      #gallery .wall .lbl{display:block;font:800 clamp(8px,.95vw,13.5px)/1.15 var(--round);color:#3B3326;text-align:center;padding-top:.28em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      /* prints with a white mat; the deeper bottom mat holds the style's name, as on an instant photo */
+      #gallery .wall .frame{position:relative;padding:min(6px,.6vw) min(6px,.6vw) 0;transform:rotate(var(--r))}
+      /* the one moving print: an orange mat and its GIF tag say so; no glow */
+      #gallery .wall .frame.gif{background:#F6D7AE;outline:2px solid #E8890C;outline-offset:-1px}
+      #gallery .wall .frame.gif .gtag{position:absolute;left:-6px;top:-8px;z-index:2;font:800 clamp(9px,1vw,13px)/1 var(--round);color:#fff;background:#B8650F;padding:.35em .6em;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+      #gallery .wall .lbl{display:block;font:800 clamp(8px,.95vw,13.5px)/1.15 var(--round);color:#3B3326;text-align:center;padding:.35em .3em .45em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       @keyframes gallery-hang{from{opacity:0;transform:translateY(-10px) rotate(var(--r))}to{opacity:1;transform:translateY(0) rotate(var(--r))}}
       #gallery.cur .wall .frame{animation:gallery-hang .45s ease-out backwards;animation-delay:calc(var(--i)*.18s)}
       @media (prefers-reduced-motion:reduce){#gallery.cur .wall .frame{animation:none}}
@@ -206,7 +214,7 @@
         <div class="frame" style="--r:0.7deg;--i:8"><img src="img/airflow-v3-340.jpg" alt="#340 The crane clears the drawer"><span class="lbl">Painted storybook</span></div>
         </div>
       <span class="stag">Art: Cut-paper collage</span></figure>
-      <p class="cap"><span class="m">261 art styles</span>, a sprinkle of fun on every PR review</p>
+      <p class="cap"><span class="m">261 art styles and growing</span>, a sprinkle of fun on every PR review</p>
       <p class="sub">Each picture takes the least-used style, and its story comes straight from the diff</p>
     </div>
   </section>
@@ -247,7 +255,7 @@
     <style>
       #join .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:0;padding:0;list-style:none}
       #join .chips li{font:700 clamp(1rem,1.6vw,1.35rem) var(--round);color:var(--muted);background:var(--code);border:1px solid var(--line);padding:.25em .7em;border-radius:999px}
-      #join .peek{position:absolute;left:7%;top:3%;width:25%;height:84%;border-radius:40% 40% 30% 30%/18% 18% 10% 10%;pointer-events:none;opacity:0;box-shadow:0 0 0 3px rgba(255,214,120,.75),0 0 28px 10px rgba(255,196,90,.45)}
+      #join .peek{position:absolute;left:7%;top:3%;width:25%;height:84%;border-radius:40% 40% 30% 30%/18% 18% 10% 10%;pointer-events:none;opacity:0;outline:3px solid rgba(255,214,120,.75);background:radial-gradient(ellipse at 50% 45%,rgba(255,214,120,.24) 0,rgba(255,214,120,0) 72%)}
       #join.cur .peek{animation:join-peek 4.2s cubic-bezier(.4,0,.2,1) .5s 1 both}
       @keyframes join-peek{0%{opacity:0;transform:scale(.97)}18%{opacity:1;transform:scale(1.015)}38%{opacity:.15;transform:scale(1)}58%{opacity:1;transform:scale(1.015)}80%,100%{opacity:0;transform:scale(1)}}
       @media (prefers-reduced-motion:reduce){#join.cur .peek{animation:none}}

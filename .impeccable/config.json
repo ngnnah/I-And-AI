@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "nested-cards",
+        "value": "*",
+        "files": [
+          "public/projects/pr-spotlight/index.html"
+        ],
+        "createdAt": "2026-11-25T06:19:36.382Z",
+        "reason": "Claude, 2026-11-25: framed prints hung inside the deck's painted pictures, an illustration, not cards in a layout"
+      }
+    ]
+  }
+}
