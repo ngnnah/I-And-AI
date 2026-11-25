@@ -11,26 +11,21 @@
   <meta property="og:url" content="https://ngnnah.github.io/I-And-AI/">
   <meta property="og:image" content="https://ngnnah.github.io/images/art/share-i-and-ai.jpg">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="preload" as="image" href="/images/art/camp.webp" imagesrcset="/images/art/camp-900.webp 900w, /images/art/camp.webp 1672w" imagesizes="100vw">
   <link rel="icon" type="image/png" href="images/favicon.png">
   <style>
     :root {
       --accent: #00d4ff;
-      --red: #e05252;
-      --blue: #7dc4ff;      /* was #5b9dff: only 3.4:1 on its own tag chip */
-      --gold: #FFCB05;
+      --gold: #ffcb05;
       --ink: #f0f3f8;
-      --head: #ccd4e0;      /* section headings */
-      --dim: #b0b9c8;       /* body copy      — 6.5:1 on a card */
-      --mute: #adb6c6;      /* secondary text — 4.6:1 even on a tag chip */
+      --head: #ccd4e0;
+      --dim: #b0b9c8;
+      --mute: #adb6c6;
       --card: rgba(255, 255, 255, 0.07);
       --edge: rgba(255, 255, 255, 0.14);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    /* The base colour lives on html. A fixed-attachment gradient only paints
-       the viewport, so without this anything below the fold falls back to
-       white — and every card here is translucent white, so they vanish. */
-    html { background: #16213e; }
+    /* The base colour lives on html: a fixed gradient paints only the viewport. */
+    html { background: #16213e; color-scheme: dark; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -38,55 +33,27 @@
       min-height: 100vh;
       color: var(--ink);
       font-size: 16px;
-      line-height: 1.6;
+      line-height: 1.5;
       -webkit-font-smoothing: antialiased;
     }
-    .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px 20px; }
-
-
-    /* ------------------------------------------- art from image-gen's site-art
-       concept, served from the home site's /images/art/. The camp sits between
-       the title and the first panel, fading into the navy; the road closes the page. */
-    .backdrop {
-      position: absolute; inset: 232px 0 auto 0; height: clamp(340px, 46vh, 440px);
-      overflow: hidden; pointer-events: none; z-index: 0;
-    }
-    .backdrop img {
-      width: 100%; height: 100%; object-fit: cover; object-position: center 45%;
-      -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 62%, transparent);
-      mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 62%, transparent);
-    }
-    .topbar, .container, .road { position: relative; z-index: 1; }
-    /* the title on plain navy, then the camp in the gap before the first panel */
-    .container > header { margin-bottom: clamp(260px, 36vh, 340px); }
-    .road {
-      height: clamp(90px, 15vw, 220px); margin-top: 8px;
-      background: url("/images/art/long-road.webp") center 45% / cover no-repeat;
-      -webkit-mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 75%, transparent);
-      mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 75%, transparent);
-    }
-    .hero .thumb {
-      display: block; width: 100%; height: auto; aspect-ratio: 21 / 9; object-fit: cover;
-      border-radius: 10px; margin-bottom: 18px; aspect-ratio: 32 / 9; object-position: center 60%;
-    }
+    ::selection { background: rgba(0, 212, 255, 0.32); color: #fff; }
+    a { color: inherit; text-decoration: none; }
+    a:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
 
     /* ------------------------------------------- top bar, shared with
        ngnnah.github.io (its css/style.css); change both together. */
-
-    .topbar { background: rgba(22, 33, 62, 0.86); border-bottom: 1px solid var(--edge); text-align: left; }
+    .topbar { background: rgba(22, 33, 62, 0.86); border-bottom: 1px solid var(--edge); }
     .topbar .bar {
       max-width: 1000px; margin: 0 auto; padding: 12px 20px;
       display: flex; flex-wrap: wrap; align-items: center;
       justify-content: space-between; gap: 8px 20px;
     }
-    .topbar a { text-decoration: none; }
     .topbar .brand {
       display: inline-flex; align-items: center; gap: 10px;
       color: #fff; font-weight: 700; font-size: 1rem; letter-spacing: -0.01em;
     }
-    .topbar .brand img {
-      width: 28px; height: 28px; border-radius: 7px; background: #f0f3f8; padding: 2px;
-    }
+    .topbar .brand img { width: 28px; height: 28px; border-radius: 7px; background: #f0f3f8; padding: 2px; }
     .topbar nav { display: flex; flex-wrap: wrap; gap: 6px; }
     .topbar nav a {
       color: #dfe5ee; font-size: 0.95rem; font-weight: 500; padding: 6px 14px;
@@ -95,275 +62,86 @@
     }
     .topbar nav a:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
     .topbar nav a[aria-current] { color: #fff; background: rgba(0, 212, 255, 0.14); border-color: rgba(0, 212, 255, 0.5); }
-    .topbar a:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 999px; }
-    @media (max-width: 640px) { .topbar nav { gap: 4px; } .topbar nav a { font-size: 0.9rem; padding: 5px 11px; } }
+    .topbar a:focus-visible { border-radius: 999px; }
 
-    header { text-align: center; margin-bottom: 44px; }
-    h1 {
-      font-size: 2.6rem;
-      letter-spacing: -0.015em;
-      margin-bottom: 10px;
-      background: linear-gradient(90deg, #00d4ff, #7b2cbf);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    /* ------------------------------------------------------------ header:
+       the words on the left, the camp picture (image-gen's site-art, from
+       the home site's /images/art/) on the right, so it is short */
+    .intro {
+      display: grid; grid-template-columns: 1fr 440px; gap: 36px; align-items: center;
+      padding: 36px 0 32px;
     }
-    .subtitle { color: var(--mute); font-size: 1.12rem; }
-
-    /* ---------------------------------------------------- section headings */
-
-    .section { margin-bottom: 44px; }
-    .section-head {
-      display: flex;
-      align-items: baseline;
-      gap: 12px;
-      margin-bottom: 18px;
+    .intro h1 { font-size: 2.4rem; line-height: 1.15; letter-spacing: -0.015em; color: #fff; }
+    .intro .subtitle { color: var(--dim); font-size: 1.08rem; margin-top: 6px; max-width: 40ch; }
+    .jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .jump a {
+      font-size: 0.9rem; font-weight: 600; color: #fff;
+      background: #1c2a4a; border: 1px solid rgba(0, 212, 255, 0.4);
+      border-radius: 999px; padding: 5px 12px;
     }
-    .section-head h2 {
-      font-size: 0.9rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--head);
-      white-space: nowrap;
-    }
-    .section-head .count {
-      font-size: 0.85rem;
-      color: var(--mute);
-      font-variant-numeric: tabular-nums;
-    }
-    .section-head .rule {
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(90deg, var(--edge), transparent);
+    .jump a span { color: var(--mute); font-weight: 500; margin-left: 4px; font-variant-numeric: tabular-nums; }
+    .jump a:hover { background: #23365f; border-color: var(--accent); }
+    .intro img {
+      display: block; width: 100%; height: auto; aspect-ratio: 2 / 1; object-fit: cover; object-position: center 20%;
+      border-radius: 14px; border: 1px solid var(--edge);
     }
 
-    /* ------------------------------------------------------------- the grid */
+    /* ----------------------------------------------------- the catalog:
+       every project in three columns, one line each, all on one screen */
+    .catalog {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: start;
+      margin-bottom: 24px;
+    }
+    .group h2 {
+      display: flex; align-items: baseline; gap: 10px;
+      font-size: 0.9rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--head); margin: 0 0 10px 4px;
+    }
+    .group h2 span { font-size: 0.85rem; letter-spacing: 0; text-transform: none; font-weight: 500; color: var(--mute); }
+    .list { list-style: none; background: var(--card); border: 1px solid var(--edge); border-radius: 14px; overflow: hidden; }
+    .list li + li { border-top: 1px solid rgba(255, 255, 255, 0.08); }
+    .list a { display: block; padding: 12px 16px 13px; transition: background-color 0.15s; }
+    .list a:hover { background: rgba(0, 212, 255, 0.08); }
+    .list a:hover b { color: var(--accent); }
+    .list b { display: flex; align-items: baseline; gap: 6px; font-size: 1.02rem; color: #fff; }
+    .list .star { color: var(--gold); font-size: 0.8em; }
+    .list .ext { margin-left: auto; font-size: 0.78rem; font-weight: 500; color: var(--mute); white-space: nowrap; }
+    .list p { color: var(--dim); font-size: 0.9rem; line-height: 1.45; margin-top: 2px; }
+    .list small { display: block; color: var(--mute); font-size: 0.78rem; margin-top: 5px; }
+    .key { color: var(--mute); font-size: 0.85rem; margin: 0 0 8px 4px; }
+    .key .star { color: var(--gold); }
 
-    .grid {
-      display: grid;
-      /* auto-fit, not auto-fill: a section with two projects stretches them
-         across the row instead of leaving a dead track on the right. */
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
+    .road {
+      height: clamp(90px, 15vw, 220px);
+      background: url("/images/art/long-road.webp") center 45% / cover no-repeat;
+      -webkit-mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 75%, transparent);
+      mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 75%, transparent);
     }
-    /* Four games under the hero sit as a tidy 2x2 rather than 3 + an orphan. */
-    .games-panel .grid { grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); }
-    .card {
-      position: relative;
-      background: var(--card);
-      border: 1px solid var(--edge);
-      border-radius: 14px;
-      padding: 26px;
-      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-      text-decoration: none;
-      color: inherit;
-      display: flex;
-      flex-direction: column;
-    }
-    .card:focus-visible, .hero:focus-visible {
-      outline: 3px solid var(--accent);
-      outline-offset: 3px;
-    }
-    footer a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 40px rgba(0, 212, 255, 0.15);
-      border-color: rgba(0, 212, 255, 0.3);
-    }
-    .card .thumb {
-      display: block;
-      width: 100%;
-      height: auto;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
-      border-radius: 10px;
-      margin-bottom: 16px;
-    }
-    .card h3 {
-      font-size: 1.3rem;
-      letter-spacing: -0.01em;
-      margin-bottom: 10px;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .card p {
-      color: var(--dim);
-      font-size: 1rem;
-      line-height: 1.62;
-      flex: 1;
-    }
-    .meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 18px;
-      align-items: center;
-    }
-    .tag {
-      display: inline-block;
-      background: rgba(0, 212, 255, 0.16);
-      color: var(--accent);
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 0.82rem;
-      font-weight: 500;
-      white-space: nowrap;
-    }
-    .tag.plain {
-      background: rgba(255, 255, 255, 0.10);
-      color: #c3cbd8;        /* lighter than --mute: chips sit on a lighter stack */
-    }
-    .star { color: var(--gold); font-size: 0.85em; }
-    .ext {
-      color: var(--mute);
-      font-size: 0.8rem;
-      font-weight: 400;
-      margin-left: auto;
-      padding-left: 8px;
-    }
-    .card:hover .ext { color: var(--accent); }
-
-    /* ------------------------------------------------- games are a group */
-
-    .games-panel {
-      border: 1px solid rgba(91, 157, 255, 0.16);
-      border-radius: 18px;
-      padding: 22px;
-      background:
-        radial-gradient(900px 260px at 12% -10%, rgba(224, 82, 82, 0.07), transparent 65%),
-        radial-gradient(900px 260px at 88% -10%, rgba(91, 157, 255, 0.08), transparent 65%),
-        rgba(255, 255, 255, 0.018);
-    }
-    .games-panel .section-head { margin-top: 26px; }
-    .games-panel .section-head:first-child { margin-top: 0; }
-    .games-panel .card:hover {
-      box-shadow: 0 10px 40px rgba(91, 157, 255, 0.16);
-      border-color: rgba(91, 157, 255, 0.35);
-    }
-    .games-panel .tag {
-      background: rgba(91, 157, 255, 0.18);
-      color: var(--blue);
-    }
-    .games-panel .tag.plain { background: rgba(255, 255, 255, 0.10); color: #c3cbd8; }
-
-    /* ------------------------------------------------------------ the hero */
-
-    .hero {
-      position: relative;
-      display: block;
-      text-decoration: none;
-      color: inherit;
-      border: 1px solid rgba(224, 82, 82, 0.28);
-      border-radius: 14px;
-      padding: 26px 26px 22px;
-      overflow: hidden;
-      background:
-        radial-gradient(620px 240px at 0% 0%, rgba(224, 82, 82, 0.16), transparent 62%),
-        radial-gradient(620px 240px at 100% 100%, rgba(91, 157, 255, 0.16), transparent 62%),
-        rgba(255, 255, 255, 0.04);
-      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-    }
-    .hero::before {
-      content: '';
-      position: absolute;
-      inset: 0 0 auto 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--red), #9c6fc4 52%, var(--blue));
-    }
-    .hero:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 14px 50px rgba(224, 82, 82, 0.16);
-      border-color: rgba(224, 82, 82, 0.45);
-    }
-    .hero .pick {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      letter-spacing: 0.11em;
-      text-transform: uppercase;
-      color: var(--gold);
-      background: rgba(255, 203, 5, 0.12);
-      border: 1px solid rgba(255, 203, 5, 0.3);
-      padding: 4px 10px;
-      border-radius: 20px;
-      margin-bottom: 14px;
-    }
-    .hero h3 {
-      font-size: 2.3rem;
-      letter-spacing: 0.02em;
-      color: #fff;
-      margin-bottom: 8px;
-    }
-    .hero .lede {
-      color: #d2d9e4;
-      font-size: 1.08rem;
-      line-height: 1.65;
-      max-width: 62ch;
-    }
-    .modes {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 18px;
-    }
-    .mode {
-      border: 1px solid var(--edge);
-      background: rgba(255, 255, 255, 0.045);
-      border-radius: 10px;
-      padding: 10px 14px;
-      min-width: 132px;
-      flex: 1 1 132px;
-    }
-    .mode b {
-      display: block;
-      font-size: 0.95rem;
-      color: #fff;
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
-    .mode span { font-size: 0.85rem; color: var(--mute); }
-    .hero .meta { margin-top: 16px; }
-    .hero .tag { background: rgba(224, 82, 82, 0.20); color: #ff9d9d; }
-    .hero .tag.plain { background: rgba(255, 255, 255, 0.10); color: #c3cbd8; }
-
-    footer {
-      text-align: center;
-      margin: 8px 0 40px;
-      color: var(--mute);
-      font-size: 0.92rem;
-    }
-    footer a { color: var(--accent); text-decoration: none; }
+    footer { text-align: center; margin: 0 0 40px; color: var(--mute); font-size: 0.92rem; }
+    footer a { color: var(--accent); }
     footer a:hover { text-decoration: underline; }
 
-    @media (max-width: 560px) {
-      .backdrop { top: 300px; height: 260px; }
-      .container > header { margin-bottom: 220px; }
-      .hero h3 { font-size: 1.7rem; }
-      .hero .lede { font-size: 1rem; }
-      .card { padding: 20px; }
-      .hero { padding: 20px; }
-      .games-panel { padding: 16px; border-radius: 14px; }
+    @media (max-width: 860px) {
+      .intro { grid-template-columns: 1fr; gap: 20px; }
+      .intro img { order: -1; }
+      .catalog { grid-template-columns: 1fr; gap: 28px; }
+    }
+    @media (max-width: 640px) {
+      .topbar nav { gap: 4px; }
+      .topbar nav a { font-size: 0.9rem; padding: 5px 11px; }
+      .intro { padding-top: 20px; }
+      .intro h1 { font-size: 2rem; }
     }
     @media (prefers-reduced-motion: reduce) {
-      .card, .hero { transition: none; }
-      .card:hover, .hero:hover { transform: none; }
+      .list a, .topbar nav a { transition: none; }
     }
   </style>
 </head>
 <body>
-  <div class="backdrop" aria-hidden="true">
-    <img src="/images/art/camp.webp" srcset="/images/art/camp-900.webp 900w, /images/art/camp.webp 1672w" sizes="100vw" alt="" fetchpriority="high">
-  </div>
-
   <header class="topbar">
     <div class="bar">
       <a class="brand" href="/">
-        <img src="/images/mark-64.png" alt="" width="26" height="26">
+        <img src="/images/mark-64.png" alt="" width="28" height="28">
         Nhat Nguyen
       </a>
       <nav aria-label="Site">
@@ -375,217 +153,106 @@
     </div>
   </header>
 
-  <div class="container">
-    <header>
-      <h1>I And AI</h1>
-      <p class="subtitle">AI-assisted development experiments and mini-projects</p>
-    </header>
-
-    <!-- ============================================================ GAMES -->
-    <section class="section games-panel">
-      <div class="section-head">
-        <h2>Games</h2>
-        <span class="count">5 projects</span>
-        <span class="rule"></span>
+  <main class="container">
+    <section class="intro">
+      <div>
+        <h1>I And AI</h1>
+        <p class="subtitle">Twelve mini-projects I built with AI: games to play together, maths for kids, and tools for coding agents.</p>
+        <nav class="jump" aria-label="Kinds of project">
+          <a href="#games">Games<span>5</span></a>
+          <a href="#learning">Learning<span>2</span></a>
+          <a href="#tools">Tools<span>5</span></a>
+        </nav>
       </div>
-
-      <a href="projects/gaming/codenames/" class="hero">
-        <img class="thumb" src="/images/art/signal-fires.webp" alt="" width="800" height="450">
-        <span class="pick">★ Pick of the bunch</span>
-        <h3>Codenames</h3>
-        <p class="lede">
-          Two teams, two spymasters, one-word clues. The spymasters see which
-          cards belong to whom; everyone else is guessing — and one card on the
-          board ends your game on the spot. Four ways to play, real-time sync so
-          everyone shares a board over a video call, plus a clue log and game
-          history to argue over afterwards.
-        </p>
-        <div class="modes">
-          <div class="mode"><b>Words</b><span>Classic 5×5, 25 cards</span></div>
-          <div class="mode"><b>Pictures</b><span>5×4 from 280 images</span></div>
-          <div class="mode"><b>DIY</b><span>Bring your own images</span></div>
-          <div class="mode"><b>Duet</b><span>2-player co-op</span></div>
-        </div>
-        <div class="meta">
-          <span class="tag">Multiplayer</span>
-          <span class="tag plain">4 game modes</span>
-          <span class="tag plain">Real-time sync</span>
-          <span class="tag plain">Clue log &amp; history</span>
-        </div>
-      </a>
-
-      <div class="section-head">
-        <h2>More games</h2>
-        <span class="count">4</span>
-        <span class="rule"></span>
-      </div>
-
-      <div class="grid">
-        <a href="projects/gaming/harmonies/" class="card">
-          <img class="thumb" src="/images/art/hex-valley.webp" alt="" width="800" height="450" loading="lazy">
-          <h3>
-            <img src="projects/gaming/harmonies/assets/harmonies-icon.svg" alt=""
-                 width="26" height="26" style="border-radius:6px">
-            Harmonies <span class="star">★</span>
-          </h3>
-          <p>A calm solo build of the board game. Stack coloured tokens on a hex
-             board to grow trees, mountains, fields, rivers and buildings, complete
-             animal habitats, and earn suns. Auto-saves, so you can put it down
-             anytime.</p>
-          <div class="meta">
-            <span class="tag">Solo</span>
-            <span class="tag plain">Board game</span>
-            <span class="tag plain">Shared scores</span>
-          </div>
-        </a>
-
-        <a href="projects/gaming/ito/" class="card">
-          <h3>🎴 Ito</h3>
-          <p>Cooperative number game — and a good way to get to know people.
-             Everyone describes a secret number using a theme, then you put the
-             whole table in order without saying a digit.</p>
-          <div class="meta">
-            <span class="tag">Co-op</span>
-            <span class="tag plain">Over video call</span>
-          </div>
-        </a>
-
-        <a href="projects/gaming/high-society/" class="card">
-          <h3>♦ High Society</h3>
-          <p>Reiner Knizia's bidding game for 3–5 players. Compete for luxury
-             status cards with a hand of money — but whoever has the least money
-             left is thrown out before scoring.</p>
-          <div class="meta">
-            <span class="tag">3–5 players</span>
-            <span class="tag plain">Bidding</span>
-          </div>
-        </a>
-
-        <a href="projects/gaming/nanja-monja/" class="card">
-          <h3>Nanja Monja</h3>
-          <p>A real-time memory card game. Name strange creatures as they appear,
-             then race to shout the name first when one turns up again. Turn-based
-             naming phase and keyboard shortcuts.</p>
-          <div class="meta">
-            <span class="tag">Multiplayer</span>
-            <span class="tag plain">Memory</span>
-          </div>
-        </a>
-
-      </div>
+      <img src="/images/art/camp-900.webp" srcset="/images/art/camp-900.webp 900w, /images/art/camp.webp 1672w" sizes="(max-width: 860px) 100vw, 440px" width="900" height="506"
+           alt="A night camp at a mountain pass: a glowing tent, a bicycle, a board game by the fire, a castle across the valley">
     </section>
 
-    <!-- ========================================================= LEARNING -->
-    <section class="section">
-      <div class="section-head">
-        <h2>Learning</h2>
-        <span class="count">2 projects</span>
-        <span class="rule"></span>
-      </div>
-      <div class="grid">
-        <a href="projects/pokemon-math-world/" class="card">
-          <img class="thumb" src="/images/art/trail-map.webp" alt="" width="800" height="450" loading="lazy">
-          <h3>Pokémon Math World <span class="star">★</span></h3>
-          <p>Three difficulty tracks in one: Trainer School, Pokémon League and
-             Champion's Road. Addition and subtraction to 100, multiplication,
-             division and word problems, with 40+ Pokémon and saved progress.</p>
-          <div class="meta">
-            <span class="tag">Grade 1–2</span>
-            <span class="tag plain">Learning game</span>
-          </div>
-        </a>
-        <a href="projects/iron-academy/" class="card">
-          <h3>Iron Academy</h3>
-          <p>Grade 5–6 maths taught through Tony Stark's origin story, with
-             Feynman-style explanations, an SAT vocabulary builder and enough
-             gamification to keep going.</p>
-          <div class="meta">
-            <span class="tag">Grade 5–6</span>
-            <span class="tag plain">Educational</span>
-          </div>
-        </a>
-      </div>
-    </section>
+    <p class="key"><span class="star">★</span> my picks</p>
+    <div class="catalog">
+      <section class="group" id="games" aria-labelledby="games-h">
+        <h2 id="games-h">Games <span>5</span></h2>
+        <ul class="list">
+          <li><a href="projects/gaming/codenames/">
+            <b>Codenames <span class="star">★</span></b>
+            <p>The board game without the box: play in one room or remotely, nothing to set up</p>
+            <small>Multiplayer · words, pictures, your own images, Duet</small>
+          </a></li>
+          <li><a href="projects/gaming/harmonies/">
+            <b>Harmonies <span class="star">★</span></b>
+            <p>Stack coloured tokens on a hex board to grow habitats and earn suns</p>
+            <small>Solo · saves as you go</small>
+          </a></li>
+          <li><a href="projects/gaming/ito/">
+            <b>Ito</b>
+            <p>Describe a secret number through a theme, then line up the table without saying a digit</p>
+            <small>Co-op · over a video call</small>
+          </a></li>
+          <li><a href="projects/gaming/high-society/">
+            <b>High Society</b>
+            <p>Reiner Knizia's bidding game: buy luxury, but the poorest player is out</p>
+            <small>3–5 players · bidding</small>
+          </a></li>
+          <li><a href="projects/gaming/nanja-monja/">
+            <b>Nanja Monja</b>
+            <p>Name strange creatures, then race to shout the name when one comes back</p>
+            <small>Multiplayer · memory</small>
+          </a></li>
+        </ul>
+      </section>
 
-    <!-- ============================================================ TOOLS -->
-    <section class="section">
-      <div class="section-head">
-        <h2>Tools</h2>
-        <span class="count">5 projects</span>
-        <span class="rule"></span>
-      </div>
-      <div class="grid">
-        <a href="projects/live-desk/setup/" class="card">
-          <img class="thumb" src="/images/art/caravans.webp" alt="" width="800" height="450" loading="lazy">
-          <h3>Live desk <span class="star">★</span></h3>
-          <p>A live desk turns each coding-agent session into one live page
-             (its goal, a Status of what the agent knows, is doing and will do
-             next, and a log of every reply) so you can direct several
-             complicated tasks at once, catch a wrong turn early and trust what
-             comes back, without tracking anything by hand. One button copies a
-             setup prompt: paste it into your agent and it installs the rules.</p>
-          <div class="meta">
-            <span class="tag">Coding agents</span>
-            <span class="tag plain">Setup page</span>
-          </div>
-        </a>
+      <section class="group" id="learning" aria-labelledby="learning-h">
+        <h2 id="learning-h">Learning <span>2</span></h2>
+        <ul class="list">
+          <li><a href="projects/pokemon-math-world/">
+            <b>Pokémon Math World <span class="star">★</span></b>
+            <p>Three tracks, from adding to 100 to word problems, with 40+ Pokémon and saved progress</p>
+            <small>Grade 1–2</small>
+          </a></li>
+          <li><a href="projects/iron-academy/">
+            <b>Iron Academy</b>
+            <p>Grade 5–6 maths through Tony Stark's origin story, plus SAT words</p>
+            <small>Grade 5–6</small>
+          </a></li>
+        </ul>
+      </section>
 
-        <a href="projects/live-desk/" class="card">
-          <h3>The &gt;&gt; Director</h3>
-          <p>A picture-book deck about the live desk: running many Claude Code
-             sessions at once and answering each one right on its board with
-             <code>&gt;&gt;</code>.</p>
-          <div class="meta">
-            <span class="tag">Claude Code</span>
-            <span class="tag plain">Workflow deck</span>
-          </div>
-        </a>
+      <section class="group" id="tools" aria-labelledby="tools-h">
+        <h2 id="tools-h">Tools <span>5</span></h2>
+        <ul class="list">
+          <li><a href="projects/live-desk/setup/">
+            <b>Live desk <span class="star">★</span></b>
+            <p>One live page for each coding-agent session; one button copies the setup prompt</p>
+            <small>Coding agents · setup page</small>
+          </a></li>
+          <li><a href="projects/live-desk/">
+            <b>The &gt;&gt; Director</b>
+            <p>A picture-book deck about running many Claude Code sessions at once</p>
+            <small>Deck</small>
+          </a></li>
+          <li><a href="https://ngnnah.github.io/2026/11/24/pr-spotlight.html">
+            <b>PR Spotlight <span class="ext">↗ post</span></b>
+            <p>A picture for every merged PR, with a lesson from its diff; reviewers are the stars</p>
+            <small>Code review · MIT code to clone</small>
+          </a></li>
+          <li><a href="https://ngnnah.github.io/story-map/">
+            <b>Story Map <span class="ext">↗ own repo</span></b>
+            <p>Drag through a book's pages and watch each character cross its map</p>
+            <small>Reading companion</small>
+          </a></li>
+          <li><a href="projects/github-todo-app/">
+            <b>GitHub TODO App</b>
+            <p>Tasks kept in a private GitHub repo through its API; no server of its own</p>
+            <small>HTML and JS</small>
+          </a></li>
+        </ul>
+      </section>
+    </div>
+  </main>
 
-        <a href="https://ngnnah.github.io/2026/11/24/pr-spotlight.html" class="card">
-          <img class="thumb" src="images/pr-spotlight-card.gif" width="560" height="311" loading="lazy"
-               alt="Woodblock-print storm: a lighthouse beam guides a small boat past the rocks while the keeper tends the lamp">
-          <h3>PR Spotlight <span class="ext">↗ post</span></h3>
-          <p>Every merged PR
-             gets a picture of the people behind it and a lesson from its diff,
-             and reviewers are the stars. 261 art styles keep it fun. The code
-             is MIT licensed, ready to clone for your team.</p>
-          <div class="meta">
-            <span class="tag">Code review</span>
-            <span class="tag plain">Deck and code</span>
-          </div>
-        </a>
-
-        <a href="https://ngnnah.github.io/story-map/" class="card">
-          <h3>Story Map <span class="ext">↗ own repo</span></h3>
-          <p>Drag a slider through a book's page numbers and watch each
-             character move across the story's own map, leaving a trail behind
-             them. Built for <i>The Sword of Shannara</i> and the Four Lands;
-             point it at any book with a map and a JSON file.</p>
-          <div class="meta">
-            <span class="tag">Reading companion</span>
-            <span class="tag plain">Zero dependencies</span>
-          </div>
-        </a>
-
-        <a href="projects/github-todo-app/" class="card">
-          <h3>GitHub TODO App</h3>
-          <p>A client-side TODO app that uses GitHub as its backend — your tasks
-             live in a private repo, written through the GitHub API. No server of
-             its own.</p>
-          <div class="meta">
-            <span class="tag">HTML/JS</span>
-            <span class="tag plain">GitHub API</span>
-          </div>
-        </a>
-      </div>
-    </section>
-
-  </div>
   <div class="road" aria-hidden="true"></div>
-  <div class="container">
-    <footer>
-      <p>View source on <a href="https://github.com/ngnnah/I-And-AI">GitHub</a></p>
-    </footer>
-  </div>
+  <footer class="container">
+    <p>View source on <a href="https://github.com/ngnnah/I-And-AI">GitHub</a></p>
+  </footer>
 </body>
 </html>
