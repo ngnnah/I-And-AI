@@ -197,6 +197,7 @@
     }
     .pin:hover { color: #a3321f; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; transform: translate(-50%, -54%) scale(1.08); }
     .pin:focus-visible { outline: 2px solid #a3321f; outline-offset: 2px; color: #a3321f; }
+    .pin.region { width: 11.6%; font-size: clamp(13px, 1.7cqi, 24px); letter-spacing: 0.04em; }
     .map-hint { display: none; color: var(--mute); font-size: 0.85rem; margin-top: 8px; text-align: center; }
 
     /* ----------------------------------------------------- the catalog:
@@ -290,32 +291,25 @@
       </div>
     </section>
 
-    <!-- The map: image-gen's site-map v6-iandai-regions (5/5), from the home
-         site's /images/art/. Each pin sits on one of the picture's blank
-         banners; --x and --y are the banner's centre as a share of the
-         picture, measured on the 1672 x 941 original. The lists below repeat
-         every link. Same block as the home page's (css/style.css). -->
+    <!-- The map: image-gen's site-map v7-iandai-sections, from the home
+         site's /images/art/. It is navigation by region, one banner each,
+         never a single project, so new projects never need a new map; the
+         pale land at the top right is uncharted, for a region to come. Each
+         pin sits on a blank banner; --x and --y are the banner's centre as a
+         share of the picture, measured on the 1672 x 941 original. Same block
+         as the home page's (css/style.css). -->
     <section class="atlas" aria-label="Map of the projects">
       <div class="map-scroll">
         <div class="map">
           <img src="/images/art/map-i-and-ai.webp" srcset="/images/art/map-i-and-ai-960.webp 960w, /images/art/map-i-and-ai.webp 1672w"
                sizes="(max-width: 760px) 900px, min(1400px, 100vw)" width="1672" height="941" fetchpriority="high"
-               alt="A painted map of an island country in three lands: a sunny harbour of workshops on the left, a rose-coloured scholars' hill in the middle, and green games country on the right, split by bands of gold cloud, with a ship arriving from the sea">
-          <a class="pin" style="--x:16.2%;--y:41.7%" href="https://ngnnah.github.io/2026/11/24/pr-spotlight.html">PR Spotlight</a>
-          <a class="pin" style="--x:26.1%;--y:60.1%" href="projects/live-desk/setup/">Live desk</a>
-          <a class="pin" style="--x:37.2%;--y:58.8%" href="projects/live-desk/">The &gt;&gt; Director</a>
-          <a class="pin" style="--x:22.0%;--y:85.8%" href="https://ngnnah.github.io/story-map/">Story Map</a>
-          <a class="pin" style="--x:33.9%;--y:85.9%" href="projects/github-todo-app/">TODO App</a>
-          <a class="pin" style="--x:52.6%;--y:45.9%" href="projects/pokemon-math-world/">Pokémon Math</a>
-          <a class="pin" style="--x:49.7%;--y:79.3%" href="projects/iron-academy/">Iron Academy</a>
-          <a class="pin" style="--x:78.5%;--y:24.7%" href="projects/gaming/codenames/">Codenames</a>
-          <a class="pin" style="--x:74.5%;--y:46.6%" href="projects/gaming/harmonies/">Harmonies</a>
-          <a class="pin" style="--x:92.5%;--y:39.3%" href="projects/gaming/ito/">Ito</a>
-          <a class="pin" style="--x:70.8%;--y:70.0%" href="projects/gaming/high-society/">High Society</a>
-          <a class="pin" style="--x:82.5%;--y:92.8%" href="projects/gaming/nanja-monja/">Nanja Monja</a>
+               alt="A painted map of an island country in three lands: a sunny harbour of workshops on the left, a rose-coloured scholars' hill in the middle, and green games country on the right, split by bands of gold cloud, with a ship arriving from the sea and a pale uncharted land beyond">
+          <a class="pin region" style="--x:30.8%;--y:66.9%" href="#tools">Tools</a>
+          <a class="pin region" style="--x:51.6%;--y:66.9%" href="#learning">Learning</a>
+          <a class="pin region" style="--x:70.3%;--y:76.0%" href="#games">Games</a>
         </div>
       </div>
-      <p class="map-hint">Each place on the map is a link. Swipe to see the whole island.</p>
+      <p class="map-hint">Each land on the map is a link to its projects. Swipe to see the whole island.</p>
     </section>
 
     <p class="key"><span class="star">★</span> my picks</p>
