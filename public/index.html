@@ -60,10 +60,6 @@
        (blue hour dark, golden hour light); change both together. */
     :root, [data-theme="dark"] {
       --bg: #141e32;
-      --bar: #1c2b47;
-      --bar-2: #131d33;
-      --grain: 0.5;
-      --red-rgb: 217 87 59;
       --bg-2: #1b2a45;
       --wash: 20 30 50;     /* the page colour, for fades over pictures */
       --acc: 233 182 92;    /* gold, for tints and borders */
@@ -90,10 +86,6 @@
     }
     [data-theme="light"] {
       --bg: #f6ecd8;
-      --bar: #fbf3e2;
-      --bar-2: #f1e1c1;
-      --grain: 0.35;
-      --red-rgb: 196 70 43;
       --bg-2: #fcf5e7;
       --wash: 246 236 216;
       --acc: 196 136 40;
@@ -157,41 +149,9 @@
 
     /* ------------------------------------------- top bar, shared with
        ngnnah.github.io (its css/style.css); change both together. */
-    /* The top bar: the top edge of the maps. Paper with a faint grain by day, the
-       maps' indigo by night, a vermilion keyline and a scalloped gold-leaf edge
-       like the maps' cloud bands. Pinned while the page scrolls; once scrolled
-       (.scrolled, set by the theme script) it slims down and casts a soft shadow. */
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 30;
-      background: linear-gradient(180deg, var(--bar), var(--bar-2));
-      border-bottom: 1px solid rgb(var(--red-rgb) / 0.55);
-      transition: box-shadow 0.3s ease;
-    }
-    .topbar::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
-      opacity: var(--grain);
-      mix-blend-mode: multiply;
-      pointer-events: none;
-    }
-    .topbar::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: -7px;
-      height: 7px;
-      background: radial-gradient(circle at 50% 0, rgb(var(--acc) / 0.85) 0 4px, transparent 4.6px) 0 0 / 14px 7px repeat-x;
-      pointer-events: none;
-    }
-    .topbar > * { position: relative; }
-    .topbar.scrolled { box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22); }
-    .topbar .bar { transition: padding 0.3s ease; }
-    .topbar.scrolled .bar { padding-top: 7px; padding-bottom: 7px; }
+    /* pinned to the top while the page scrolls, so the theme switch is always in reach */
+    .topbar { position: sticky; top: 0; z-index: 30; background: rgb(var(--wash) / 0.86); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--edge); transition: box-shadow 0.3s ease; }
+    .topbar.scrolled { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12); }
     .topbar .bar {
       max-width: 1000px; margin: 0 auto; padding: 12px 20px;
       display: flex; flex-wrap: wrap; align-items: center;
@@ -366,7 +326,7 @@
     @media (prefers-reduced-motion: reduce) {
       .list a, .topbar nav a, .pin, .map img.map-night, .road::before, .road::after { transition: none; }
       .pin:hover { transform: translate(-50%, -54%); }
-      .topbar, .topbar .bar { transition: none; }
+      .topbar { transition: none; }
       html { scroll-behavior: auto; }
       .glow { animation: none; opacity: 0.4; }
       .needle { transition: none; }
