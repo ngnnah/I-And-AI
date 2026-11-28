@@ -31,6 +31,9 @@
           button.setAttribute("title", "Switch to " + next);
         }
       }
+      // Holiday lights from December 1 to January 31; ?season=holiday previews them.
+      var month = new Date().getMonth();
+      if (month === 11 || month === 0 || /[?&]season=holiday/.test(location.search)) root.setAttribute("data-season", "holiday");
       var chosen = null;
       try { chosen = sessionStorage.getItem("theme"); } catch (e) {}
       var hour = new Date().getHours();
@@ -152,6 +155,46 @@
     /* pinned to the top while the page scrolls, so the theme switch is always in reach */
     .topbar { position: sticky; top: 0; z-index: 30; background: rgb(var(--wash) / 0.86); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--edge); transition: box-shadow 0.3s ease; }
     .topbar.scrolled { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12); }
+    /* Holiday string lights under the top bar, from December 1 to January 31 only
+       (the theme script sets data-season; ?season=holiday previews it). Bulbs hang
+       on a sagging wire; half of them twinkle. */
+    [data-season="holiday"] .topbar::before,
+    [data-season="holiday"] .topbar::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -14px;
+      height: 14px;
+      pointer-events: none;
+      background-size: 96px 14px;
+      background-repeat: repeat-x;
+      animation: twinkle 3.2s ease-in-out infinite alternate;
+    }
+    [data-season="holiday"] .topbar::before {
+      background-image:
+        radial-gradient(circle at 12px 8px, #ff6b5e 0 3px, rgb(255 107 94 / 0.35) 3.6px, transparent 6.5px),
+        radial-gradient(circle at 60px 8px, #6fd08c 0 3px, rgb(111 208 140 / 0.35) 3.6px, transparent 6.5px),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='14'%3E%3Cpath d='M0 1 Q12 9 24 1 Q36 9 48 1 Q60 9 72 1 Q84 9 96 1' fill='none' stroke='%23c9d6c2' stroke-opacity='.45' stroke-width='1'/%3E%3C/svg%3E");
+      animation: none;
+    }
+    [data-theme="light"][data-season="holiday"] .topbar::before {
+      background-image:
+        radial-gradient(circle at 12px 8px, #e4473b 0 3px, rgb(228 71 59 / 0.3) 3.6px, transparent 6.5px),
+        radial-gradient(circle at 60px 8px, #3f9a5c 0 3px, rgb(63 154 92 / 0.3) 3.6px, transparent 6.5px),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='14'%3E%3Cpath d='M0 1 Q12 9 24 1 Q36 9 48 1 Q60 9 72 1 Q84 9 96 1' fill='none' stroke='%233c5a3f' stroke-opacity='.5' stroke-width='1'/%3E%3C/svg%3E");
+    }
+    [data-season="holiday"] .topbar::after {
+      background-image:
+        radial-gradient(circle at 36px 8px, #ffd166 0 3px, rgb(255 209 102 / 0.4) 3.6px, transparent 6.5px),
+        radial-gradient(circle at 84px 8px, #d8ecff 0 3px, rgb(216 236 255 / 0.45) 3.6px, transparent 6.5px);
+    }
+    [data-theme="light"][data-season="holiday"] .topbar::after {
+      background-image:
+        radial-gradient(circle at 36px 8px, #e0a320 0 3px, rgb(224 163 32 / 0.35) 3.6px, transparent 6.5px),
+        radial-gradient(circle at 84px 8px, #5a9bd8 0 3px, rgb(90 155 216 / 0.35) 3.6px, transparent 6.5px);
+    }
+    @keyframes twinkle { from { opacity: 0.45; } to { opacity: 1; } }
     .topbar .bar {
       max-width: 1000px; margin: 0 auto; padding: 12px 20px;
       display: flex; flex-wrap: wrap; align-items: center;
@@ -327,6 +370,7 @@
       .list a, .topbar nav a, .pin, .map img.map-night, .road::before, .road::after { transition: none; }
       .pin:hover { transform: translate(-50%, -54%); }
       .topbar { transition: none; }
+      [data-season="holiday"] .topbar::before, [data-season="holiday"] .topbar::after { animation: none; }
       html { scroll-behavior: auto; }
       .glow { animation: none; opacity: 0.4; }
       .needle { transition: none; }
