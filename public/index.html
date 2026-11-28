@@ -31,9 +31,9 @@
           button.setAttribute("title", "Switch to " + next);
         }
       }
-      // Holiday lights from December 1 to January 31; ?season=holiday previews them.
-      var month = new Date().getMonth();
-      if (month === 11 || month === 0 || /[?&]season=holiday/.test(location.search)) root.setAttribute("data-season", "holiday");
+      // Holiday lights from November 28 to January 31; ?season=holiday previews them.
+      var now = new Date(), month = now.getMonth();
+      if (month === 11 || month === 0 || (month === 10 && now.getDate() >= 28) || /[?&]season=holiday/.test(location.search)) root.setAttribute("data-season", "holiday");
       var chosen = null;
       try { chosen = sessionStorage.getItem("theme"); } catch (e) {}
       var hour = new Date().getHours();
@@ -155,7 +155,7 @@
     /* pinned to the top while the page scrolls, so the theme switch is always in reach */
     .topbar { position: sticky; top: 0; z-index: 30; background: rgb(var(--wash) / 0.86); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--edge); transition: box-shadow 0.3s ease; }
     .topbar.scrolled { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12); }
-    /* Holiday string lights under the top bar, from December 1 to January 31 only
+    /* Holiday string lights under the top bar, from November 28 to January 31 only
        (the theme script sets data-season; ?season=holiday previews it). Bulbs hang
        on a sagging wire; half of them twinkle. */
     [data-season="holiday"] .topbar::before,
