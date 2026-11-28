@@ -180,25 +180,76 @@
 
     /* ------------------------------------------------------------ the map:
        same block as the home page's css/style.css; change both together */
-    html { overflow-x: clip; }
+    html { overflow-x: clip; scroll-behavior: smooth; }
     .atlas { width: min(1400px, calc(100vw - 48px)); margin: 0 calc(50% - min(700px, 50vw - 24px)) 36px; }
     .map {
       position: relative; container-type: inline-size; border-radius: 14px; overflow: hidden;
       box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35), 0 0 0 1px var(--edge);
     }
     .map img { display: block; width: 100%; height: auto; }
+    /* the night map lies over the day one and fades in with the dark theme */
+    .map img.map-night { position: absolute; inset: 0; height: 100%; opacity: 0; transition: opacity 1.2s ease; }
+    [data-theme="dark"] .map img.map-night { opacity: 1; }
     .pin {
       position: absolute; left: var(--x); top: var(--y); transform: translate(-50%, -54%);
       width: 8.4%; padding: 0.35% 0; text-align: center; white-space: nowrap;
       font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
       font-style: italic; font-weight: 700; font-size: clamp(10px, 1.08cqi, 16px);
       line-height: 1.1; letter-spacing: 0.01em; color: #3b2414; border-radius: 6px;
-      transition: color 0.2s, transform 0.2s;
+      transition: color 0.2s, transform 0.2s, box-shadow 0.25s;
     }
     .pin:hover { color: #a3321f; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; transform: translate(-50%, -54%) scale(1.08); }
     .pin:focus-visible { outline: 2px solid #a3321f; outline-offset: 2px; color: #a3321f; }
     .pin.region { width: 11.6%; font-size: clamp(13px, 1.7cqi, 24px); letter-spacing: 0.04em; }
     .map-hint { display: none; color: var(--mute); font-size: 0.85rem; margin-top: 8px; text-align: center; }
+
+    /* the map's small motions (the script is js/main.js here, the page's last script on I And AI) */
+    /* lights that breathe: soft glows on the painted lamps, fires and windows */
+    .glow {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      width: var(--w);
+      height: var(--h);
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      background: radial-gradient(closest-side, rgb(255 205 120 / 0.7), rgb(255 160 70 / 0.22) 55%, transparent);
+      opacity: 0.2;
+      animation: breathe var(--t, 6s) ease-in-out var(--d, 0s) infinite;
+    }
+    @keyframes breathe {
+      0%, 100% { opacity: 0.15; scale: 0.92; }
+      50% { opacity: 0.75; scale: 1.06; }
+    }
+    /* the traveller: an overlay in picture units, so it scales with the map */
+    .route { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; mix-blend-mode: screen; }
+    .route path { fill: none; stroke: rgb(255 205 120); stroke-linecap: round; }
+    .route .halo { fill: rgb(255 190 100 / 0.35); }
+    .route .dot { fill: rgb(255 244 214); }
+    /* the compass needle, centred on the painted rose; --a is the turn */
+    .needle {
+      position: absolute;
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%) rotate(var(--a, 0deg));
+      transition: transform 0.9s cubic-bezier(0.3, 1.35, 0.5, 1);
+      pointer-events: none;
+      filter: drop-shadow(0 1px 1.5px rgba(40, 10, 0, 0.55));
+    }
+    .needle svg { display: block; width: 100%; height: 100%; animation: sway 7s ease-in-out infinite; }
+    .needle.aim svg { animation-play-state: paused; }
+    .needle .n { fill: #d8321e; stroke: #fff1cf; stroke-width: 0.9; }
+    .needle .s { fill: #f4c95d; stroke: #6b3a1a; stroke-width: 0.9; }
+    .needle circle { fill: #f4c95d; stroke: #6b3a1a; stroke-width: 1; }
+    @keyframes sway { 0%, 100% { rotate: -1.6deg; } 50% { rotate: 1.6deg; } }
+    /* banner and heading light each other */
+    .pin.lit { color: #a3321f; box-shadow: 0 0 24px 7px rgb(var(--acc) / 0.55); }
+    .section-head, .intro h1, .group h2 { transition: box-shadow 0.3s; border-radius: 2px; }
+    .section-head.lit, .intro h1.lit, .group h2.lit {
+      box-shadow: 0 3px 0 -1px rgb(var(--acc) / 0.85), 0 10px 26px -12px rgb(var(--acc) / 0.7);
+    }
+
 
     /* ----------------------------------------------------- the catalog:
        every project in three columns, one line each, all on one screen */
@@ -227,7 +278,7 @@
 
     .road {
       height: clamp(90px, 15vw, 220px);
-      background: url("/images/art/long-road.webp") center 45% / cover no-repeat;
+      background: url("/images/art/shore-strip.webp") center 45% / cover no-repeat;
       -webkit-mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 75%, transparent);
       mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 75%, transparent);
     }
@@ -253,8 +304,13 @@
       .intro h1 { font-size: 2rem; }
     }
     @media (prefers-reduced-motion: reduce) {
-      .list a, .topbar nav a, .pin { transition: none; }
+      .list a, .topbar nav a, .pin, .map img.map-night { transition: none; }
       .pin:hover { transform: translate(-50%, -54%); }
+      html { scroll-behavior: auto; }
+      .glow { animation: none; opacity: 0.4; }
+      .needle { transition: none; }
+      .needle svg { animation: none; }
+      .section-head, .intro h1, .group h2 { transition: none; }
     }
   </style>
 </head>
@@ -300,10 +356,17 @@
          as the home page's (css/style.css). -->
     <section class="atlas" aria-label="Map of the projects">
       <div class="map-scroll">
-        <div class="map">
+        <div class="map" data-route="2,557 29,562 55,567 81,569 107,566 132,563 170,561 212,559 252,560 291,564 332,561 375,552 402,547 430,541 450,529 472,521 510,521 533,517 545,500 549,482 535,466 515,460 505,459 700,455 875,456 925,457 947,480 932,512 942,527 980,542 1020,546 1063,542 1095,536 1122,521 1140,495 1168,483 1197,476 1203,452 1218,433 1243,416 1255,396 1274,384 1305,377 1347,371 1372,356 1401,347 1428,341 1440,328 1432,314 1419,310 1370,298 1320,285 1260,255 1245,230 1274,221 1305,218 1327,211 1331,192 1327,172 1350,150 1407,144" data-compass="106,829,75">
           <img src="/images/art/map-i-and-ai.webp" srcset="/images/art/map-i-and-ai-960.webp 960w, /images/art/map-i-and-ai.webp 1672w"
                sizes="(max-width: 760px) 900px, min(1400px, 100vw)" width="1672" height="941" fetchpriority="high"
                alt="A painted map of an island country in three lands: a sunny harbour of workshops on the left, a rose-coloured scholars' hill in the middle, and green games country on the right, split by bands of gold cloud, with a ship arriving from the sea and a pale uncharted land beyond">
+          <img class="map-night" src="/images/art/map-i-and-ai-night.webp" srcset="/images/art/map-i-and-ai-night-960.webp 960w, /images/art/map-i-and-ai-night.webp 1672w"
+               sizes="(max-width: 760px) 900px, min(1400px, 100vw)" width="1672" height="941" alt="" loading="lazy">
+          <span class="glow" style="--x:19.3%;--y:29.6%;--w:3.6%;--h:6.4%;--d:0s;--t:6s"></span>
+          <span class="glow" style="--x:12.9%;--y:28.9%;--w:13.8%;--h:6.4%;--d:0.8s;--t:5.4s"></span>
+          <span class="glow" style="--x:60.9%;--y:54.7%;--w:5.4%;--h:8.5%;--d:2.5s;--t:6.6s"></span>
+          <span class="glow" style="--x:78.7%;--y:26.4%;--w:4.2%;--h:8.5%;--d:1.3s;--t:5.2s"></span>
+          <span class="glow" style="--x:90.2%;--y:26.6%;--w:4.2%;--h:9.6%;--d:3.7s;--t:6.8s"></span>
           <a class="pin region" style="--x:30.8%;--y:66.9%" href="#tools">Tools</a>
           <a class="pin region" style="--x:51.6%;--y:66.9%" href="#learning">Learning</a>
           <a class="pin region" style="--x:70.3%;--y:76.0%" href="#games">Games</a>
@@ -398,5 +461,120 @@
   <footer class="container">
     <p>View source on <a href="https://github.com/ngnnah/I-And-AI">GitHub</a></p>
   </footer>
+  <script>
+  /* The map's four small motions. The same code is in I And AI's index.html;
+     change both together. Each map's own numbers are data attributes on .map,
+     in the 1672 x 941 picture's pixels: data-route (points, ";" starts another
+     route) and data-compass ("x,y,radius" of the painted rose); the glows are
+     .glow spans in the markup. */
+  (function () {
+    var map = document.querySelector(".map");
+    if (!map) return;
+    var W = 1672, H = 941, NS = "http://www.w3.org/2000/svg";
+    var still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var pins = map.querySelectorAll(".pin");
+
+    /* 1. The route lights up: a small warm light walks the painted dots and a
+       soft trail follows it, then fades into the haze. Drawn as three stacked
+       dashes of the same path (long and faint, short and bright). */
+    function pathD(pts) { // curve through the points' midpoints, so no corners
+      var mid = function (a, b) { return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; };
+      var d = "M" + pts[0] + "L" + mid(pts[0], pts[1]);
+      for (var i = 1; i < pts.length - 1; i++) d += "Q" + pts[i] + " " + mid(pts[i], pts[i + 1]);
+      return d + "L" + pts[pts.length - 1];
+    }
+    function svg(tag, attrs, parent) {
+      var el = document.createElementNS(NS, tag);
+      for (var k in attrs) el.setAttribute(k, attrs[k]);
+      parent.appendChild(el);
+      return el;
+    }
+    function travel() {
+      var routes = map.dataset.route.split(";").map(function (r) {
+        return r.trim().split(/\s+/).map(function (p) { return p.split(",").map(Number); });
+      });
+      var root = svg("svg", { "class": "route", viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "none", "aria-hidden": "true" }, map);
+      map.insertBefore(root, pins[0]);
+      var walkers = routes.map(function (pts) {
+        var d = pathD(pts), g = svg("g", {}, root);
+        var trail = [[260, 15, 0.1], [170, 8, 0.25], [90, 3.5, 0.6]].map(function (t) {
+          var p = svg("path", { d: d, "stroke-width": t[1], opacity: t[2] }, g);
+          return { el: p, len: t[0] };
+        });
+        var halo = svg("circle", { r: 14, "class": "halo" }, g), dot = svg("circle", { r: 4.5, "class": "dot" }, g);
+        return { g: g, trail: trail, halo: halo, dot: dot, total: trail[0].el.getTotalLength() };
+      });
+      var start = null, DURATION = 4200;
+      function frame(now) {
+        start = start || now;
+        var t = Math.min((now - start) / DURATION, 1);
+        var p = (1 - Math.cos(Math.PI * t)) / 2;                // slow at both ends
+        var fade = 1 - Math.max(0, (t - 0.85) / 0.15);          // dims over the last stretch
+        walkers.forEach(function (w) {
+          var head = p * w.total, at = w.trail[0].el.getPointAtLength(head);
+          w.g.setAttribute("opacity", fade);
+          w.trail.forEach(function (s) {
+            s.el.setAttribute("stroke-dasharray", s.len + " " + (w.total + s.len));
+            s.el.setAttribute("stroke-dashoffset", s.len - head); // dash covers [head - len, head]
+          });
+          [w.halo, w.dot].forEach(function (c) { c.setAttribute("cx", at.x); c.setAttribute("cy", at.y); });
+        });
+        if (t < 1) requestAnimationFrame(frame); else root.remove(); // the painted route rests as it was
+      }
+      requestAnimationFrame(frame);
+    }
+    if (!still && map.dataset.route) {
+      if ("IntersectionObserver" in window) {
+        var seen = new IntersectionObserver(function (entries) {
+          if (!entries[0].isIntersecting) return;
+          seen.disconnect();
+          travel();
+        }, { threshold: 0.5 });
+        seen.observe(map);
+      } else travel();
+    }
+
+    /* 4. The compass needle sits on the painted rose; it sways a little at rest
+       and turns to the banner being pointed at. */
+    var needle = null, turn = 0;
+    if (map.dataset.compass) {
+      var c = map.dataset.compass.split(",").map(Number);
+      needle = document.createElement("div");
+      needle.className = "needle";
+      needle.setAttribute("aria-hidden", "true");
+      needle.style.cssText = "left:" + c[0] / W * 100 + "%;top:" + c[1] / H * 100 + "%;width:" + c[2] * 1.5 / W * 100 + "%";
+      needle.innerHTML = '<svg viewBox="-50 -50 100 100"><path d="M0-46L4.5 0H-4.5Z" class="n"/><path d="M0 46L4.5 0H-4.5Z" class="s"/><circle r="3.6"/></svg>';
+      map.insertBefore(needle, pins[0]);
+    }
+    function aim(pin) {
+      if (!needle) return;
+      var c = map.dataset.compass.split(",").map(Number), to = 0;
+      if (pin) { // banner centre minus rose centre, in picture pixels (so the aspect ratio counts)
+        var dx = parseFloat(pin.style.getPropertyValue("--x")) / 100 * W - c[0];
+        var dy = parseFloat(pin.style.getPropertyValue("--y")) / 100 * H - c[1];
+        to = Math.atan2(dx, -dy) * 180 / Math.PI;               // degrees clockwise from north
+      }
+      turn += ((to - turn + 540) % 360) - 180;                  // the short way round
+      needle.style.setProperty("--a", turn + "deg");
+      needle.classList.toggle("aim", !!pin);
+    }
+
+    /* 3. Banner and section heading light each other, and the needle follows. */
+    pins.forEach(function (pin) {
+      var section = document.querySelector(pin.getAttribute("href"));
+      var head = section && (section.querySelector(".section-head, h2") || section.querySelector("h1"));
+      function on() { pin.classList.add("lit"); if (head) head.classList.add("lit"); aim(pin); }
+      function off() { pin.classList.remove("lit"); if (head) head.classList.remove("lit"); aim(null); }
+      pin.addEventListener("mouseenter", on);
+      pin.addEventListener("mouseleave", off);
+      pin.addEventListener("focus", function () { if (pin.matches(":focus-visible")) on(); });
+      pin.addEventListener("blur", off);
+      if (head) {
+        head.addEventListener("mouseenter", on);
+        head.addEventListener("mouseleave", off);
+      }
+    });
+  })();
+  </script>
 </body>
 </html>
