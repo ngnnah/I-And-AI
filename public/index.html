@@ -11,24 +11,123 @@
   <meta property="og:url" content="https://ngnnah.github.io/I-And-AI/">
   <meta property="og:image" content="https://ngnnah.github.io/images/art/share-i-and-ai.jpg">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#141e32">
+  <script>
+    /* Golden hour (light) by day and blue hour (dark) by night, in the visitor's
+       own time zone; the switch in the top bar overrides it for this visit.
+       Runs in the head so the page never flashes the other theme. The same
+       script is the home site's _includes/theme.html; change both together. */
+    (function () {
+      var root = document.documentElement;
+      var meta = { light: "#f6ecd8", dark: "#141e32" };
+      function apply(theme) {
+        root.setAttribute("data-theme", theme);
+        var tag = document.querySelector('meta[name="theme-color"]');
+        if (tag) tag.setAttribute("content", meta[theme]);
+        var button = document.querySelector(".theme-switch");
+        if (button) {
+          var next = theme === "light" ? "blue hour (dark)" : "golden hour (light)";
+          button.setAttribute("aria-label", "Switch to " + next);
+          button.setAttribute("title", "Switch to " + next);
+        }
+      }
+      var chosen = null;
+      try { chosen = sessionStorage.getItem("theme"); } catch (e) {}
+      var hour = new Date().getHours();
+      apply(chosen === "light" || chosen === "dark" ? chosen : (hour >= 6 && hour < 18 ? "light" : "dark"));
+      document.addEventListener("DOMContentLoaded", function () {
+        var button = document.querySelector(".theme-switch");
+        if (!button) return;
+        apply(root.getAttribute("data-theme"));
+        button.addEventListener("click", function () {
+          var theme = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+          try { sessionStorage.setItem("theme", theme); } catch (e) {}
+          apply(theme);
+        });
+      });
+    })();
+  </script>
   <link rel="icon" type="image/png" href="images/favicon.png">
   <style>
-    :root {
-      --accent: #00d4ff;
-      --gold: #ffcb05;
-      --ink: #f0f3f8;
-      --head: #ccd4e0;
-      --dim: #b0b9c8;
-      --mute: #adb6c6;
-      --card: rgba(255, 255, 255, 0.07);
-      --edge: rgba(255, 255, 255, 0.14);
+    /* Both themes and the switch: the same as the home site's css/style.css
+       (blue hour dark, golden hour light); change both together. */
+    :root, [data-theme="dark"] {
+      --bg: #141e32;
+      --bg-2: #1b2a45;
+      --wash: 20 30 50;     /* the page colour, for fades over pictures */
+      --acc: 233 182 92;    /* gold, for tints and borders */
+      --accent: #e9b65c;    /* links and focus */
+      --red: #d9573b;
+      --blue: #8fb3d9;
+      --gold: #f2c14e;
+      --strong: #fff;       /* names and headings */
+      --ink: #f5eee2;
+      --head: #e2d6c0;      /* section heads */
+      --body: #e3dbcd;      /* long reading copy */
+      --dim: #c8beac;       /* card copy, 6.5:1 on a card */
+      --mute: #b9ae9b;      /* dates, counts, secondary */
+      --nav: #ece3d3;
+      --card: rgba(255, 240, 215, 0.07);
+      --edge: rgba(255, 236, 205, 0.16);
+      --line: rgba(255, 255, 255, 0.08);
+      --tint: rgba(255, 255, 255, 0.10);
+      --tint-2: rgba(255, 255, 255, 0.04);
+      --pill: #22314d;
+      --pill-hover: #2c3e5f;
+      --pre: rgba(0, 0, 0, 0.28);
+      color-scheme: dark;
     }
+    [data-theme="light"] {
+      --bg: #f6ecd8;
+      --bg-2: #fcf5e7;
+      --wash: 246 236 216;
+      --acc: 196 136 40;
+      --accent: #2f5288;
+      --red: #c4462b;
+      --blue: #4c78aa;
+      --gold: #b9821c;
+      --strong: #1f160f;
+      --ink: #2b2118;
+      --head: #4a3a2a;
+      --body: #3a2e22;
+      --dim: #574837;
+      --mute: #6e5d4a;
+      --nav: #3a2e22;
+      --card: rgba(255, 251, 242, 0.72);
+      --edge: rgba(110, 76, 38, 0.2);
+      --line: rgba(110, 76, 38, 0.1);
+      --tint: rgba(110, 76, 38, 0.08);
+      --tint-2: rgba(255, 255, 255, 0.5);
+      --pill: #fff8ea;
+      --pill-hover: #f9ead0;
+      --pre: rgba(110, 76, 38, 0.07);
+      color-scheme: light;
+    }
+
+    /* the theme switch at the end of the top bar: a sun by night, a moon by day */
+    .theme-switch {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--edge);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--nav);
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    .theme-switch:hover { background: var(--tint); border-color: rgb(var(--acc) / 0.6); }
+    .theme-switch svg { width: 18px; height: 18px; }
+    .theme-switch .moon, [data-theme="light"] .theme-switch .sun { display: none; }
+    [data-theme="light"] .theme-switch .moon { display: block; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     /* The base colour lives on html: a fixed gradient paints only the viewport. */
-    html { background: #16213e; color-scheme: dark; }
+    html { background: var(--bg); }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      background: linear-gradient(135deg, var(--bg-2) 0%, var(--bg) 100%);
       background-attachment: fixed;
       min-height: 100vh;
       color: var(--ink);
@@ -36,14 +135,14 @@
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
     }
-    ::selection { background: rgba(0, 212, 255, 0.32); color: #fff; }
+    ::selection { background: rgb(var(--acc) / 0.32); color: var(--strong); }
     a { color: inherit; text-decoration: none; }
     a:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
     .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
 
     /* ------------------------------------------- top bar, shared with
        ngnnah.github.io (its css/style.css); change both together. */
-    .topbar { background: rgba(22, 33, 62, 0.86); border-bottom: 1px solid var(--edge); }
+    .topbar { background: rgb(var(--wash) / 0.86); border-bottom: 1px solid var(--edge); }
     .topbar .bar {
       max-width: 1000px; margin: 0 auto; padding: 12px 20px;
       display: flex; flex-wrap: wrap; align-items: center;
@@ -51,40 +150,54 @@
     }
     .topbar .brand {
       display: inline-flex; align-items: center; gap: 10px;
-      color: #fff; font-weight: 700; font-size: 1rem; letter-spacing: -0.01em;
+      color: var(--strong); font-weight: 700; font-size: 1rem; letter-spacing: -0.01em;
     }
-    .topbar .brand img { width: 28px; height: 28px; border-radius: 7px; background: #f0f3f8; padding: 2px; }
-    .topbar nav { display: flex; flex-wrap: wrap; gap: 6px; }
+    .topbar .brand img { width: 28px; height: 28px; border-radius: 7px; background: #f5eee2; padding: 2px; }
+    .topbar nav { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
     .topbar nav a {
-      color: #dfe5ee; font-size: 0.95rem; font-weight: 500; padding: 6px 14px;
+      color: var(--nav); font-size: 0.95rem; font-weight: 500; padding: 6px 14px;
       border: 1px solid transparent; border-radius: 999px;
       transition: background-color 0.2s, border-color 0.2s;
     }
-    .topbar nav a:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
-    .topbar nav a[aria-current] { color: #fff; background: rgba(0, 212, 255, 0.14); border-color: rgba(0, 212, 255, 0.5); }
+    .topbar nav a:hover { color: var(--strong); background: var(--line); }
+    .topbar nav a[aria-current] { color: var(--strong); background: rgb(var(--acc) / 0.14); border-color: rgb(var(--acc) / 0.5); }
     .topbar a:focus-visible { border-radius: 999px; }
 
     /* ------------------------------------------------------------ header:
        the words on the left, the camp picture (image-gen's site-art, from
        the home site's /images/art/) on the right, so it is short */
-    .intro {
-      display: grid; grid-template-columns: 1fr 440px; gap: 36px; align-items: center;
-      padding: 36px 0 32px;
-    }
-    .intro h1 { font-size: 2.4rem; line-height: 1.15; letter-spacing: -0.015em; color: #fff; }
+    .intro { padding: 36px 0 24px; }
+    .intro h1 { font-size: 2.4rem; line-height: 1.15; letter-spacing: -0.015em; color: var(--strong); }
     .intro .subtitle { color: var(--dim); font-size: 1.08rem; margin-top: 6px; max-width: 40ch; }
     .jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
     .jump a {
-      font-size: 0.9rem; font-weight: 600; color: #fff;
-      background: #1c2a4a; border: 1px solid rgba(0, 212, 255, 0.4);
+      font-size: 0.9rem; font-weight: 600; color: var(--strong);
+      background: var(--pill); border: 1px solid rgb(var(--acc) / 0.4);
       border-radius: 999px; padding: 5px 12px;
     }
     .jump a span { color: var(--mute); font-weight: 500; margin-left: 4px; font-variant-numeric: tabular-nums; }
-    .jump a:hover { background: #23365f; border-color: var(--accent); }
-    .intro img {
-      display: block; width: 100%; height: auto; aspect-ratio: 2 / 1; object-fit: cover; object-position: center 20%;
-      border-radius: 14px; border: 1px solid var(--edge);
+    .jump a:hover { background: var(--pill-hover); border-color: var(--accent); }
+
+    /* ------------------------------------------------------------ the map:
+       same block as the home page's css/style.css; change both together */
+    html { overflow-x: clip; }
+    .atlas { width: min(1400px, calc(100vw - 48px)); margin: 0 calc(50% - min(700px, 50vw - 24px)) 36px; }
+    .map {
+      position: relative; container-type: inline-size; border-radius: 14px; overflow: hidden;
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35), 0 0 0 1px var(--edge);
     }
+    .map img { display: block; width: 100%; height: auto; }
+    .pin {
+      position: absolute; left: var(--x); top: var(--y); transform: translate(-50%, -54%);
+      width: 8.4%; padding: 0.35% 0; text-align: center; white-space: nowrap;
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      font-style: italic; font-weight: 700; font-size: clamp(10px, 1.08cqi, 16px);
+      line-height: 1.1; letter-spacing: 0.01em; color: #3b2414; border-radius: 6px;
+      transition: color 0.2s, transform 0.2s;
+    }
+    .pin:hover { color: #a3321f; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; transform: translate(-50%, -54%) scale(1.08); }
+    .pin:focus-visible { outline: 2px solid #a3321f; outline-offset: 2px; color: #a3321f; }
+    .map-hint { display: none; color: var(--mute); font-size: 0.85rem; margin-top: 8px; text-align: center; }
 
     /* ----------------------------------------------------- the catalog:
        every project in three columns, one line each, all on one screen */
@@ -99,11 +212,11 @@
     }
     .group h2 span { font-size: 0.85rem; letter-spacing: 0; text-transform: none; font-weight: 500; color: var(--mute); }
     .list { list-style: none; background: var(--card); border: 1px solid var(--edge); border-radius: 14px; overflow: hidden; }
-    .list li + li { border-top: 1px solid rgba(255, 255, 255, 0.08); }
+    .list li + li { border-top: 1px solid var(--line); }
     .list a { display: block; padding: 12px 16px 13px; transition: background-color 0.15s; }
-    .list a:hover { background: rgba(0, 212, 255, 0.08); }
+    .list a:hover { background: rgb(var(--acc) / 0.08); }
     .list a:hover b { color: var(--accent); }
-    .list b { display: flex; align-items: baseline; gap: 6px; font-size: 1.02rem; color: #fff; }
+    .list b { display: flex; align-items: baseline; gap: 6px; font-size: 1.02rem; color: var(--strong); }
     .list .star { color: var(--gold); font-size: 0.8em; }
     .list .ext { margin-left: auto; font-size: 0.78rem; font-weight: 500; color: var(--mute); white-space: nowrap; }
     .list p { color: var(--dim); font-size: 0.9rem; line-height: 1.45; margin-top: 2px; }
@@ -121,9 +234,15 @@
     footer a { color: var(--accent); }
     footer a:hover { text-decoration: underline; }
 
+    /* on a phone the map keeps a readable size and pans sideways */
+    @media (max-width: 760px) {
+      .atlas { width: auto; margin: 0 -20px 32px; }
+      .map-scroll { overflow-x: auto; scrollbar-width: none; padding: 0 20px 6px; }
+      .map-scroll::-webkit-scrollbar { display: none; }
+      .map { width: 900px; }
+      .map-hint { display: block; padding: 0 20px; }
+    }
     @media (max-width: 860px) {
-      .intro { grid-template-columns: 1fr; gap: 20px; }
-      .intro img { order: -1; }
       .catalog { grid-template-columns: 1fr; gap: 28px; }
     }
     @media (max-width: 640px) {
@@ -133,7 +252,8 @@
       .intro h1 { font-size: 2rem; }
     }
     @media (prefers-reduced-motion: reduce) {
-      .list a, .topbar nav a { transition: none; }
+      .list a, .topbar nav a, .pin { transition: none; }
+      .pin:hover { transform: translate(-50%, -54%); }
     }
   </style>
 </head>
@@ -149,6 +269,10 @@
         <a href="/#writing">Writing</a>
         <a href="/reading/">Reading</a>
         <a href="/I-And-AI/" aria-current="page">I And AI</a>
+        <button class="theme-switch" type="button" aria-label="Switch theme">
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+        </button>
       </nav>
     </div>
   </header>
@@ -164,8 +288,34 @@
           <a href="#tools">Tools<span>5</span></a>
         </nav>
       </div>
-      <img src="/images/art/camp-900.webp" srcset="/images/art/camp-900.webp 900w, /images/art/camp.webp 1672w" sizes="(max-width: 860px) 100vw, 440px" width="900" height="506"
-           alt="A night camp at a mountain pass: a glowing tent, a bicycle, a board game by the fire, a castle across the valley">
+    </section>
+
+    <!-- The map: image-gen's site-map v6-iandai-regions (5/5), from the home
+         site's /images/art/. Each pin sits on one of the picture's blank
+         banners; --x and --y are the banner's centre as a share of the
+         picture, measured on the 1672 x 941 original. The lists below repeat
+         every link. Same block as the home page's (css/style.css). -->
+    <section class="atlas" aria-label="Map of the projects">
+      <div class="map-scroll">
+        <div class="map">
+          <img src="/images/art/map-i-and-ai.webp" srcset="/images/art/map-i-and-ai-960.webp 960w, /images/art/map-i-and-ai.webp 1672w"
+               sizes="(max-width: 760px) 900px, min(1400px, 100vw)" width="1672" height="941" fetchpriority="high"
+               alt="A painted map of an island country in three lands: a sunny harbour of workshops on the left, a rose-coloured scholars' hill in the middle, and green games country on the right, split by bands of gold cloud, with a ship arriving from the sea">
+          <a class="pin" style="--x:16.2%;--y:41.7%" href="https://ngnnah.github.io/2026/11/24/pr-spotlight.html">PR Spotlight</a>
+          <a class="pin" style="--x:26.1%;--y:60.1%" href="projects/live-desk/setup/">Live desk</a>
+          <a class="pin" style="--x:37.2%;--y:58.8%" href="projects/live-desk/">The &gt;&gt; Director</a>
+          <a class="pin" style="--x:22.0%;--y:85.8%" href="https://ngnnah.github.io/story-map/">Story Map</a>
+          <a class="pin" style="--x:33.9%;--y:85.9%" href="projects/github-todo-app/">TODO App</a>
+          <a class="pin" style="--x:52.6%;--y:45.9%" href="projects/pokemon-math-world/">Pokémon Math</a>
+          <a class="pin" style="--x:49.7%;--y:79.3%" href="projects/iron-academy/">Iron Academy</a>
+          <a class="pin" style="--x:78.5%;--y:24.7%" href="projects/gaming/codenames/">Codenames</a>
+          <a class="pin" style="--x:74.5%;--y:46.6%" href="projects/gaming/harmonies/">Harmonies</a>
+          <a class="pin" style="--x:92.5%;--y:39.3%" href="projects/gaming/ito/">Ito</a>
+          <a class="pin" style="--x:70.8%;--y:70.0%" href="projects/gaming/high-society/">High Society</a>
+          <a class="pin" style="--x:82.5%;--y:92.8%" href="projects/gaming/nanja-monja/">Nanja Monja</a>
+        </div>
+      </div>
+      <p class="map-hint">Each place on the map is a link. Swipe to see the whole island.</p>
     </section>
 
     <p class="key"><span class="star">★</span> my picks</p>
