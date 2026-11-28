@@ -160,6 +160,46 @@
        (the theme script sets data-season; ?season=holiday previews it). */
     [data-season="holiday"] .topbar { background-image: linear-gradient(90deg, transparent calc(50% - 560px), rgb(var(--wash)) calc(50% - 510px), rgb(var(--wash)) calc(50% + 510px), transparent calc(50% + 560px)), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='60'%3E%3Cg opacity='.45' font-family='Apple Color Emoji%2CSegoe UI Emoji%2CNoto Color Emoji%2Csans-serif' text-anchor='middle'%3E%3Ctext x='20' y='40' font-size='21' transform='rotate%28-8 20 40%29'%3E%F0%9F%8E%84%3C/text%3E%3Ctext x='62' y='22' font-size='14' transform='rotate%280 62 22%29'%3E%E2%9D%84%EF%B8%8F%3C/text%3E%3Ctext x='104' y='40' font-size='18' transform='rotate%286 104 40%29'%3E%F0%9F%8E%81%3C/text%3E%3Ctext x='150' y='40' font-size='19' transform='rotate%28-4 150 40%29'%3E%E2%9B%84%3C/text%3E%3Ctext x='190' y='20' font-size='12' transform='rotate%280 190 20%29'%3E%E2%9D%84%EF%B8%8F%3C/text%3E%3Ctext x='228' y='42' font-size='18' transform='rotate%280 228 42%29'%3E%F0%9F%8F%AE%3C/text%3E%3Ctext x='272' y='40' font-size='16' transform='rotate%288 272 40%29'%3E%F0%9F%A7%A7%3C/text%3E%3C/g%3E%3C/svg%3E"); background-repeat: no-repeat, repeat-x; background-position: 0 0, 0 center; }
     [data-theme="dark"][data-season="holiday"] .topbar { background-image: linear-gradient(90deg, transparent calc(50% - 560px), rgb(var(--wash)) calc(50% - 510px), rgb(var(--wash)) calc(50% + 510px), transparent calc(50% + 560px)), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='60'%3E%3Cg opacity='.55' font-family='Apple Color Emoji%2CSegoe UI Emoji%2CNoto Color Emoji%2Csans-serif' text-anchor='middle'%3E%3Ctext x='20' y='40' font-size='21' transform='rotate%28-8 20 40%29'%3E%F0%9F%8E%84%3C/text%3E%3Ctext x='62' y='22' font-size='14' transform='rotate%280 62 22%29'%3E%E2%9D%84%EF%B8%8F%3C/text%3E%3Ctext x='104' y='40' font-size='18' transform='rotate%286 104 40%29'%3E%F0%9F%8E%81%3C/text%3E%3Ctext x='150' y='40' font-size='19' transform='rotate%28-4 150 40%29'%3E%E2%9B%84%3C/text%3E%3Ctext x='190' y='20' font-size='12' transform='rotate%280 190 20%29'%3E%E2%9D%84%EF%B8%8F%3C/text%3E%3Ctext x='228' y='42' font-size='18' transform='rotate%280 228 42%29'%3E%F0%9F%8F%AE%3C/text%3E%3Ctext x='272' y='40' font-size='16' transform='rotate%288 272 40%29'%3E%F0%9F%A7%A7%3C/text%3E%3C/g%3E%3C/svg%3E"); }
+    /* Holiday string lights strung along the top edge inside the bar, so they
+       never hang over the page; half the bulbs twinkle. Same dates as above. */
+    [data-season="holiday"] .topbar::before,
+    [data-season="holiday"] .topbar::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 14px;
+      pointer-events: none;
+      background-size: 96px 14px;
+      background-repeat: repeat-x;
+    }
+    [data-season="holiday"] .topbar::before {
+      background-image:
+        radial-gradient(circle at 12px 8px, #ff6b5e 0 2.6px, rgb(255 107 94 / 0.35) 3.2px, transparent 5.5px),
+        radial-gradient(circle at 60px 8px, #6fd08c 0 2.6px, rgb(111 208 140 / 0.35) 3.2px, transparent 5.5px),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='14'%3E%3Cpath d='M0 1 Q12 9 24 1 Q36 9 48 1 Q60 9 72 1 Q84 9 96 1' fill='none' stroke='%23c9d6c2' stroke-opacity='.45' stroke-width='1'/%3E%3C/svg%3E");
+    }
+    [data-theme="light"][data-season="holiday"] .topbar::before {
+      background-image:
+        radial-gradient(circle at 12px 8px, #e4473b 0 2.6px, rgb(228 71 59 / 0.3) 3.2px, transparent 5.5px),
+        radial-gradient(circle at 60px 8px, #3f9a5c 0 2.6px, rgb(63 154 92 / 0.3) 3.2px, transparent 5.5px),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='14'%3E%3Cpath d='M0 1 Q12 9 24 1 Q36 9 48 1 Q60 9 72 1 Q84 9 96 1' fill='none' stroke='%233c5a3f' stroke-opacity='.5' stroke-width='1'/%3E%3C/svg%3E");
+    }
+    [data-season="holiday"] .topbar::after {
+      background-image:
+        radial-gradient(circle at 36px 8px, #ffd166 0 2.6px, rgb(255 209 102 / 0.4) 3.2px, transparent 5.5px),
+        radial-gradient(circle at 84px 8px, #d8ecff 0 2.6px, rgb(216 236 255 / 0.45) 3.2px, transparent 5.5px);
+      animation: twinkle 3.2s ease-in-out infinite alternate;
+    }
+    [data-theme="light"][data-season="holiday"] .topbar::after {
+      background-image:
+        radial-gradient(circle at 36px 8px, #e0a320 0 2.6px, rgb(224 163 32 / 0.35) 3.2px, transparent 5.5px),
+        radial-gradient(circle at 84px 8px, #5a9bd8 0 2.6px, rgb(90 155 216 / 0.35) 3.2px, transparent 5.5px);
+    }
+    @keyframes twinkle { from { opacity: 0.45; } to { opacity: 1; } }
+    .topbar > * { position: relative; }
+    [data-season="holiday"] .topbar .bar { padding-top: 17px; }
     .topbar .bar {
       max-width: 1000px; margin: 0 auto; padding: 12px 20px;
       display: flex; flex-wrap: wrap; align-items: center;
@@ -335,6 +375,7 @@
       .list a, .topbar nav a, .pin, .map img.map-night, .road::before, .road::after { transition: none; }
       .pin:hover { transform: translate(-50%, -54%); }
       .topbar { transition: none; }
+      [data-season="holiday"] .topbar::after { animation: none; }
       html { scroll-behavior: auto; }
       .glow { animation: none; opacity: 0.4; }
       .needle { transition: none; }
